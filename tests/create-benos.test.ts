@@ -9,20 +9,20 @@ import {
 import { tmpdir } from 'node:os'
 import { join, relative as relativePath, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { exec, execFile } from 'node:child_process'
+import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { describe, expect, it } from 'vitest'
 
 const run = promisify(execFile)
-const runShell = promisify(exec)
 const root = resolve(fileURLToPath(new URL('../', import.meta.url)))
+const pnpmCli =
+  process.platform === 'win32' && process.env.PNPM_HOME
+    ? resolve(process.env.PNPM_HOME, '..', 'pnpm', 'bin', 'pnpm.cjs')
+    : undefined
 
 function runPnpm(args: string[], options: Parameters<typeof run>[1]) {
-  if (process.platform !== 'win32') return run('pnpm', args, options)
-  const command = ['pnpm.cmd', ...args]
-    .map((argument) => `"${argument.replaceAll('"', '\\"')}"`)
-    .join(' ')
-  return runShell(command, options)
+  if (pnpmCli) return run(process.execPath, [pnpmCli, ...args], options)
+  return run('pnpm', args, options)
 }
 
 function fileDependency(from: string, archive: string): string {

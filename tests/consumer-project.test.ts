@@ -8,23 +8,23 @@ import {
   writeFile,
 } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
-import { exec, execFile } from 'node:child_process'
+import { join, resolve } from 'node:path'
+import { execFile } from 'node:child_process'
 import { spawn } from 'node:child_process'
 import { promisify } from 'node:util'
 import { chromium, expect as playwrightExpect } from '@playwright/test'
 import { describe, it } from 'vitest'
 
 const run = promisify(execFile)
-const runShell = promisify(exec)
 const root = new URL('../', import.meta.url)
+const pnpmCli =
+  process.platform === 'win32' && process.env.PNPM_HOME
+    ? resolve(process.env.PNPM_HOME, '..', 'pnpm', 'bin', 'pnpm.cjs')
+    : undefined
 
 function runPnpm(args: string[], options: Parameters<typeof run>[1]) {
-  if (process.platform !== 'win32') return run('pnpm', args, options)
-  const command = ['pnpm.cmd', ...args]
-    .map((argument) => `"${argument.replaceAll('"', '\\"')}"`)
-    .join(' ')
-  return runShell(command, options)
+  if (pnpmCli) return run(process.execPath, [pnpmCli, ...args], options)
+  return run('pnpm', args, options)
 }
 
 async function pack(packageName: string, destination: string): Promise<string> {
