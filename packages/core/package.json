@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/core",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Fine-grained reactive signals, computeds, effects, and ownership for Benos.",
   "repository": {
     "type": "git",

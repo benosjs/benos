@@ -1,6 +1,6 @@
 {
   "name": "benos",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A TypeScript-first fine-grained frontend framework.",
   "repository": {
     "type": "git",

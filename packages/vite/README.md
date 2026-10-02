@@ -1,5 +1,7 @@
 # @benosjs/vite
 
+![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/benos-logo.png)
+
 The Vite plugin that transforms raw Benos TSX before other JSX transforms and
 connects the compiler to the DOM runtime.
 

@@ -6,6 +6,11 @@ current without rerunning the component function.
 
 ## Install
 
+For a ready-to-run example, scaffold an app with `npm create benos@latest`.
+The starter uses the system light or dark theme and demonstrates a counter
+whose component render count remains one, alongside a keyed `<For>` list. It is
+intentionally small so you can replace it with your own app.
+
 Install the public packages in an existing Vite project:
 
 ```sh

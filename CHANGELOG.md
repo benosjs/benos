@@ -2,6 +2,31 @@
 
 All notable changes to Benos are documented here.
 
+## [0.1.2] — 2026-10-02
+
+### Changed
+
+- Replace the create-benos starter with one small, centered responsive example
+  that follows the system light/dark theme and uses the Benos logo for branding
+  and the favicon.
+- Demonstrate run-once components with a counter and a render-count indicator,
+  and add a keyed `<For>` list with add, remove, and shuffle controls.
+- Link the starter to the getting-started guide, API reference, React migration
+  guide, and GitHub repository. Remove the obsolete `--template` CLI option.
+- Bump the six publishable packages and starter dependencies to `0.1.2`.
+
+### Verification
+
+- Local Node 24.11 verification passes: 136 unit/integration tests, 30 browser
+  tests, type-level checks, docs, lint, packed metadata, and the create-benos
+  packed end-to-end test.
+- A fresh packed starter install reports zero vulnerabilities and no engine or
+  deprecation warnings. The production bundle remains 4,001 B for core and
+  10,151 B for core plus DOM; the five kernel benchmark medians remain below
+  the 2× Preact CI guard.
+- The Ubuntu, Windows, and macOS GitHub Actions matrix is pending the push.
+- This version is prepared for release and has not been published.
+
 ## [0.1.1] — 2026-10-02
 
 ### Fixed

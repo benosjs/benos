@@ -5,3 +5,4 @@ pnpm-lock.yaml
 benchmarks/js-framework-benchmark/src/SvelteApp.svelte
 benchmarks/js-framework-benchmark/results
 examples/dashboard/comparison-results.json
+packages/create-benos/template/src/style.css

@@ -1,5 +1,7 @@
 # @benosjs/core
 
+![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/benos-logo.png)
+
 The small reactive kernel for Benos: signals, computed values, effects,
 batching, roots, ownership, contexts, cleanup, and error routing.
 

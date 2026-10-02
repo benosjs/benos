@@ -17,7 +17,6 @@ function usage() {
 Options:
   --yes                  confirm writing into a non-empty directory
   --git                  run git init after scaffolding
-  --template <path>      copy a local template directory instead of the default
   --help                 show this message`
 }
 
@@ -31,7 +30,6 @@ function packageManager() {
 
 function parseArgs(args) {
   let directory
-  let template
   let yes = false
   let git = false
   for (let index = 0; index < args.length; index++) {
@@ -48,16 +46,11 @@ function parseArgs(args) {
       git = true
       continue
     }
-    if (arg === '--template') {
-      template = args[++index]
-      if (!template) throw new Error('--template requires a directory path')
-      continue
-    }
     if (arg.startsWith('-')) throw new Error(`Unknown option: ${arg}`)
     if (directory) throw new Error(`Unexpected argument: ${arg}`)
     directory = arg
   }
-  return { directory: directory ?? 'benos-app', yes, git, template }
+  return { directory: directory ?? 'benos-app', yes, git }
 }
 
 async function isNonEmpty(directory) {
@@ -106,7 +99,7 @@ async function main() {
   const directory = resolve(process.cwd(), options.directory)
   await confirmOverwrite(directory, options.yes)
   await mkdir(directory, { recursive: true })
-  await cp(resolve(options.template ?? templateRoot), directory, {
+  await cp(templateRoot, directory, {
     recursive: true,
     force: true,
     errorOnExist: false,

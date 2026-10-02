@@ -1,5 +1,7 @@
 # Benos
 
+![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/benos-logo.png)
+
 Benos is a TypeScript-first fine-grained frontend framework. Components run
 once, signals update DOM bindings synchronously, and ownership makes effects,
 listeners, refs, and cleanup deterministic.

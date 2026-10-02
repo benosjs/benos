@@ -73,11 +73,14 @@ describe('create-benos packed scaffold', () => {
       ) as {
         createBenosPackageManager?: string
         private?: boolean
+        version?: string
         dependencies?: Record<string, string>
         devDependencies?: Record<string, string>
         pnpm?: { overrides?: Record<string, string> }
+        engines?: { node?: string }
       }
       expect(generated.private).toBe(true)
+      expect(generated.version).toBe('0.1.2')
       expect(generated.createBenosPackageManager).toBe('pnpm')
       const benosDependencies = Object.entries({
         ...generated.dependencies,
@@ -88,7 +91,29 @@ describe('create-benos packed scaffold', () => {
         expect(version, `${name} must use a published semver range`).toMatch(
           /^\^\d+\.\d+\.\d+$/,
         )
-        expect(version).toBe('^0.1.1')
+        expect(version).toBe('^0.1.2')
+      }
+      expect(generated.engines?.node).toBe('^22.18.0 || ^24.11.0 || >=26.0.0')
+      const starterSource = await readFile(join(app, 'src/main.tsx'), 'utf8')
+      const starterCss = await readFile(join(app, 'src/style.css'), 'utf8')
+      expect(starterSource.split(/\r?\n/).length).toBeLessThan(150)
+      expect(starterCss.split(/\r?\n/).length).toBeLessThan(100)
+      expect(await readFile(join(app, 'index.html'), 'utf8')).toContain(
+        'prefers-color-scheme: dark',
+      )
+      expect(await readFile(join(app, 'index.html'), 'utf8')).toContain(
+        'benos-mark-light.png',
+      )
+      await expect(run('node', [cli, '--help'])).resolves.toMatchObject({
+        stdout: expect.not.stringContaining('--template'),
+      })
+      await expect(run('node', [cli, '--template', app])).rejects.toThrow(
+        'Unknown option: --template',
+      )
+      for (const logo of ['benos-mark-light.png', 'benos-mark-navy.png']) {
+        expect(
+          (await readFile(join(app, 'public', logo))).byteLength,
+        ).toBeGreaterThan(0)
       }
       expect(await readdir(join(app, '.git')).catch(() => [])).toHaveLength(0)
       for (const [manager, userAgent] of [

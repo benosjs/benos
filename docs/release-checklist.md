@@ -1,7 +1,7 @@
-# v0.1.1 release checklist
+# v0.1.2 release checklist
 
-This checklist prepares the unpublished `0.1.1` release. All six package
-manifests target `0.1.1`; do not publish until the CI, package-content, and
+This checklist prepares the unpublished `0.1.2` release. All six package
+manifests target `0.1.2`; do not publish until the CI, package-content, and
 dry-run gates below pass.
 
 ## 1. Create the npm organization and log in
@@ -53,7 +53,7 @@ Node range than `^22.18.0 || ^24.11.0 || >=26.0.0`. `check:packed` packs all six
 fails if any packed `package.json` contains `workspace:`, rejects root stub and
 `.tsbuildinfo` artifacts, and checks every export target exists in `dist/js`
 or `dist/types`. The create-benos tests require generated `@benosjs`
-dependencies to be published semver ranges such as `^0.1.1`; this rejects
+dependencies to be published semver ranges such as `^0.1.2`; this rejects
 local paths, packed archive paths, and workspace protocols. `audit:template`
 scaffolds a fresh project from the packed packages, installs it with npm, and
 fails on high or critical advisories (it also rejects engine and deprecation
@@ -156,12 +156,12 @@ the registry before continuing.
 ## 8. Verify the registry release
 
 ```sh
-npm view @benosjs/core@0.1.1 version
-npm view @benosjs/dom@0.1.1 version
-npm view @benosjs/compiler@0.1.1 version
-npm view @benosjs/vite@0.1.1 version
-npm view @benosjs/eslint-plugin@0.1.1 version
-npm view create-benos@0.1.1 version
+npm view @benosjs/core@0.1.2 version
+npm view @benosjs/dom@0.1.2 version
+npm view @benosjs/compiler@0.1.2 version
+npm view @benosjs/vite@0.1.2 version
+npm view @benosjs/eslint-plugin@0.1.2 version
+npm view create-benos@0.1.2 version
 npm create benos@latest -- --help
 ```
 
@@ -173,9 +173,9 @@ type-check, build, test, and lint scripts, and record the release URLs.
 After the registry verification succeeds, run these final steps yourself:
 
 ```sh
-git tag -a v0.1.1 -m "Release v0.1.1"
-git push origin v0.1.1
-gh release create v0.1.1 --title v0.1.1 --notes-file CHANGELOG.md
+git tag -a v0.1.2 -m "Release v0.1.2"
+git push origin v0.1.2
+gh release create v0.1.2 --title v0.1.2 --notes-file CHANGELOG.md
 ```
 
 Confirm the GitHub release page contains the `CHANGELOG.md` notes and links to
