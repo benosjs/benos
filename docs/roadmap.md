@@ -2,6 +2,17 @@
 
 This roadmap covers work after v0.1. The phase scope and current status live in [plan.md](./plan.md); this file lists the post-v0.1 modules and investigations only.
 
+## v0.1.1 package cleanup
+
+- Narrow the `files` allowlist in the five scoped packages to publish only
+  `dist/js` and `dist/types`, excluding the non-exported root `dist/index.*`
+  stubs and `dist/types.tsbuildinfo` found in the v0.1.0 tarballs.
+- Extend `check:packed` to reject `.tsbuildinfo` files and root stub entry
+  points in every packed package.
+- Update the starter's `happy-dom` dev dependency to a patched version and
+  rerun its consumer checks; the v0.1.0 template install reports a critical
+  dev-dependency advisory, while the production dependency audit is clean.
+
 ## First-party modules (optional, integrated)
 
 - `@benosjs/router`: typed routes, params, and search params; nested layouts; lazy loading; route-level data loading; SSR support.

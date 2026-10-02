@@ -27,4 +27,12 @@ All notable changes to Benos are documented here.
 
 - 133 repository tests and 30 Chromium/Firefox/WebKit browser tests pass.
 - `@benosjs/core` is 3,997 B minified plus gzip; core plus DOM is 10,148 B.
-- No package was published as part of this release preparation.
+- All six packages were published at `0.1.0`; the `latest` tags for
+  `@benosjs/dom` and `@benosjs/vite` point to `0.1.0`.
+- `@benosjs/dom@0.0.0-stage` and `@benosjs/vite@0.0.0-stage` were also
+  published during failed initial attempts and have been deprecated.
+- The published scoped tarballs include non-exported root `dist/index.*` stub
+  files and `dist/types.tsbuildinfo`. All package exports resolve to real files
+  under `dist/js` and `dist/types`; excluding those extras and rejecting them
+  in `check:packed` are tracked for `0.1.1`.
+- A fresh npm consumer app passed type-check, build, test, and lint.

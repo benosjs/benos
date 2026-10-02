@@ -1,7 +1,8 @@
 # v0.1.0 release checklist
 
-This checklist is for the maintainer to run. No packages have been published,
-the repository is pushed to `main`, and no release tag has been created.
+This checklist is for the maintainer to run. All six packages are published at
+`0.1.0`; the repository is pushed to `main`, and the Git tag and GitHub release
+are pending final verification.
 
 ## 1. Create the npm organization and log in
 
@@ -143,6 +144,9 @@ pnpm --filter create-benos publish --access public --publish-branch main
 
 For a scoped package, `--access public` is required. Wait for each package to
 become installable before publishing the next package that depends on it.
+Check each publish command's exit status and success output before running the
+next command. Stop immediately if a command fails, then verify the package on
+the registry before continuing.
 
 ## 8. Verify the registry release
 
