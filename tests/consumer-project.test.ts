@@ -9,18 +9,27 @@ import {
 } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { execFile } from 'node:child_process'
+import { exec, execFile } from 'node:child_process'
 import { spawn } from 'node:child_process'
 import { promisify } from 'node:util'
 import { chromium, expect as playwrightExpect } from '@playwright/test'
 import { describe, it } from 'vitest'
 
 const run = promisify(execFile)
+const runShell = promisify(exec)
 const root = new URL('../', import.meta.url)
+
+function runPnpm(args: string[], options: Parameters<typeof run>[1]) {
+  if (process.platform !== 'win32') return run('pnpm', args, options)
+  const command = ['pnpm.cmd', ...args]
+    .map((argument) => `"${argument.replaceAll('"', '\\"')}"`)
+    .join(' ')
+  return runShell(command, options)
+}
 
 async function pack(packageName: string, destination: string): Promise<string> {
   const packageDirectory = new URL(`packages/${packageName}/`, root)
-  await run('pnpm', ['pack', '--pack-destination', destination, '--silent'], {
+  await runPnpm(['pack', '--pack-destination', destination, '--silent'], {
     cwd: packageDirectory,
   })
   const files = await readdir(destination)
@@ -61,11 +70,9 @@ describe('packed consumer project', () => {
         },
       }
       await writeFile(packageFile, JSON.stringify(packageJson, null, 2))
-      await run('pnpm', ['install', '--offline', '--ignore-scripts'], {
-        cwd: temporary,
-      })
-      await run('pnpm', ['run', 'typecheck'], { cwd: temporary })
-      await run('pnpm', ['run', 'build'], { cwd: temporary })
+      await runPnpm(['install', '--ignore-scripts'], { cwd: temporary })
+      await runPnpm(['run', 'typecheck'], { cwd: temporary })
+      await runPnpm(['run', 'build'], { cwd: temporary })
       const server = spawn(
         'pnpm',
         ['exec', 'vite', 'preview', '--host', '127.0.0.1', '--port', '4174'],
