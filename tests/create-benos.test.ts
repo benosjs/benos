@@ -98,8 +98,14 @@ describe('create-benos packed scaffold', () => {
         ['bun', 'bun/1.2.0 npm/? node/v22.12.0 darwin arm64'],
       ] as const) {
         const managerApp = join(temporary, `${manager}-app`)
+        const env = Object.fromEntries(
+          Object.entries(process.env).filter(
+            ([key]) => key.toLowerCase() !== 'npm_config_user_agent',
+          ),
+        )
+        env.npm_config_user_agent = userAgent
         await run('node', [cli, managerApp], {
-          env: { ...process.env, npm_config_user_agent: userAgent },
+          env,
         })
         const managerPackage = JSON.parse(
           await readFile(join(managerApp, 'package.json'), 'utf8'),
