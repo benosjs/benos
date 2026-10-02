@@ -24,7 +24,8 @@ All notable changes to Benos are documented here.
   deprecation warnings. The production bundle remains 4,001 B for core and
   10,151 B for core plus DOM; the five kernel benchmark medians remain below
   the 2× Preact CI guard.
-- The Ubuntu, Windows, and macOS GitHub Actions matrix is pending the push.
+- GitHub Actions runs the packed create-benos end-to-end test on Ubuntu,
+  Windows, and macOS.
 - This version is prepared for release and has not been published.
 
 ## [0.1.1] — 2026-10-02

@@ -1,15 +1,14 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { mountApp } from './main'
 
 describe('Benos starter', () => {
   beforeEach(() => {
-    vi.resetModules()
     document.body.innerHTML = '<div id="app"></div>'
+    mountApp(document.querySelector<HTMLElement>('#app')!)
   })
 
-  it('keeps the component mounted once while signals and keyed items update', async () => {
-    await import('./main')
-
+  it('keeps the component mounted once while signals and keyed items update', () => {
     const rendered = () => document.querySelector('.run-number')?.textContent
     const listItems = () => Array.from(document.querySelectorAll('li'))
     expect(rendered()).toBe('1')

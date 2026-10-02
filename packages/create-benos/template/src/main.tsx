@@ -139,6 +139,9 @@ function App() {
   )
 }
 
+export function mountApp(host: HTMLElement) {
+  return render(() => <App />, host)
+}
+
 const host = document.querySelector('#app')
-if (!(host instanceof HTMLElement)) throw new Error('Missing #app')
-render(() => <App />, host)
+if (host instanceof HTMLElement) mountApp(host)
