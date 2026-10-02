@@ -17,8 +17,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test
       - run: pnpm build
+      - run: pnpm test
       - run: pnpm typecheck:types
       - run: pnpm check:jsx-types
       - run: pnpm check:doc-examples
@@ -47,4 +47,5 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build
       - run: pnpm exec vitest run tests/create-benos.test.ts

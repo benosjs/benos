@@ -15,6 +15,7 @@ import { describe, expect, it } from 'vitest'
 
 const run = promisify(execFile)
 const root = resolve(fileURLToPath(new URL('../', import.meta.url)))
+const pnpm = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
 
 function fileDependency(from: string, archive: string): string {
   return `file:${relativePath(from, archive).replaceAll('\\', '/')}`
@@ -24,7 +25,7 @@ async function pack(
   packageDirectory: string,
   destination: string,
 ): Promise<string> {
-  await run('pnpm', ['pack', '--pack-destination', destination, '--silent'], {
+  await run(pnpm, ['pack', '--pack-destination', destination, '--silent'], {
     cwd: join(root, 'packages', packageDirectory),
   })
   const files = await readdir(destination)
@@ -114,12 +115,10 @@ describe('create-benos packed scaffold', () => {
         join(app, 'package.json'),
         `${JSON.stringify(generated, null, 2)}\n`,
       )
-      await run('pnpm', ['install', '--offline', '--ignore-scripts'], {
-        cwd: app,
-      })
+      await run(pnpm, ['install', '--ignore-scripts'], { cwd: app })
       for (const script of ['typecheck', 'build', 'test', 'lint']) {
         try {
-          await run('pnpm', ['run', script], { cwd: app })
+          await run(pnpm, ['run', script], { cwd: app })
         } catch (error) {
           const failure = error as { stdout?: string; stderr?: string }
           throw new Error(
