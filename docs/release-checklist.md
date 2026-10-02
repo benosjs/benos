@@ -1,7 +1,7 @@
 # v0.1.0 release checklist
 
 This checklist is for the maintainer to run. No packages have been published,
-the repository has not been pushed, and no release tag has been created.
+the repository is pushed to `main`, and no release tag has been created.
 
 ## 1. Create the npm organization and log in
 
@@ -100,7 +100,7 @@ This gate is required before any package publish:
 2. Push the release branch to the GitHub repository:
 
    ```sh
-   git push origin <release-branch>
+   git push origin main
    ```
 
 3. In GitHub Actions, confirm the complete CI workflow is green. The `verify`
@@ -117,12 +117,12 @@ Run a dry-run for all six packages in dependency order. This must complete
 without registry writes:
 
 ```sh
-pnpm --dir packages/core publish --dry-run --access public
-pnpm --dir packages/dom publish --dry-run --access public
-pnpm --dir packages/compiler publish --dry-run --access public
-pnpm --dir packages/vite publish --dry-run --access public
-pnpm --dir packages/eslint-plugin publish --dry-run --access public
-pnpm --dir packages/create-benos publish --dry-run --access public
+pnpm --filter @benosjs/core publish --dry-run --access public --publish-branch main
+pnpm --filter @benosjs/dom publish --dry-run --access public --publish-branch main
+pnpm --filter @benosjs/compiler publish --dry-run --access public --publish-branch main
+pnpm --filter @benosjs/vite publish --dry-run --access public --publish-branch main
+pnpm --filter @benosjs/eslint-plugin publish --dry-run --access public --publish-branch main
+pnpm --filter create-benos publish --dry-run --access public --publish-branch main
 ```
 
 Review each rehearsal's files and manifest, then repeat `pnpm check:packed`.
@@ -133,12 +133,12 @@ Use an npm account with two-factor authentication enabled:
 
 ```sh
 npm login
-pnpm --filter @benosjs/core publish --access public
-pnpm --filter @benosjs/dom publish --access public
-pnpm --filter @benosjs/compiler publish --access public
-pnpm --filter @benosjs/vite publish --access public
-pnpm --filter @benosjs/eslint-plugin publish --access public
-pnpm --filter create-benos publish --access public
+pnpm --filter @benosjs/core publish --access public --publish-branch main
+pnpm --filter @benosjs/dom publish --access public --publish-branch main
+pnpm --filter @benosjs/compiler publish --access public --publish-branch main
+pnpm --filter @benosjs/vite publish --access public --publish-branch main
+pnpm --filter @benosjs/eslint-plugin publish --access public --publish-branch main
+pnpm --filter create-benos publish --access public --publish-branch main
 ```
 
 For a scoped package, `--access public` is required. Wait for each package to
