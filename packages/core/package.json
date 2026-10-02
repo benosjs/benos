@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fine-grained reactive signals, computeds, effects, and ownership for Benos.",
   "repository": {
     "type": "git",
@@ -16,10 +16,11 @@
   "homepage": "https://github.com/benosjs/benos#readme",
   "type": "module",
   "engines": {
-    "node": ">=22.12.0"
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
   },
   "files": [
-    "dist"
+    "dist/js",
+    "dist/types"
   ],
   "types": "./dist/types/index.d.ts",
   "exports": {

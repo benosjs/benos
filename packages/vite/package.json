@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/vite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vite integration for the Benos TypeScript and JSX compiler.",
   "repository": {
     "type": "git",
@@ -17,10 +17,11 @@
   "homepage": "https://github.com/benosjs/benos#readme",
   "type": "module",
   "engines": {
-    "node": ">=22.12.0"
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
   },
   "files": [
-    "dist"
+    "dist/js",
+    "dist/types"
   ],
   "dependencies": {
     "@benosjs/compiler": "workspace:*"

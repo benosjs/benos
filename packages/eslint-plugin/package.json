@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/eslint-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "ESLint rules for Benos component and prop conventions.",
   "repository": {
     "type": "git",
@@ -16,13 +16,14 @@
   "homepage": "https://github.com/benosjs/benos#readme",
   "type": "module",
   "engines": {
-    "node": ">=22.12.0"
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
   },
   "peerDependencies": {
-    "eslint": ">=9"
+    "eslint": "^10.0.0"
   },
   "files": [
-    "dist"
+    "dist/js",
+    "dist/types"
   ],
   "types": "./dist/types/index.d.ts",
   "exports": {

@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/dashboard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The Benos validation dashboard example.",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22.12.0"
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
   },
   "scripts": {
     "dev": "DASHBOARD_FRAMEWORK=benos vite --config vite.config.ts",
@@ -39,7 +39,7 @@
     "@types/node": "^22.19.0",
     "@playwright/test": "^1.55.0",
     "typescript": "^5.9.3",
-    "vite": "8.3.1"
+    "vite": "8.3.2"
   },
   "bugs": {
     "url": "https://github.com/benosjs/benos/issues"

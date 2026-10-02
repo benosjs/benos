@@ -1,15 +1,13 @@
-# v0.1.0 release checklist
+# v0.1.1 release checklist
 
-This checklist is for the maintainer to run. All six packages are published at
-`0.1.0`; the repository is pushed to `main`, and the Git tag and GitHub release
-are pending final verification.
+This checklist prepares the unpublished `0.1.1` release. All six package
+manifests target `0.1.1`; do not publish until the CI, package-content, and
+dry-run gates below pass.
 
 ## 1. Create the npm organization and log in
 
-1. Sign in to npm and open [Create an organization](https://www.npmjs.com/org/create).
-   Create the organization named `benosjs`; this creates the `@benosjs` scope.
-   Confirm that the account that will publish is an owner or publisher for that
-   organization.
+1. Confirm the `benosjs` npm organization exists and the account that will
+   publish is an owner or publisher for the `@benosjs` scope.
 2. Log in from the release machine and verify the active account:
 
    ```sh
@@ -33,6 +31,7 @@ From a clean checkout, run:
 
 ```sh
 pnpm install --frozen-lockfile
+pnpm check:engines
 pnpm build
 pnpm test
 pnpm typecheck:types
@@ -40,6 +39,7 @@ pnpm check:jsx-types
 pnpm check:doc-examples
 pnpm check:public-imports
 pnpm check:packed
+pnpm audit:template
 pnpm lint
 pnpm size
 pnpm bench:guard
@@ -48,11 +48,16 @@ pnpm test:browser
 pnpm exec vitest run tests/create-benos.test.ts
 ```
 
-The `check:packed` script packs all six publishable packages and fails if any
-packed `package.json` contains `workspace:`. The create-benos test also fails
-if generated `@benosjs` dependencies are not published semver ranges such as
-`^0.1.0`; this rejects local paths, packed archive paths, and workspace
-protocols. Confirm the core and core-plus-DOM budgets, benchmark guard ratios,
+The `check:engines` script fails if an installed dependency requires a stricter
+Node range than `^22.18.0 || ^24.11.0 || >=26.0.0`. `check:packed` packs all six packages,
+fails if any packed `package.json` contains `workspace:`, rejects root stub and
+`.tsbuildinfo` artifacts, and checks every export target exists in `dist/js`
+or `dist/types`. The create-benos tests require generated `@benosjs`
+dependencies to be published semver ranges such as `^0.1.1`; this rejects
+local paths, packed archive paths, and workspace protocols. `audit:template`
+scaffolds a fresh project from the packed packages, installs it with npm, and
+fails on high or critical advisories (it also rejects engine and deprecation
+warnings). Confirm the core and core-plus-DOM budgets, benchmark guard ratios,
 and all browser engines pass.
 
 ## 3. Inspect package contents with pnpm pack
@@ -79,8 +84,8 @@ The automated check must report no `workspace:` string in any packed
 
 ## 4. Prepare publishable manifests
 
-The workspace manifests are kept private during development. Before publishing,
-remove `private: true` only from these six publishable packages:
+Before publishing, confirm `private: true` is absent only from these six
+publishable packages (remove it if present):
 
 - `@benosjs/core`
 - `@benosjs/dom`
@@ -151,12 +156,12 @@ the registry before continuing.
 ## 8. Verify the registry release
 
 ```sh
-npm view @benosjs/core@0.1.0 version
-npm view @benosjs/dom@0.1.0 version
-npm view @benosjs/compiler@0.1.0 version
-npm view @benosjs/vite@0.1.0 version
-npm view @benosjs/eslint-plugin@0.1.0 version
-npm view create-benos@0.1.0 version
+npm view @benosjs/core@0.1.1 version
+npm view @benosjs/dom@0.1.1 version
+npm view @benosjs/compiler@0.1.1 version
+npm view @benosjs/vite@0.1.1 version
+npm view @benosjs/eslint-plugin@0.1.1 version
+npm view create-benos@0.1.1 version
 npm create benos@latest -- --help
 ```
 
@@ -168,9 +173,9 @@ type-check, build, test, and lint scripts, and record the release URLs.
 After the registry verification succeeds, run these final steps yourself:
 
 ```sh
-git tag -a v0.1.0 -m "Release v0.1.0"
-git push origin v0.1.0
-gh release create v0.1.0 --title v0.1.0 --notes-file CHANGELOG.md
+git tag -a v0.1.1 -m "Release v0.1.1"
+git push origin v0.1.1
+gh release create v0.1.1 --title v0.1.1 --notes-file CHANGELOG.md
 ```
 
 Confirm the GitHub release page contains the `CHANGELOG.md` notes and links to

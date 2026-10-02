@@ -1,0 +1,36 @@
+:root {
+  color: #20242c;
+  background: #f5f7fa;
+  font-family: system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+main {
+  width: min(42rem, calc(100% - 2rem));
+  margin: 4rem auto;
+}
+
+h1 {
+  margin-bottom: 1.25rem;
+}
+
+button {
+  padding: 0.55rem 0.8rem;
+  border: 1px solid #c7ced8;
+  border-radius: 0.4rem;
+  background: white;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+ul {
+  padding-left: 1.25rem;
+  line-height: 1.8;
+}

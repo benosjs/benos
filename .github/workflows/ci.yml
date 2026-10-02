@@ -14,9 +14,10 @@ jobs:
           version: 10.17.0
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.18.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm check:engines
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test
@@ -25,6 +26,7 @@ jobs:
       - run: pnpm check:doc-examples
       - run: pnpm check:public-imports
       - run: pnpm check:packed
+      - run: pnpm audit:template
       - run: pnpm lint
       - run: pnpm size
       - run: pnpm bench:guard
@@ -44,8 +46,9 @@ jobs:
           version: 10.17.0
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 22.18.0
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - run: pnpm check:engines
       - run: pnpm exec vitest run tests/create-benos.test.ts

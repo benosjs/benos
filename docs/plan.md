@@ -5,7 +5,7 @@ This document is the source of truth for Benos scope and phase status. The maste
 ## Phase 0 — Workspace — complete
 
 - Scaffold the pnpm monorepo, TypeScript project references, Vitest, ESLint, Prettier, and production bundle-size checks.
-- Set the minimum Node version to 22.12.0 and use current stable Vite and Vitest versions.
+- Set the minimum Node version to `^22.18.0 || ^24.11.0 || >=26.0.0` and use current stable Vite and Vitest versions.
 - Create the architecture and roadmap documentation structure.
 - Verify install, tests, build, lint, and size checks.
 
@@ -107,7 +107,7 @@ Write the type-level sketch required by risk 1 in `risks.md`: one typed declarat
 - Detect npm, pnpm, Yarn, and Bun invocation so generated scripts and install instructions use the caller's package manager.
 - Support a non-interactive project name/template path suitable for CI, with a clear interactive default for local use. Refuse to write into a non-empty directory unless the user explicitly confirms the overwrite.
 - Generate a TypeScript/TSX project with ESLint, Prettier, Vitest, and an example app that exercises signals, components, `<Show>`, and `<For>`.
-- Generated projects must support Windows, macOS, and Linux, use the Node 22.12.0 floor, and pass end-to-end type-check, build, test, and lint checks against packed Benos packages.
+- Generated projects must support Windows, macOS, and Linux, use the Node.js `^22.18.0 || ^24.11.0 || >=26.0.0` range, and pass end-to-end type-check, build, test, and lint checks against packed Benos packages.
 - Git initialization is opt-in through an explicit `--git` flag; scaffolding never initializes Git implicitly.
 - Include the minimal scripts and JSX configuration needed for a first render, and keep router, forms, query, SSR, UI primitives, and other out-of-scope modules out of the generated starter.
 - Recheck npm name and scope availability immediately before publication; publishing remains explicitly deferred until approval.

@@ -1,6 +1,6 @@
 {
   "name": "create-benos",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Create a Benos TypeScript application.",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
   "homepage": "https://github.com/benosjs/benos#readme",
   "type": "module",
   "engines": {
-    "node": ">=22.12.0"
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
   },
   "bin": {
     "create-benos": "src/index.mjs"

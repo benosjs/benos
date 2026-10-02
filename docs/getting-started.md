@@ -1,6 +1,6 @@
 # Getting started
 
-Benos v0.1 targets Node 22.12 or newer. It uses TypeScript/TSX, the Benos
+Benos v0.1 targets Node.js `^22.18.0 || ^24.11.0 || >=26.0.0`. It uses TypeScript/TSX, the Benos
 compiler, and Vite. Components run once; signal reads in bindings keep the DOM
 current without rerunning the component function.
 

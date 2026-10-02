@@ -31,6 +31,13 @@ export default function benos(options: BenosViteOptions = {}): Plugin {
   return {
     name: '@benosjs/vite',
     enforce: 'pre',
+    config() {
+      return {
+        optimizeDeps: {
+          include: ['@benosjs/dom/internal'],
+        },
+      }
+    },
     configResolved(next) {
       config = next
     },
@@ -50,7 +57,9 @@ export default function benos(options: BenosViteOptions = {}): Plugin {
         })
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
-        throw new Error(`Benos JSX transform failed for ${clean}: ${message}`)
+        throw new Error(`Benos JSX transform failed for ${clean}: ${message}`, {
+          cause: error,
+        })
       }
       for (const diagnostic of result.diagnostics)
         this.warn({

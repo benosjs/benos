@@ -38,6 +38,13 @@ For type checking, applications use `"jsx": "react-jsx"`, `"jsxImportSource": "@
 
 The output imports `template` and `instantiate` from `@benosjs/dom/internal`. `template` receives an immutable, host-neutral plan: element/text/anchor instructions, literal attributes, namespace, source location in development, and numbered slots. It does not call `document` at module import time. Development output keeps this readable object form. Production output uses a compact positional tuple encoding of the same plan fields; the decoder is internal to the matching DOM runtime. Both encodings describe identical slots, ownership, evaluation order, and namespace transitions and must pass the same behavior fixtures. The DOM host lazily builds and clones a prototype per document; a later server host can interpret the same instructions into escaped HTML. `instantiate` owns the clone and runs a setup callback with slot operations that register render-tier bindings. Component descriptors are inert until materialized under a component owner.
 
+JSX text uses line-aware whitespace normalization. A text node without a line
+break is preserved exactly, including spaces next to an expression. When it
+contains line breaks, indentation is removed from continuation lines, trailing
+spaces are removed from non-final lines, and retained lines are joined with one
+space. This preserves a final-line space such as the one in
+`<button>\n  Clicks: {count()}\n</button>`.
+
 Example input:
 
 ```tsx

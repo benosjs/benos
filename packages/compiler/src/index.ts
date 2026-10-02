@@ -106,14 +106,19 @@ function attributeName(node: t.JSXAttribute['name']): string {
 }
 
 function textValue(value: string): string {
-  const lines = value.replace(/\r/g, '').split('\n')
+  const lines = value.replace(/\r\n?/g, '\n').split('\n')
   if (lines.length === 1) return value
   const kept: string[] = []
-  for (const lineValue of lines) {
-    const line = lineValue.replace(/[\t ]+/g, ' ').trim()
-    if (line) kept.push(line)
+  for (let index = 0; index < lines.length; index++) {
+    let line = (lines[index] ?? '').replace(/\t/g, ' ')
+    if (index !== 0) line = line.replace(/^ +/, '')
+    if (index !== lines.length - 1) line = line.replace(/ +$/, '')
+    if (line) {
+      if (kept.length) kept.push(' ')
+      kept.push(line)
+    }
   }
-  return kept.join(' ')
+  return kept.join('')
 }
 
 function literalValue(
@@ -563,7 +568,7 @@ function buildDynamicTemplate(node: t.JSXElement): DynamicTemplate | null {
     }
   }
   if (childAttribute) {
-    const slot = nextSlot++
+    const slot = nextSlot
     children.push(
       t.objectExpression([
         t.objectProperty(t.identifier('op'), t.stringLiteral('anchor')),

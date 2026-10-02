@@ -29,7 +29,9 @@ Vite, Vitest, ESLint, Prettier, signals, components, `<Show>`, and `<For>`.
 
 ## Development
 
-Benos requires Node.js 22.12.0 or newer and pnpm 10.17.0 for repository work.
+Benos requires Node.js `^22.18.0 || ^24.11.0 || >=26.0.0` and pnpm 10.17.0
+for repository work. The range intersects Babel 8 and Vitest 5 support; Node
+24.8 is below the supported 24.x floor.
 
 ```sh
 pnpm install

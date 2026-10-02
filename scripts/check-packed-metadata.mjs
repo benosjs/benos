@@ -38,6 +38,25 @@ try {
     const { stdout: listing } = await run('tar', ['-tf', archive], {
       cwd: root,
     })
+    const entries = listing
+      .split('\n')
+      .map((entry) => entry.trim())
+      .filter(Boolean)
+    const packageEntries = new Set(
+      entries.map((entry) => entry.replace(/^package\//, '')),
+    )
+    const forbidden = entries.filter((entry) => {
+      const path = entry.replace(/^package\//, '')
+      return (
+        path.endsWith('.tsbuildinfo') ||
+        /^dist\/index(?:\.[^/]+)?(?:\.map)?$/.test(path)
+      )
+    })
+    if (forbidden.length) {
+      throw new Error(
+        `Packed ${packageDirectory} includes forbidden build artifacts: ${forbidden.join(', ')}`,
+      )
+    }
     const manifests = listing
       .split('\n')
       .map((entry) => entry.trim())
@@ -53,7 +72,30 @@ try {
           `Packed ${packageDirectory}/${manifest} contains a workspace: dependency`,
         )
       }
-      JSON.parse(stdout)
+      const metadata = JSON.parse(stdout)
+      const exports = metadata.exports
+      if (exports) {
+        const targets = []
+        const collectTargets = (value) => {
+          if (typeof value === 'string') targets.push(value)
+          else if (value && typeof value === 'object')
+            for (const target of Object.values(value)) collectTargets(target)
+        }
+        collectTargets(exports)
+        for (const target of targets) {
+          if (
+            !target.startsWith('./dist/js/') &&
+            !target.startsWith('./dist/types/')
+          )
+            throw new Error(
+              `Packed ${packageDirectory} exports outside dist/js or dist/types: ${target}`,
+            )
+          if (!packageEntries.has(target.slice(2)))
+            throw new Error(
+              `Packed ${packageDirectory} export target is missing: ${target}`,
+            )
+        }
+      }
     }
   }
   console.log(

@@ -8,6 +8,14 @@ type TransformHook = (
 ) => unknown
 
 describe('@benosjs/vite', () => {
+  it('pre-optimizes the compiler runtime subpath', () => {
+    const plugin = benos()
+    const config = plugin.config as () => {
+      optimizeDeps: { include: string[] }
+    }
+    expect(config().optimizeDeps.include).toContain('@benosjs/dom/internal')
+  })
+
   it('runs as a pre plugin and transforms raw TSX', async () => {
     const plugin = benos()
     expect(plugin.enforce).toBe('pre')

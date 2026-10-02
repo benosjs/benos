@@ -2,6 +2,39 @@
 
 All notable changes to Benos are documented here.
 
+## [0.1.1] — 2026-10-02
+
+### Fixed
+
+- Preserve whitespace adjacent to JSX expressions using line-aware JSX text
+  normalization; added inline and multiline text-expression fixtures for both
+  compiler optimization modes.
+- Pre-optimize `@benosjs/dom/internal` in the Vite plugin to avoid a first-load
+  dependency optimization reload.
+- Render the starter features as a semantic list and add compact default CSS.
+
+### Changed
+
+- Require Node.js `^22.18.0 || ^24.11.0 || >=26.0.0` across the packages and starter,
+  matching the strictest dependency requirement. CI now runs at Node 22.18.0
+  and checks installed dependency engine ranges.
+- Upgrade ESLint to 10.11.0, Vite to 8.3.2, Vitest to 5.0.3, and happy-dom to
+  20.14.5. The ESLint plugin now declares its supported ESLint 10 peer range;
+  CI audits a freshly scaffolded project for high and critical advisories.
+- Publish only `dist/js` and `dist/types` from the scoped packages. The packed
+  metadata check rejects root stub files, `.tsbuildinfo`, and missing export
+  targets.
+
+### Verification
+
+- The local suite passes 136 unit tests and 30 Chromium/Firefox/WebKit tests;
+  type-level, documentation, lint, packed-package, engine, and size checks pass.
+- `@benosjs/core` is 4,001 B minified plus gzip; core plus DOM is 10,151 B,
+  both within the existing budgets.
+- On Node 24.11.0, a fresh scaffold installed from packed 0.1.1 packages with
+  no engine or deprecation warnings; `npm audit` reported zero vulnerabilities.
+- This version is prepared for release and has not been published.
+
 ## [0.1.0] — 2026-10-01
 
 ### Release metadata

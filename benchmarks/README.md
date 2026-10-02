@@ -374,3 +374,27 @@ The nine-row table is the release measurement. Benos remains slower than Solid
 on every row except update; the largest remaining gap is clear. The gap is
 retained as a post-v0.1 performance item rather than being hidden by changing
 the adapter or raising the bundle budgets.
+
+## v0.1.1 release candidate verification (2026-10-02)
+
+Built and measured locally with Node 22.18.0, Vite 8.3.2, and Vitest 5.0.3.
+The nine-row framework trace above remains the latest interleaved DOM
+measurement; this release-candidate change set does not modify the core or DOM
+runtime, so that trace was not rerun. The production kernel guard was rerun
+with its median-of-seven protocol (each run has five timed samples):
+
+| Artifact                         |         Size |       Budget |
+| -------------------------------- | -----------: | -----------: |
+| `@benosjs/core`                  |  4,001 bytes |  4,096 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,151 bytes | 10,240 bytes |
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.25 |        4.89 | 1.26× |
+| 20-deep computed chain write + read |       6.37 |        5.29 | 1.20× |
+| 200-effect fanout write             |       2.15 |        1.19 | 1.74× |
+| Dynamic dependency switch           |       3.46 |        2.51 | 1.43× |
+| Repeated equal write                |       0.83 |        0.50 | 1.65× |
+
+All kernel guard ratios remain below 2× Preact. The bundle sizes remain within
+their existing budgets.

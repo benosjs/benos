@@ -64,6 +64,10 @@ const fixtureMatrix = [
     'export const App = (props) => <input title={props.title()} value={props.value()} />',
   ],
   [
+    'text adjacent to expressions',
+    'export const App = (props) => <main><p>before{props.inline()}after</p><button>\n      Clicks: {props.count()}\n    </button></main>',
+  ],
+  [
     'component props',
     'function Card(props) { return <article>{props.title()}</article> } export const App = (props) => <Card title={props.title} />',
   ],
@@ -159,7 +163,9 @@ function runBehaviorFixture(code: string): FixtureSnapshot {
 
 interface MatrixSnapshot {
   initial: string
+  initialText: string
   updated: string
+  updatedText: string
   disposed: string
   reads: number
   events: number
@@ -178,7 +184,6 @@ function runMatrixFixture(
   const module = evaluate(code, domRuntime as Record<string, unknown>, {
     ErrorBoundary: domRuntime.ErrorBoundary,
   })
-  let dispose = (): void => undefined
   let update = (): void => undefined
   let reads = 0
   let events = 0
@@ -204,6 +209,23 @@ function runMatrixFixture(
     update = () => {
       title.set('second')
       value.set('two')
+    }
+  } else if (name === 'text adjacent to expressions') {
+    const inline = signal('value')
+    const count = signal(6)
+    props = {
+      inline: () => {
+        reads++
+        return inline()
+      },
+      count: () => {
+        reads++
+        return count()
+      },
+    }
+    update = () => {
+      inline.set('updated')
+      count.set(7)
     }
   } else if (name === 'component props') {
     const title = signal('first')
@@ -275,17 +297,19 @@ function runMatrixFixture(
     }
   }
 
-  dispose = render(
+  const dispose = render(
     () => (module.App as (nextProps: Record<string, unknown>) => Child)(props),
     document.body,
   )
   const initial = document.body.innerHTML
+  const initialText = document.body.textContent ?? ''
   if (name === 'events')
     document
       .querySelector('button')
       ?.dispatchEvent(new Event('click', { bubbles: true }))
   update()
   const updated = document.body.innerHTML
+  const updatedText = document.body.textContent ?? ''
   const namespaces = [
     document.querySelector('svg')?.namespaceURI ?? '',
     document.querySelector('math')?.namespaceURI ?? '',
@@ -293,7 +317,9 @@ function runMatrixFixture(
   dispose()
   return {
     initial,
+    initialText,
     updated,
+    updatedText,
     disposed: document.body.innerHTML,
     reads,
     events,
@@ -368,6 +394,12 @@ describe('@benosjs/compiler', () => {
         expect(noneSnapshot.namespaces[1]).toBe(
           'http://www.w3.org/1998/Math/MathML',
         )
+      }
+      if (name === 'text adjacent to expressions') {
+        expect(noneSnapshot.initialText).toContain('beforevalueafter')
+        expect(noneSnapshot.initialText).toContain('Clicks: 6')
+        expect(noneSnapshot.updatedText).toContain('beforeupdatedafter')
+        expect(noneSnapshot.updatedText).toContain('Clicks: 7')
       }
       if (name === 'errors')
         expect(noneSnapshot.initial).toContain('fixture failure')

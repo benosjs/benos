@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/compiler",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The TypeScript and JSX compiler for Benos applications.",
   "repository": {
     "type": "git",
@@ -17,10 +17,11 @@
   "homepage": "https://github.com/benosjs/benos#readme",
   "type": "module",
   "engines": {
-    "node": ">=22.12.0"
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
   },
   "files": [
-    "dist"
+    "dist/js",
+    "dist/types"
   ],
   "dependencies": {
     "@babel/core": "^8.0.6",

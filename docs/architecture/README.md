@@ -1,6 +1,8 @@
 # Architecture
 
-Benos targets Node.js 22.12.0 or newer for development tooling. Its TypeScript output target is ES2022.
+Benos targets Node.js `^22.18.0 || ^24.11.0 || >=26.0.0` for development
+tooling. This is the intersection of the supported dependency engine ranges;
+Node 24.8 does not meet the 24.x floor. Its TypeScript output target is ES2022.
 
 Phase 1 kernel designs (required for v0.1):
 

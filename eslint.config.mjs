@@ -2,7 +2,14 @@ import js from '@eslint/js'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**'] },
+  {
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      'packages/create-benos/template/**',
+    ],
+  },
   {
     files: ['benchmarks/js-framework-benchmark/**/*.{js,jsx,mjs}'],
     languageOptions: {

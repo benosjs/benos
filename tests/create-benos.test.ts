@@ -88,14 +88,14 @@ describe('create-benos packed scaffold', () => {
         expect(version, `${name} must use a published semver range`).toMatch(
           /^\^\d+\.\d+\.\d+$/,
         )
-        expect(version).toBe('^0.1.0')
+        expect(version).toBe('^0.1.1')
       }
       expect(await readdir(join(app, '.git')).catch(() => [])).toHaveLength(0)
       for (const [manager, userAgent] of [
-        ['npm', 'npm/11.0.0 node/v22.12.0 darwin arm64'],
-        ['pnpm', 'pnpm/10.17.0 npm/? node/v22.12.0 darwin arm64'],
-        ['yarn', 'yarn/4.5.0 npm/? node/v22.12.0 darwin arm64'],
-        ['bun', 'bun/1.2.0 npm/? node/v22.12.0 darwin arm64'],
+        ['npm', 'npm/11.0.0 node/v22.18.0 darwin arm64'],
+        ['pnpm', 'pnpm/10.17.0 npm/? node/v22.18.0 darwin arm64'],
+        ['yarn', 'yarn/4.5.0 npm/? node/v22.18.0 darwin arm64'],
+        ['bun', 'bun/1.2.0 npm/? node/v22.18.0 darwin arm64'],
       ] as const) {
         const managerApp = join(temporary, `${manager}-app`)
         const env = Object.fromEntries(
@@ -137,6 +137,7 @@ describe('create-benos packed scaffold', () => {
           const failure = error as { stdout?: string; stderr?: string }
           throw new Error(
             `${script} failed\n${failure.stdout ?? ''}\n${failure.stderr ?? ''}`,
+            { cause: error },
           )
         }
       }
