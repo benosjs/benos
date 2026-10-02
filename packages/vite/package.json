@@ -15,7 +15,6 @@
     "tsx"
   ],
   "homepage": "https://github.com/benosjs/benos#readme",
-  "private": true,
   "type": "module",
   "engines": {
     "node": ">=22.12.0"
