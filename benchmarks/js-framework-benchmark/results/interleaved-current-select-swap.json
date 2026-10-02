@@ -1,0 +1,160 @@
+{
+  "protocol": "js-framework-benchmark CPU operations 01-09",
+  "browser": "153.0.8010.12",
+  "node": "v24.8.0",
+  "platform": "darwin arm64",
+  "measurement": "Chrome trace click-to-paint duration (commit/layout fallback)",
+  "traceCategories": [
+    "blink.user_timing",
+    "devtools.timeline",
+    "disabled-by-default-devtools.timeline"
+  ],
+  "rounds": 5,
+  "warmups": 1,
+  "operations": [
+    "04_select1k",
+    "05_swap1k"
+  ],
+  "frameworks": {
+    "benos": {
+      "04_select1k": {
+        "label": "select row",
+        "medianMs": 7.143,
+        "minMs": 3.119,
+        "maxMs": 13.5,
+        "samplesMs": [
+          11.487,
+          7.143,
+          3.119,
+          13.5,
+          6.807
+        ]
+      },
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 11.305,
+        "minMs": 6.975,
+        "maxMs": 14.553,
+        "samplesMs": [
+          6.975,
+          14.553,
+          11.305,
+          11.615,
+          10.521
+        ]
+      }
+    },
+    "solid": {
+      "04_select1k": {
+        "label": "select row",
+        "medianMs": 1.881,
+        "minMs": 0.947,
+        "maxMs": 27.593,
+        "samplesMs": [
+          1.881,
+          26.484,
+          0.947,
+          27.593,
+          1.567
+        ]
+      },
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 26.295,
+        "minMs": 23.915,
+        "maxMs": 29.337,
+        "samplesMs": [
+          26.295,
+          29.295,
+          29.337,
+          23.915,
+          25.666
+        ]
+      }
+    },
+    "svelte": {
+      "04_select1k": {
+        "label": "select row",
+        "medianMs": 1.829,
+        "minMs": 1.597,
+        "maxMs": 27.212,
+        "samplesMs": [
+          4.64,
+          1.763,
+          1.597,
+          1.829,
+          27.212
+        ]
+      },
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 12.388,
+        "minMs": 5.486,
+        "maxMs": 27.456,
+        "samplesMs": [
+          27.456,
+          7.257,
+          5.486,
+          12.388,
+          26.231
+        ]
+      }
+    },
+    "vue": {
+      "04_select1k": {
+        "label": "select row",
+        "medianMs": 6.124,
+        "minMs": 3.796,
+        "maxMs": 26.917,
+        "samplesMs": [
+          6.124,
+          14.019,
+          3.796,
+          26.917,
+          3.879
+        ]
+      },
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 10.185,
+        "minMs": 8.935,
+        "maxMs": 27.107,
+        "samplesMs": [
+          10.185,
+          10.118,
+          27.107,
+          8.935,
+          10.546
+        ]
+      }
+    },
+    "react": {
+      "04_select1k": {
+        "label": "select row",
+        "medianMs": 14.183,
+        "minMs": 7.166,
+        "maxMs": 14.719,
+        "samplesMs": [
+          11.737,
+          14.719,
+          7.166,
+          14.183,
+          14.321
+        ]
+      },
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 35.438,
+        "minMs": 32.786,
+        "maxMs": 46.729,
+        "samplesMs": [
+          41.78,
+          32.786,
+          33.231,
+          46.729,
+          35.438
+        ]
+      }
+    }
+  }
+}

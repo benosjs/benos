@@ -1,0 +1,134 @@
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  readdir,
+  rm,
+  writeFile,
+} from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join, relative as relativePath, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+import { describe, expect, it } from 'vitest'
+
+const run = promisify(execFile)
+const root = resolve(fileURLToPath(new URL('../', import.meta.url)))
+
+function fileDependency(from: string, archive: string): string {
+  return `file:${relativePath(from, archive).replaceAll('\\', '/')}`
+}
+
+async function pack(
+  packageDirectory: string,
+  destination: string,
+): Promise<string> {
+  await run('pnpm', ['pack', '--pack-destination', destination, '--silent'], {
+    cwd: join(root, 'packages', packageDirectory),
+  })
+  const files = await readdir(destination)
+  const prefix =
+    packageDirectory === 'create-benos'
+      ? 'create-benos-'
+      : `benosjs-${packageDirectory}-`
+  const file = files.find((entry) => entry.startsWith(prefix))
+  if (!file)
+    throw new Error(`Packed ${packageDirectory} archive was not created`)
+  return join(destination, file)
+}
+
+describe('create-benos packed scaffold', () => {
+  it('scaffolds a packed app and passes typecheck, build, test, and lint', async () => {
+    const temporary = await mkdtemp(join(tmpdir(), 'create-benos-e2e-'))
+    const archives = join(temporary, 'archives')
+    const extracted = join(temporary, 'create-package')
+    await mkdir(archives)
+    await mkdir(extracted)
+    try {
+      const [createArchive, core, dom, compiler, vite, eslintPlugin] =
+        await Promise.all([
+          pack('create-benos', archives),
+          pack('core', archives),
+          pack('dom', archives),
+          pack('compiler', archives),
+          pack('vite', archives),
+          pack('eslint-plugin', archives),
+        ])
+      await run('tar', ['-xzf', createArchive, '-C', extracted])
+      const cli = join(extracted, 'package', 'src', 'index.mjs')
+      const app = join(temporary, 'app')
+      await run('node', [cli, app])
+      const generated = JSON.parse(
+        await readFile(join(app, 'package.json'), 'utf8'),
+      ) as {
+        createBenosPackageManager?: string
+        private?: boolean
+        dependencies?: Record<string, string>
+        devDependencies?: Record<string, string>
+        pnpm?: { overrides?: Record<string, string> }
+      }
+      expect(generated.private).toBe(true)
+      expect(generated.createBenosPackageManager).toBe('pnpm')
+      const benosDependencies = Object.entries({
+        ...generated.dependencies,
+        ...generated.devDependencies,
+      }).filter(([name]) => name.startsWith('@benosjs/'))
+      expect(benosDependencies).toHaveLength(5)
+      for (const [name, version] of benosDependencies) {
+        expect(version, `${name} must use a published semver range`).toMatch(
+          /^\^\d+\.\d+\.\d+$/,
+        )
+        expect(version).toBe('^0.1.0')
+      }
+      expect(await readdir(join(app, '.git')).catch(() => [])).toHaveLength(0)
+      for (const [manager, userAgent] of [
+        ['npm', 'npm/11.0.0 node/v22.12.0 darwin arm64'],
+        ['pnpm', 'pnpm/10.17.0 npm/? node/v22.12.0 darwin arm64'],
+        ['yarn', 'yarn/4.5.0 npm/? node/v22.12.0 darwin arm64'],
+        ['bun', 'bun/1.2.0 npm/? node/v22.12.0 darwin arm64'],
+      ] as const) {
+        const managerApp = join(temporary, `${manager}-app`)
+        await run('node', [cli, managerApp], {
+          env: { ...process.env, npm_config_user_agent: userAgent },
+        })
+        const managerPackage = JSON.parse(
+          await readFile(join(managerApp, 'package.json'), 'utf8'),
+        ) as { createBenosPackageManager?: string }
+        expect(managerPackage.createBenosPackageManager).toBe(manager)
+      }
+      await expect(run('node', [cli, app])).rejects.toThrow(
+        'Refusing to overwrite',
+      )
+
+      generated.pnpm = {
+        overrides: {
+          '@benosjs/core': fileDependency(app, core),
+          '@benosjs/dom': fileDependency(app, dom),
+          '@benosjs/compiler': fileDependency(app, compiler),
+          '@benosjs/vite': fileDependency(app, vite),
+          '@benosjs/eslint-plugin': fileDependency(app, eslintPlugin),
+        },
+      }
+      await writeFile(
+        join(app, 'package.json'),
+        `${JSON.stringify(generated, null, 2)}\n`,
+      )
+      await run('pnpm', ['install', '--offline', '--ignore-scripts'], {
+        cwd: app,
+      })
+      for (const script of ['typecheck', 'build', 'test', 'lint']) {
+        try {
+          await run('pnpm', ['run', script], { cwd: app })
+        } catch (error) {
+          const failure = error as { stdout?: string; stderr?: string }
+          throw new Error(
+            `${script} failed\n${failure.stdout ?? ''}\n${failure.stderr ?? ''}`,
+          )
+        }
+      }
+    } finally {
+      await rm(temporary, { recursive: true, force: true })
+    }
+  }, 180_000)
+})

@@ -1,0 +1,39 @@
+{
+  "name": "@benosjs/eslint-plugin",
+  "version": "0.1.0",
+  "description": "ESLint rules for Benos component and prop conventions.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "benos",
+    "eslint",
+    "eslint-plugin",
+    "typescript"
+  ],
+  "homepage": "https://github.com/benosjs/benos#readme",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "peerDependencies": {
+    "eslint": ">=9"
+  },
+  "files": [
+    "dist"
+  ],
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "development": "./dist/js/index.development.js",
+      "default": "./dist/js/index.production.js"
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
+  }
+}

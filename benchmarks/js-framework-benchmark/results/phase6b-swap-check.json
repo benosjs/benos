@@ -1,0 +1,94 @@
+{
+  "protocol": "js-framework-benchmark CPU operations 01-09",
+  "browser": "153.0.8010.12",
+  "node": "v24.8.0",
+  "platform": "darwin arm64",
+  "measurement": "Chrome trace click-to-paint duration (commit/layout fallback)",
+  "traceCategories": [
+    "blink.user_timing",
+    "devtools.timeline",
+    "disabled-by-default-devtools.timeline"
+  ],
+  "rounds": 5,
+  "warmups": 1,
+  "operations": [
+    "05_swap1k"
+  ],
+  "frameworks": {
+    "benos": {
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 9.193,
+        "minMs": 3.743,
+        "maxMs": 11.537,
+        "samplesMs": [
+          9.193,
+          3.743,
+          3.876,
+          10.057,
+          11.537
+        ]
+      }
+    },
+    "solid": {
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 3.114,
+        "minMs": 2.776,
+        "maxMs": 3.449,
+        "samplesMs": [
+          3.449,
+          2.847,
+          3.114,
+          2.776,
+          3.119
+        ]
+      }
+    },
+    "svelte": {
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 4.376,
+        "minMs": 4.205,
+        "maxMs": 5.678,
+        "samplesMs": [
+          5.678,
+          5.026,
+          4.27,
+          4.376,
+          4.205
+        ]
+      }
+    },
+    "vue": {
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 19.582,
+        "minMs": 19.004,
+        "maxMs": 26.797,
+        "samplesMs": [
+          26.797,
+          19.582,
+          19.069,
+          24.276,
+          19.004
+        ]
+      }
+    },
+    "react": {
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 27.218,
+        "minMs": 26.472,
+        "maxMs": 29.38,
+        "samplesMs": [
+          29.38,
+          27.665,
+          27.218,
+          26.472,
+          27.174
+        ]
+      }
+    }
+  }
+}

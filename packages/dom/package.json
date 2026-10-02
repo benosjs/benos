@@ -1,0 +1,55 @@
+{
+  "name": "@benosjs/dom",
+  "version": "0.1.0",
+  "description": "Fine-grained DOM renderer and component runtime for Benos.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "benos",
+    "dom",
+    "renderer",
+    "jsx",
+    "fine-grained"
+  ],
+  "homepage": "https://github.com/benosjs/benos#readme",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@benosjs/core": "workspace:*"
+  },
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "development": "./dist/js/index.development.js",
+      "default": "./dist/js/index.production.js"
+    },
+    "./internal": {
+      "types": "./dist/types/internal.d.ts",
+      "development": "./dist/js/internal.development.js",
+      "default": "./dist/js/internal.production.js"
+    },
+    "./jsx-runtime": {
+      "types": "./dist/types/jsx-runtime.d.ts",
+      "development": "./dist/js/jsx-runtime.development.js",
+      "default": "./dist/js/jsx-runtime.production.js"
+    },
+    "./jsx-dev-runtime": {
+      "types": "./dist/types/jsx-dev-runtime.d.ts",
+      "development": "./dist/js/jsx-dev-runtime.development.js",
+      "default": "./dist/js/jsx-dev-runtime.production.js"
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
+  }
+}

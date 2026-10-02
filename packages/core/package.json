@@ -1,0 +1,41 @@
+{
+  "name": "@benosjs/core",
+  "version": "0.1.0",
+  "description": "Fine-grained reactive signals, computeds, effects, and ownership for Benos.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "benos",
+    "signals",
+    "reactivity",
+    "fine-grained"
+  ],
+  "homepage": "https://github.com/benosjs/benos#readme",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "development": "./dist/js/index.development.js",
+      "default": "./dist/js/index.production.js"
+    },
+    "./internal": {
+      "types": "./dist/types/internal.d.ts",
+      "development": "./dist/js/internal.development.js",
+      "default": "./dist/js/internal.production.js"
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
+  }
+}

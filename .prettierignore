@@ -1,0 +1,7 @@
+node_modules
+**/dist
+coverage
+pnpm-lock.yaml
+benchmarks/js-framework-benchmark/src/SvelteApp.svelte
+benchmarks/js-framework-benchmark/results
+examples/dashboard/comparison-results.json

@@ -1,0 +1,14 @@
+node_modules/
+**/dist/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.DS_Store
+.release-packs/
+*.tgz
+.turbo/
+.vite/
+.npm/
+npm-debug.log*
+pnpm-debug.log*

@@ -1,0 +1,34 @@
+{
+  "name": "benos-consumer-fixture",
+  "version": "0.1.0",
+  "description": "Fresh consumer fixture for packed Benos packages.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "benos",
+    "consumer",
+    "fixture"
+  ],
+  "homepage": "https://github.com/benosjs/benos#readme",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@benosjs/core": "0.1.0",
+    "@benosjs/dom": "0.1.0",
+    "@benosjs/vite": "0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "8.3.1"
+  },
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
+  }
+}

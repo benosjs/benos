@@ -1,0 +1,94 @@
+{
+  "protocol": "js-framework-benchmark CPU operations 01-09",
+  "browser": "153.0.8010.12",
+  "node": "v24.8.0",
+  "platform": "darwin arm64",
+  "measurement": "Chrome trace click-to-paint duration (commit/layout fallback)",
+  "traceCategories": [
+    "blink.user_timing",
+    "devtools.timeline",
+    "disabled-by-default-devtools.timeline"
+  ],
+  "rounds": 5,
+  "warmups": 1,
+  "operations": [
+    "09_clear1k"
+  ],
+  "frameworks": {
+    "benos": {
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 6.209,
+        "minMs": 6.057,
+        "maxMs": 6.466,
+        "samplesMs": [
+          6.278,
+          6.209,
+          6.466,
+          6.057,
+          6.178
+        ]
+      }
+    },
+    "solid": {
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 2.544,
+        "minMs": 2.526,
+        "maxMs": 3.503,
+        "samplesMs": [
+          3.503,
+          2.544,
+          2.526,
+          2.526,
+          2.707
+        ]
+      }
+    },
+    "svelte": {
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 3.293,
+        "minMs": 3.278,
+        "maxMs": 5.012,
+        "samplesMs": [
+          5.012,
+          3.288,
+          3.278,
+          3.293,
+          3.337
+        ]
+      }
+    },
+    "vue": {
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 3.476,
+        "minMs": 3.434,
+        "maxMs": 3.625,
+        "samplesMs": [
+          3.572,
+          3.453,
+          3.625,
+          3.476,
+          3.434
+        ]
+      }
+    },
+    "react": {
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 5.031,
+        "minMs": 4.397,
+        "maxMs": 7.865,
+        "samplesMs": [
+          6.978,
+          4.455,
+          7.865,
+          4.397,
+          5.031
+        ]
+      }
+    }
+  }
+}

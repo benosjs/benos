@@ -1,0 +1,47 @@
+{
+  "name": "@benosjs/dashboard",
+  "version": "0.1.0",
+  "description": "The Benos validation dashboard example.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "benos",
+    "dashboard",
+    "example",
+    "benchmark"
+  ],
+  "homepage": "https://github.com/benosjs/benos#readme",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "DASHBOARD_FRAMEWORK=benos vite --config vite.config.ts",
+    "build": "DASHBOARD_FRAMEWORK=benos vite build --config vite.config.ts",
+    "build:solid": "DASHBOARD_FRAMEWORK=solid vite build --config vite.config.ts",
+    "build:slice:benos": "DASHBOARD_FRAMEWORK=benos DASHBOARD_ENTRY=slice vite build --config vite.config.ts",
+    "build:slice:solid": "DASHBOARD_FRAMEWORK=solid DASHBOARD_ENTRY=slice vite build --config vite.config.ts",
+    "build:compare": "pnpm build:slice:benos && pnpm build:slice:solid && node scripts/compare.mjs"
+  },
+  "dependencies": {
+    "@benosjs/core": "workspace:*",
+    "@benosjs/compiler": "workspace:*",
+    "@benosjs/dom": "workspace:*",
+    "@benosjs/vite": "workspace:*",
+    "solid-js": "1.9.15"
+  },
+  "devDependencies": {
+    "vite-plugin-solid": "2.11.14",
+    "@types/node": "^22.19.0",
+    "@playwright/test": "^1.55.0",
+    "typescript": "^5.9.3",
+    "vite": "8.3.1"
+  },
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
+  }
+}
