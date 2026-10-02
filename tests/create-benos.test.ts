@@ -3,6 +3,7 @@ import {
   mkdtemp,
   readFile,
   readdir,
+  realpath,
   rm,
   writeFile,
 } from 'node:fs/promises'
@@ -49,7 +50,8 @@ async function pack(
 
 describe('create-benos packed scaffold', () => {
   it('scaffolds a packed app and passes typecheck, build, test, and lint', async () => {
-    const temporary = await mkdtemp(join(tmpdir(), 'create-benos-e2e-'))
+    const temporaryRoot = process.env.RUNNER_TEMP ?? (await realpath(tmpdir()))
+    const temporary = await mkdtemp(join(temporaryRoot, 'create-benos-e2e-'))
     const archives = join(temporary, 'archives')
     const extracted = join(temporary, 'create-package')
     await mkdir(archives)
