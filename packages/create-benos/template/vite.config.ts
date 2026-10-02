@@ -2,5 +2,5 @@ import { defineConfig } from 'vite'
 import benos from '@benosjs/vite'
 
 export default defineConfig({
-  plugins: [benos()],
+  plugins: [benos({ exclude: [/\.test\.tsx$/] })],
 })
