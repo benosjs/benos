@@ -59,7 +59,10 @@ function Fixture(): JSX.Element {
   const tabsValue = signal('profile')
   const accordionValue = signal<string[]>(['shipping'])
   const next = (
-    <button class="benos-button" id="batch2-after">
+    <button
+      class="benos-button benos-button--primary benos-button--md"
+      id="batch2-after"
+    >
       Continue
     </button>
   )
