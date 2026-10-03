@@ -1,9 +1,17 @@
 /* global console */
 
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import {
+  copyFile,
+  mkdir,
+  mkdtemp,
+  readFile,
+  rm,
+  writeFile,
+} from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import process from 'node:process'
 import { join, resolve } from 'node:path'
+import { pathToFileURL } from 'node:url'
 import { spawnSync } from 'node:child_process'
 import { runCommand } from '../packages/benos/src/process.mjs'
 import { createFixtureRegistry } from '../tests/fixtures/ui-registry/create.mjs'
@@ -28,8 +36,33 @@ const cli = resolve(root, 'packages/benos/src/index.mjs')
 const registry = await createFixtureRegistry(
   join(temporary, 'fixture-registry'),
 )
+const batch1RegistryDirectory = join(temporary, 'batch1-registry')
+const batch1Names = [
+  'button',
+  'input',
+  'textarea',
+  'label',
+  'card',
+  'badge',
+  'separator',
+]
 
 try {
+  await mkdir(join(batch1RegistryDirectory, 'items'), { recursive: true })
+  const batch1Index = JSON.parse(
+    await readFile(resolve(root, 'registry/v1/index.json'), 'utf8'),
+  )
+  for (const item of batch1Index.items) {
+    const itemPath = join(batch1RegistryDirectory, 'items', item.name + '.json')
+    await copyFile(
+      resolve(root, 'registry/v1/items', item.name + '.json'),
+      itemPath,
+    )
+    item.url = pathToFileURL(itemPath).href
+  }
+  const batch1IndexPath = join(batch1RegistryDirectory, 'index.json')
+  await writeFile(batch1IndexPath, JSON.stringify(batch1Index, null, 2) + '\n')
+  const batch1Registry = pathToFileURL(batch1IndexPath).href
   const scaffoldEnv = Object.fromEntries(
     Object.entries(process.env).filter(
       ([key]) => key.toLowerCase() !== 'npm_config_user_agent',
@@ -84,6 +117,33 @@ try {
     lock.items.tokens?.files?.[0]?.target !== 'src/styles/tokens.css'
   ) {
     throw new Error('benos add did not record registry and npm dependencies.')
+  }
+  await runCommand(
+    process.execPath,
+    [cli, 'add', ...batch1Names, '--yes', '--registry', batch1Registry],
+    { cwd: app },
+  )
+  for (const name of batch1Names) {
+    const component = join(app, 'src/components/ui', name + '.tsx')
+    const stylesheet = join(app, 'src/styles', name + '.css')
+    const componentSource = await readFile(component, 'utf8')
+    const exportName = name.charAt(0).toUpperCase() + name.slice(1)
+    if (!componentSource.includes('export function ' + exportName)) {
+      throw new Error(
+        'benos add did not copy the ' + name + ' component source.',
+      )
+    }
+    if (!(await readFile(stylesheet, 'utf8')).includes('.benos-')) {
+      throw new Error('benos add did not copy the ' + name + ' stylesheet.')
+    }
+  }
+  const batchLock = JSON.parse(
+    await readFile(join(app, 'benos.lock.json'), 'utf8'),
+  )
+  if (
+    !batch1Names.every((name) => batchLock.items[name]?.files?.length === 2)
+  ) {
+    throw new Error('benos add did not record all batch 1 component files.')
   }
   const dependencyProbe =
     manager === 'yarn'

@@ -38,13 +38,16 @@
     "audit:template": "node scripts/audit-template.mjs",
     "registry:build": "node scripts/build-ui-registry.mjs",
     "registry:check": "node scripts/build-ui-registry.mjs --check",
+    "gallery": "pnpm --filter @benosjs/ui-gallery dev",
+    "gallery:build": "pnpm --filter @benosjs/ui-gallery build",
     "test:ui-cli:matrix": "node scripts/test-ui-cli-project.mjs",
     "check:jsx-types": "node scripts/generate-jsx-types.mjs --check",
     "check:doc-examples": "node scripts/check-doc-examples.mjs",
     "size": "node scripts/check-size.mjs",
-    "test:browser": "playwright test"
+    "test:browser": "node scripts/test-browser.mjs"
   },
   "devDependencies": {
+    "@benosjs/dom": "workspace:*",
     "@benosjs/primitives": "workspace:*",
     "axe-core": "4.13.0",
     "@babel/core": "^8.0.6",

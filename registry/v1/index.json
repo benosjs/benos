@@ -1,5 +1,76 @@
 {
   "schemaVersion": 1,
   "release": "0.2.0",
-  "items": []
+  "items": [
+    {
+      "name": "badge",
+      "type": "registry:component",
+      "title": "Badge",
+      "description": "A compact status label with brand and semantic tones.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/badge.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:2d82a69bfa5a57b73aa3967166f98a506c81dacbaf935aa244322a89a4e824bc"
+    },
+    {
+      "name": "button",
+      "type": "registry:component",
+      "title": "Button",
+      "description": "A typed button with accessible focus, size, and intent variants.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/button.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:fbddac12cce968ac30f5f892450ab8d0f1cfdb85602a0e6c10a816c3a18957f9"
+    },
+    {
+      "name": "card",
+      "type": "registry:component",
+      "title": "Card",
+      "description": "A neutral content surface with default, outlined, and raised variants.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/card.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:d29b7a04d044709e42f2ebc36b4eaf14afd63d28b13c7dffd040141c403a3a11"
+    },
+    {
+      "name": "input",
+      "type": "registry:component",
+      "title": "Input",
+      "description": "A styled native input with size and invalid-state support.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/input.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:a3461a49112a86561208ce5b54e07f2f7f083c3bbe9f9cb2f5c579cc8f40cac1"
+    },
+    {
+      "name": "label",
+      "type": "registry:component",
+      "title": "Label",
+      "description": "A styled, native label with typed control association.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/label.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:b80385d35e5133566024fa527d10b8ae0085cd6840463ecea95f9df13a4e7dc2"
+    },
+    {
+      "name": "separator",
+      "type": "registry:component",
+      "title": "Separator",
+      "description": "An accessible horizontal or vertical separator.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/separator.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:35b2fd670faf9e398e18bf1d7ee07225967f3e9b6ba6e57a626f83eae3f4ee90"
+    },
+    {
+      "name": "textarea",
+      "type": "registry:component",
+      "title": "Textarea",
+      "description": "A styled native textarea with size and invalid-state support.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/textarea.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:98f8388f0b7eaac364d42469e152421e38b440b14f7c4090751773af1129faae"
+    }
+  ]
 }

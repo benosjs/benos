@@ -1,6 +1,6 @@
 # UI component registry
 
-**Status:** U1 design; U3 adds schema-v1 validation, a deterministic static registry builder, and GitHub raw hosting instructions. The generated index is intentionally empty until U4 adds styled components. Schema and versioned URL structure are hard-to-reverse.
+**Status:** U1 design and U3 registry foundation are complete. U4 batch 1 adds the first seven styled components to schema-v1 payloads. Schema and versioned URL structure are hard-to-reverse.
 
 **Scope label:** registry foundations are implemented in U3; component payloads arrive in U4, and update-base retention is exercised in U5 (required for 0.2.0).
 
@@ -47,7 +47,7 @@ Each item document lists relative registry paths, target templates, content type
 - Every registry component's public props include `id?: string`. Components that need a machine or relationship ID forward it to the primitive; absent values come from `createUniqueId()`. Stateless components apply the optional ID to their root element for a consistent component API.
 - registryDependencies name other registry items such as tokens or shared helpers. Resolve recursively, deduplicate by item/version, and apply deterministic topological ordering.
 - files contain source-owned TSX/TypeScript/CSS. All TSX imports public @benosjs paths. A target starts with `components/` or `css/`; the CLI maps those prefixes to `benos.json` destinations and rejects traversal, absolute paths, and symlink escapes.
-- The registry builder reads `registry/source/items/*.json`, emits deterministic schema-v1 item payloads with per-file SHA-256 checksums, and generates `registry/v1/index.json`. The index item checksum covers the exact UTF-8 bytes of its immutable item JSON; each file checksum covers its exact UTF-8 content.
+- The registry builder reads `registry/source/items/*.json`, embeds either inline content or a repository-local sourceFile, emits deterministic schema-v1 item payloads with per-file SHA-256 checksums, and generates `registry/v1/index.json`. Standalone TSX/CSS authoring files live under `registry/source/components/` and `registry/source/css/`; published payloads remain self-contained. The index item checksum covers the exact UTF-8 bytes of its immutable item JSON; each file checksum covers its exact UTF-8 content.
 - cssVars or Tailwind-oriented metadata may be optional; plain CSS remains the default.
 - Checksums cover exact UTF-8 content; verify before planning writes.
 - Schema forbids executable postinstall hooks and arbitrary shell commands.
@@ -62,15 +62,11 @@ Use a mutable stable discovery index in the GitHub repository, but require each 
 
 U3 fixes the initial path and host: benos.lock.json pins installed component version, immutable base URL, and checksum. The discovery index on `main` is mutable, but an item URL must include the release tag and never use the branch URL. Never fetch the old base from an unpinned branch. GitHub raw is the initial host because the repository is canonical and requires no service; a configured website may mirror the same JSON later. Do not invent a public website URL. CDN headers and ETags are optimizations, not version identity.
 
-The current generated v1 index has no items; this is expected before U4, not a
-hosting failure. CI runs `pnpm registry:check` so checked-in discovery and
-payload files cannot drift from registry sources. Runtime validation also
+The generated v1 index contains source payloads for completed U4 batches. CI runs `pnpm registry:check` so checked-in discovery and payload files cannot drift from registry sources. Runtime validation also
 accepts `file:` URLs and loopback HTTP only for explicit local development and
 tests; released registry URLs remain HTTPS and tag-pinned.
 
-There are no styled registry components yet, so the fresh-project strict
-TypeScript and Benos ESLint requirement for copied components becomes active
-with U4's first registry payload; it is not vacuously counted as a U3 pass.
+Every U4 registry component is added unchanged to a fresh create-benos project in the OS/package-manager matrix; that project runs strict TypeScript and Benos ESLint checks across copied source.
 
 If the old base cannot be fetched, refuse automatic merge and preserve local files. A validated local cache is acceptable. Removing an item from the current catalog prevents new installation but does not erase old payloads needed for updates.
 

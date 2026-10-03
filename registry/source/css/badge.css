@@ -1,0 +1,32 @@
+.benos-badge {
+  align-items: center;
+  border: 1px solid currentColor;
+  border-radius: var(--benos-radius-pill);
+  display: inline-flex;
+  font-size: var(--benos-text-xs);
+  font-weight: 650;
+  gap: var(--benos-space-1);
+  line-height: 1.4;
+  padding-block: 0.15em;
+  padding-inline: var(--benos-space-2);
+}
+
+.benos-badge--neutral {
+  color: var(--benos-color-text-muted);
+}
+
+.benos-badge--brand {
+  color: var(--benos-color-brand);
+}
+
+.benos-badge--success {
+  color: var(--benos-color-success);
+}
+
+.benos-badge--warning {
+  color: var(--benos-color-warning);
+}
+
+.benos-badge--danger {
+  color: var(--benos-color-danger);
+}

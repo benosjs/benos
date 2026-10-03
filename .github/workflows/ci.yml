@@ -19,6 +19,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:engines
       - run: pnpm build
+      - run: pnpm registry:check
+      - run: pnpm gallery:build
+      - run: pnpm exec tsc -p examples/ui-gallery/tsconfig.json --noEmit
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test
       - run: pnpm typecheck:types

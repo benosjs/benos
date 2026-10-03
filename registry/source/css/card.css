@@ -1,0 +1,16 @@
+.benos-card {
+  background: var(--benos-color-surface);
+  border: 1px solid var(--benos-color-border);
+  border-radius: var(--benos-radius-lg);
+  color: var(--benos-color-text);
+  padding: var(--benos-space-5);
+}
+
+.benos-card--outlined {
+  background: transparent;
+  border-width: 2px;
+}
+
+.benos-card--raised {
+  box-shadow: var(--benos-shadow-md);
+}

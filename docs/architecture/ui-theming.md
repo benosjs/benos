@@ -1,8 +1,8 @@
 # UI theming and visual tokens
 
-**Status:** U1 design approved; U2 brand assets are in use; U4 token implementation later. Token names are a hard-to-reverse API and remain provisional until U4 review.
+**Status:** U1 design approved; U3 installs the base semantic tokens; U4 batch 1 styles use them. Token names are a hard-to-reverse API; unused token families remain provisional until later U4 batches.
 
-**Scope label:** designed now, built later (U4; required for 0.2.0).
+**Scope label:** base tokens and batch 1 component styles are implemented for U4; remaining token families are designed now and may be built in later U4 batches (required for 0.2.0).
 
 ## Goals
 
@@ -22,15 +22,18 @@
 
 The approved marks are `assets/brand/benos-mark-navy.png` and `assets/brand/benos-mark-light.png`; they match the variants used on the Benos website. The navy artwork's measured primary color is **#12306B**. Use the navy mark against light surfaces and the white mark against dark surfaces, selected with `<picture>`/`prefers-color-scheme` for the starter and favicon. GitHub/npm Markdown has no reliable color-scheme image selection, so READMEs use the navy mark on their light rendering surface. Do not use the old `assets/benos-logo.png` in new UI assets.
 
-Proposed semantic color tokens, with values to validate against WCAG contrast during U4:
+Implemented semantic color token values, using the navy artwork's primary color and a separate dark-mode remapping:
 
-- --benos-color-brand and --benos-color-brand-strong: #12306B and a darker pressed/focus value, with accessible foreground contrast.
-- --benos-color-canvas: light page surface selected to complement the mark while meeting contrast requirements.
-- --benos-color-surface and --benos-color-surface-raised: cards, fields, menus, and overlays.
-- --benos-color-text and --benos-color-text-muted: primary and secondary text.
-- --benos-color-border and --benos-color-focus: boundaries and a high-contrast focus indicator.
-- --benos-color-danger, --benos-color-success, and --benos-color-warning: semantic states independent of brand blue.
-- --benos-color-on-brand: foreground on brand fills, chosen after contrast checks.
+- `--benos-color-brand`: `#12306B` light / `#A9C4FF` dark.
+- `--benos-color-brand-strong`: `#0B204A` light / `#C7D8FF` dark.
+- `--benos-color-canvas`: `#F7F9FC` light / `#101728` dark.
+- `--benos-color-surface` and `--benos-color-surface-raised`: `#FFFFFF` light; `#172238` and `#202E47` dark.
+- `--benos-color-text` and `--benos-color-text-muted`: `#172033` / `#566176` light; `#F3F6FC` / `#BDC8DC` dark.
+- `--benos-color-border` and `--benos-color-focus`: `#D8DEEA` / `#2459B2` light; `#3A4964` / `#B4CCFF` dark.
+- `--benos-color-danger`, `--benos-color-success`, and `--benos-color-warning`: `#B42318`, `#16794B`, and `#8A4B08` light; `#FFB4AB`, `#8FE0B2`, and `#FFD08A` dark.
+- `--benos-color-on-brand`: `#FFFFFF` light / `#102044` dark.
+
+The batch 1 axe fixtures reported no color-contrast violations in light, dark, RTL, or dark RTL mode in Chromium, Firefox, and WebKit. Continue checking large text, forced colors, and states not yet represented by U4 fixtures.
 
 Dark tokens are semantic remappings, not opacity inversions. Preserve legibility, boundaries, focus rings, disabled contrast, and status meaning. The supplied white mark is used on dark surfaces; the dark canvas and interactive brand surface must remain distinct from the mark and meet contrast requirements. Use the white variant when system or explicit theme selects dark mode; test normal and large text sizes against actual assets.
 
@@ -46,7 +49,7 @@ Dark tokens are semantic remappings, not opacity inversions. Preserve legibility
 | Motion     | --benos-motion-fast, --benos-motion-normal, --benos-ease-standard                                                                                                                                                                                                                                               | Honor reduced-motion preferences.                 |
 | Layering   | --benos-z-dropdown, --benos-z-popover, --benos-z-dialog, --benos-z-toast                                                                                                                                                                                                                                        | A shared documented overlay scale.                |
 
-The listed names are the complete proposed public token set; exact values and whether every token ships are U4 decisions. Renaming published tokens is costly. Keep tokens under :root/theme selectors and avoid a broad reset that changes host typography or box sizing.
+The color token names and values above are implemented. The remaining listed families are the planned public token set; unused names and whether every one ships remain later U4 decisions. Renaming published tokens is costly. Keep tokens under :root/theme selectors and avoid a broad reset that changes host typography or box sizing.
 
 ## CSS API: theme selection and token contract
 
@@ -91,7 +94,7 @@ Trade-offs: CSS names can collide, and importing every stylesheet may include un
 - Invalid user token override: rely on CSS fallback/inheritance; do not add runtime validation.
 - Treat the supplied logo variants and their actual backgrounds as authoritative; do not assume transparency or synthesize a variant that is not present.
 
-## Test plan for U4
+## Remaining U4 test plan
 
 - Screenshot/computed-style fixtures for light, dark, auto, nested theme, and explicit override.
 - axe-core and contrast checks for text, focus, status, disabled, and overlay states; manually review what automation cannot judge.

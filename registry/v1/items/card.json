@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "card",
+  "type": "registry:component",
+  "title": "Card",
+  "description": "A neutral content surface with default, outlined, and raised variants.",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "card.tsx",
+      "target": "components/card.tsx",
+      "contentType": "text/tsx",
+      "content": "import { mergeProps, splitProps } from '@benosjs/dom'\nimport type { JSX } from '@benosjs/dom'\n\nexport type CardVariant = 'default' | 'outlined' | 'raised'\n\nexport type CardProps = Omit<JSX.IntrinsicElements['div'], 'class' | 'ref'> & {\n  id?: string\n  class?: string\n  variant?: CardVariant\n  ref?: (element: HTMLDivElement) => void\n}\n\nexport function Card(props: CardProps): JSX.Element {\n  const merged = mergeProps({ variant: 'default' as const }, props)\n  const [local, native] = splitProps(merged, ['variant', 'class', 'ref', 'children'] as const)\n  const ref = (element: HTMLDivElement) => local.ref?.(element)\n\n  return (\n    <div\n      {...native}\n      class={['benos-card', 'benos-card--' + local.variant, local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      {local.children}\n    </div>\n  )\n}\n",
+      "checksum": "sha256:2365c2619dfb30a8883cb3a2e6881cc0481232e0c4745ca10527da39a66951d4"
+    },
+    {
+      "path": "card.css",
+      "target": "css/card.css",
+      "contentType": "text/css",
+      "content": ".benos-card {\n  background: var(--benos-color-surface);\n  border: 1px solid var(--benos-color-border);\n  border-radius: var(--benos-radius-lg);\n  color: var(--benos-color-text);\n  padding: var(--benos-space-5);\n}\n\n.benos-card--outlined {\n  background: transparent;\n  border-width: 2px;\n}\n\n.benos-card--raised {\n  box-shadow: var(--benos-shadow-md);\n}\n",
+      "checksum": "sha256:52bf400a51f24d19ae2a424e0060067cbecff403daf6d5636f296d09f34aae98"
+    }
+  ]
+}

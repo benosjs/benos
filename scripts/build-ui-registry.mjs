@@ -2,11 +2,12 @@
 
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
-import { dirname, resolve } from 'node:path'
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path'
 import semver from 'semver'
 
 const root = resolve(import.meta.dirname, '..')
 const sourceDirectory = resolve(root, 'registry/source/items')
+const sourceRoot = resolve(root, 'registry/source')
 const outputDirectory = resolve(root, 'registry/v1')
 const outputItemsDirectory = resolve(outputDirectory, 'items')
 const indexPath = resolve(outputDirectory, 'index.json')
@@ -73,11 +74,13 @@ function validateSource(source, filename) {
     throw new Error(`${filename}.files must contain at least one file.`)
   const filePaths = new Set()
   for (const file of source.files) {
+    const hasContent = typeof file?.content === 'string'
+    const hasSourceFile = typeof file?.sourceFile === 'string'
     if (
       !file ||
       typeof file.path !== 'string' ||
       typeof file.target !== 'string' ||
-      typeof file.content !== 'string' ||
+      hasContent === hasSourceFile ||
       !contentTypes.has(file.contentType)
     ) {
       throw new Error(`${filename} contains an incomplete file record.`)
@@ -102,6 +105,18 @@ function validateSource(source, filename) {
       )
     if (filePaths.has(file.path))
       throw new Error(`${filename} repeats ${file.path}.`)
+    if (
+      hasSourceFile &&
+      (file.sourceFile.includes(String.fromCharCode(92)) ||
+        file.sourceFile.includes(String.fromCharCode(0)) ||
+        file.sourceFile.startsWith('/') ||
+        /^[a-zA-Z]:/.test(file.sourceFile) ||
+        file.sourceFile
+          .split('/')
+          .some((part) => !part || part === '.' || part === '..'))
+    ) {
+      throw new Error('Registry source has an unsafe sourceFile path.')
+    }
     filePaths.add(file.path)
   }
   return source
@@ -137,7 +152,27 @@ async function readSources() {
     const source = validateSource(JSON.parse(raw), filename)
     if (filename !== `${source.name}.json`)
       throw new Error(`Source filename must match item name ${source.name}.`)
-    sources.push(source)
+    const files = []
+    for (const file of source.files) {
+      if (typeof file.sourceFile !== 'string') {
+        files.push(file)
+        continue
+      }
+      const absoluteSource = resolve(sourceRoot, file.sourceFile)
+      const sourceRelative = relative(sourceRoot, absoluteSource)
+      if (
+        sourceRelative === '..' ||
+        sourceRelative.startsWith('..' + sep) ||
+        isAbsolute(sourceRelative)
+      ) {
+        throw new Error('Registry source file escapes registry/source.')
+      }
+      const content = await readFile(absoluteSource, 'utf8')
+      const { sourceFile, ...metadata } = file
+      void sourceFile
+      files.push({ ...metadata, content })
+    }
+    sources.push({ ...source, files })
   }
   return sources
 }

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "input",
+  "type": "registry:component",
+  "title": "Input",
+  "description": "A styled native input with size and invalid-state support.",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "input.tsx",
+      "target": "components/input.tsx",
+      "contentType": "text/tsx",
+      "content": "import { mergeProps, splitProps } from '@benosjs/dom'\nimport type { JSX } from '@benosjs/dom'\n\nexport type InputSize = 'sm' | 'md' | 'lg'\nexport type InputType = 'email' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'url'\n\nexport type InputProps = Omit<JSX.IntrinsicElements['input'], 'class' | 'ref' | 'type'> & {\n  id?: string\n  class?: string\n  size?: InputSize\n  type?: InputType\n  invalid?: boolean\n  ref?: (element: HTMLInputElement) => void\n}\n\nexport function Input(props: InputProps): JSX.Element {\n  const merged = mergeProps({ type: 'text' as const, size: 'md' as const, invalid: false }, props)\n  const [local, native] = splitProps(merged, [\n    'size',\n    'class',\n    'invalid',\n    'ref',\n    'children',\n    'aria-invalid',\n  ] as const)\n  const ariaInvalid =\n    local.invalid || local['aria-invalid'] === true || local['aria-invalid'] === 'true'\n      ? 'true'\n      : (local['aria-invalid'] ?? 'false')\n  const ref = (element: HTMLInputElement) => local.ref?.(element)\n\n  return (\n    <input\n      {...native}\n      class={['benos-input', 'benos-input--' + local.size, local.class].filter(Boolean).join(' ')}\n      aria-invalid={ariaInvalid}\n      data-invalid={ariaInvalid === 'true' ? 'true' : 'false'}\n      ref={ref}\n    />\n  )\n}\n",
+      "checksum": "sha256:9df1e40b3a95322a95c5ab626e480bf8f858743dd204bafa6ffa7934a6eefb1a"
+    },
+    {
+      "path": "input.css",
+      "target": "css/input.css",
+      "contentType": "text/css",
+      "content": ".benos-input {\n  background: var(--benos-color-surface);\n  border: 1px solid var(--benos-color-border);\n  border-radius: var(--benos-radius-md);\n  color: var(--benos-color-text);\n  display: block;\n  font: inherit;\n  inline-size: 100%;\n  min-inline-size: 0;\n}\n\n.benos-input--sm {\n  min-block-size: 2rem;\n  padding-inline: var(--benos-space-2);\n}\n\n.benos-input--md {\n  min-block-size: 2.5rem;\n  padding-inline: var(--benos-space-3);\n}\n\n.benos-input--lg {\n  min-block-size: 3rem;\n  padding-inline: var(--benos-space-4);\n}\n\n.benos-input::placeholder {\n  color: var(--benos-color-text-muted);\n  opacity: 1;\n}\n\n.benos-input:focus-visible {\n  border-color: var(--benos-color-focus);\n  outline: 3px solid var(--benos-color-focus);\n  outline-offset: 2px;\n}\n\n.benos-input[aria-invalid='true'] {\n  border-color: var(--benos-color-danger);\n}\n\n.benos-input:disabled {\n  background: var(--benos-color-canvas);\n  color: var(--benos-color-text-muted);\n  cursor: not-allowed;\n}\n",
+      "checksum": "sha256:c5c2730214afb4179c1bcf7363f885ed6440cf6350e7066adf66dc4e68995206"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+.benos-separator {
+  background: var(--benos-color-border);
+  border: 0;
+  flex: none;
+}
+
+.benos-separator--horizontal {
+  block-size: 1px;
+  inline-size: 100%;
+}
+
+.benos-separator--vertical {
+  align-self: stretch;
+  block-size: auto;
+  inline-size: 1px;
+  min-block-size: 1rem;
+}

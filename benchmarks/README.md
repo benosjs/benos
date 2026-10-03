@@ -454,3 +454,28 @@ using five timed samples:
 
 All five ratios pass the 2× guard. The U2 adapter has no effect on the existing
 kernel hot paths.
+
+## UI U4 batch 1 (2026-10-03)
+
+The seven styled registry components do not modify `@benosjs/core` or
+`@benosjs/dom`; these measurements are from a fresh production rebuild.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard was rerun with the median of seven runs, each run
+using five timed samples:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.20 |        4.94 | 1.24× |
+| 20-deep computed chain write + read |       6.41 |        5.27 | 1.22× |
+| 200-effect fanout write             |       2.06 |        1.19 | 1.76× |
+| Dynamic dependency switch           |       3.57 |        2.49 | 1.41× |
+| Repeated equal write                |       0.84 |        0.53 | 1.60× |
+
+All five ratios pass the 2× guard. There were no core or DOM source changes.
+Component coverage and the gallery instructions are recorded in
+[`docs/checkpoints/ui-U4-batch-1.md`](../docs/checkpoints/ui-U4-batch-1.md).

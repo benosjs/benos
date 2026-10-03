@@ -1,0 +1,83 @@
+@import '../../../registry/source/css/button.css';
+@import '../../../registry/source/css/input.css';
+@import '../../../registry/source/css/textarea.css';
+@import '../../../registry/source/css/label.css';
+@import '../../../registry/source/css/card.css';
+@import '../../../registry/source/css/badge.css';
+@import '../../../registry/source/css/separator.css';
+
+body {
+  background: var(--benos-color-canvas);
+  color: var(--benos-color-text);
+}
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+  --benos-color-brand: #12306b;
+  --benos-color-brand-strong: #0b204a;
+  --benos-color-canvas: #f7f9fc;
+  --benos-color-surface: #ffffff;
+  --benos-color-surface-raised: #ffffff;
+  --benos-color-text: #172033;
+  --benos-color-text-muted: #566176;
+  --benos-color-border: #d8deea;
+  --benos-color-focus: #2459b2;
+  --benos-color-danger: #b42318;
+  --benos-color-success: #16794b;
+  --benos-color-warning: #8a4b08;
+  --benos-color-on-brand: #ffffff;
+  --benos-space-1: 0.25rem;
+  --benos-space-2: 0.5rem;
+  --benos-space-3: 0.75rem;
+  --benos-space-4: 1rem;
+  --benos-space-5: 1.5rem;
+  --benos-space-6: 2rem;
+  --benos-radius-sm: 0.25rem;
+  --benos-radius-md: 0.5rem;
+  --benos-radius-lg: 0.75rem;
+  --benos-radius-pill: 999px;
+  --benos-text-xs: 0.75rem;
+  --benos-text-sm: 0.875rem;
+  --benos-line-height-body: 1.5;
+  --benos-shadow-md: 0 8px 24px rgb(23 32 51 / 12%);
+  --benos-motion-fast: 120ms;
+  --benos-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']),
+  [data-theme='dark'] {
+    color-scheme: dark;
+    --benos-color-brand: #a9c4ff;
+    --benos-color-brand-strong: #c7d8ff;
+    --benos-color-canvas: #101728;
+    --benos-color-surface: #172238;
+    --benos-color-surface-raised: #202e47;
+    --benos-color-text: #f3f6fc;
+    --benos-color-text-muted: #bdc8dc;
+    --benos-color-border: #3a4964;
+    --benos-color-focus: #b4ccff;
+    --benos-color-danger: #ffb4ab;
+    --benos-color-success: #8fe0b2;
+    --benos-color-warning: #ffd08a;
+    --benos-color-on-brand: #102044;
+  }
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --benos-color-brand: #a9c4ff;
+  --benos-color-brand-strong: #c7d8ff;
+  --benos-color-canvas: #101728;
+  --benos-color-surface: #172238;
+  --benos-color-surface-raised: #202e47;
+  --benos-color-text: #f3f6fc;
+  --benos-color-text-muted: #bdc8dc;
+  --benos-color-border: #3a4964;
+  --benos-color-focus: #b4ccff;
+  --benos-color-danger: #ffb4ab;
+  --benos-color-success: #8fe0b2;
+  --benos-color-warning: #ffd08a;
+  --benos-color-on-brand: #102044;
+}

@@ -1,13 +1,24 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@benosjs/dom",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "noEmit": true,
     "composite": false,
+    "baseUrl": ".",
+    "paths": {
+      "@benosjs/core": ["../packages/core/src/index.ts"],
+      "@benosjs/core/internal": ["../packages/core/src/internal.ts"],
+      "@benosjs/dom": ["../packages/dom/src/index.ts"],
+      "@benosjs/dom/jsx-runtime": ["../packages/dom/src/jsx-runtime.ts"]
+    },
     "types": ["node"]
   },
   "include": [
     "../packages/dom/tests/types.test.ts",
-    "../packages/primitives/tests/types.compile.ts"
+    "../packages/primitives/tests/types.compile.ts",
+    "./ui-batch1.types.ts",
+    "../registry/source/components/*.tsx"
   ]
 }

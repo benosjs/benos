@@ -1,0 +1,91 @@
+.benos-button {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: var(--benos-radius-md);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 650;
+  gap: var(--benos-space-2);
+  justify-content: center;
+  line-height: 1.25;
+  transition:
+    background-color var(--benos-motion-fast) var(--benos-ease-standard),
+    border-color var(--benos-motion-fast) var(--benos-ease-standard),
+    color var(--benos-motion-fast) var(--benos-ease-standard);
+}
+
+.benos-button--sm {
+  min-block-size: 2rem;
+  padding-inline: var(--benos-space-3);
+}
+
+.benos-button--md {
+  min-block-size: 2.5rem;
+  padding-inline: var(--benos-space-4);
+}
+
+.benos-button--lg {
+  min-block-size: 3rem;
+  padding-inline: var(--benos-space-5);
+}
+
+.benos-button--primary {
+  background: var(--benos-color-brand);
+  color: var(--benos-color-on-brand);
+}
+
+.benos-button--primary:hover:not(:disabled) {
+  background: var(--benos-color-brand-strong);
+}
+
+.benos-button--secondary {
+  background: var(--benos-color-surface-raised);
+  border-color: var(--benos-color-border);
+  color: var(--benos-color-text);
+}
+
+.benos-button--secondary:hover:not(:disabled),
+.benos-button--outline:hover:not(:disabled) {
+  background: var(--benos-color-canvas);
+}
+
+.benos-button--outline {
+  background: transparent;
+  border-color: var(--benos-color-border);
+  color: var(--benos-color-text);
+}
+
+.benos-button--ghost {
+  background: transparent;
+  color: var(--benos-color-brand);
+}
+
+.benos-button--ghost:hover:not(:disabled) {
+  background: var(--benos-color-canvas);
+}
+
+.benos-button--danger {
+  background: var(--benos-color-danger);
+  color: var(--benos-color-on-brand);
+}
+
+.benos-button--danger:hover:not(:disabled) {
+  filter: brightness(0.94);
+}
+
+.benos-button:focus-visible {
+  outline: 3px solid var(--benos-color-focus);
+  outline-offset: 2px;
+}
+
+.benos-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .benos-button {
+    transition: none;
+  }
+}
