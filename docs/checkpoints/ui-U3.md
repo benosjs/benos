@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-03
 
-**Status:** U3 implementation and expanded CLI verification are complete locally. `benos init`, `benos add`, and `benos list` are implemented; the static registry build and GitHub raw hosting setup are documented. The authorized 12-cell CI run is pending the `ui-system` push.
+**Status:** U3 implementation and expanded CLI verification are complete. `benos init`, `benos add`, and `benos list` are implemented; the static registry build and GitHub raw hosting setup are documented. All 12 authorized OS/package-manager CI cells pass on `ui-system`.
 
 ## What changed
 
@@ -77,18 +77,20 @@ The CLI behavior suite contains 18 passing Vitest tests. The fixture-backed add 
 
 ### Configured CI matrix
 
-These 12 cells are present in `.github/workflows/ci.yml`; this follow-up will trigger them on the authorized `ui-system` push.
+The first pushed run exposed Windows CRLF mismatches in the byte-for-byte registry check and Yarn 4 fresh-project install/type-resolution issues. The fixes and green rerun are described below.
 
-| Runner           | npm     | pnpm    | Yarn 4  | Bun     |
-| ---------------- | ------- | ------- | ------- | ------- |
-| `ubuntu-latest`  | Pending | Pending | Pending | Pending |
-| `windows-latest` | Pending | Pending | Pending | Pending |
-| `macos-latest`   | Pending | Pending | Pending | Pending |
+| Runner           | npm  | pnpm | Yarn 4 | Bun  |
+| ---------------- | ---- | ---- | ------ | ---- |
+| `ubuntu-latest`  | Pass | Pass | Pass   | Pass |
+| `windows-latest` | Pass | Pass | Pass   | Pass |
+| `macos-latest`   | Pass | Pass | Pass   | Pass |
+
+The fix run, [CI run 37114886937](https://github.com/benosjs/benos/actions/runs/37114886937), finished green, including the main verification job and all three packed create-benos jobs.
 
 ## Sizes and deviations
 
 U3 changed no `@benosjs/core` or `@benosjs/dom` implementation. The rebuilt bundles remain within the approved 4,096-byte and 10,240-byte gzip budgets.
 
-The local fresh-project flow passed with npm and pnpm on macOS, including the new real registry dependency graph and the starter's strict TypeScript and Benos ESLint checks. Yarn, Bun, Ubuntu, and Windows will be verified by the pushed matrix. The U4 requirement that every production registry component passes unchanged is still pending the first U4 payload.
+The first run failed in four Windows cells because Git checked out `registry/v1/index.json` with CRLF while the builder compares canonical LF bytes. `.gitattributes` now pins generated registry JSON to LF. Ubuntu and macOS Yarn cells initially failed because Yarn 4 treats a fresh lockfile as an immutable-install error in CI; the test harness disables that setting for the initial scaffold install. A local Yarn PnP run then showed TypeScript could not resolve `vite/client`, so the starter now selects Yarn's `node-modules` linker. The full rerun passed all 12 cells. The U4 requirement that every production registry component passes unchanged is still pending the first U4 payload.
 
-**Checkpoint result:** U3 implementation and local verification are complete. CI matrix results and U4 component-specific checks remain pending. Stop for review before U4.
+**Checkpoint result:** U3 implementation, local verification, and the CI matrix are complete. U4 component-specific checks remain pending. Stop for review before U4.
