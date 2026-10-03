@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-03
 
-**Status:** Implementation and local verification complete on `ui-system`; pushed-branch CI is the remaining gate.
+**Status:** Complete on `ui-system`. Local verification and GitHub Actions run [37136869920](https://github.com/benosjs/benos/actions/runs/37136869920) pass.
 
 ## What changed
 
@@ -30,21 +30,21 @@ No axe violations were reported for any of the seven components in the tested mo
 
 ## Verification
 
-| Check                                                                              | Result                                                                                                          |
-| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `pnpm build`                                                                       | Pass                                                                                                            |
-| `pnpm test`                                                                        | Pass — 204 tests in 19 files                                                                                    |
-| `pnpm lint`                                                                        | Pass — ESLint and Prettier                                                                                      |
-| `pnpm typecheck:types`                                                             | Pass — includes batch 1 `expect-type` assertions                                                                |
-| `pnpm registry:check`                                                              | Pass — generated index and seven item payloads are current                                                      |
-| Public-import, packed-metadata, engine, JSX-type, and documentation-example checks | Pass                                                                                                            |
-| `pnpm gallery:build` and gallery strict `tsc`                                      | Pass                                                                                                            |
-| `pnpm audit:template`                                                              | Pass — no engine/deprecation warnings and zero vulnerabilities                                                  |
-| Fresh consumer with pnpm                                                           | Pass — scaffold, add all seven unchanged, strict type-check, build, test, Benos ESLint/Prettier                 |
-| `pnpm test:browser`                                                                | Pass — 147/147 tests across Chromium, Firefox, and WebKit; includes 45 batch 1 test executions (15 per browser) |
-| `pnpm size` after production rebuild                                               | Pass — core 4,051/4,096 bytes; core + DOM 10,200/10,240 bytes                                                   |
-| `pnpm bench:guard`                                                                 | Pass — seven-run median below 2× Preact on every workload                                                       |
-| OS/package-manager CI matrix                                                       | Pending the push for this checkpoint                                                                            |
+| Check                                                                              | Result                                                                                                                    |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm build`                                                                       | Pass                                                                                                                      |
+| `pnpm test`                                                                        | Pass — 204 tests in 19 files                                                                                              |
+| `pnpm lint`                                                                        | Pass — ESLint and Prettier                                                                                                |
+| `pnpm typecheck:types`                                                             | Pass — includes batch 1 `expect-type` assertions                                                                          |
+| `pnpm registry:check`                                                              | Pass — generated index and seven item payloads are current                                                                |
+| Public-import, packed-metadata, engine, JSX-type, and documentation-example checks | Pass                                                                                                                      |
+| `pnpm gallery:build` and gallery strict `tsc`                                      | Pass                                                                                                                      |
+| `pnpm audit:template`                                                              | Pass — no engine/deprecation warnings and zero vulnerabilities                                                            |
+| Fresh consumer with pnpm                                                           | Pass — scaffold, add all seven unchanged, strict type-check, build, test, Benos ESLint/Prettier                           |
+| `pnpm test:browser`                                                                | Pass — 147/147 tests across Chromium, Firefox, and WebKit; includes 45 batch 1 test executions (15 per browser)           |
+| `pnpm size` after production rebuild                                               | Pass — core 4,051/4,096 bytes; core + DOM 10,200/10,240 bytes                                                             |
+| `pnpm bench:guard`                                                                 | Pass — seven-run median below 2× Preact on every workload                                                                 |
+| OS/package-manager CI matrix                                                       | Pass — all 12 Ubuntu/Windows/macOS × npm/pnpm/Yarn/Bun cells; all three create-benos jobs and main verification also pass |
 
 ## Bundle sizes and kernel benchmark medians
 
@@ -69,7 +69,9 @@ Production kernel guard results, median of seven comparisons (each comparison us
 
 - Component CSS is copied as a separate file by `benos add`; the consuming application imports each component stylesheet. The shared theme stylesheet remains owned by `benos init`.
 - Playwright's WebKit build did not honor the macOS global full-keyboard preference. The existing traversal fixture explicitly adds `tabindex="0"` to the link to model inclusion in the Tab order; `docs/ui-plan.md` records that this does not emulate Safari's global setting.
-- The local fresh-consumer run used pnpm. The configured 12-cell Ubuntu/Windows/macOS × npm/pnpm/Yarn/Bun matrix must run on the pushed branch before this checkpoint is CI-complete.
+- The first CI run found registry payload differences on Windows because checkout converted TSX/CSS source to CRLF. `.gitattributes` now pins registry authoring files to LF; the next run passed registry checks and fresh consumers in all 12 matrix cells.
+- The second CI run found WebKit/Linux contrast violations on plain native buttons surrounding the component fixture, not on the components. Fixture-only controls now use theme tokens; the unmodified axe run passes after that correction.
+- The local fresh-consumer run used pnpm; CI passed npm, pnpm, Yarn, and Bun on Ubuntu, Windows, and macOS.
 
 ## Gallery review
 
@@ -83,4 +85,4 @@ pnpm --filter @benosjs/ui-gallery dev
 
 Open the local URL printed by Vite, normally `http://localhost:5173/`. The page shows Light, Dark, and RTL panels together. Hover buttons and use Tab/Shift+Tab to review interactive states.
 
-**Checkpoint result:** batch 1 is locally verified and ready for visual review. CI is the remaining checkpoint gate; no merge into `main` is included.
+**Checkpoint result:** batch 1 is locally and CI verified and ready for visual review. It remains on `ui-system`; no merge into `main` is included.
