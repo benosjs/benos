@@ -83,6 +83,7 @@ jobs:
           corepack enable
           corepack prepare yarn@4.5.0 --activate
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build
       - run: pnpm registry:check
       - name: Test a fresh create-benos consumer
         env:
