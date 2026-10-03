@@ -14,6 +14,10 @@ const supportedManagers = new Set(['npm', 'pnpm', 'yarn', 'bun'])
 if (!supportedManagers.has(manager)) {
   throw new Error('Set BENOS_PACKAGE_MANAGER to npm, pnpm, yarn, or bun.')
 }
+if (manager === 'yarn') {
+  // CI defaults Yarn 4 to immutable installs; a new scaffold must create its lock.
+  process.env.YARN_ENABLE_IMMUTABLE_INSTALLS = 'false'
+}
 
 const temporary = await mkdtemp(
   join(process.env.RUNNER_TEMP ?? tmpdir(), 'benos-ui-cli-'),
