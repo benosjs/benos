@@ -7,12 +7,12 @@
 
 | Component  | Types                            | Fresh create-benos strict type-check + lint | Keyboard                                                                                   | axe-core                                 | Gallery states                               |
 | ---------- | -------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------- | -------------------------------------------- |
-| Checkbox   | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm                    | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL                              | Pass in all 12 browser/mode combinations | Checked                                      |
-| Switch     | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm                    | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL                              | Pass in all 12 browser/mode combinations | On; accessibility tree asserts `switch` role |
-| RadioGroup | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm                    | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL                              | Pass in all 12 browser/mode combinations | Selected option                              |
-| Select     | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm                    | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL; Tab behavior recorded below | Pass in all 12 browser/mode combinations | Selected and open                            |
-| Tabs       | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm                    | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL                              | Pass in all 12 browser/mode combinations | Selected tab and panel                       |
-| Accordion  | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm                    | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL                              | Pass in all 12 browser/mode combinations | Expanded item                                |
+| Checkbox   | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm and Yarn 4.5.0     | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL                              | Pass in all 12 browser/mode combinations | Checked                                      |
+| Switch     | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm and Yarn 4.5.0     | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL                              | Pass in all 12 browser/mode combinations | On; accessibility tree asserts `switch` role |
+| RadioGroup | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm and Yarn 4.5.0     | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL                              | Pass in all 12 browser/mode combinations | Selected option                              |
+| Select     | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm and Yarn 4.5.0     | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL; Tab behavior recorded below | Pass in all 12 browser/mode combinations | Selected and open                            |
+| Tabs       | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm and Yarn 4.5.0     | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL                              | Pass in all 12 browser/mode combinations | Selected tab and panel                       |
+| Accordion  | Pass; `tests/ui-batch2.types.ts` | Pass unchanged with pnpm and Yarn 4.5.0     | Pass in Chromium, Firefox, WebKit; light, dark, RTL, dark RTL                              | Pass in all 12 browser/mode combinations | Expanded item                                |
 
 The browser matrix ran 207 tests across Chromium, Firefox, and WebKit. The six
 axe tests each scan four modes, for 72 component/mode/browser scans with no
@@ -21,9 +21,18 @@ state and explicit ID overrides are also checked in each browser. The gallery
 test asserts all six controls appear in selected or open states in its light,
 dark, and Arabic RTL panels.
 
-The fresh-project test was run locally with pnpm and passed strict type-check,
-production build, Vitest, and Benos ESLint/Prettier without edits to installed
-component source. The CI workflow defines the 3 OS × 4 package-manager matrix.
+The fresh-project test was run locally with pnpm and Yarn 4.5.0 and passed
+strict type-check, production build, Vitest, and Benos ESLint/Prettier without
+edits to installed component source. The starter uses Yarn's
+`nodeLinker: node-modules`; the test harness adds a loopback-only HTTP whitelist
+for its temporary local package registry. The CI workflow defines the 3 OS ×
+4 package-manager matrix.
+
+The initial CI attempts exposed and fixed three test-infrastructure issues:
+the consumer matrix now builds workspace packages before packing them; Yarn 4
+uses a loopback-only whitelist for the temporary HTTP registry; and the browser
+fixture's continuation button uses the Benos button class so Linux WebKit does
+not report a contrast issue from the unrelated native default button.
 
 ## Accessibility behavior and deviations
 

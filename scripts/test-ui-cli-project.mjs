@@ -168,6 +168,16 @@ try {
   const localRegistry = await createLocalPrimitivesRegistry(
     join(temporary, 'benosjs-primitives-0.2.0.tgz'),
   )
+  if (manager === 'yarn') {
+    // Yarn 4 blocks plain HTTP registries by default. This fixture registry is
+    // intentionally loopback-only, so trust only its local host for this test.
+    const yarnrcPath = join(app, '.yarnrc.yml')
+    const yarnConfig = await readFile(yarnrcPath, 'utf8')
+    await writeFile(
+      yarnrcPath,
+      `${yarnConfig.trimEnd()}\nunsafeHttpWhitelist:\n  - 127.0.0.1\n`,
+    )
+  }
   const previousRegistry = process.env.npm_config_registry
   const previousNpmRegistry = process.env.NPM_CONFIG_REGISTRY
   const previousYarnRegistry = process.env.YARN_NPM_REGISTRY_SERVER
@@ -177,7 +187,16 @@ try {
   try {
     await runCommand(
       process.execPath,
-      [cli, 'add', ...batch2Names, '--yes', '--registry', batch1Registry],
+      [
+        cli,
+        'add',
+        ...batch2Names,
+        '--yes',
+        '--registry',
+        batch1Registry,
+        '--package-manager',
+        manager,
+      ],
       { cwd: app },
     )
   } finally {

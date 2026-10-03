@@ -58,7 +58,11 @@ function Fixture(): JSX.Element {
   const selectValue = signal<string[]>(['north'])
   const tabsValue = signal('profile')
   const accordionValue = signal<string[]>(['shipping'])
-  const next = <button id="batch2-after">Continue</button>
+  const next = (
+    <button class="benos-button" id="batch2-after">
+      Continue
+    </button>
+  )
   if (name === 'checkbox') {
     return (
       <>

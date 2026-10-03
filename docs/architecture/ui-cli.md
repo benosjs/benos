@@ -142,6 +142,10 @@ project, runs `benos init`, `list`, and `list --installed`, then runs project
 typecheck, build, test, and lint. It has not been triggered from this local
 checkpoint.
 
+The starter includes `.yarnrc.yml` with Yarn's `nodeLinker: node-modules`
+setting so the starter's Vite client types resolve with the standard TypeScript
+compiler under Yarn 4.
+
 **U5 remaining:**
 
 - `diff` classification for unchanged files, local edits, upstream edits, files changed on both sides, deleted local targets, and newly added upstream files.

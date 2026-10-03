@@ -96,6 +96,9 @@ describe('create-benos packed scaffold', () => {
         expect(version).toBe('^0.1.2')
       }
       expect(generated.engines?.node).toBe('^22.18.0 || ^24.11.0 || >=26.0.0')
+      expect(await readFile(join(app, '.yarnrc.yml'), 'utf8')).toContain(
+        'nodeLinker: node-modules',
+      )
       const starterSource = await readFile(join(app, 'src/main.tsx'), 'utf8')
       const starterCss = await readFile(join(app, 'src/style.css'), 'utf8')
       const viteConfig = await readFile(join(app, 'vite.config.ts'), 'utf8')
