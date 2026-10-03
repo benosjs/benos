@@ -28,11 +28,11 @@ edits to installed component source. The starter uses Yarn's
 for its temporary local package registry. The CI workflow defines the 3 OS ×
 4 package-manager matrix.
 
-The initial CI attempts exposed and fixed three test-infrastructure issues:
+The CI attempts exposed and fixed three test-infrastructure issues:
 the consumer matrix now builds workspace packages before packing them; Yarn 4
 uses a loopback-only whitelist for the temporary HTTP registry; and the browser
-fixture's continuation button uses the Benos button class so Linux WebKit does
-not report a contrast issue from the unrelated native default button.
+fixture's continuation button uses the explicit primary and medium classes so
+Linux WebKit does not report a contrast issue from platform default colors.
 
 ## Accessibility behavior and deviations
 
@@ -74,6 +74,10 @@ not report a contrast issue from the unrelated native default button.
   deprecation warnings and zero vulnerabilities. The local Node 24.8.0 is below
   the supported 24.11 floor, so engine warnings from commands run directly on
   that Node are expected.
+- Final GitHub Actions run [37150792965](https://github.com/benosjs/benos/actions/runs/37150792965)
+  passed: the main verification job, all 12 OS/package-manager consumer cells,
+  and create-benos on Ubuntu, Windows, and macOS. The preceding run caught the
+  Linux WebKit contrast issue described above; it passed after the fixture fix.
 - Core: 4,051 / 4,096 gzip bytes. Core + DOM: 10,200 / 10,240 gzip bytes.
 - Review screenshot: `/tmp/benos-u4-batch2-gallery.png`. Run `pnpm gallery`
   from the repository root and visit `http://localhost:5173`.
