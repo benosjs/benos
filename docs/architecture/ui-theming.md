@@ -26,11 +26,12 @@ Implemented semantic color token values, using the navy artwork's primary color 
 
 - `--benos-color-brand`: `#12306B` light / `#A9C4FF` dark.
 - `--benos-color-brand-strong`: `#0B204A` light / `#C7D8FF` dark.
+- `--benos-color-brand-soft`: `#E8EEF9` light / `#263653` dark, for quiet brand-tinted surfaces.
 - `--benos-color-canvas`: `#F7F9FC` light / `#101728` dark.
 - `--benos-color-surface` and `--benos-color-surface-raised`: `#FFFFFF` light; `#172238` and `#202E47` dark.
 - `--benos-color-text` and `--benos-color-text-muted`: `#172033` / `#566176` light; `#F3F6FC` / `#BDC8DC` dark.
 - `--benos-color-border` and `--benos-color-focus`: `#D8DEEA` / `#2459B2` light; `#3A4964` / `#B4CCFF` dark.
-- `--benos-color-danger`, `--benos-color-success`, and `--benos-color-warning`: `#B42318`, `#16794B`, and `#8A4B08` light; `#FFB4AB`, `#8FE0B2`, and `#FFD08A` dark.
+- `--benos-color-danger`, `--benos-color-danger-strong`, `--benos-color-on-danger`, `--benos-color-success`, and `--benos-color-warning`: `#B42318`, `#8F1C14`, `#FFFFFF`, `#16794B`, and `#8A4B08` light; `#FF6B61`, `#FF8A80`, `#172238`, `#8FE0B2`, and `#FFD08A` dark. The dark danger pair keeps danger text legible on dark surfaces and dark foreground text legible on the saturated danger button.
 - `--benos-color-on-brand`: `#FFFFFF` light / `#102044` dark.
 
 The batch 1 axe fixtures reported no color-contrast violations in light, dark, RTL, or dark RTL mode in Chromium, Firefox, and WebKit. Continue checking large text, forced colors, and states not yet represented by U4 fixtures.

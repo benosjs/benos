@@ -40,7 +40,7 @@
 }
 
 .benos-button--secondary {
-  background: var(--benos-color-surface-raised);
+  background: var(--benos-color-brand-soft);
   border-color: var(--benos-color-border);
   color: var(--benos-color-text);
 }
@@ -67,11 +67,11 @@
 
 .benos-button--danger {
   background: var(--benos-color-danger);
-  color: var(--benos-color-on-brand);
+  color: var(--benos-color-on-danger);
 }
 
 .benos-button--danger:hover:not(:disabled) {
-  filter: brightness(0.94);
+  background: var(--benos-color-danger-strong);
 }
 
 .benos-button:focus-visible {

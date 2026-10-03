@@ -1,7 +1,7 @@
 .benos-label {
   color: var(--benos-color-text);
   display: inline-block;
-  font-size: var(--benos-text-sm);
-  font-weight: 600;
+  font-size: var(--benos-text-xs);
+  font-weight: 500;
   line-height: var(--benos-line-height-body);
 }

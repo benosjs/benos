@@ -1,0 +1,62 @@
+.benos-checkbox {
+  align-items: center;
+  color: var(--benos-color-text);
+  cursor: pointer;
+  display: inline-flex;
+  gap: var(--benos-space-2);
+  line-height: var(--benos-line-height-body);
+  position: relative;
+}
+
+.benos-checkbox input {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+}
+
+.benos-checkbox__control {
+  align-items: center;
+  background: var(--benos-color-surface);
+  border: 1px solid var(--benos-color-border);
+  border-radius: var(--benos-radius-sm);
+  color: var(--benos-color-on-brand);
+  display: inline-flex;
+  flex: none;
+  inline-size: 1.125rem;
+  justify-content: center;
+  block-size: 1.125rem;
+}
+
+.benos-checkbox__control[data-state='checked'] {
+  background: var(--benos-color-brand);
+  border-color: var(--benos-color-brand);
+}
+
+.benos-checkbox__control[data-state='indeterminate'] {
+  background: var(--benos-color-brand);
+  border-color: var(--benos-color-brand);
+}
+
+.benos-checkbox__control > span {
+  font-size: 0.8rem;
+  line-height: 1;
+  opacity: 0;
+}
+
+.benos-checkbox__control[data-state='checked'] > span,
+.benos-checkbox__control[data-state='indeterminate'] > span {
+  opacity: 1;
+}
+
+.benos-checkbox input:focus-visible + .benos-checkbox__control {
+  outline: 3px solid var(--benos-color-focus);
+  outline-offset: 2px;
+}
+
+.benos-checkbox[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.58;
+}

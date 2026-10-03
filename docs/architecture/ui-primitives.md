@@ -1,8 +1,8 @@
 # UI primitives and the Zag.js adapter
 
-**Status:** U1 design and U2 adapter implementation and verification complete. U4 batch 1 adds the first seven styled registry components; complex Zag-backed styled controls remain later U4 batches. Zag.js and its machine packages are pinned to 1.44.0. No hidden ID generator or internal import is allowed. See the [U2 checkpoint](../checkpoints/ui-U2.md) for the per-primitive browser matrix and observed Zag/APG differences.
+**Status:** U1 design and U2 adapter implementation and verification are complete. U4 batches 1 and 2 provide thirteen styled registry components, including six Zag-backed controls. Zag.js and its machine packages are pinned to 1.44.0. No hidden ID generator or internal Benos import is allowed. See the [U2 checkpoint](../checkpoints/ui-U2.md) for the per-primitive browser matrix and observed Zag/APG differences, and the [U4 batch 2 checkpoint](../checkpoints/ui-U4-batch-2.md) for styled-control coverage.
 
-**Scope label:** U2 adapters and U4 batch 1 styled components are built; the remaining registry controls and their theming are later U4 work (required for 0.2.0).
+**Scope label:** U2 adapters and U4 batches 1 and 2 styled components are built; remaining registry controls and their theming are later U4 work (required for 0.2.0).
 
 ## Goals
 

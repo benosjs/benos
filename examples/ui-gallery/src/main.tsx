@@ -7,6 +7,12 @@ import { Input } from '../../../registry/source/components/input.js'
 import { Label } from '../../../registry/source/components/label.js'
 import { Separator } from '../../../registry/source/components/separator.js'
 import { Textarea } from '../../../registry/source/components/textarea.js'
+import { Checkbox } from '../../../registry/source/components/checkbox.js'
+import { Switch } from '../../../registry/source/components/switch.js'
+import { RadioGroup } from '../../../registry/source/components/radio-group.js'
+import { Select } from '../../../registry/source/components/select.js'
+import { Tabs } from '../../../registry/source/components/tabs.js'
+import { Accordion } from '../../../registry/source/components/accordion.js'
 import './ui.css'
 import './gallery.css'
 
@@ -44,6 +50,12 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
       <p class="mode-hint">
         Hover controls or press Tab to preview focus styles.
       </p>
+      {rtl && (
+        <p class="rtl-sample" lang="ar">
+          مرحبًا بكم في مكوّنات بينوس. صُممت هذه الواجهة لدعم اتجاه الكتابة من
+          اليمين إلى اليسار.
+        </p>
+      )}
 
       <section class="sample-group" aria-labelledby={'buttons-' + props.mode}>
         <h3 id={'buttons-' + props.mode}>Button</h3>
@@ -54,6 +66,9 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
           <Button variant="ghost">Ghost</Button>
           <Button variant="danger">Danger</Button>
           <Button disabled>Disabled</Button>
+          <Button disabled variant="danger">
+            Disabled danger
+          </Button>
           <Button size="sm" variant="outline">
             Small
           </Button>
@@ -76,7 +91,7 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
           </div>
           <div class="field">
             <Label for={'disabled-' + props.mode}>Disabled</Label>
-            <Input id={'disabled-' + props.mode} disabled value="Read only" />
+            <Input id={'disabled-' + props.mode} disabled value="Unavailable" />
           </div>
           <div class="field">
             <Label for={'invalid-' + props.mode}>Invalid</Label>
@@ -166,6 +181,96 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
           <span>End</span>
         </div>
       </section>
+
+      <section
+        class="sample-group"
+        aria-labelledby={'primitives-' + props.mode}
+      >
+        <h3 id={'primitives-' + props.mode}>Interactive primitives</h3>
+        <div class="primitive-grid">
+          <Card class="primitive-card">
+            <Checkbox id={'checkbox-' + props.mode} defaultChecked>
+              {rtl ? 'إرسال تحديثات البريد' : 'Email me product updates'}
+            </Checkbox>
+          </Card>
+          <Card class="primitive-card">
+            <Switch id={'switch-' + props.mode} defaultChecked>
+              {rtl ? 'تفعيل التنبيهات' : 'Enable notifications'}
+            </Switch>
+          </Card>
+          <RadioGroup
+            id={'radio-' + props.mode}
+            label={rtl ? 'سرعة التوصيل' : 'Delivery speed'}
+            defaultValue="standard"
+            orientation="horizontal"
+            items={[
+              { value: 'standard', label: rtl ? 'عادي' : 'Standard' },
+              { value: 'express', label: rtl ? 'سريع' : 'Express' },
+            ]}
+          />
+          <Select
+            id={'select-' + props.mode}
+            label={rtl ? 'المنطقة' : 'Region'}
+            defaultValue={['north']}
+            defaultOpen
+            positioning={{ sameWidth: true }}
+            items={[
+              { value: 'north', label: rtl ? 'الشمال' : 'North' },
+              { value: 'south', label: rtl ? 'الجنوب' : 'South' },
+              { value: 'west', label: rtl ? 'الغرب' : 'West' },
+            ]}
+          />
+          <Tabs
+            id={'tabs-' + props.mode}
+            label={rtl ? 'إعدادات الحساب' : 'Account settings'}
+            defaultValue="profile"
+            items={[
+              {
+                value: 'profile',
+                label: rtl ? 'الملف الشخصي' : 'Profile',
+                content: (
+                  <p>
+                    {rtl
+                      ? 'حدّث بياناتك الشخصية.'
+                      : 'Update your personal details.'}
+                  </p>
+                ),
+              },
+              {
+                value: 'security',
+                label: rtl ? 'الأمان' : 'Security',
+                content: (
+                  <p>
+                    {rtl
+                      ? 'راجع خيارات الأمان.'
+                      : 'Review your security options.'}
+                  </p>
+                ),
+              },
+            ]}
+          />
+          <Accordion
+            id={'accordion-' + props.mode}
+            defaultValue={['delivery']}
+            items={[
+              {
+                value: 'delivery',
+                title: rtl ? 'متى سيصل طلبي؟' : 'When will my order arrive?',
+                content: rtl
+                  ? 'تصل الطلبات عادة خلال يومين.'
+                  : 'Most orders arrive within two days.',
+              },
+              {
+                value: 'returns',
+                title: rtl ? 'كيف أبدأ الإرجاع؟' : 'How do I start a return?',
+                content: rtl
+                  ? 'تواصل مع فريق الدعم لبدء الإرجاع.'
+                  : 'Contact support to start a return.',
+              },
+            ]}
+          />
+        </div>
+      </section>
     </section>
   )
 }
@@ -199,13 +304,16 @@ export function mountGallery(host: HTMLElement): () => void {
         </header>
 
         <section class="intro">
-          <p class="eyebrow">Source-owned components · Batch 1</p>
+          <p class="eyebrow">Source-owned components · Batches 1 and 2</p>
           <h1>Small building blocks, in your hands.</h1>
           <p>
             Native HTML, Benos getter-backed props, and a quiet navy palette.
             Try each mode, then use the keyboard to inspect focus.
           </p>
-          <div class="component-list" aria-label="Components in this batch">
+          <div
+            class="component-list"
+            aria-label="Components in batches 1 and 2"
+          >
             <span>Button</span>
             <span>Input</span>
             <span>Textarea</span>
@@ -213,6 +321,12 @@ export function mountGallery(host: HTMLElement): () => void {
             <span>Card</span>
             <span>Badge</span>
             <span>Separator</span>
+            <span>Checkbox</span>
+            <span>Switch</span>
+            <span>Radio group</span>
+            <span>Select</span>
+            <span>Tabs</span>
+            <span>Accordion</span>
           </div>
         </section>
 
@@ -223,7 +337,7 @@ export function mountGallery(host: HTMLElement): () => void {
         </div>
 
         <footer class="site-footer">
-          <span>Batch 1 · no primitive runtime dependency</span>
+          <span>Batches 1 and 2 · source-owned styled components</span>
           <span>Colors follow the Benos navy and light marks.</span>
         </footer>
       </main>

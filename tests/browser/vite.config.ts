@@ -52,6 +52,28 @@ export default defineConfig({
           '../../packages/primitives/node_modules/@zag-js/select/dist/index.mjs',
         ),
       },
+      ...['accordion', 'checkbox', 'radio-group', 'switch', 'tabs'].map(
+        (name) => ({
+          find: `@benosjs/primitives/${name}`,
+          replacement: alias(
+            `../../packages/primitives/dist/js/${name}.development.js`,
+          ),
+        }),
+      ),
+      {
+        find: '@benosjs/primitives/select',
+        replacement: alias(
+          '../../packages/primitives/dist/js/select.development.js',
+        ),
+      },
+      ...['accordion', 'checkbox', 'radio-group', 'switch', 'tabs'].map(
+        (name) => ({
+          find: `@zag-js/${name}`,
+          replacement: alias(
+            `../../packages/primitives/node_modules/@zag-js/${name}/dist/index.mjs`,
+          ),
+        }),
+      ),
       {
         find: '@zag-js/toast',
         replacement: alias(

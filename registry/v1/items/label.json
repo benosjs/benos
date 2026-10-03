@@ -19,8 +19,8 @@
       "path": "label.css",
       "target": "css/label.css",
       "contentType": "text/css",
-      "content": ".benos-label {\n  color: var(--benos-color-text);\n  display: inline-block;\n  font-size: var(--benos-text-sm);\n  font-weight: 600;\n  line-height: var(--benos-line-height-body);\n}\n",
-      "checksum": "sha256:6b8cb63114f0afbe018a893d545ef11f6121b079dd28b90e7421da5d725aea96"
+      "content": ".benos-label {\n  color: var(--benos-color-text);\n  display: inline-block;\n  font-size: var(--benos-text-xs);\n  font-weight: 500;\n  line-height: var(--benos-line-height-body);\n}\n",
+      "checksum": "sha256:5bf72d27de5a56918e5a024b7a0b8437d2d1aa97d16336ac1c7c5f52a00ede10"
     }
   ]
 }

@@ -173,15 +173,30 @@ h1 {
 
 .button-row .benos-button {
   font-size: 11px;
-  min-block-size: 2rem;
-  padding-inline: 9px;
 }
 
 .field-grid,
-.card-grid {
+.card-grid,
+.primitive-grid {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.primitive-grid {
+  align-items: start;
+}
+
+.primitive-card {
+  align-items: start;
+  display: flex;
+  min-block-size: 3.5rem;
+  padding: 12px;
+}
+
+.primitive-grid > .benos-select {
+  grid-column: 1 / -1;
+  margin-block-start: 128px;
 }
 
 .field {
@@ -201,10 +216,15 @@ h1 {
 
 .error-copy {
   color: var(--benos-color-danger);
-  direction: ltr;
   font-size: 11px;
-  text-align: end;
-  unicode-bidi: isolate;
+  text-align: start;
+}
+
+.rtl-sample {
+  color: var(--benos-color-text-muted);
+  font-size: var(--benos-text-sm);
+  line-height: var(--benos-line-height-body);
+  margin-block: 0 16px;
 }
 
 .card-grid .benos-card {
@@ -266,7 +286,8 @@ h1 {
   }
 
   .field-grid,
-  .card-grid {
+  .card-grid,
+  .primitive-grid {
     grid-template-columns: 1fr;
   }
 

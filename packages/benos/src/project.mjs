@@ -30,6 +30,7 @@ export const TOKENS_CSS = `:root,
   color-scheme: light;
   --benos-color-brand: #12306b;
   --benos-color-brand-strong: #0b204a;
+  --benos-color-brand-soft: #e8eef9;
   --benos-color-canvas: #f7f9fc;
   --benos-color-surface: #ffffff;
   --benos-color-surface-raised: #ffffff;
@@ -38,9 +39,11 @@ export const TOKENS_CSS = `:root,
   --benos-color-border: #d8deea;
   --benos-color-focus: #2459b2;
   --benos-color-danger: #b42318;
+  --benos-color-danger-strong: #8f1c14;
   --benos-color-success: #16794b;
   --benos-color-warning: #8a4b08;
   --benos-color-on-brand: #ffffff;
+  --benos-color-on-danger: #ffffff;
   --benos-space-1: 0.25rem;
   --benos-space-2: 0.5rem;
   --benos-space-3: 0.75rem;
@@ -80,6 +83,7 @@ export const TOKENS_CSS = `:root,
     color-scheme: dark;
     --benos-color-brand: #a9c4ff;
     --benos-color-brand-strong: #c7d8ff;
+    --benos-color-brand-soft: #263653;
     --benos-color-canvas: #101728;
     --benos-color-surface: #172238;
     --benos-color-surface-raised: #202e47;
@@ -87,10 +91,12 @@ export const TOKENS_CSS = `:root,
     --benos-color-text-muted: #bdc8dc;
     --benos-color-border: #3a4964;
     --benos-color-focus: #b4ccff;
-    --benos-color-danger: #ffb4ab;
+    --benos-color-danger: #ff6b61;
+    --benos-color-danger-strong: #ff8a80;
     --benos-color-success: #8fe0b2;
     --benos-color-warning: #ffd08a;
     --benos-color-on-brand: #102044;
+    --benos-color-on-danger: #172238;
   }
 }
 
@@ -98,6 +104,7 @@ export const TOKENS_CSS = `:root,
   color-scheme: dark;
   --benos-color-brand: #a9c4ff;
   --benos-color-brand-strong: #c7d8ff;
+  --benos-color-brand-soft: #263653;
   --benos-color-canvas: #101728;
   --benos-color-surface: #172238;
   --benos-color-surface-raised: #202e47;
@@ -105,10 +112,12 @@ export const TOKENS_CSS = `:root,
   --benos-color-text-muted: #bdc8dc;
   --benos-color-border: #3a4964;
   --benos-color-focus: #b4ccff;
-  --benos-color-danger: #ffb4ab;
+  --benos-color-danger: #ff6b61;
+  --benos-color-danger-strong: #ff8a80;
   --benos-color-success: #8fe0b2;
   --benos-color-warning: #ffd08a;
   --benos-color-on-brand: #102044;
+  --benos-color-on-danger: #172238;
 }
 `
 

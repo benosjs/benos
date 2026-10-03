@@ -1,0 +1,109 @@
+.benos-select {
+  color: var(--benos-color-text);
+  display: grid;
+  gap: var(--benos-space-2);
+  position: relative;
+}
+
+.benos-select__label {
+  font-size: var(--benos-text-sm);
+  font-weight: 600;
+}
+
+.benos-select__control {
+  display: flex;
+  gap: var(--benos-space-1);
+}
+
+.benos-select__trigger,
+.benos-select__clear {
+  align-items: center;
+  background: var(--benos-color-surface);
+  border: 1px solid var(--benos-color-border);
+  border-radius: var(--benos-radius-md);
+  color: var(--benos-color-text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: var(--benos-space-2);
+  justify-content: space-between;
+  min-block-size: 2.5rem;
+  padding-block: var(--benos-space-2);
+  padding-inline: var(--benos-space-3);
+}
+
+.benos-select__trigger {
+  flex: 1;
+  text-align: start;
+}
+
+.benos-select__clear {
+  justify-content: center;
+  min-inline-size: 2.5rem;
+}
+
+.benos-select__trigger:focus-visible,
+.benos-select__clear:focus-visible {
+  outline: 3px solid var(--benos-color-focus);
+  outline-offset: 2px;
+}
+
+.benos-select[data-invalid='true'] .benos-select__trigger {
+  border-color: var(--benos-color-danger);
+}
+
+.benos-select[data-disabled] .benos-select__trigger,
+.benos-select[data-disabled] .benos-select__clear {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.benos-select__positioner {
+  z-index: var(--benos-z-dropdown, 10);
+}
+
+.benos-select__content {
+  background: var(--benos-color-surface-raised);
+  border: 1px solid var(--benos-color-border);
+  border-radius: var(--benos-radius-md);
+  box-shadow: var(--benos-shadow-md);
+  color: var(--benos-color-text);
+  inline-size: max(12rem, var(--reference-width, 100%));
+  max-block-size: 16rem;
+  overflow-y: auto;
+  padding: var(--benos-space-1);
+}
+
+.benos-select__content[data-state='closed'] {
+  display: none;
+}
+
+.benos-select__item {
+  align-items: center;
+  border-radius: var(--benos-radius-sm);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  min-block-size: 2.25rem;
+  padding-block: var(--benos-space-2);
+  padding-inline: var(--benos-space-2);
+}
+
+.benos-select__item[data-highlighted] {
+  background: var(--benos-color-brand-soft);
+  outline: none;
+}
+
+.benos-select__item[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.benos-select__check {
+  color: var(--benos-color-brand);
+  opacity: 0;
+}
+
+.benos-select__check[data-selected] {
+  opacity: 1;
+}

@@ -1,6 +1,6 @@
 # UI component registry
 
-**Status:** U1 design and U3 registry foundation are complete. U4 batch 1 adds the first seven styled components to schema-v1 payloads. Schema and versioned URL structure are hard-to-reverse.
+**Status:** U1 design and U3 registry foundation are complete. U4 batches 1 and 2 add thirteen styled components to schema-v1 payloads. Schema and versioned URL structure are hard-to-reverse.
 
 **Scope label:** registry foundations are implemented in U3; component payloads arrive in U4, and update-base retention is exercised in U5 (required for 0.2.0).
 
@@ -43,7 +43,7 @@ Proposed index:
 
 Each item document lists relative registry paths, target templates, content types, checksums, and inline UTF-8 file content, following shadcn's source-registry approach. The index and item `dependencies` fields are arrays of `{ "name": "package", "version": "semver-range" }` records. No target may escape configured directories.
 
-- npm dependencies are explicit package/range records, not bare package names. Batch 1 has none; Batch 2/3 install the `@benosjs/primitives` package and its source imports use only the required public subpaths.
+- npm dependencies are explicit package/range records, not bare package names. Batch 1 has none; Batch 2 declares `@benosjs/primitives` and the corresponding Zag machine packages, and source imports use public package entry points rather than internal Benos subpaths.
 - Every registry component's public props include `id?: string`. Components that need a machine or relationship ID forward it to the primitive; absent values come from `createUniqueId()`. Stateless components apply the optional ID to their root element for a consistent component API.
 - registryDependencies name other registry items such as tokens or shared helpers. Resolve recursively, deduplicate by item/version, and apply deterministic topological ordering.
 - files contain source-owned TSX/TypeScript/CSS. All TSX imports public @benosjs paths. A target starts with `components/` or `css/`; the CLI maps those prefixes to `benos.json` destinations and rejects traversal, absolute paths, and symlink escapes.

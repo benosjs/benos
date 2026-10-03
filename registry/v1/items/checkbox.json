@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "checkbox",
+  "type": "registry:component",
+  "title": "Checkbox",
+  "description": "An accessible checkbox with controlled and uncontrolled state.",
+  "dependencies": [
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/checkbox",
+      "version": "1.44.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "checkbox.tsx",
+      "target": "components/checkbox.tsx",
+      "contentType": "text/tsx",
+      "content": "import { createCheckbox } from '@benosjs/primitives/checkbox'\nimport { mergeProps, splitProps } from '@benosjs/dom'\nimport type { CheckboxOptions } from '@benosjs/primitives/checkbox'\nimport type { JSX } from '@benosjs/dom'\n\nexport type CheckboxProps = Omit<JSX.IntrinsicElements['label'], 'class' | 'for' | 'ref'> &\n  Pick<\n    CheckboxOptions,\n    | 'checked'\n    | 'defaultChecked'\n    | 'disabled'\n    | 'invalid'\n    | 'required'\n    | 'readOnly'\n    | 'onCheckedChange'\n    | 'name'\n    | 'form'\n    | 'value'\n    | 'dir'\n  > & {\n    id?: string\n    class?: string\n    ref?: (element: HTMLLabelElement) => void\n  }\n\nexport function Checkbox(props: CheckboxProps): JSX.Element {\n  const merged = mergeProps({ defaultChecked: false }, props)\n  const [local, native] = splitProps(merged, [\n    'id',\n    'class',\n    'ref',\n    'children',\n    'checked',\n    'defaultChecked',\n    'disabled',\n    'invalid',\n    'required',\n    'readOnly',\n    'onCheckedChange',\n    'name',\n    'form',\n    'value',\n    'dir',\n  ] as const)\n  const machine = createCheckbox(() => ({\n    ...(local.id === undefined ? {} : { id: local.id }),\n    ...(local.checked === undefined ? {} : { checked: local.checked }),\n    defaultChecked: local.defaultChecked,\n    ...(local.disabled === undefined ? {} : { disabled: local.disabled }),\n    ...(local.invalid === undefined ? {} : { invalid: local.invalid }),\n    ...(local.required === undefined ? {} : { required: local.required }),\n    ...(local.readOnly === undefined ? {} : { readOnly: local.readOnly }),\n    ...(local.onCheckedChange === undefined ? {} : { onCheckedChange: local.onCheckedChange }),\n    ...(local.name === undefined ? {} : { name: local.name }),\n    ...(local.form === undefined ? {} : { form: local.form }),\n    ...(local.value === undefined ? {} : { value: local.value }),\n    ...(local.dir === undefined ? {} : { dir: local.dir }),\n  }))\n  const api = machine.api\n  const root = api().getRootProps()\n  const rootRef = root.ref as ((element: HTMLLabelElement) => void) | undefined\n  const ref = (element: HTMLLabelElement) => {\n    rootRef?.(element)\n    local.ref?.(element)\n  }\n\n  return (\n    <label\n      {...root}\n      {...native}\n      id={local.id}\n      class={['benos-checkbox', local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      <input {...api().getHiddenInputProps()} />\n      <span class=\"benos-checkbox__control\" {...api().getControlProps()}>\n        <span aria-hidden=\"true\" {...api().getIndicatorProps()}>\n          ✓\n        </span>\n      </span>\n      <span class=\"benos-checkbox__label\" {...api().getLabelProps()}>\n        {local.children}\n      </span>\n    </label>\n  )\n}\n",
+      "checksum": "sha256:e55a685ec2c845d54ec69491d0d603897ac93f28742cbf92e7502c62305b59e8"
+    },
+    {
+      "path": "checkbox.css",
+      "target": "css/checkbox.css",
+      "contentType": "text/css",
+      "content": ".benos-checkbox {\n  align-items: center;\n  color: var(--benos-color-text);\n  cursor: pointer;\n  display: inline-flex;\n  gap: var(--benos-space-2);\n  line-height: var(--benos-line-height-body);\n  position: relative;\n}\n\n.benos-checkbox input {\n  block-size: 1px;\n  clip-path: inset(50%);\n  inline-size: 1px;\n  overflow: hidden;\n  position: absolute;\n  white-space: nowrap;\n}\n\n.benos-checkbox__control {\n  align-items: center;\n  background: var(--benos-color-surface);\n  border: 1px solid var(--benos-color-border);\n  border-radius: var(--benos-radius-sm);\n  color: var(--benos-color-on-brand);\n  display: inline-flex;\n  flex: none;\n  inline-size: 1.125rem;\n  justify-content: center;\n  block-size: 1.125rem;\n}\n\n.benos-checkbox__control[data-state='checked'] {\n  background: var(--benos-color-brand);\n  border-color: var(--benos-color-brand);\n}\n\n.benos-checkbox__control[data-state='indeterminate'] {\n  background: var(--benos-color-brand);\n  border-color: var(--benos-color-brand);\n}\n\n.benos-checkbox__control > span {\n  font-size: 0.8rem;\n  line-height: 1;\n  opacity: 0;\n}\n\n.benos-checkbox__control[data-state='checked'] > span,\n.benos-checkbox__control[data-state='indeterminate'] > span {\n  opacity: 1;\n}\n\n.benos-checkbox input:focus-visible + .benos-checkbox__control {\n  outline: 3px solid var(--benos-color-focus);\n  outline-offset: 2px;\n}\n\n.benos-checkbox[data-disabled] {\n  cursor: not-allowed;\n  opacity: 0.58;\n}\n",
+      "checksum": "sha256:958a1b1928684fa48bafa5c185843f1ca5b3b528bb1fb6b84a4f5974c899f539"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "name": "radio-group",
+  "title": "Radio Group",
+  "description": "A typed, keyboard-accessible group of mutually exclusive options.",
+  "type": "registry:component",
+  "dependencies": [
+    { "name": "@benosjs/primitives", "version": "^0.2.0" },
+    { "name": "@zag-js/radio-group", "version": "1.44.0" }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "radio-group.tsx",
+      "target": "components/radio-group.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/radio-group.tsx"
+    },
+    {
+      "path": "radio-group.css",
+      "target": "css/radio-group.css",
+      "contentType": "text/css",
+      "sourceFile": "css/radio-group.css"
+    }
+  ]
+}

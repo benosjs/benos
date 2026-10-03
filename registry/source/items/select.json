@@ -1,0 +1,25 @@
+{
+  "name": "select",
+  "title": "Select",
+  "description": "A styled select-only combobox with Zag collection and keyboard behavior.",
+  "type": "registry:component",
+  "dependencies": [
+    { "name": "@benosjs/primitives", "version": "^0.2.0" },
+    { "name": "@zag-js/select", "version": "1.44.0" }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "select.tsx",
+      "target": "components/select.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/select.tsx"
+    },
+    {
+      "path": "select.css",
+      "target": "css/select.css",
+      "contentType": "text/css",
+      "sourceFile": "css/select.css"
+    }
+  ]
+}

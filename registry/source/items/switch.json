@@ -1,0 +1,25 @@
+{
+  "name": "switch",
+  "title": "Switch",
+  "description": "An accessible on/off switch with the switch role and native form behavior.",
+  "type": "registry:component",
+  "dependencies": [
+    { "name": "@benosjs/primitives", "version": "^0.2.0" },
+    { "name": "@zag-js/switch", "version": "1.44.0" }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "switch.tsx",
+      "target": "components/switch.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/switch.tsx"
+    },
+    {
+      "path": "switch.css",
+      "target": "css/switch.css",
+      "contentType": "text/css",
+      "sourceFile": "css/switch.css"
+    }
+  ]
+}

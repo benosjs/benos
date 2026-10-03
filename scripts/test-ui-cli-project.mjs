@@ -15,6 +15,7 @@ import { pathToFileURL } from 'node:url'
 import { spawnSync } from 'node:child_process'
 import { runCommand } from '../packages/benos/src/process.mjs'
 import { createFixtureRegistry } from '../tests/fixtures/ui-registry/create.mjs'
+import { createLocalPrimitivesRegistry } from '../tests/fixtures/ui-registry/local-primitives-registry.mjs'
 
 const root = resolve(import.meta.dirname, '..')
 const manager = process.env.BENOS_PACKAGE_MANAGER
@@ -45,6 +46,14 @@ const batch1Names = [
   'card',
   'badge',
   'separator',
+]
+const batch2Names = [
+  'checkbox',
+  'switch',
+  'radio-group',
+  'select',
+  'tabs',
+  'accordion',
 ]
 
 try {
@@ -144,6 +153,70 @@ try {
     !batch1Names.every((name) => batchLock.items[name]?.files?.length === 2)
   ) {
     throw new Error('benos add did not record all batch 1 component files.')
+  }
+  await runCommand(
+    'pnpm',
+    [
+      '--filter',
+      '@benosjs/primitives',
+      'pack',
+      '--pack-destination',
+      temporary,
+    ],
+    { cwd: root },
+  )
+  const localRegistry = await createLocalPrimitivesRegistry(
+    join(temporary, 'benosjs-primitives-0.2.0.tgz'),
+  )
+  const previousRegistry = process.env.npm_config_registry
+  const previousNpmRegistry = process.env.NPM_CONFIG_REGISTRY
+  const previousYarnRegistry = process.env.YARN_NPM_REGISTRY_SERVER
+  process.env.npm_config_registry = localRegistry.url
+  process.env.NPM_CONFIG_REGISTRY = localRegistry.url
+  process.env.YARN_NPM_REGISTRY_SERVER = localRegistry.url
+  try {
+    await runCommand(
+      process.execPath,
+      [cli, 'add', ...batch2Names, '--yes', '--registry', batch1Registry],
+      { cwd: app },
+    )
+  } finally {
+    if (previousRegistry === undefined) delete process.env.npm_config_registry
+    else process.env.npm_config_registry = previousRegistry
+    if (previousNpmRegistry === undefined)
+      delete process.env.NPM_CONFIG_REGISTRY
+    else process.env.NPM_CONFIG_REGISTRY = previousNpmRegistry
+    if (previousYarnRegistry === undefined)
+      delete process.env.YARN_NPM_REGISTRY_SERVER
+    else process.env.YARN_NPM_REGISTRY_SERVER = previousYarnRegistry
+    await localRegistry.close()
+  }
+  for (const name of batch2Names) {
+    const component = join(app, 'src/components/ui', name + '.tsx')
+    const stylesheet = join(app, 'src/styles', name + '.css')
+    const componentSource = await readFile(component, 'utf8')
+    const exportName =
+      name === 'radio-group'
+        ? 'RadioGroup'
+        : name.charAt(0).toUpperCase() + name.slice(1)
+    if (!componentSource.includes('export function ' + exportName)) {
+      throw new Error(
+        'benos add did not copy the ' + name + ' component source.',
+      )
+    }
+    if (!(await readFile(stylesheet, 'utf8')).includes('.benos-')) {
+      throw new Error('benos add did not copy the ' + name + ' stylesheet.')
+    }
+  }
+  const allComponentsLock = JSON.parse(
+    await readFile(join(app, 'benos.lock.json'), 'utf8'),
+  )
+  if (
+    !batch2Names.every(
+      (name) => allComponentsLock.items[name]?.files?.length === 2,
+    )
+  ) {
+    throw new Error('benos add did not record all batch 2 component files.')
   }
   const dependencyProbe =
     manager === 'yarn'

@@ -1,6 +1,7 @@
 .benos-input {
   background: var(--benos-color-surface);
   border: 1px solid var(--benos-color-border);
+  box-sizing: border-box;
   border-radius: var(--benos-radius-md);
   color: var(--benos-color-text);
   display: block;
@@ -10,17 +11,17 @@
 }
 
 .benos-input--sm {
-  min-block-size: 2rem;
+  block-size: 2rem;
   padding-inline: var(--benos-space-2);
 }
 
 .benos-input--md {
-  min-block-size: 2.5rem;
+  block-size: 2.5rem;
   padding-inline: var(--benos-space-3);
 }
 
 .benos-input--lg {
-  min-block-size: 3rem;
+  block-size: 3rem;
   padding-inline: var(--benos-space-4);
 }
 

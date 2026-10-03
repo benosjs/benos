@@ -479,3 +479,27 @@ using five timed samples:
 All five ratios pass the 2× guard. There were no core or DOM source changes.
 Component coverage and the gallery instructions are recorded in
 [`docs/checkpoints/ui-U4-batch-1.md`](../docs/checkpoints/ui-U4-batch-1.md).
+
+## UI U4 batch 2 (2026-10-03)
+
+Production artifacts were rebuilt before measurement. Batch 2 adds only
+registry source and styles; the Select collection import is a declared Zag
+dependency and no component code enters core or DOM.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard used the median of seven runs, each with five
+timed samples:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.15 |        4.93 | 1.28× |
+| 20-deep computed chain write + read |       6.38 |        5.30 | 1.19× |
+| 200-effect fanout write             |       2.14 |        1.18 | 1.79× |
+| Dynamic dependency switch           |       3.55 |        2.47 | 1.44× |
+| Repeated equal write                |       0.84 |        0.51 | 1.65× |
+
+All five ratios pass the 2× production guard. See the [U4 batch 2 checkpoint](../docs/checkpoints/ui-U4-batch-2.md) for the six-component browser and consumer matrix.

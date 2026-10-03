@@ -173,3 +173,89 @@ test('WebKit full keyboard mode traverses native buttons and links', async ({
   await page.keyboard.press('Tab')
   await expect(page.locator('#keyboard-input')).toBeFocused()
 })
+
+test('gallery visual scales, logical field text, and dark danger contrast', async ({
+  page,
+}) => {
+  await page.goto('/examples/ui-gallery/')
+  await expect(page.locator('.mode-panel')).toHaveCount(3)
+  const scale = await page.evaluate(() => {
+    const height = (selector: string) => {
+      const element = document.querySelector<HTMLElement>(selector)
+      if (!element) throw new Error(`Missing gallery visual ${selector}`)
+      return element.getBoundingClientRect().height
+    }
+    const style = (selector: string) => {
+      const element = document.querySelector<HTMLElement>(selector)
+      if (!element) throw new Error(`Missing gallery visual ${selector}`)
+      return getComputedStyle(element)
+    }
+    return {
+      buttonSmall: height('.mode-panel[data-theme="light"] .benos-button--sm'),
+      buttonDefault: height(
+        '.mode-panel[data-theme="light"] .benos-button--md',
+      ),
+      buttonLarge: height('.mode-panel[data-theme="light"] .benos-button--lg'),
+      inputSmall: height('#small-input-light'),
+      inputDefault: height('#email-light'),
+      inputLarge: height('#large-input-light'),
+      secondary: style(
+        '.mode-panel[data-theme="light"] .benos-button--secondary',
+      ).backgroundColor,
+      outline: style('.mode-panel[data-theme="light"] .benos-button--outline')
+        .backgroundColor,
+      labelSize: Number.parseFloat(
+        style('.mode-panel[data-theme="light"] .benos-label').fontSize,
+      ),
+      headingSize: Number.parseFloat(
+        style('.mode-panel[data-theme="light"] h3').fontSize,
+      ),
+      invalidCursor: style('#disabled-light').cursor,
+      invalidTextareaCursor: style('#disabled-notes-light').cursor,
+      errorAlignment: style('#error-rtl').textAlign,
+      helperAlignment: style('#notes-error-rtl').textAlign,
+      darkDanger: (() => {
+        const danger = style(
+          '.mode-panel[data-theme="dark"] .benos-button--danger',
+        )
+        const channels = (color: string): [number, number, number] => {
+          const values = color.match(/[\d.]+/g)
+          if (!values || values.length < 3)
+            throw new Error(`Cannot parse ${color}`)
+          return [Number(values[0]), Number(values[1]), Number(values[2])]
+        }
+        const luminance = (color: string) => {
+          const [red, green, blue] = channels(color)
+          const linear = (channel: number) => {
+            const value = channel / 255
+            return value <= 0.04045
+              ? value / 12.92
+              : ((value + 0.055) / 1.055) ** 2.4
+          }
+          return (
+            0.2126 * linear(red) +
+            0.7152 * linear(green) +
+            0.0722 * linear(blue)
+          )
+        }
+        const background = luminance(danger.backgroundColor)
+        const foreground = luminance(danger.color)
+        return (
+          (Math.max(background, foreground) + 0.05) /
+          (Math.min(background, foreground) + 0.05)
+        )
+      })(),
+    }
+  })
+  expect(scale.buttonSmall).toBeLessThan(scale.buttonDefault)
+  expect(scale.buttonDefault).toBeLessThan(scale.buttonLarge)
+  expect(scale.inputSmall).toBeLessThan(scale.inputDefault)
+  expect(scale.inputDefault).toBeLessThan(scale.inputLarge)
+  expect(scale.secondary).not.toBe(scale.outline)
+  expect(scale.labelSize).toBeLessThan(scale.headingSize)
+  expect(scale.invalidCursor).toBe('not-allowed')
+  expect(scale.invalidTextareaCursor).toBe('not-allowed')
+  expect(scale.errorAlignment).toBe('start')
+  expect(scale.helperAlignment).toBe('start')
+  expect(scale.darkDanger).toBeGreaterThanOrEqual(4.5)
+})
