@@ -1,2 +1,4 @@
 registry/v1/*.json text eol=lf
 registry/v1/**/*.json text eol=lf
+registry/source/components/*.tsx text eol=lf
+registry/source/css/*.css text eol=lf
