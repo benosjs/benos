@@ -1,6 +1,6 @@
 # Benos app
 
-![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/benos-logo.png)
+![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/brand/benos-mark-navy.png)
 
 This app was created with `create-benos`. It uses the public Benos package
 roots, TypeScript/TSX, Vite, ESLint, Prettier, and Vitest. The starter includes

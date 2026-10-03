@@ -1,6 +1,6 @@
 # create-benos
 
-![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/benos-logo.png)
+![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/brand/benos-mark-navy.png)
 
 Scaffold a TypeScript/TSX Benos application with Vite, Vitest, ESLint,
 Prettier, a light/dark responsive layout, a run-once component counter, and a

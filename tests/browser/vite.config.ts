@@ -46,6 +46,24 @@ export default defineConfig({
           '../../packages/compiler/dist/js/index.development.js',
         ),
       },
+      {
+        find: '@zag-js/select',
+        replacement: alias(
+          '../../packages/primitives/node_modules/@zag-js/select/dist/index.mjs',
+        ),
+      },
+      {
+        find: '@zag-js/toast',
+        replacement: alias(
+          '../../packages/primitives/node_modules/@zag-js/toast/dist/index.mjs',
+        ),
+      },
+      {
+        find: '@zag-js/vanilla',
+        replacement: alias(
+          '../../packages/primitives/node_modules/@zag-js/vanilla/dist/index.mjs',
+        ),
+      },
     ],
   },
   server: {

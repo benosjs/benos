@@ -3,6 +3,7 @@ import {
   computed,
   createContext,
   createRoot,
+  createUniqueId,
   effect,
   getContext,
   onCleanup,
@@ -17,6 +18,28 @@ import {
 } from '../src/runtime.js'
 
 describe('ownership', () => {
+  it('creates unique IDs across calls and independent roots', () => {
+    const firstRoot = createRoot((dispose) => {
+      const ids = [createUniqueId(), createUniqueId()]
+      return { dispose, ids }
+    })
+    const secondRoot = createRoot((dispose) => {
+      const id = createUniqueId()
+      return { dispose, id }
+    })
+
+    expect(new Set([...firstRoot.ids, secondRoot.id]).size).toBe(3)
+    expect(firstRoot.ids.every((id) => /^b\d+$/.test(id))).toBe(true)
+    firstRoot.dispose()
+    secondRoot.dispose()
+  })
+
+  it('requires an active owner so future server IDs can follow the owner tree', () => {
+    expect(() => createUniqueId()).toThrow('active owner')
+    const id = createRoot(() => createUniqueId())
+    expect(id).toMatch(/^b\d+$/)
+  })
+
   it('disposes children in reverse creation order and local cleanups in reverse registration order', () => {
     const order: string[] = []
     const dispose = createRoot((disposeRoot) => {

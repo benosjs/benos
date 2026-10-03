@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/benosjs/benos/main/registry/v1/lock.schema.json",
+  "title": "Benos UI installed component lock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "items"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "items": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "version",
+          "checksum",
+          "baseUrl",
+          "title",
+          "description",
+          "dependencies",
+          "registryDependencies",
+          "files"
+        ],
+        "properties": {
+          "version": { "type": "string" },
+          "checksum": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+          "baseUrl": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "^(?:https://|file://)"
+          },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "dependencies": {
+            "type": "array",
+            "items": { "$ref": "common.schema.json#/$defs/dependency" }
+          },
+          "registryDependencies": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["path", "target", "checksum"],
+              "properties": {
+                "path": { "type": "string" },
+                "target": { "type": "string" },
+                "checksum": {
+                  "type": "string",
+                  "pattern": "^sha256:[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

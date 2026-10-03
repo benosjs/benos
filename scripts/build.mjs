@@ -1,7 +1,14 @@
 import { resolve } from 'node:path'
 import { build } from 'vite'
 
-const packages = ['core', 'dom', 'compiler', 'vite', 'eslint-plugin']
+const packages = [
+  'core',
+  'dom',
+  'compiler',
+  'vite',
+  'eslint-plugin',
+  'primitives',
+]
 
 for (const name of packages) {
   const root = resolve('packages', name)
@@ -10,7 +17,21 @@ for (const name of packages) {
       ? ['index', 'internal']
       : name === 'dom'
         ? ['index', 'internal', 'jsx-runtime', 'jsx-dev-runtime']
-        : ['index']
+        : name === 'primitives'
+          ? [
+              'accordion',
+              'checkbox',
+              'dialog',
+              'menu',
+              'popover',
+              'radio-group',
+              'select',
+              'switch',
+              'tabs',
+              'toast',
+              'tooltip',
+            ]
+          : ['index']
 
   for (const mode of ['development', 'production']) {
     for (const entry of entries) {
@@ -22,7 +43,7 @@ for (const name of packages) {
         build: {
           target: 'es2022',
           outDir: 'dist/js',
-          emptyOutDir: mode === 'development' && entry === 'index',
+          emptyOutDir: mode === 'development' && entry === entries[0],
           minify: mode === 'production' ? 'esbuild' : false,
           sourcemap: mode === 'development',
           lib: {
@@ -33,6 +54,7 @@ for (const name of packages) {
           rollupOptions: {
             external: (id) =>
               id.startsWith('@benosjs/') ||
+              id.startsWith('@zag-js/') ||
               id.startsWith('@babel/') ||
               id.startsWith('node:'),
           },

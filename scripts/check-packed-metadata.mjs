@@ -15,6 +15,8 @@ const publishable = [
   'compiler',
   'vite',
   'eslint-plugin',
+  'primitives',
+  'benos',
   'create-benos',
 ]
 

@@ -1,5 +1,5 @@
 {
-  "name": "benos",
+  "name": "benos-monorepo",
   "version": "0.1.2",
   "description": "A TypeScript-first fine-grained frontend framework.",
   "repository": {
@@ -36,12 +36,17 @@
     "check:packed": "node scripts/check-packed-metadata.mjs",
     "check:engines": "node scripts/check-engines.mjs",
     "audit:template": "node scripts/audit-template.mjs",
+    "registry:build": "node scripts/build-ui-registry.mjs",
+    "registry:check": "node scripts/build-ui-registry.mjs --check",
+    "test:ui-cli:matrix": "node scripts/test-ui-cli-project.mjs",
     "check:jsx-types": "node scripts/generate-jsx-types.mjs --check",
     "check:doc-examples": "node scripts/check-doc-examples.mjs",
     "size": "node scripts/check-size.mjs",
     "test:browser": "playwright test"
   },
   "devDependencies": {
+    "@benosjs/primitives": "workspace:*",
+    "axe-core": "4.13.0",
     "@babel/core": "^8.0.6",
     "@babel/generator": "^8.0.6",
     "@babel/parser": "^8.0.6",

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { mountApp } from './main'
+import { mountApp } from '@/main'
 
 describe('Benos starter', () => {
   beforeEach(() => {

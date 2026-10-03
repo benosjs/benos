@@ -62,3 +62,7 @@ The stream respects writer backpressure; resolved fragments are buffered within 
 ## Hard-to-reverse decisions
 
 Marker grammar and versioning, payload format and opt-in policy, mismatch recovery scope, event replay policy, effect suppression on the server, and the **strict versus CSP-nonce patch delivery modes and their reveal timing** are protocol or user-visible choices. They are hard to reverse and must be frozen with paired server/client fixtures and browser tests before any SSR release. The Phase 1 graph primitives remain synchronous and DOM-free.
+
+## Deterministic IDs
+
+The public `createUniqueId(): string` signature takes no arguments and requires an active owner. Its current client-only behavior uses one monotonic counter per loaded core instance, so independent roots on the same page do not collide. Future SSR must preserve this API while deriving IDs from a request/root namespace, deterministic owner-tree path, and per-owner call ordinal. Hydration must recreate the same owner path and ordinal sequence. The server implementation must not use a process-global counter, randomness, timestamps, or DOM state; request roots must remain isolated. This future derivation policy is an implementation change behind the existing function signature and needs paired SSR/hydration fixtures before SSR ships.

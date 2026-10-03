@@ -1,6 +1,6 @@
 # @benosjs/dom
 
-![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/benos-logo.png)
+![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/brand/benos-mark-navy.png)
 
 The fine-grained DOM renderer and component runtime for Benos. It provides
 `render`, JSX control flow, props helpers, portals, error boundaries, refs,

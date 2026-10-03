@@ -98,6 +98,17 @@ describe('create-benos packed scaffold', () => {
       expect(generated.engines?.node).toBe('^22.18.0 || ^24.11.0 || >=26.0.0')
       const starterSource = await readFile(join(app, 'src/main.tsx'), 'utf8')
       const starterCss = await readFile(join(app, 'src/style.css'), 'utf8')
+      const viteConfig = await readFile(join(app, 'vite.config.ts'), 'utf8')
+      const tsconfig = JSON.parse(
+        await readFile(join(app, 'tsconfig.json'), 'utf8'),
+      ) as {
+        compilerOptions?: { baseUrl?: string; paths?: Record<string, string[]> }
+      }
+      expect(viteConfig).toContain('alias:')
+      expect(viteConfig).toContain(
+        "'@': fileURLToPath(new URL('./src', import.meta.url))",
+      )
+      expect(tsconfig.compilerOptions?.paths?.['@/*']).toEqual(['src/*'])
       expect(starterSource.split(/\r?\n/).length).toBeLessThan(150)
       expect(starterCss.split(/\r?\n/).length).toBeLessThan(100)
       expect(await readFile(join(app, 'index.html'), 'utf8')).toContain(

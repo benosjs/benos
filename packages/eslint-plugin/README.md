@@ -1,6 +1,6 @@
 # @benosjs/eslint-plugin
 
-![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/benos-logo.png)
+![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/brand/benos-mark-navy.png)
 
 ESLint rules for Benos component conventions. The v0.1 plugin includes the
 `no-props-destructuring` rule, which catches snapshots of getter-backed props.

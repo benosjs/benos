@@ -5,6 +5,7 @@
     { "path": "./packages/dom" },
     { "path": "./packages/compiler" },
     { "path": "./packages/vite" },
-    { "path": "./packages/eslint-plugin" }
+    { "path": "./packages/eslint-plugin" },
+    { "path": "./packages/primitives" }
   ]
 }

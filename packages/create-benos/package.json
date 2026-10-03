@@ -27,7 +27,7 @@
     "template"
   ],
   "scripts": {
-    "test": "node --test"
+    "test": "node --test tests/cli.test.mjs"
   },
   "bugs": {
     "url": "https://github.com/benosjs/benos/issues"

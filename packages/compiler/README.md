@@ -1,6 +1,6 @@
 # @benosjs/compiler
 
-![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/benos-logo.png)
+![Benos logo](https://raw.githubusercontent.com/benosjs/benos/main/assets/brand/benos-mark-navy.png)
 
 The Babel-based TypeScript/JSX transform for Benos. It emits inert template and
 component descriptors, source maps, development diagnostics, and the compact

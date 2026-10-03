@@ -808,7 +808,7 @@ function mountComponent(
     else {
       let output!: Child
       runWithOwner(owner, () => {
-        output = descriptor.component(descriptor.props) as Child
+        output = untrack(() => descriptor.component(descriptor.props) as Child)
       })
       componentRange = runWithOwner(owner, () =>
         mountValue(output, parent, before, owner),

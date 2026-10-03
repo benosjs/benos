@@ -6,5 +6,8 @@
     "composite": false,
     "types": ["node"]
   },
-  "include": ["../packages/dom/tests/types.test.ts"]
+  "include": [
+    "../packages/dom/tests/types.test.ts",
+    "../packages/primitives/tests/types.compile.ts"
+  ]
 }

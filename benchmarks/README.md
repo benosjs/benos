@@ -398,3 +398,59 @@ with its median-of-seven protocol (each run has five timed samples):
 
 All kernel guard ratios remain below 2× Preact. The bundle sizes remain within
 their existing budgets.
+
+## UI U1 amendment / U2 Zag contract checkpoint (2026-10-02)
+
+Rebuilt production output with Node 22.18.0 before measuring. The U1 alias and
+workspace-name changes do not add runtime bytes. Sizes below are from the fresh
+build, not the earlier stale `dist` output. U2 stopped before adding primitive
+runtime code because Zag requires a stable machine `id` and Benos has no public
+ID-generation API; details are in `docs/checkpoints/ui-U2.md`.
+
+| Artifact                         |         Size |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,001 bytes |  4,096 bytes |  95 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,151 bytes | 10,240 bytes |  89 bytes |
+
+The production kernel guard used the median of seven runs, each with five timed
+samples:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       7.99 |        6.33 | 1.29× |
+| 20-deep computed chain write + read |      10.67 |        6.63 | 1.20× |
+| 200-effect fanout write             |       2.47 |        1.83 | 1.71× |
+| Dynamic dependency switch           |       4.77 |        3.35 | 1.47× |
+| Repeated equal write                |       1.00 |        0.61 | 1.60× |
+
+Every kernel ratio remained below the 2× Preact guard. These timings are a
+kernel checkpoint only; the U2 prototype did not change the runtime. Ratios
+are the median of the seven per-run ratios, while the two displayed time
+columns are separately medianed; their rounded values therefore need not divide
+to the displayed ratio.
+
+## UI U2 completion (2026-10-03)
+
+Built production output with Node 22.18.0 before measuring. `createUniqueId()`
+adds 50 gzip bytes to core and 47 bytes to core+DOM versus the fresh U1 build;
+both budgets remain unchanged. ID creation runs only during primitive setup,
+not during signal, computed, or effect updates.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,198 bytes | 10,240 bytes |  42 bytes |
+
+The production kernel guard was rerun with the median of seven runs, each run
+using five timed samples:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.07 |        4.82 | 1.27× |
+| 20-deep computed chain write + read |       6.26 |        5.24 | 1.20× |
+| 200-effect fanout write             |       2.03 |        1.16 | 1.73× |
+| Dynamic dependency switch           |       3.46 |        2.46 | 1.41× |
+| Repeated equal write                |       0.82 |        0.50 | 1.62× |
+
+All five ratios pass the 2× guard. The U2 adapter has no effect on the existing
+kernel hot paths.

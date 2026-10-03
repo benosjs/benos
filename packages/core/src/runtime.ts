@@ -144,6 +144,7 @@ let setupDepth = 0
 let flushing = false
 let writeVersion = 0
 let nextNodeId = 1
+let nextUniqueId = 0
 let flushVersion = 0
 const development = process.env.NODE_ENV !== 'production'
 const debugState = development
@@ -388,6 +389,12 @@ export function createRoot<T>(fn: (dispose: () => void) => T): T {
   }
   if (failed) throw thrown
   return result
+}
+
+export function createUniqueId(): string {
+  if (!currentOwner || currentOwner.disposed || currentOwner.disposing)
+    throw new Error('createUniqueId requires an active owner')
+  return `b${nextUniqueId++}`
 }
 
 export function onCleanup(fn: () => void): void {
