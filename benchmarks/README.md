@@ -503,3 +503,32 @@ timed samples:
 | Repeated equal write                |       0.84 |        0.51 | 1.65× |
 
 All five ratios pass the 2× production guard. See the [U4 batch 2 checkpoint](../docs/checkpoints/ui-U4-batch-2.md) for the six-component browser and consumer matrix.
+
+## UI U4 batch 2 review fixes (2026-10-04)
+
+Rebuilt production artifacts locally with Node v24.8.0 before measuring. No
+core or DOM runtime source changed in this review; the Tab direction fix is in
+the UI registry component and the checkbox change is in registry CSS. The
+prior Node 22.18.0 checkpoint build measured 4,051 / 10,200 bytes; this local
+rebuild measures two fewer bytes for both artifacts. Both measurements remain
+under their unchanged budgets.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,049 bytes |  4,096 bytes |  47 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,198 bytes | 10,240 bytes |  42 bytes |
+
+The production benchmark guard used the median of seven runs, each with five
+timed samples. These medians were measured after other local verification jobs
+finished:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       5.97 |        4.72 | 1.27× |
+| 20-deep computed chain write + read |       6.21 |        4.99 | 1.26× |
+| 200-effect fanout write             |       2.01 |        1.16 | 1.74× |
+| Dynamic dependency switch           |       3.63 |        2.35 | 1.54× |
+| Repeated equal write                |       0.69 |        0.48 | 1.44× |
+
+All ratios pass the 2× production guard. No kernel benchmark workload or
+production runtime path changed in the review.

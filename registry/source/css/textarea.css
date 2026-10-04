@@ -5,6 +5,7 @@
   color: var(--benos-color-text);
   display: block;
   font: inherit;
+  font-size: var(--benos-text-xs, 0.75rem);
   inline-size: 100%;
   min-block-size: 6rem;
   min-inline-size: 0;

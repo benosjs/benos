@@ -3,6 +3,7 @@
   color: var(--benos-color-text);
   cursor: pointer;
   display: inline-flex;
+  font-size: var(--benos-text-xs, 0.75rem);
   gap: var(--benos-space-2);
   line-height: var(--benos-line-height-body);
   position: relative;

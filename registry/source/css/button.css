@@ -5,6 +5,7 @@
   cursor: pointer;
   display: inline-flex;
   font: inherit;
+  font-size: var(--benos-text-xs, 0.75rem);
   font-weight: 650;
   gap: var(--benos-space-2);
   justify-content: center;

@@ -80,13 +80,19 @@ export function Tabs(props: TabsProps): JSX.Element {
       {...root}
       {...native}
       id={local.id}
+      dir={local.dir}
       class={['benos-tabs', local.class].filter(Boolean).join(' ')}
       ref={ref}
     >
       <div class="benos-tabs__label" id={labelId}>
         {local.label}
       </div>
-      <div class="benos-tabs__list" aria-labelledby={labelId} {...api().getListProps()}>
+      <div
+        class="benos-tabs__list"
+        aria-labelledby={labelId}
+        {...api().getListProps()}
+        dir={local.dir}
+      >
         {local.items.map((item) => (
           <button
             class="benos-tabs__trigger"
@@ -95,13 +101,18 @@ export function Tabs(props: TabsProps): JSX.Element {
               value: item.value,
               disabled: item.disabled,
             })}
+            dir={local.dir}
           >
             {item.label}
           </button>
         ))}
       </div>
       {local.items.map((item) => (
-        <div class="benos-tabs__panel" {...api().getContentProps({ value: item.value })}>
+        <div
+          class="benos-tabs__panel"
+          {...api().getContentProps({ value: item.value })}
+          dir={local.dir}
+        >
           {item.content}
         </div>
       ))}

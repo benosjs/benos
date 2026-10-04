@@ -109,9 +109,7 @@ export function Select(props: SelectProps): JSX.Element {
       <div class="benos-select__control" {...api().getControlProps()}>
         <button class="benos-select__trigger" type="button" {...api().getTriggerProps()}>
           <span {...api().getValueTextProps()}>{api().valueAsString || local.placeholder}</span>
-          <span aria-hidden="true" {...api().getIndicatorProps()}>
-            ▾
-          </span>
+          <span aria-hidden="true" class="benos-select__chevron" {...api().getIndicatorProps()} />
         </button>
         <button
           class="benos-select__clear"

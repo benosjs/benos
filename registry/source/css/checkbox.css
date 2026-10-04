@@ -3,6 +3,7 @@
   color: var(--benos-color-text);
   cursor: pointer;
   display: inline-flex;
+  font-size: var(--benos-text-xs, 0.75rem);
   gap: var(--benos-space-2);
   line-height: var(--benos-line-height-body);
   position: relative;
@@ -41,6 +42,7 @@
 }
 
 .benos-checkbox__control > span {
+  color: var(--benos-color-on-brand);
   font-size: 0.8rem;
   line-height: 1;
   opacity: 0;

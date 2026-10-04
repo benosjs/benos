@@ -12,5 +12,6 @@
 }
 
 .benos-card--raised {
+  background: var(--benos-color-surface-raised);
   box-shadow: var(--benos-shadow-md);
 }

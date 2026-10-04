@@ -19,8 +19,8 @@
       "path": "card.css",
       "target": "css/card.css",
       "contentType": "text/css",
-      "content": ".benos-card {\n  background: var(--benos-color-surface);\n  border: 1px solid var(--benos-color-border);\n  border-radius: var(--benos-radius-lg);\n  color: var(--benos-color-text);\n  padding: var(--benos-space-5);\n}\n\n.benos-card--outlined {\n  background: transparent;\n  border-width: 2px;\n}\n\n.benos-card--raised {\n  box-shadow: var(--benos-shadow-md);\n}\n",
-      "checksum": "sha256:52bf400a51f24d19ae2a424e0060067cbecff403daf6d5636f296d09f34aae98"
+      "content": ".benos-card {\n  background: var(--benos-color-surface);\n  border: 1px solid var(--benos-color-border);\n  border-radius: var(--benos-radius-lg);\n  color: var(--benos-color-text);\n  padding: var(--benos-space-5);\n}\n\n.benos-card--outlined {\n  background: transparent;\n  border-width: 2px;\n}\n\n.benos-card--raised {\n  background: var(--benos-color-surface-raised);\n  box-shadow: var(--benos-shadow-md);\n}\n",
+      "checksum": "sha256:a5d820b66498491bc2d2759a3f5556f71472d4e4e5571a1ca20991a2d7512a01"
     }
   ]
 }

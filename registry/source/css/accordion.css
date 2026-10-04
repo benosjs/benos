@@ -1,6 +1,7 @@
 .benos-accordion {
   border-block-start: 1px solid var(--benos-color-border);
   color: var(--benos-color-text);
+  font-size: var(--benos-text-xs, 0.75rem);
 }
 
 .benos-accordion__item {
@@ -20,6 +21,7 @@
   cursor: pointer;
   display: flex;
   font: inherit;
+  font-weight: 600;
   inline-size: 100%;
   justify-content: space-between;
   min-block-size: 3rem;
@@ -41,10 +43,15 @@
 
 .benos-accordion__indicator {
   color: var(--benos-color-brand);
-  font-size: 1.25em;
+  block-size: 1rem;
+  display: inline-block;
+  flex: none;
+  inline-size: 1rem;
+  position: relative;
 }
 
 .benos-accordion__content {
+  color: var(--benos-color-text-muted);
   line-height: var(--benos-line-height-body);
   padding-block: 0 var(--benos-space-4);
   padding-inline: var(--benos-space-2);
@@ -52,4 +59,32 @@
 
 .benos-accordion__content[data-state='closed'] {
   display: none;
+}
+
+.benos-accordion__indicator::before,
+.benos-accordion__indicator::after {
+  background: currentColor;
+  border-radius: var(--benos-radius-pill);
+  content: '';
+  inline-size: 0.7rem;
+  block-size: 1.5px;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.benos-accordion__indicator::after {
+  transition: transform var(--benos-motion-fast) var(--benos-ease-standard);
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.benos-accordion__indicator[data-state='open']::after {
+  transform: translate(-50%, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .benos-accordion__indicator::after {
+    transition: none;
+  }
 }

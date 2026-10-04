@@ -19,7 +19,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:090381faeca07cec94abbd4c86a12898c3a96b54fcd5609de21499d95dfc7723"
+      "checksum": "sha256:543700254f667e290a54484242da4d9afea5d781151a510ef86ab6b5fd3de2e0"
     },
     {
       "name": "badge",
@@ -39,7 +39,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/button.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:89087264a113dc081806483c086e11dabe35fcd5c300df553a5ccd8f1443c4ad"
+      "checksum": "sha256:01b1c1fdff6458aa5da9c18eb8a9f9be464d9cc0c1abec102e823b3de2b75e15"
     },
     {
       "name": "card",
@@ -49,7 +49,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/card.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:d29b7a04d044709e42f2ebc36b4eaf14afd63d28b13c7dffd040141c403a3a11"
+      "checksum": "sha256:a1ba739c0a1c36abed5820dfcfe4a15d8af324ffd5dedec78af39412413afab8"
     },
     {
       "name": "checkbox",
@@ -68,7 +68,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:d3b8684a76e1e7de98c25f450bf7009e91ef52184a4620bda4f4771a6f6f6f56"
+      "checksum": "sha256:f4cea878d42c22331e2a68ca361184ed7d93230940720c322ac6e1b40c2857c3"
     },
     {
       "name": "input",
@@ -78,7 +78,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/input.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:b2fc8a75f7319596f91678761f4b3d00d95fab39ce7dd91452729a8ff071ae1e"
+      "checksum": "sha256:0ad8d440afe266b5b38fa3df63b8a46e07bab1ce068d783da630eb7ab798fa0e"
     },
     {
       "name": "label",
@@ -107,7 +107,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:4abd63c4e7c0573f7e4e41012e3310696d9864048714099aef04696d25d62d6b"
+      "checksum": "sha256:e55c69b5ef61a1f8073c9eff9627970204eeeb56e366aac4661e5af3b303a4a0"
     },
     {
       "name": "select",
@@ -126,7 +126,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:43390cf6d76d7805ea14b05271a5c6c1f114d0c582dc205cce3e816a4ee420d8"
+      "checksum": "sha256:5b518ebd798f57b32659c73bf638ee6833d4420270c7850a6b050596c16e3198"
     },
     {
       "name": "separator",
@@ -155,7 +155,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:db7b45541588472569105ccfcd345ae2d780ce13d20535b7464857a92eabd36f"
+      "checksum": "sha256:52feaab5830d529115427396ad62d0932701431111a7b35349a02e600ac7ee15"
     },
     {
       "name": "tabs",
@@ -174,7 +174,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:a4131b2bd8b6aa00d0153fb0d58378451f24831db1694ad7bc43a060c9ffc935"
+      "checksum": "sha256:a776d2a0a03621530aedb992da8f3a12df938df697462bce75b07c36d7e4c276"
     },
     {
       "name": "textarea",
@@ -184,7 +184,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/textarea.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:98f8388f0b7eaac364d42469e152421e38b440b14f7c4090751773af1129faae"
+      "checksum": "sha256:dd8cc16b56646cb586895bb5cf77be7343be2ec097005c0f7331a19658de8958"
     }
   ]
 }

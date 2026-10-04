@@ -104,9 +104,7 @@ export function Accordion(props: AccordionProps): JSX.Element {
                 class="benos-accordion__indicator"
                 aria-hidden="true"
                 {...api().getItemIndicatorProps({ value: item.value })}
-              >
-                +
-              </span>
+              />
             </button>
           </h3>
           <div

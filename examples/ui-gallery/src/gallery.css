@@ -172,7 +172,7 @@ h1 {
 }
 
 .button-row .benos-button {
-  font-size: 11px;
+  font-size: var(--benos-text-xs);
 }
 
 .field-grid,
@@ -194,9 +194,11 @@ h1 {
   padding: 12px;
 }
 
-.primitive-grid > .benos-select {
+.primitive-grid > .benos-radio-group,
+.primitive-grid > .benos-select,
+.primitive-grid > .benos-tabs,
+.primitive-grid > .benos-accordion {
   grid-column: 1 / -1;
-  margin-block-start: 128px;
 }
 
 .field {
@@ -207,7 +209,7 @@ h1 {
 
 .field .benos-input,
 .field .benos-textarea {
-  font-size: 12px;
+  font-size: var(--benos-text-xs);
 }
 
 .field-wide {

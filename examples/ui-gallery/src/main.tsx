@@ -47,8 +47,9 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
           height="34"
         />
       </header>
-      <p class="mode-hint">
-        Hover controls or press Tab to preview focus styles.
+      <p class="mode-hint" dir={rtl ? 'ltr' : undefined}>
+        Click Select to view options; hover or press Tab to preview focus
+        styles.
       </p>
       {rtl && (
         <p class="rtl-sample" lang="ar">
@@ -212,7 +213,6 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
             id={'select-' + props.mode}
             label={rtl ? 'المنطقة' : 'Region'}
             defaultValue={['north']}
-            defaultOpen
             positioning={{ sameWidth: true }}
             items={[
               { value: 'north', label: rtl ? 'الشمال' : 'North' },

@@ -1,51 +1,62 @@
 .benos-select {
   color: var(--benos-color-text);
   display: grid;
+  font-size: var(--benos-text-xs, 0.75rem);
   gap: var(--benos-space-2);
   position: relative;
 }
 
 .benos-select__label {
-  font-size: var(--benos-text-sm);
+  font-size: var(--benos-text-xs, 0.75rem);
   font-weight: 600;
 }
 
 .benos-select__control {
+  align-items: center;
+  background: var(--benos-color-surface);
+  border: 1px solid var(--benos-color-border);
+  border-radius: var(--benos-radius-md);
   display: flex;
-  gap: var(--benos-space-1);
+  min-block-size: 2.5rem;
 }
 
 .benos-select__trigger,
 .benos-select__clear {
   align-items: center;
-  background: var(--benos-color-surface);
-  border: 1px solid var(--benos-color-border);
-  border-radius: var(--benos-radius-md);
+  background: transparent;
+  border: 0;
   color: var(--benos-color-text);
   cursor: pointer;
   display: inline-flex;
   font: inherit;
   gap: var(--benos-space-2);
-  justify-content: space-between;
   min-block-size: 2.5rem;
   padding-block: var(--benos-space-2);
-  padding-inline: var(--benos-space-3);
 }
 
 .benos-select__trigger {
   flex: 1;
+  justify-content: space-between;
+  min-inline-size: 0;
+  padding-inline: var(--benos-space-3);
   text-align: start;
 }
 
 .benos-select__clear {
   justify-content: center;
   min-inline-size: 2.5rem;
+  padding-inline: var(--benos-space-2);
+  border-inline-start: 1px solid var(--benos-color-border);
+}
+
+.benos-select__control:focus-within {
+  outline: 3px solid var(--benos-color-focus);
+  outline-offset: 2px;
 }
 
 .benos-select__trigger:focus-visible,
 .benos-select__clear:focus-visible {
-  outline: 3px solid var(--benos-color-focus);
-  outline-offset: 2px;
+  outline: none;
 }
 
 .benos-select[data-invalid='true'] .benos-select__trigger {
@@ -56,6 +67,14 @@
 .benos-select[data-disabled] .benos-select__clear {
   cursor: not-allowed;
   opacity: 0.58;
+}
+
+.benos-select__chevron {
+  background: currentColor;
+  block-size: 0.5rem;
+  clip-path: polygon(0 0, 50% 62%, 100% 0, 100% 34%, 50% 100%, 0 34%);
+  flex: none;
+  inline-size: 0.75rem;
 }
 
 .benos-select__positioner {
@@ -74,6 +93,7 @@
   padding: var(--benos-space-1);
 }
 
+.benos-select__content[hidden],
 .benos-select__content[data-state='closed'] {
   display: none;
 }
