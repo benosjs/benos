@@ -1,7 +1,7 @@
 # U5 checkpoint — `benos diff` and `benos update`
 
-**Status:** Implementation and local verification complete. The 12-cell GitHub
-Actions consumer matrix is pending for the pushed `ui-system` commit.
+**Status:** Complete. Local verification and the GitHub Actions run passed for
+all twelve OS/package-manager combinations. CI: [run 37304039785](https://github.com/benosjs/benos/actions/runs/37304039785).
 
 ## Coverage
 
@@ -58,12 +58,15 @@ No runtime source in core or DOM changed for U5.
 
 ## CI consumer matrix
 
-The CI workflow runs the packed fresh-project update test for all twelve
-combinations below. Results and the workflow URL will be filled in after the
-push completes.
+The CI workflow ran the packed fresh-project update test for all twelve
+combinations below.
 
-| Operating system | npm     | pnpm    | Yarn    | Bun     |
-| ---------------- | ------- | ------- | ------- | ------- |
-| Ubuntu           | Pending | Pending | Pending | Pending |
-| Windows          | Pending | Pending | Pending | Pending |
-| macOS            | Pending | Pending | Pending | Pending |
+| Operating system | npm  | pnpm | Yarn | Bun  |
+| ---------------- | ---- | ---- | ---- | ---- |
+| Ubuntu           | Pass | Pass | Pass | Pass |
+| Windows          | Pass | Pass | Pass | Pass |
+| macOS            | Pass | Pass | Pass | Pass |
+
+The workflow also passed its main verify job and create-benos checks on all
+three operating systems. No platform-specific fixes were needed for U5; the
+matrix exercised CRLF preservation during a real fresh-project update.
