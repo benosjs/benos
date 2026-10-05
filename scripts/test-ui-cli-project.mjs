@@ -1,5 +1,7 @@
 /* global console */
 
+import { createHash } from 'node:crypto'
+import { Buffer } from 'node:buffer'
 import {
   copyFile,
   mkdir,
@@ -11,7 +13,7 @@ import {
 import { tmpdir } from 'node:os'
 import process from 'node:process'
 import { join, resolve } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { pathToFileURL, URL } from 'node:url'
 import { spawnSync } from 'node:child_process'
 import { runCommand } from '../packages/benos/src/process.mjs'
 import { createFixtureRegistry } from '../tests/fixtures/ui-registry/create.mjs'
@@ -57,6 +59,45 @@ const batch2Names = [
 ]
 const batch3Names = ['dialog', 'popover', 'tooltip', 'dropdown-menu', 'toast']
 const batch4Names = ['sortable-table']
+
+function digest(bytes) {
+  return `sha256:${createHash('sha256').update(bytes).digest('hex')}`
+}
+
+async function createUpdatedFixtureRegistry(sourceUrl, directory) {
+  const sourceIndex = JSON.parse(await readFile(new URL(sourceUrl), 'utf8'))
+  const itemsDirectory = join(directory, 'items')
+  await mkdir(itemsDirectory, { recursive: true })
+  const entries = []
+  for (const sourceEntry of sourceIndex.items) {
+    const item = JSON.parse(await readFile(new URL(sourceEntry.url), 'utf8'))
+    item.release = '0.2.1'
+    if (item.name === 'sample') {
+      item.files = item.files.map((file) => ({
+        ...file,
+        content: `${file.content}\nexport const registryUpdateMarker = '0.2.1'\n`,
+      }))
+    }
+    item.files = item.files.map((file) => ({
+      ...file,
+      checksum: digest(Buffer.from(file.content, 'utf8')),
+    }))
+    const itemBytes = Buffer.from(`${JSON.stringify(item, null, 2)}\n`)
+    const itemPath = join(itemsDirectory, `${item.name}.json`)
+    await writeFile(itemPath, itemBytes)
+    entries.push({
+      ...sourceEntry,
+      url: pathToFileURL(itemPath).href,
+      checksum: digest(itemBytes),
+    })
+  }
+  const indexPath = join(directory, 'index.json')
+  await writeFile(
+    indexPath,
+    `${JSON.stringify({ schemaVersion: 1, release: '0.2.1', items: entries }, null, 2)}\n`,
+  )
+  return pathToFileURL(indexPath).href
+}
 
 try {
   await mkdir(join(batch1RegistryDirectory, 'items'), { recursive: true })
@@ -128,6 +169,44 @@ try {
     lock.items.tokens?.files?.[0]?.target !== 'src/styles/tokens.css'
   ) {
     throw new Error('benos add did not record registry and npm dependencies.')
+  }
+  const originalSample = await readFile(samplePath, 'utf8')
+  await writeFile(
+    samplePath,
+    `// local matrix edit\r\n${originalSample.replaceAll('\n', '\r\n')}`,
+  )
+  const updateRegistry = await createUpdatedFixtureRegistry(
+    registry,
+    join(temporary, 'registry-update'),
+  )
+  const diff = spawnSync(
+    process.execPath,
+    [cli, 'diff', 'sample', '--registry', updateRegistry],
+    { cwd: app, encoding: 'utf8' },
+  )
+  if (diff.status !== 0 || !diff.stdout?.includes('both changed')) {
+    throw new Error(
+      `benos diff did not report both sides changed: ${diff.stderr ?? diff.stdout}`,
+    )
+  }
+  await runCommand(
+    process.execPath,
+    [cli, 'update', 'sample', '--yes', '--registry', updateRegistry],
+    { cwd: app },
+  )
+  const mergedSample = await readFile(samplePath, 'utf8')
+  if (
+    !mergedSample.includes('// local matrix edit') ||
+    !mergedSample.includes("registryUpdateMarker = '0.2.1'") ||
+    /[^\r]\n/.test(mergedSample)
+  ) {
+    throw new Error('benos update did not merge safely and preserve CRLF.')
+  }
+  const updatedLock = JSON.parse(
+    await readFile(join(app, 'benos.lock.json'), 'utf8'),
+  )
+  if (updatedLock.items.sample.version !== '0.2.1') {
+    throw new Error('benos update did not advance the component lock entry.')
   }
   await runCommand(
     process.execPath,

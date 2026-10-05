@@ -9,6 +9,8 @@ static registry, and lists available or installed items.
 npx benos init
 npx benos add button
 npx benos list
+npx benos diff button
+npx benos update button
 ```
 
 `init` checks the existing Vite and TypeScript `@/` aliases before writing and

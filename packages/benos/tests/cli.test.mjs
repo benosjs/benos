@@ -7,7 +7,7 @@ import { parsePackageManager } from '../src/process.mjs'
 
 const cli = fileURLToPath(new URL('../src/index.mjs', import.meta.url))
 
-test('benos help documents only the implemented U3 commands', () => {
+test('benos help documents all supported UI commands', () => {
   const result = spawnSync(process.execPath, [cli, '--help'], {
     encoding: 'utf8',
   })
@@ -15,7 +15,8 @@ test('benos help documents only the implemented U3 commands', () => {
   assert.match(result.stdout, /init\s+Initialize/)
   assert.match(result.stdout, /add <name\.\.\./)
   assert.match(result.stdout, /list\s+List/)
-  assert.doesNotMatch(result.stdout, /diff|update/)
+  assert.match(result.stdout, /diff \[name\]/)
+  assert.match(result.stdout, /update \[name\]/)
 })
 
 test('package manager user-agent parsing recognizes the supported managers', () => {

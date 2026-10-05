@@ -2,8 +2,10 @@
 /* global console, process */
 
 import { addItems } from './add.mjs'
+import { diffItems } from './diff.mjs'
 import { initProject } from './init.mjs'
 import { listItems } from './list.mjs'
+import { updateItems } from './update.mjs'
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
@@ -14,12 +16,17 @@ Commands:
   add <name...>        Copy component source from the configured registry
   list                 List registry components
   list --installed     List locally installed components
+  diff [name]          Compare installed files with their pinned base and registry
+  update [name]        Safely merge newer registry source into installed files
 
 Options:
-  --yes                         Accept the displayed non-destructive plan
+  --yes                         Accept the displayed update plan
   --registry <url-or-file>      Override the registry index for this command
   --package-manager <manager>   Select npm, pnpm, yarn, or bun for dependency installs
   --help                        Show this message
+
+With no name, diff and update inspect all installed components. Updates preserve
+local changes, and conflicting components are written to .benos/conflicts.
 
 Run inside a Benos application. 'benos init' never edits an existing Vite config.`
 
@@ -59,7 +66,8 @@ function parseOptions(command, args) {
       continue
     }
     if (arg.startsWith('-')) throw new Error(`Unknown option: ${arg}`)
-    if (command === 'add') options.names.push(arg)
+    if (command === 'add' || command === 'diff' || command === 'update')
+      options.names.push(arg)
     else throw new Error(`Unexpected argument for benos ${command}: ${arg}`)
   }
   return options
@@ -71,12 +79,14 @@ export async function runCli(args) {
     console.log(HELP)
     return
   }
-  if (!['init', 'add', 'list'].includes(command)) {
+  if (!['init', 'add', 'list', 'diff', 'update'].includes(command)) {
     throw new Error(`Unknown command: ${command}\n\n${HELP}`)
   }
   const options = parseOptions(command, rest)
   if (command === 'init') return initProject(options)
   if (command === 'add') return addItems(options)
+  if (command === 'diff') return diffItems(options)
+  if (command === 'update') return updateItems(options)
   return listItems(options)
 }
 

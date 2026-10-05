@@ -195,7 +195,7 @@ async function readInstalledBenosVersion(root, name) {
   return manifest.version
 }
 
-async function assertMinimumBenosVersions(root, allItems, options) {
+export async function assertMinimumBenosVersions(root, allItems, options) {
   const requirements = new Map()
   for (const { item } of allItems) {
     for (const requirement of item.minimumBenosVersions) {

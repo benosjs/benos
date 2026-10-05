@@ -1,8 +1,8 @@
 # UI component registry
 
-**Status:** U1 design and U3 registry foundation are complete. U4 batches 1–3 add eighteen styled components and their shared overlay-host dependency to schema-v1 payloads. Schema and versioned URL structure are hard-to-reverse.
+**Status:** U1 design, U3 registry foundation, U4 component batches, and U5 pinned-base update support are complete. U4 batches 1–3 add eighteen styled components and their shared overlay-host dependency to schema-v1 payloads. Schema and versioned URL structure are hard-to-reverse.
 
-**Scope label:** registry foundations are implemented in U3; component payloads arrive in U4, and update-base retention is exercised in U5 (required for 0.2.0).
+**Scope label:** registry foundations shipped in U3, component payloads in U4, and immutable-base merge handling in U5 (required for 0.2.0).
 
 ## Goals
 
@@ -63,13 +63,19 @@ Use a mutable stable discovery index in the GitHub repository, but require each 
 
 U3 fixes the initial path and host: benos.lock.json pins installed component version, immutable base URL, and checksum. The discovery index on `main` is mutable, but an item URL must include the release tag and never use the branch URL. Never fetch the old base from an unpinned branch. GitHub raw is the initial host because the repository is canonical and requires no service; a configured website may mirror the same JSON later. Do not invent a public website URL. CDN headers and ETags are optimizations, not version identity.
 
+U5 caches old base payloads under a name/version/checksum key in `.benos/cache/`.
+The URL, top-level payload checksum, item identity/version, schema, and every
+file checksum are validated before a cache entry can supply merge input. The
+mutable latest index and latest item cache never substitute for a pinned base.
+The lock entry advances only with that component's completed file transaction.
+
 The generated v1 index contains source payloads for completed U4 batches. CI runs `pnpm registry:check` so checked-in discovery and payload files cannot drift from registry sources. Runtime validation also
 accepts `file:` URLs and loopback HTTP only for explicit local development and
 tests; released registry URLs remain HTTPS and tag-pinned.
 
 Every U4 registry component is added unchanged to a fresh create-benos project in the OS/package-manager matrix; that project runs strict TypeScript and Benos ESLint checks across copied source. Related overlay items declare the shared `overlay-host` helper as a registry dependency so adding multiple overlays does not create duplicate file destinations.
 
-If the old base cannot be fetched, refuse automatic merge and preserve local files. A validated local cache is acceptable. Removing an item from the current catalog prevents new installation but does not erase old payloads needed for updates.
+If the old base cannot be fetched, refuse automatic merge and preserve local files. A validated version-keyed local cache is acceptable. Removing an item from the current catalog prevents new installation but does not erase old payloads needed for updates. Update conflicts produce separate base/local/incoming artifacts; registry removal never deletes local files.
 
 ## Project configuration API: benos.json
 
@@ -127,7 +133,7 @@ Identical registry version, config, and requested names produce deterministic de
 | [Ark UI](https://ark-ui.com/docs/overview/about)                          | Framework packages built atop Zag.                   | Benos combines small runtime behavior dependencies with source-owned UI, at added CLI complexity. |
 | [Kobalte](https://kobalte.dev/docs/core/overview/introduction/)           | Solid UI packages.                                   | Kobalte is package-first; Benos accepts registry/merge complexity for source ownership.           |
 
-## Test plan for U3
+## Test plan for U3 and U5
 
 - For every registry component, add it to a fresh create-benos project and verify strict TypeScript type-checking and Benos ESLint pass without modifying the copied component source. Run this against each supported package manager in the platform matrix.
 - Type-level fixtures verify optional `id` on every registry component and that an explicit string is applied to the root or forwarded to the primitive ID it overrides.
@@ -138,6 +144,7 @@ Identical registry version, config, and requested names produce deterministic de
 - Same index+lock yields identical output; index movement does not rewrite installed base metadata.
 - npm/pnpm/Yarn/Bun consumers type-check on Ubuntu, Windows, and macOS.
 - The minimum-version gate refuses old and absent installed Benos packages without writing project state or cache data, prints the exact package-manager upgrade command, and succeeds once installed package versions meet the item requirements.
+- `benos diff` covers all local/base/incoming states and does not write cache or project files. `benos update` uses the pinned base with a three-way line merge, preserves local line endings, isolates each component in a recoverable journaled transaction, and leaves conflicted files and lock entries unchanged. The CLI consumer matrix runs an actual CRLF disjoint merge on Ubuntu, Windows, and macOS with npm, pnpm, Yarn, and Bun.
 
 ## Hard-to-reverse decisions
 

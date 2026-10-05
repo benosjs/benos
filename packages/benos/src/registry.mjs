@@ -1,7 +1,14 @@
 /* global URL, fetch, AbortSignal, Buffer */
 
-import { createHash } from 'node:crypto'
-import { lstat, mkdir, readFile, realpath, writeFile } from 'node:fs/promises'
+import { createHash, randomUUID } from 'node:crypto'
+import {
+  lstat,
+  mkdir,
+  readFile,
+  realpath,
+  rename,
+  writeFile,
+} from 'node:fs/promises'
 import { isAbsolute, relative, resolve, sep } from 'node:path'
 import semver from 'semver'
 import { isSafePosixRelativePath } from './path-safety.mjs'
@@ -384,6 +391,70 @@ async function cacheBytes(root, name, bytes) {
   const path = cachePath(root, name)
   await ensureCacheDirectory(root)
   await writeFile(path, bytes)
+}
+
+function pinnedBaseCacheName(name, record) {
+  const version = String(record.version).replace(/[^a-zA-Z0-9.-]/g, '_')
+  const checksum = record.checksum.slice(
+    'sha256:'.length,
+    'sha256:'.length + 16,
+  )
+  return `base-${name}-${version}-${checksum}.json`
+}
+
+async function validatePinnedItem(bytes, name, record) {
+  if (digest(bytes) !== record.checksum)
+    throw new Error(
+      `Pinned base checksum mismatch for ${name}@${record.version}.`,
+    )
+  const item = validateItem(
+    parseJson(bytes, record.baseUrl),
+    name,
+    record.version,
+  )
+  return { item, bytes }
+}
+
+async function cachePinnedBase(root, name, record, bytes) {
+  const directory = await ensureCacheDirectory(root)
+  const path = resolve(directory, pinnedBaseCacheName(name, record))
+  const temporary = `${path}.${randomUUID()}.tmp`
+  try {
+    const stat = await lstat(path)
+    if (stat.isSymbolicLink() || !stat.isFile())
+      throw new Error(`Refusing unsafe pinned-base cache file: ${path}`)
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error
+  }
+  await writeFile(temporary, bytes, { flag: 'wx' })
+  await rename(temporary, path)
+}
+
+/** Load the exact installed payload, verifying the lock's immutable URL and checksum. */
+export async function loadPinnedItem(root, name, record, options = {}) {
+  let fetchError
+  try {
+    const bytes = await readResource(record.baseUrl)
+    const result = await validatePinnedItem(bytes, name, record)
+    if (options.cache !== false)
+      await cachePinnedBase(root, name, record, bytes)
+    return result.item
+  } catch (error) {
+    fetchError = error
+  }
+
+  try {
+    await ensureCacheDirectory(root)
+    const bytes = await readFile(
+      cachePath(root, pinnedBaseCacheName(name, record)),
+    )
+    return (await validatePinnedItem(bytes, name, record)).item
+  } catch (cacheError) {
+    throw new Error(
+      `Cannot retrieve the verified base for ${name}@${record.version}; local files were preserved. Registry: ${record.baseUrl}. ${fetchError.message} Cached base: ${cacheError.message}`,
+      { cause: cacheError },
+    )
+  }
 }
 
 async function getBytesWithCache(root, url, name) {

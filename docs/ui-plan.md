@@ -134,7 +134,16 @@ Implement batches 1 through 4, with a checkpoint after each batch. Build a compo
 
 ### U5 — Updates
 
-Implement `benos diff` and `benos update` with three-way merge. Test: an untouched component updates cleanly; an edited component merges non-conflicting changes; conflicts are shown clearly and never lose user edits.
+Implement `benos diff` and `benos update` with the exact immutable base pinned
+in `benos.lock.json`. `diff` reports unchanged, local-only, upstream-only,
+both-changed, missing-local, and new-upstream files without writes. `update`
+merges disjoint edits, reports overlaps in separate base/local/incoming
+artifacts, preserves source bytes and line endings, and updates each component
+with a recoverable journaled transaction. A failed minimum-version gate prints
+the exact upgrade command before modifying source. Cover cached/offline bases,
+unavailable bases, deleted files, CRLF, interrupted writes, and independent
+components when another conflicts. Run the update consumer test on Ubuntu,
+Windows, and macOS with npm, pnpm, Yarn, and Bun.
 
 ### U6 — Documentation and starter integration
 
@@ -239,3 +248,8 @@ Complete **U0** and **U1** only, then stop at the U1 checkpoint for my review.
 - **Review fixes and local verification — complete.** Dialog, Popover, and Dropdown Menu use Button styling by default and accept a render callback for a custom Button. Tooltip has a visible info affordance and stays keyboard-focusable. API guidance, gallery copy, and mixed-direction text handling are covered by browser assertions. Full test results, production profile, and bundle sizes are in [the gallery follow-up checkpoint](checkpoints/ui-U4-gallery-followup.md).
 - The table profile isolates framework baseline from registry component overhead. Replacing the redundant per-row column `<For>` with a one-time descriptor map removed the measured registry-only mount increment; the follow-up benchmark records pooled medians and spreads for three interleaved production runs.
 - **No core or DOM runtime source changed.** Production bundle budgets remain core 4,051/4,096 gzip bytes and core + DOM 10,200/10,240.
+
+## U5 update CLI status (2026-10-05)
+
+- **Implementation:** `benos diff` classifies tracked files against the exact pinned payload and current registry. `benos update` does line-based three-way merges, preserves local newline style, emits separate conflict copies, checks minimum Benos versions, and applies each component through a journaled transaction. `benos update` recovers interrupted transactions; `benos diff` detects them without writing.
+- **Verification:** local cases and the Ubuntu/Windows/macOS by npm/pnpm/Yarn/Bun consumer matrix are listed in [the U5 checkpoint](checkpoints/ui-U5.md). The checkpoint records final test totals, bundle sizes, and CI runs.

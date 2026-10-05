@@ -1,8 +1,8 @@
 # Benos UI CLI
 
-**Status:** U1 design approved; U3 implements `init`, `add`, and `list`. `diff` and `update` remain designed for U5. Package name, command grammar, config mutation, and merge semantics are hard-to-reverse.
+**Status:** U1 design approved; U3 implements `init`, `add`, and `list`; U5 implements `diff` and `update`. Package name, command grammar, config mutation, and merge semantics are hard-to-reverse.
 
-**Scope label:** `init`, `add`, and `list` are implemented in U3; `diff` and `update` are designed now and built in U5 (required for 0.2.0).
+**Scope label:** `init`, `add`, and `list` shipped in U3; `diff` and `update` are implemented in U5 (required for 0.2.0).
 
 ## Goals
 
@@ -29,6 +29,10 @@ On 2026-10-02, npm view benos and npm view @benosjs/primitives both returned reg
     npx benos list --installed
     npx benos diff [name]
     npx benos update [name]
+
+With no name, `diff` and `update` operate on every item in `benos.lock.json`.
+A named update includes that installed item and its already-installed registry
+dependencies. Non-interactive updates require `--yes`.
 
 The CLI is a setup-time tool. Generated source imports public @benosjs packages, not the CLI.
 
@@ -79,11 +83,45 @@ List names, descriptions, versions, required packages, and installed file state.
 
 ### diff [name]
 
-Read-only comparison of each local file with its exact original base from benos.lock.json, plus available newer registry content. Report unchanged, local edits, upstream changes, both changed, missing local files, and new upstream files. An optional name narrows output.
+This command is read-only. It verifies and loads the exact installed payload at
+the immutable `baseUrl` and checksum recorded in `benos.lock.json`, then compares
+each tracked file with the local file and latest registry payload. It reports
+`unchanged`, `local edits only`, `upstream changes only`, `both changed`,
+`missing locally`, or `new upstream files`. An upstream file removal is shown
+as an upstream change and never deletes a local file. Content classification
+normalizes CRLF and LF while treating a missing final newline as a source edit.
+
+If a transaction journal is pending, `diff` reports it without changing files
+and asks the developer to run `benos update` to recover first.
 
 ### update [name]
 
-Three-way merge with base=the version pinned at original install, local=current file, incoming=new registry version. Use a tested diff3 algorithm and preserve user edits. If the old base is unavailable or a merge is not demonstrably safe, refuse automatic write.
+Three-way merge with base=the exact payload pinned at original install,
+local=current file bytes, and incoming=the latest registry payload. The base
+must pass immutable URL, payload, and per-file checksum validation; a
+version-keyed cache entry is accepted only after the same checks. If neither
+the URL nor a valid cache supplies that base, skip the component and preserve
+its local files and lock entry.
+
+Independent line edits merge automatically; overlapping edits conflict, while
+identical edits are kept once. Merged output uses the local file's newline
+style and preserves the locally edited final-newline state. A missing local
+file is a conflict rather than an instruction to restore it. Invalid UTF-8 is
+refused without changing its bytes.
+
+Every conflicted component remains unchanged, including its lock record. The
+CLI writes complete `.base`, `.local`, and `.incoming` copies with resolution
+instructions under `.benos/conflicts/`; it never writes conflict markers into
+component source. Other component transactions may still succeed. A minimum
+`@benosjs/*` version failure prints the exact upgrade command and stops before
+source writes. Updates do not auto-install changed npm dependencies.
+
+Files are staged in a per-component transaction directory with byte backups
+and a journal. Target files are replaced before the lock entry; atomic lock
+replacement is the commit marker. The next `benos update` removes a committed
+journal or rolls back an uncommitted transaction. If files or lock state have
+changed independently, recovery stops and preserves the journal and files for
+manual resolution.
 
 Plan every file before writes. If one component has conflicts, leave that component's files unchanged and write base/local/incoming artifacts under .benos/conflicts with resolution instructions. Independent components may update atomically as separate groups. No force option in v0.2.0; users may edit/remove a component themselves.
 
@@ -131,27 +169,28 @@ Errors identify project root, path, expected/actual version or hash, registry UR
 | [Ark UI](https://ark-ui.com/docs/overview/about)                        | Install framework adapters built on Zag. | Ark distributes components; Benos uses machine behavior plus local presentation source.                                  |
 | [Kobalte](https://kobalte.dev/docs/core/overview/introduction/)         | Install Solid component packages.        | No copy/update protocol is needed there; Benos accepts CLI complexity to make files user-owned.                          |
 
-## Verification status and remaining test plan
+## Verification status
 
 U3 tests cover init preflight/idempotency, no-write confirmation, local registry
 loading, checksum and path validation, dependency ordering/cycles, no-clobber,
 cache fallback, package-manager detection, and reproducible generated registry
 files. CI configures fresh create-benos consumer checks on Ubuntu, Windows, and
 macOS with npm, pnpm, Yarn 4, and Bun. The matrix scaffolds and installs a fresh
-project, runs `benos init`, `list`, and `list --installed`, then runs project
-typecheck, build, test, and lint. It has not been triggered from this local
-checkpoint.
+project, runs `benos init`, `list`, `list --installed`, `diff`, and `update`,
+then runs project typecheck, build, test, and lint. The U5 checkpoint records
+the current three-platform, four-manager run.
 
 The starter includes `.yarnrc.yml` with Yarn's `nodeLinker: node-modules`
 setting so the starter's Vite client types resolve with the standard TypeScript
 compiler under Yarn 4.
 
-**U5 remaining:**
-
-- `diff` classification for unchanged files, local edits, upstream edits, files changed on both sides, deleted local targets, and newly added upstream files.
-- Three-way `update` cases: unchanged base, local-only/upstream-only edits, disjoint edits, overlapping conflicts, and deleted local files.
-- Conflict artifacts, independent component update groups, recovery after interrupted writes, and retained immutable bases when the discovery index advances.
-- Update-specific path and mixed-line-ending fixtures, plus a guarantee that conflicted files remain unchanged.
+**U5 coverage:** `tests/benos-update.test.ts` covers all six diff statuses,
+clean and disjoint updates, overlapping conflicts with untouched source and lock,
+deleted files, unavailable bases, offline checksum-validated cache, CRLF,
+independent component updates around a conflict, minimum-version refusal, and
+interrupted transaction detection and recovery. The fresh consumer matrix
+performs an actual disjoint local/upstream update with CRLF files on all three
+operating systems and all four package managers.
 
 ## Hard-to-reverse decisions
 
