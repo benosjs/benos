@@ -42,8 +42,10 @@ h2 { margin: 7px 0 0; font-size: 20px; letter-spacing: -0.035em; }
 .primary-button, .list-actions button { min-height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 9px; background: transparent; font-size: 13px; font-weight: 650; }
 .primary-button { display: flex; width: 100%; align-items: center; justify-content: space-between; border-color: var(--accent); color: white; background: var(--accent); }
 .primary-button span { font-size: 20px; font-weight: 400; }
+.starter-primary-button { width: 100%; justify-content: space-between; }
 .explanation { margin: 13px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .list-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 13px; }
+.list-actions .benos-input { flex: 1 1 12rem; }
 .list-actions button:hover { border-color: #92a9c9; background: var(--accent-soft); }
 button:disabled { cursor: not-allowed; opacity: 0.48; }
 ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }

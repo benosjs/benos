@@ -106,9 +106,11 @@ async function createConflictArtifacts(root, component, version, conflicts) {
     `Conflict while updating ${component} to ${version}.`,
     '',
     'Benos left the component source files and benos.lock.json unchanged.',
-    'For each conflict, compare the .base, .local, and .incoming copies.',
-    'Resolve the source file manually, then rerun benos update.',
-    'Do not copy conflict markers into application source.',
+    'Compare each .base, .local, and .incoming copy and save your desired local resolution outside the source file.',
+    'For a file present upstream, temporarily replace the source with the exact .incoming copy, then rerun benos update for this component to advance its pinned base.',
+    'Reapply your saved local changes after the update succeeds.',
+    'If the .incoming copy says the file was removed upstream, this CLI has no guided acceptance command; preserve the local file and review the registry change manually.',
+    'Never copy conflict markers into application source.',
   ].join('\n')
   await writeFile(resolve(directory, 'README.txt'), `${instructions}\n`)
   for (const conflict of conflicts) {

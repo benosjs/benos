@@ -190,7 +190,14 @@ importers:
 
   packages/core: {}
 
-  packages/create-benos: {}
+  packages/create-benos:
+    dependencies:
+      benos:
+        specifier: workspace:^
+        version: link:../benos
+      cross-spawn:
+        specifier: ^7.0.6
+        version: 7.0.6
 
   packages/dom:
     dependencies:

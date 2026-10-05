@@ -425,6 +425,9 @@ describe('benos diff and update', () => {
     expect(
       await readFile(join(conflictRoot, folder, 'README.txt'), 'utf8'),
     ).toMatch(/source files and benos\.lock\.json unchanged/)
+    expect(
+      await readFile(join(conflictRoot, folder, 'README.txt'), 'utf8'),
+    ).toMatch(/replace the source with the exact \.incoming copy/)
     expect(await readFile(join(source, 'main.ts'), 'utf8')).not.toMatch(
       /<<<<<<<|=======|>>>>>>>/,
     )

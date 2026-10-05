@@ -24,10 +24,15 @@
   },
   "files": [
     "src",
+    "starter-ui",
     "template"
   ],
   "scripts": {
     "test": "node --test tests/cli.test.mjs"
+  },
+  "dependencies": {
+    "benos": "workspace:^",
+    "cross-spawn": "^7.0.6"
   },
   "bugs": {
     "url": "https://github.com/benosjs/benos/issues"

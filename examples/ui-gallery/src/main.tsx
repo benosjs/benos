@@ -33,6 +33,10 @@ type ExampleRow = {
   requests: number
 }
 
+function guideUrl(component: string): string {
+  return `https://github.com/benosjs/benos/blob/main/docs/ui/components/${component}.md`
+}
+
 const sampleTableRows: readonly ExampleRow[] = [
   { id: 'u-1', name: 'Amina Saleh', region: 'Beirut', requests: 128 },
   { id: 'u-2', name: 'Daniel Haddad', region: 'Tripoli', requests: 42 },
@@ -115,7 +119,12 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
       )}
 
       <section class="sample-group" aria-labelledby={'buttons-' + props.mode}>
-        <h3 id={'buttons-' + props.mode}>Button</h3>
+        <h3 id={'buttons-' + props.mode}>
+          Button{' '}
+          <a class="guide-link" href={guideUrl('button')}>
+            Guide
+          </a>
+        </h3>
         <div class="button-row">
           <Button id={'button-primary-' + props.mode}>Primary</Button>
           <Button variant="secondary">Secondary</Button>
@@ -136,7 +145,18 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
       </section>
 
       <section class="sample-group" aria-labelledby={'fields-' + props.mode}>
-        <h3 id={'fields-' + props.mode}>Input and textarea</h3>
+        <h3 id={'fields-' + props.mode}>
+          Input and textarea
+          <a class="guide-link" href={guideUrl('input')}>
+            Input guide
+          </a>
+          <a class="guide-link" href={guideUrl('textarea')}>
+            Textarea guide
+          </a>
+          <a class="guide-link" href={guideUrl('label')}>
+            Label guide
+          </a>
+        </h3>
         <div class="field-grid">
           <div class="field">
             <Label for={'email-' + props.mode}>Email address</Label>
@@ -206,7 +226,12 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
       </section>
 
       <section class="sample-group" aria-labelledby={'surfaces-' + props.mode}>
-        <h3 id={'surfaces-' + props.mode}>Card</h3>
+        <h3 id={'surfaces-' + props.mode}>
+          Card{' '}
+          <a class="guide-link" href={guideUrl('card')}>
+            Guide
+          </a>
+        </h3>
         <div class="card-grid">
           <Card>Default surface</Card>
           <Card variant="outlined">Outlined surface</Card>
@@ -215,7 +240,12 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
       </section>
 
       <section class="sample-group" aria-labelledby={'badges-' + props.mode}>
-        <h3 id={'badges-' + props.mode}>Badge</h3>
+        <h3 id={'badges-' + props.mode}>
+          Badge{' '}
+          <a class="guide-link" href={guideUrl('badge')}>
+            Guide
+          </a>
+        </h3>
         <div class="badge-row">
           <Badge>Neutral</Badge>
           <Badge tone="brand">Brand</Badge>
@@ -226,7 +256,12 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
       </section>
 
       <section class="sample-group" aria-labelledby={'separator-' + props.mode}>
-        <h3 id={'separator-' + props.mode}>Separator</h3>
+        <h3 id={'separator-' + props.mode}>
+          Separator{' '}
+          <a class="guide-link" href={guideUrl('separator')}>
+            Guide
+          </a>
+        </h3>
         <div class="separator-demo">
           <span>Section one</span>
           <Separator />
@@ -244,6 +279,14 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
         aria-labelledby={'primitives-' + props.mode}
       >
         <h3 id={'primitives-' + props.mode}>Interactive primitives</h3>
+        <nav class="guide-links" aria-label="Interactive component guides">
+          <a href={guideUrl('checkbox')}>Checkbox</a>
+          <a href={guideUrl('switch')}>Switch</a>
+          <a href={guideUrl('radio-group')}>Radio group</a>
+          <a href={guideUrl('select')}>Select</a>
+          <a href={guideUrl('tabs')}>Tabs</a>
+          <a href={guideUrl('accordion')}>Accordion</a>
+        </nav>
         <div class="primitive-grid">
           <Card class="primitive-card">
             <Checkbox id={'checkbox-' + props.mode} defaultChecked>
@@ -329,7 +372,12 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
       </section>
 
       <section class="sample-group" aria-labelledby={'table-' + props.mode}>
-        <h3 id={'table-' + props.mode}>Sortable table</h3>
+        <h3 id={'table-' + props.mode}>
+          Sortable table{' '}
+          <a class="guide-link" href={guideUrl('sortable-table')}>
+            Guide
+          </a>
+        </h3>
         <p class="table-note" dir={rtl ? 'rtl' : undefined}>
           {rtl
             ? 'تتيح الأعمدة القابلة للفرز إعادة ترتيب الصفوف نفسها.'
@@ -372,6 +420,13 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
 
       <section class="sample-group" aria-labelledby={'overlays-' + props.mode}>
         <h3 id={'overlays-' + props.mode}>Overlays</h3>
+        <nav class="guide-links" aria-label="Overlay component guides">
+          <a href={guideUrl('dialog')}>Dialog</a>
+          <a href={guideUrl('popover')}>Popover</a>
+          <a href={guideUrl('tooltip')}>Tooltip</a>
+          <a href={guideUrl('dropdown-menu')}>Dropdown menu</a>
+          <a href={guideUrl('toast')}>Toast</a>
+        </nav>
         <p class="overlay-note" dir={rtl ? 'rtl' : undefined}>
           {rtl
             ? 'تضيف التلميحات سياقًا اختياريًا؛ أبقِ التعليمات الأساسية ظاهرة.'
@@ -472,23 +527,20 @@ export function mountGallery(host: HTMLElement): () => void {
           </a>
           <nav aria-label="Project links">
             <a href="https://github.com/benosjs/benos">GitHub</a>
-            <a href="https://github.com/benosjs/benos/tree/main/docs/architecture">
-              UI design
+            <a href="https://github.com/benosjs/benos/tree/main/docs/ui">
+              Component guides
             </a>
           </nav>
         </header>
 
         <section class="intro">
-          <p class="eyebrow">Source-owned components · Batches 1–4</p>
+          <p class="eyebrow">19 source-owned components · Batches 1–4</p>
           <h1>Small building blocks, in your hands.</h1>
           <p>
             Native HTML, Benos getter-backed props, and a quiet navy palette.
             Try each mode, then use the keyboard to inspect focus.
           </p>
-          <div
-            class="component-list"
-            aria-label="Components in batches 1, 2, 3, and 4"
-          >
+          <div class="component-list" aria-label="Benos UI component catalog">
             <span>Button</span>
             <span>Input</span>
             <span>Textarea</span>

@@ -31,7 +31,7 @@ test('gallery shows all six primitives with selected and open states', async ({
   const panels = page.locator('.mode-panel')
   await expect(panels).toHaveCount(3)
   await expect(
-    page.getByLabel('Components in batches 1, 2, 3, and 4').locator('span'),
+    page.getByLabel('Benos UI component catalog').locator('span'),
   ).toHaveCount(19)
 
   for (let index = 0; index < 3; index += 1) {

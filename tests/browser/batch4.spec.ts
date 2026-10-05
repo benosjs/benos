@@ -4,6 +4,40 @@ import { expect, test } from '@playwright/test'
 const require = createRequire(import.meta.url)
 const axePath = require.resolve('axe-core')
 
+test('gallery links every catalog component to its guide page', async ({
+  page,
+}) => {
+  await page.goto('/examples/ui-gallery/')
+  const components = [
+    'button',
+    'input',
+    'textarea',
+    'label',
+    'card',
+    'badge',
+    'separator',
+    'checkbox',
+    'switch',
+    'radio-group',
+    'select',
+    'tabs',
+    'accordion',
+    'dialog',
+    'popover',
+    'tooltip',
+    'dropdown-menu',
+    'toast',
+    'sortable-table',
+  ]
+  for (const component of components) {
+    await expect(
+      page.locator(
+        `a[href="https://github.com/benosjs/benos/blob/main/docs/ui/components/${component}.md"]`,
+      ),
+    ).toHaveCount(3)
+  }
+})
+
 test('renders a named semantic table and cycles sort state in place', async ({
   page,
 }) => {

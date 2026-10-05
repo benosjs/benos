@@ -41,7 +41,9 @@ async function pack(
   const prefix =
     packageDirectory === 'create-benos'
       ? 'create-benos-'
-      : `benosjs-${packageDirectory}-`
+      : packageDirectory === 'benos'
+        ? 'benos-'
+        : `benosjs-${packageDirectory}-`
   const file = files.find((entry) => entry.startsWith(prefix))
   if (!file)
     throw new Error(`Packed ${packageDirectory} archive was not created`)
@@ -57,9 +59,10 @@ describe('create-benos packed scaffold', () => {
     await mkdir(archives)
     await mkdir(extracted)
     try {
-      const [createArchive, core, dom, compiler, vite, eslintPlugin] =
+      const [createArchive, benos, core, dom, compiler, vite, eslintPlugin] =
         await Promise.all([
           pack('create-benos', archives),
+          pack('benos', archives),
           pack('core', archives),
           pack('dom', archives),
           pack('compiler', archives),
@@ -67,7 +70,25 @@ describe('create-benos packed scaffold', () => {
           pack('eslint-plugin', archives),
         ])
       await run('tar', ['-xzf', createArchive, '-C', extracted])
-      const cli = join(extracted, 'package', 'src', 'index.mjs')
+      const createPackage = join(extracted, 'package')
+      const createManifestPath = join(createPackage, 'package.json')
+      const createManifest = JSON.parse(
+        await readFile(createManifestPath, 'utf8'),
+      ) as {
+        pnpm?: { overrides?: Record<string, string> }
+      }
+      createManifest.pnpm = {
+        overrides: {
+          ...createManifest.pnpm?.overrides,
+          benos: fileDependency(createPackage, benos),
+        },
+      }
+      await writeFile(
+        createManifestPath,
+        `${JSON.stringify(createManifest, null, 2)}\n`,
+      )
+      await runPnpm(['install', '--ignore-scripts'], { cwd: createPackage })
+      const cli = join(createPackage, 'src', 'index.mjs')
       const app = join(temporary, 'app')
       await run('node', [cli, app])
       const generated = JSON.parse(

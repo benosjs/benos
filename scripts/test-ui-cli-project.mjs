@@ -7,6 +7,7 @@ import {
   mkdir,
   mkdtemp,
   readFile,
+  readdir,
   rm,
   writeFile,
 } from 'node:fs/promises'
@@ -121,10 +122,55 @@ try {
     ),
   )
   scaffoldEnv.npm_config_user_agent = `${manager}/0.0.0 node/${process.versions.node}`
+  const noUiApp = join(temporary, 'starter-no-ui')
+  await runCommand(process.execPath, [scaffold, noUiApp, '--no-ui'], {
+    cwd: root,
+    env: scaffoldEnv,
+  })
+  if (
+    (await readFile(join(noUiApp, 'src/main.tsx'), 'utf8')).includes(
+      '@/components/ui/',
+    ) ||
+    (await readdir(noUiApp)).includes('benos.json')
+  ) {
+    throw new Error('--no-ui unexpectedly initialized or imported Benos UI.')
+  }
+  const uiApp = join(temporary, 'starter-ui')
+  await runCommand(
+    process.execPath,
+    [scaffold, uiApp, '--ui', '--registry', batch1Registry],
+    { cwd: root, env: scaffoldEnv },
+  )
+  const uiStarter = await readFile(join(uiApp, 'src/main.tsx'), 'utf8')
+  if (
+    !uiStarter.includes("from '@/components/ui/button'") ||
+    !uiStarter.includes("from '@/components/ui/input'")
+  ) {
+    throw new Error('--ui did not add Button and Input to the starter app.')
+  }
+  if (uiStarter.trimEnd().split(/\r?\n/).length > 150) {
+    throw new Error('--ui starter should remain under 150 lines of TSX.')
+  }
+  const uiLock = JSON.parse(
+    await readFile(join(uiApp, 'benos.lock.json'), 'utf8'),
+  )
+  if (!uiLock.items?.button || !uiLock.items?.input) {
+    throw new Error('--ui did not record Button and Input in benos.lock.json.')
+  }
+  for (const script of ['typecheck', 'build', 'test', 'lint']) {
+    await runCommand(manager, ['run', script], { cwd: uiApp })
+  }
   await runCommand(process.execPath, [scaffold, app], {
     cwd: root,
     env: scaffoldEnv,
   })
+  const defaultStarter = await readFile(join(app, 'src/main.tsx'), 'utf8')
+  if (
+    defaultStarter.includes('@/components/ui/') ||
+    (await readdir(app)).includes('benos.json')
+  ) {
+    throw new Error('Non-interactive create-benos must default to no UI.')
+  }
   const generated = JSON.parse(
     await readFile(join(app, 'package.json'), 'utf8'),
   )

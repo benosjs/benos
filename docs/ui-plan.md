@@ -147,7 +147,9 @@ Windows, and macOS with npm, pnpm, Yarn, and Bun.
 
 ### U6 — Documentation and starter integration
 
-Write a UI guide (installation, theming, each component's API and accessibility notes). Decide with me whether `create-benos` should offer to run `benos init` during scaffolding. Every code example compiles and type-checks in CI.
+Write a UI guide for installation with `benos init` and `benos add`, theming and token customization, editing copied source, the diff/update/conflict workflow, minimum-version requirements, and one API, variants, and accessibility page for each of the 19 components. Cover the observed Zag Tab behavior for Select and Dropdown Menu and WebKit's native RTL radio behavior. Compile and strict type-check every example in CI.
+
+The create-benos starter asks “Add Benos UI components?” interactively with a default of no, and supports `--ui` and `--no-ui`. The opt-in path runs `benos init`, adds Button and Input, and uses them in the starter. Test opt-in and opt-out in the create-benos OS/package-manager matrix. Prepare the gallery for a production deployment as a website component catalog, with a link to each guide page, and document deployment steps without deploying it.
 
 ### U7 — Release preparation (0.2.0)
 
@@ -253,3 +255,7 @@ Complete **U0** and **U1** only, then stop at the U1 checkpoint for my review.
 
 - **Implementation:** `benos diff` classifies tracked files against the exact pinned payload and current registry. `benos update` does line-based three-way merges, preserves local newline style, emits separate conflict copies, checks minimum Benos versions, and applies each component through a journaled transaction. `benos update` recovers interrupted transactions; `benos diff` detects them without writing.
 - **Verification:** local cases and the Ubuntu/Windows/macOS by npm/pnpm/Yarn/Bun consumer matrix are listed in [the U5 checkpoint](checkpoints/ui-U5.md). The checkpoint records final test totals, bundle sizes, and CI runs.
+
+## U6 documentation and starter status (2026-10-05)
+
+- **In progress:** 19 guide pages and a guide index cover install, tokens, copied source, updates/conflicts, component APIs, variants, and accessibility behavior. `create-benos` now has a no-by-default prompt and `--ui`/`--no-ui`; the opt-in starter uses Button and Input. The gallery links each component to its guide and has a production deployment guide. Local and matrix verification plus the CI run are recorded in [the U6 checkpoint](checkpoints/ui-U6.md).
