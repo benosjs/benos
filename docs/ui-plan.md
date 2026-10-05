@@ -149,7 +149,18 @@ Windows, and macOS with npm, pnpm, Yarn, and Bun.
 
 Write a UI guide for installation with `benos init` and `benos add`, theming and token customization, editing copied source, the diff/update/conflict workflow, minimum-version requirements, and one API, variants, and accessibility page for each of the 19 components. Cover the observed Zag Tab behavior for Select and Dropdown Menu and WebKit's native RTL radio behavior. Compile and strict type-check every example in CI.
 
-The create-benos starter asks “Add Benos UI components?” interactively with a default of no, and supports `--ui` and `--no-ui`. The opt-in path runs `benos init`, adds Button and Input, and uses them in the starter. Test opt-in and opt-out in the create-benos OS/package-manager matrix. Prepare the gallery for a production deployment as a website component catalog, with a link to each guide page, and document deployment steps without deploying it.
+The create-benos starter asks for a project name when omitted (default
+`benos-app`), asks “Add Benos UI components?” (default no), and asks whether
+to install with the detected package manager and start the dev server (default
+yes). The opt-in UI path runs `benos init`, adds Button and Input, and uses
+them in the starter. Support `--ui`/`--no-ui`, `--install`/`--no-install`,
+`--start`/`--no-start`, and the existing `--git`/`--yes` flags. Non-TTY runs
+never prompt or start the server unless `--start` is explicit. Preserve
+generated files and print manual commands on installation failure. Test the
+interactive pseudo-terminal flow and non-interactive flags in all 12
+OS/package-manager matrix cells, including clean server shutdown. Prepare the
+gallery for a production deployment as a website component catalog, with a
+link to each guide page, and document deployment steps without deploying it.
 
 ### U7 — Release preparation (0.2.0)
 
@@ -258,10 +269,11 @@ Complete **U0** and **U1** only, then stop at the U1 checkpoint for my review.
 
 ## U6 documentation and starter status (2026-10-05)
 
-- **Complete:** 19 guide pages and a guide index cover installation, tokens,
+- **Implementation and local checks complete; refreshed CI pending:** 19 guide pages and a guide index cover installation, tokens,
   copied source, updates/conflicts, component APIs, variants, and accessibility
-  behavior. `create-benos` has the no-by-default prompt and `--ui`/`--no-ui`;
-  the opt-in starter uses Button and Input. The gallery links every component
-  to its guide and has a production deployment guide. Local verification and
-  all 16 jobs in [CI run 37310690258](https://github.com/benosjs/benos/actions/runs/37310690258)
-  passed. Full results are in [the U6 checkpoint](checkpoints/ui-U6.md).
+  behavior. `create-benos` now has interactive name, UI, and install/start
+  prompts, matching non-interactive flags, a safe no-TTY default, install
+  failure recovery, and a pseudo-terminal server lifecycle test. The opt-in
+  starter uses Button and Input. The gallery links every component to its
+  guide and has a production deployment guide. Local verification passed;
+  refreshed CI results will be recorded in [the U6 checkpoint](checkpoints/ui-U6.md).

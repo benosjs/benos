@@ -94,7 +94,9 @@ try {
   )
   await runPnpm(['install', '--ignore-scripts'], { cwd: creatorPackage })
   const cli = join(creatorPackage, 'src', 'index.mjs')
-  await run(process.execPath, [cli, app], { cwd: root })
+  await run(process.execPath, [cli, app, '--no-install', '--no-start'], {
+    cwd: root,
+  })
 
   const packageFile = join(app, 'package.json')
   const metadata = JSON.parse(await readFile(packageFile, 'utf8'))

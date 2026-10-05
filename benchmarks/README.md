@@ -668,3 +668,30 @@ checkpoint at
 Raw profiles are in
 [`u4-batch4-profile.json`](js-framework-benchmark/results/u4-batch4-profile.json)
 and the three archived run files beside it.
+
+## UI U6 interactive create-benos follow-up (2026-10-05)
+
+This follow-up changes only the create-benos CLI, its test harness, and
+documentation. It does not change core or DOM runtime code. The local
+verification shell used Node 24.8.0, which is below the workspace's declared
+minimum; CI uses Node 22.18.0. Record these local values for this checkpoint
+and use the CI size row as the supported-runtime confirmation.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,049 bytes |  4,096 bytes |  47 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,198 bytes | 10,240 bytes |  42 bytes |
+
+The production kernel guard was run on its own and reports the median of seven
+runs with five timed samples per run:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       5.97 |        4.76 | 1.26× |
+| 20-deep computed chain write + read |       6.25 |        4.92 | 1.28× |
+| 200-effect fanout write             |       1.99 |        1.14 | 1.74× |
+| Dynamic dependency switch           |       3.67 |        2.29 | 1.59× |
+| Repeated equal write                |       0.68 |        0.47 | 1.43× |
+
+All rows remain below the 2× guard. No framework hot path changed in this
+follow-up.

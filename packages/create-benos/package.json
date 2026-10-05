@@ -31,6 +31,7 @@
     "test": "node --test tests/cli.test.mjs"
   },
   "dependencies": {
+    "@clack/prompts": "1.8.1",
     "benos": "workspace:^",
     "cross-spawn": "^7.0.6"
   },

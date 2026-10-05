@@ -36,10 +36,25 @@ New Benos projects can request the same setup during scaffolding:
 npm create benos@latest my-app -- --ui
 ```
 
-Interactive scaffolding asks “Add Benos UI components?” with a default of no.
-The `--ui` flag opts in; `--no-ui` explicitly opts out. The opt-in path installs
-starter dependencies, runs `benos init`, and adds Button and Input. A custom
-registry can be selected with `--registry <url>`.
+Interactive scaffolding asks for a project name when one is omitted (default
+`benos-app`), then asks “Add Benos UI components?” (default no). It next asks
+“Install with <detected package manager> and start now?” (default yes). If
+accepted, it installs dependencies, runs `benos init` and adds Button and
+Input when UI was selected, then starts Vite and prints its local URL. If
+declined, it prints the exact commands to run later. Failed installs leave the
+generated files in place and print the failed command plus recovery steps.
+If UI was selected but installation was declined, the printed commands also
+run `benos init` and add Button and Input after dependencies are installed.
+
+Use `--ui` or `--no-ui`, `--install` or `--no-install`, and `--start` or
+`--no-start` to control those prompts in scripts. `--yes` accepts prompt
+defaults and confirms a non-empty destination; `--git` opts into `git init`.
+Supplying either install/start flag skips that combined prompt; an omitted
+`--start` then means leave the server stopped, while `--start` installs first
+unless paired with `--no-install` (which is an error).
+Without a terminal, the CLI never prompts or starts a server automatically;
+pass `--start` to request startup explicitly. ESLint remains the starter's
+linter. A custom registry can be selected with `--registry <url>`.
 
 ## Theme and customization
 

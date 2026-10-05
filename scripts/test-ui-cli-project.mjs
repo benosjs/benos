@@ -3,6 +3,7 @@
 import { createHash } from 'node:crypto'
 import { Buffer } from 'node:buffer'
 import {
+  chmod,
   copyFile,
   mkdir,
   mkdtemp,
@@ -12,10 +13,12 @@ import {
   writeFile,
 } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
+import { clearTimeout, setTimeout } from 'node:timers'
 import process from 'node:process'
-import { join, resolve } from 'node:path'
-import { pathToFileURL, URL } from 'node:url'
+import { dirname, join, resolve } from 'node:path'
+import { fileURLToPath, pathToFileURL, URL } from 'node:url'
 import { spawnSync } from 'node:child_process'
+import * as pty from 'node-pty'
 import { runCommand } from '../packages/benos/src/process.mjs'
 import { createFixtureRegistry } from '../tests/fixtures/ui-registry/create.mjs'
 import { createLocalPackagesRegistry } from '../tests/fixtures/ui-registry/local-primitives-registry.mjs'
@@ -34,9 +37,13 @@ if (manager === 'yarn') {
 const temporary = await mkdtemp(
   join(process.env.RUNNER_TEMP ?? tmpdir(), 'benos-ui-cli-'),
 )
-const app = join(temporary, 'starter')
+const app = join(temporary, 'benos-app')
 const scaffold = resolve(root, 'packages/create-benos/src/index.mjs')
 const cli = resolve(root, 'packages/benos/src/index.mjs')
+const nodePtyRoot = resolve(
+  dirname(fileURLToPath(import.meta.resolve('node-pty'))),
+  '..',
+)
 const registry = await createFixtureRegistry(
   join(temporary, 'fixture-registry'),
 )
@@ -60,6 +67,89 @@ const batch2Names = [
 ]
 const batch3Names = ['dialog', 'popover', 'tooltip', 'dropdown-menu', 'toast']
 const batch4Names = ['sortable-table']
+
+function stripAnsi(value) {
+  // eslint-disable-next-line no-control-regex
+  return value.replace(/\u001b\[[0-?]*[ -/]*[@-~]/g, '')
+}
+
+async function runInteractiveScaffold(
+  cwd,
+  env,
+  packageManager,
+  { declineStart = false } = {},
+) {
+  if (process.platform === 'darwin') {
+    // node-pty 1.1.0's npm tarball omits this helper's executable bit.
+    await chmod(
+      join(nodePtyRoot, 'prebuilds', `darwin-${process.arch}`, 'spawn-helper'),
+      0o755,
+    )
+  }
+  const terminal = pty.spawn(process.execPath, [scaffold], {
+    cwd,
+    cols: 100,
+    rows: 32,
+    env: { ...env, TERM: 'xterm-256color' },
+  })
+  let output = ''
+  let stage = 0
+  let localUrl
+  return await new Promise((resolvePromise, reject) => {
+    const timeout = setTimeout(() => {
+      terminal.kill()
+      reject(new Error(`Interactive create-benos timed out:\n${output}`))
+    }, 150_000)
+    const prompts = [
+      { stage: 1, text: 'What is your project named?' },
+      { stage: 2, text: 'Add Benos UI components?' },
+      { stage: 3, text: `Install with ${packageManager} and start now?` },
+    ]
+    terminal.onData((data) => {
+      output += data
+      const cleanOutput = stripAnsi(output)
+      const nextPrompt = prompts.find(
+        (prompt) =>
+          prompt.stage === stage + 1 && cleanOutput.includes(prompt.text),
+      )
+      if (nextPrompt) {
+        stage = nextPrompt.stage
+        const response =
+          nextPrompt.stage === 3 && declineStart ? '\u001b[B\r' : '\r'
+        setTimeout(() => terminal.write(response), 80)
+      }
+      localUrl ??= cleanOutput.match(
+        /https?:\/\/(?:localhost|127\.0\.0\.1):\d+\/?/,
+      )?.[0]
+      if (localUrl && !output.includes('\u0003')) {
+        output += '\u0003'
+        setTimeout(() => terminal.write('\u0003'), 100)
+      }
+    })
+    terminal.onExit(({ exitCode, signal }) => {
+      clearTimeout(timeout)
+      if (!localUrl) {
+        if (!declineStart) {
+          reject(
+            new Error(
+              `Interactive starter did not show a local URL (exit ${exitCode}, signal ${signal ?? 'none'}):\n${stripAnsi(output)}`,
+            ),
+          )
+          return
+        }
+      }
+      if (exitCode !== 0) {
+        reject(
+          new Error(
+            `Interactive starter did not stop cleanly (exit ${exitCode}):\n${stripAnsi(output)}`,
+          ),
+        )
+        return
+      }
+      resolvePromise({ output: stripAnsi(output), localUrl })
+    })
+  })
+}
 
 function digest(bytes) {
   return `sha256:${createHash('sha256').update(bytes).digest('hex')}`
@@ -123,10 +213,11 @@ try {
   )
   scaffoldEnv.npm_config_user_agent = `${manager}/0.0.0 node/${process.versions.node}`
   const noUiApp = join(temporary, 'starter-no-ui')
-  await runCommand(process.execPath, [scaffold, noUiApp, '--no-ui'], {
-    cwd: root,
-    env: scaffoldEnv,
-  })
+  await runCommand(
+    process.execPath,
+    [scaffold, noUiApp, '--no-ui', '--no-install', '--no-start', '--yes'],
+    { cwd: root, env: scaffoldEnv },
+  )
   if (
     (await readFile(join(noUiApp, 'src/main.tsx'), 'utf8')).includes(
       '@/components/ui/',
@@ -138,7 +229,15 @@ try {
   const uiApp = join(temporary, 'starter-ui')
   await runCommand(
     process.execPath,
-    [scaffold, uiApp, '--ui', '--registry', batch1Registry],
+    [
+      scaffold,
+      uiApp,
+      '--ui',
+      '--install',
+      '--no-start',
+      '--registry',
+      batch1Registry,
+    ],
     { cwd: root, env: scaffoldEnv },
   )
   const uiStarter = await readFile(join(uiApp, 'src/main.tsx'), 'utf8')
@@ -160,10 +259,50 @@ try {
   for (const script of ['typecheck', 'build', 'test', 'lint']) {
     await runCommand(manager, ['run', script], { cwd: uiApp })
   }
-  await runCommand(process.execPath, [scaffold, app], {
-    cwd: root,
-    env: scaffoldEnv,
-  })
+  const interactive = await runInteractiveScaffold(
+    temporary,
+    scaffoldEnv,
+    manager,
+  )
+  if (
+    !interactive.output.includes(`Detected package manager: ${manager}`) ||
+    !interactive.output.includes('Development server stopped.')
+  ) {
+    throw new Error(
+      `Interactive create-benos did not use ${manager} or stop the server cleanly:\n${interactive.output}`,
+    )
+  }
+  const declinedRoot = join(temporary, 'declined-start')
+  await mkdir(declinedRoot)
+  const declined = await runInteractiveScaffold(
+    declinedRoot,
+    scaffoldEnv,
+    manager,
+    { declineStart: true },
+  )
+  if (
+    declined.localUrl ||
+    !declined.output.includes(
+      `Next steps: cd benos-app && ${manager} install && ${manager} run dev`,
+    )
+  ) {
+    throw new Error(
+      `Declining startup did not print the manual next steps:\n${declined.output}`,
+    )
+  }
+  try {
+    await globalThis.fetch(interactive.localUrl)
+    throw new Error(
+      `Development server is still responding at ${interactive.localUrl}.`,
+    )
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.startsWith('Development server is still')
+    ) {
+      throw error
+    }
+  }
   const defaultStarter = await readFile(join(app, 'src/main.tsx'), 'utf8')
   if (
     defaultStarter.includes('@/components/ui/') ||
@@ -179,7 +318,6 @@ try {
       `create-benos selected ${generated.createBenosPackageManager}; expected ${manager}.`,
     )
   }
-  await runCommand(manager, ['install'], { cwd: app })
   await runCommand(
     process.execPath,
     [cli, 'init', '--yes', '--registry', registry],

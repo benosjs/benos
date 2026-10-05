@@ -90,7 +90,7 @@ describe('create-benos packed scaffold', () => {
       await runPnpm(['install', '--ignore-scripts'], { cwd: createPackage })
       const cli = join(createPackage, 'src', 'index.mjs')
       const app = join(temporary, 'app')
-      await run('node', [cli, app])
+      await run('node', [cli, app, '--no-install', '--no-start'])
       const generated = JSON.parse(
         await readFile(join(app, 'package.json'), 'utf8'),
       ) as {
@@ -166,9 +166,11 @@ describe('create-benos packed scaffold', () => {
           ),
         )
         env.npm_config_user_agent = userAgent
-        await run('node', [cli, managerApp], {
-          env,
-        })
+        await run(
+          'node',
+          [cli, managerApp, '--no-install', '--no-start', '--yes'],
+          { env },
+        )
         const managerPackage = JSON.parse(
           await readFile(join(managerApp, 'package.json'), 'utf8'),
         ) as { createBenosPackageManager?: string }

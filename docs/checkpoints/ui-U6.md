@@ -68,3 +68,46 @@ this integration. No package was published here.
 The starter's Website link remains omitted per the earlier instruction to skip
 it until the public website URL is known. The gallery's component guide links
 point to GitHub. No deployment was performed.
+
+## Interactive-flow follow-up
+
+**Status:** implementation and local verification complete; the refreshed CI
+matrix is pending.
+
+- Missing directory names now prompt with `benos-app` as the default. The
+  existing UI question remains default No. A third question asks whether to
+  install with the detected package manager and start Vite; it defaults Yes.
+- Added `--install`/`--no-install` and `--start`/`--no-start` alongside
+  `--ui`/`--no-ui`, `--git`, and `--yes`. Non-TTY execution never prompts or
+  starts a server without explicit `--start`. ESLint remains the starter
+  linter; no linter-choice prompt was added.
+- Installation failures report the failed command and manual recovery
+  commands while leaving the generated project in place. Interactive Ctrl+C
+  is forwarded to Vite, and the CLI exits after the server stops.
+- Opting into UI while declining installation still creates the UI-ready
+  starter and prints the ordered install, `benos init`, `benos add`, and dev
+  commands; the CLI does not run a version gate before dependencies exist.
+- Expanded the CI consumer matrix test to exercise both accepted and declined
+  install/start choices through a pseudo-terminal, verify the printed URL,
+  stop the server, and confirm that the URL no longer responds. The same test
+  runs with each of npm, pnpm, Yarn, and Bun on Ubuntu, Windows, and macOS.
+
+### Local verification
+
+| Check                                                                                                                                      | Result                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `pnpm build`                                                                                                                               | Pass                                                                                                                |
+| `pnpm test`                                                                                                                                | Pass; 221 tests across 20 files                                                                                     |
+| `pnpm --filter create-benos test`                                                                                                          | Pass; 11 tests                                                                                                      |
+| `tests/create-benos.test.ts`                                                                                                               | Pass; 1 packed consumer test                                                                                        |
+| `pnpm test:ui-cli:matrix` with pnpm                                                                                                        | Pass; default install/start, clean stop, declined start, UI starter type-check/build/test/lint, registry CLI checks |
+| `pnpm test:browser`                                                                                                                        | Pass; 405 Chromium, Firefox, and WebKit tests                                                                       |
+| `pnpm gallery:build` and gallery type-check                                                                                                | Pass                                                                                                                |
+| `pnpm typecheck:types`, `check:jsx-types`, `check:doc-examples`, `check:public-imports`, `check:packed`, `check:engines`, `registry:check` | Pass                                                                                                                |
+| `pnpm audit:template`                                                                                                                      | Pass; no engine/deprecation warnings and zero vulnerabilities                                                       |
+| `pnpm lint`                                                                                                                                | Pass                                                                                                                |
+| `pnpm bench:guard`                                                                                                                         | Pass; every workload below 2× Preact                                                                                |
+| `pnpm size`                                                                                                                                | Pass; local Node 24.8.0 measured core 4,049/4,096 bytes and core + DOM 10,198/10,240 bytes                          |
+
+The complete OS/package-manager matrix is pending CI; its successful results
+will be added here after the run finishes.
