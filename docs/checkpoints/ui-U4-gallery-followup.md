@@ -2,8 +2,9 @@
 
 **Date:** 2026-10-05
 
-**Status:** Changes implemented; local verification complete. CI confirmation is
-pending the requested push to `ui-system`.
+**Status:** Changes implemented; local verification complete. GitHub Actions
+passed all 16 jobs for commit `8208fea` on `ui-system`:
+[run 37294322294](https://github.com/benosjs/benos/actions/runs/37294322294).
 
 ## Review changes
 
@@ -75,6 +76,9 @@ medians are in [`benchmarks/README.md`](../../benchmarks/README.md).
 - `pnpm bench:guard`: all five production workloads remained within 2× Preact.
 - Core is 4,051 / 4,096 gzip bytes; core + DOM is 10,200 / 10,240 gzip bytes.
   No core or DOM runtime source changed.
+- GitHub Actions run 37294322294 passed all 16 jobs, including the full browser
+  suite and the Ubuntu, Windows, and macOS create-benos and package-manager
+  matrix jobs.
 
 ## Deviations
 
