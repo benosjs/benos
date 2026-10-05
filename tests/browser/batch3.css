@@ -9,6 +9,21 @@
   position: fixed;
 }
 
+button:not(.benos-button) {
+  appearance: none;
+  background: var(--benos-color-surface);
+  border: 1px solid var(--benos-color-border);
+  border-radius: var(--benos-radius-sm);
+  color: var(--benos-color-text);
+  font: inherit;
+  padding: 0.25rem 0.5rem;
+}
+
+button:not(.benos-button):focus-visible {
+  outline: 3px solid var(--benos-color-focus);
+  outline-offset: 2px;
+}
+
 html {
   --benos-z-dropdown: 10;
   --benos-z-popover: 20;
