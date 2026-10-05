@@ -51,6 +51,26 @@ function validateDependencies(value, label) {
   return value
 }
 
+function validateMinimumBenosVersions(value, label) {
+  if (!Array.isArray(value))
+    throw new Error(`${label}.minimumBenosVersions must be an array.`)
+  const names = new Set()
+  for (const requirement of value) {
+    if (
+      !requirement ||
+      !/^@benosjs\/[a-z0-9._-]+$/.test(requirement.name ?? '') ||
+      typeof requirement.version !== 'string' ||
+      !semver.valid(requirement.version)
+    ) {
+      throw new Error(`${label} has an invalid minimum Benos package version.`)
+    }
+    if (names.has(requirement.name))
+      throw new Error(`${label} repeats minimum ${requirement.name}.`)
+    names.add(requirement.name)
+  }
+  return value
+}
+
 function validateSource(source, filename) {
   if (!source || typeof source !== 'object' || Array.isArray(source))
     throw new Error(`${filename} must contain a JSON object.`)
@@ -64,6 +84,7 @@ function validateSource(source, filename) {
   if (!['registry:component', 'registry:style'].includes(source.type))
     throw new Error(`${filename} has an unsupported registry type.`)
   validateDependencies(source.dependencies, filename)
+  validateMinimumBenosVersions(source.minimumBenosVersions, filename)
   if (
     !Array.isArray(source.registryDependencies) ||
     source.registryDependencies.some((name) => !slugPattern.test(name))
@@ -206,6 +227,7 @@ async function expectedOutputs(release) {
       title: source.title,
       description: source.description,
       dependencies: source.dependencies,
+      minimumBenosVersions: source.minimumBenosVersions,
       registryDependencies: source.registryDependencies,
       files: source.files.map((file) => ({
         ...file,

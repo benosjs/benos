@@ -4,6 +4,17 @@
 
 **Status:** Complete; final CI run passed on `ui-system`.
 
+### Compatibility follow-up
+
+Before Batch 4, registry payloads gained a required `minimumBenosVersions`
+array. `benos add` checks the installed packages in the full resolved item
+graph and defers registry cache writes until this preflight succeeds. An old
+or absent package produces a manager-specific upgrade command without
+changing component files, `package.json`, or `benos.lock.json`. New tests cover
+both refusal and successful installation. Overlay items require core 0.1.3
+because their primitive adapters use `createUniqueId()`; until core 0.1.3 is
+published, projects with core 0.1.2 will be asked to upgrade.
+
 ## Coverage
 
 | Component     | Types and IDs                                                 | Fresh create-benos project                                                        | Keyboard and behavior                                                                                                    | axe-core                                       | Gallery                                                                                     |

@@ -6,6 +6,12 @@
   "title": "Separator",
   "description": "An accessible horizontal or vertical separator.",
   "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.1.2"
+    }
+  ],
   "registryDependencies": [],
   "files": [
     {

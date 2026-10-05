@@ -29,6 +29,7 @@
     "bench:compare": "node benchmarks/compare-kernel.mjs",
     "bench:guard": "node benchmarks/guard-kernel.mjs",
     "bench:jfb": "pnpm --dir benchmarks/js-framework-benchmark install --frozen-lockfile --ignore-workspace && pnpm --dir benchmarks/js-framework-benchmark bench",
+    "bench:table": "pnpm --dir benchmarks/js-framework-benchmark install --frozen-lockfile --ignore-workspace && pnpm --dir benchmarks/js-framework-benchmark bench:table",
     "bench:profile": "node --expose-gc benchmarks/kernel-profile.mjs",
     "lint": "eslint . && prettier --check .",
     "typecheck:types": "tsc -p tests/tsconfig.types.json --noEmit",

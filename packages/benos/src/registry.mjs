@@ -160,6 +160,27 @@ function validateDependencies(dependencies, label) {
   }
 }
 
+function validateMinimumBenosVersions(versions, label) {
+  if (!Array.isArray(versions))
+    throw new Error(`${label} minimumBenosVersions must be an array.`)
+  const names = new Set()
+  for (const requirement of versions) {
+    if (
+      !requirement ||
+      typeof requirement !== 'object' ||
+      typeof requirement.name !== 'string' ||
+      !/^@benosjs\/[a-z0-9._-]+$/.test(requirement.name) ||
+      typeof requirement.version !== 'string' ||
+      !semver.valid(requirement.version)
+    ) {
+      throw new Error(`${label} has an invalid minimum Benos package version.`)
+    }
+    if (names.has(requirement.name))
+      throw new Error(`${label} repeats minimum ${requirement.name}.`)
+    names.add(requirement.name)
+  }
+}
+
 export function validateIndex(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw new Error('Registry index must be a JSON object.')
@@ -249,6 +270,7 @@ function validateItem(item, expectedName, indexRelease) {
       'title',
       'description',
       'dependencies',
+      'minimumBenosVersions',
       'registryDependencies',
       'files',
     ]),
@@ -274,6 +296,10 @@ function validateItem(item, expectedName, indexRelease) {
   )
     throw new Error(`Registry item ${expectedName} needs dependency arrays.`)
   validateDependencies(item.dependencies, `Registry item ${expectedName}`)
+  validateMinimumBenosVersions(
+    item.minimumBenosVersions,
+    `Registry item ${expectedName}`,
+  )
   if (
     item.registryDependencies.some(
       (dependency) =>
@@ -374,7 +400,7 @@ async function getBytesWithCache(root, url, name) {
   }
 }
 
-export async function loadIndex(root, registryUrl) {
+export async function loadIndex(root, registryUrl, options = {}) {
   let bytes
   let downloaded
   try {
@@ -390,11 +416,12 @@ export async function loadIndex(root, registryUrl) {
     )
   }
   const index = validateIndex(parseJson(bytes, registryUrl))
-  if (downloaded) await cacheBytes(root, 'index.json', bytes)
-  return { index, bytes }
+  if (downloaded && !options.deferCache)
+    await cacheBytes(root, 'index.json', bytes)
+  return { index, bytes, downloaded }
 }
 
-async function loadItem(root, entry, release) {
+async function loadItem(root, entry, release, options = {}) {
   if (!NAME_PATTERN.test(entry.name))
     throw new Error(`Invalid registry item name ${entry.name}.`)
   const cacheName = `items-${entry.name}.json`
@@ -415,11 +442,12 @@ async function loadItem(root, entry, release) {
   if (digest(bytes) !== entry.checksum)
     throw new Error(`Registry item checksum mismatch: ${entry.name}`)
   const item = validateItem(parseJson(bytes, entry.url), entry.name, release)
-  if (downloaded) await cacheBytes(root, cacheName, bytes)
-  return item
+  if (downloaded && !options.deferCache)
+    await cacheBytes(root, cacheName, bytes)
+  return { item, bytes, downloaded }
 }
 
-export async function resolveItems(root, index, requestedNames) {
+export async function resolveItems(root, index, requestedNames, options = {}) {
   const entries = new Map(index.items.map((item) => [item.name, item]))
   const visiting = new Set()
   const loaded = new Map()
@@ -432,7 +460,8 @@ export async function resolveItems(root, index, requestedNames) {
     const entry = entries.get(name)
     if (!entry) throw new Error(`Registry item not found: ${name}`)
     visiting.add(name)
-    const item = await loadItem(root, entry, index.release)
+    const loadedItem = await loadItem(root, entry, index.release, options)
+    const item = loadedItem.item
     for (const dependency of item.registryDependencies) {
       if (typeof dependency !== 'string')
         throw new Error(`Invalid registry dependency in ${name}.`)
@@ -440,9 +469,21 @@ export async function resolveItems(root, index, requestedNames) {
     }
     visiting.delete(name)
     loaded.set(name, { entry, item })
-    ordered.push({ entry, item })
+    ordered.push({
+      entry,
+      item,
+      cacheBytes: loadedItem.downloaded ? loadedItem.bytes : undefined,
+    })
   }
 
   for (const name of requestedNames) await visit(name)
   return ordered
+}
+
+export async function cacheResolvedResources(root, indexResource, allItems) {
+  if (indexResource.downloaded)
+    await cacheBytes(root, 'index.json', indexResource.bytes)
+  for (const { item, cacheBytes: bytes } of allItems) {
+    if (bytes) await cacheBytes(root, `items-${item.name}.json`, bytes)
+  }
 }

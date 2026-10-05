@@ -22,7 +22,7 @@ import {
   packageManagerArgs,
   runManagerInstall,
 } from './process.mjs'
-import { loadIndex, resolveItems } from './registry.mjs'
+import { cacheResolvedResources, loadIndex, resolveItems } from './registry.mjs'
 import {
   readApplication,
   readUiConfig,
@@ -167,6 +167,70 @@ async function planFiles(root, config, allItems) {
   return { planned, writes }
 }
 
+async function readInstalledBenosVersion(root, name) {
+  const manifestPath = resolve(
+    root,
+    'node_modules',
+    ...name.split('/'),
+    'package.json',
+  )
+  let manifest
+  try {
+    manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
+  } catch (error) {
+    if (error.code === 'ENOENT') return undefined
+    throw new Error(
+      `Cannot read installed package metadata at ${manifestPath}: ${error.message}`,
+      { cause: error },
+    )
+  }
+  if (
+    manifest.name !== name ||
+    typeof manifest.version !== 'string' ||
+    !semver.valid(manifest.version)
+  )
+    throw new Error(
+      `Installed package metadata for ${name} is invalid at ${manifestPath}.`,
+    )
+  return manifest.version
+}
+
+async function assertMinimumBenosVersions(root, allItems, options) {
+  const requirements = new Map()
+  for (const { item } of allItems) {
+    for (const requirement of item.minimumBenosVersions) {
+      const previous = requirements.get(requirement.name)
+      if (!previous || semver.gt(requirement.version, previous.version)) {
+        requirements.set(requirement.name, {
+          version: requirement.version,
+          items: new Set([item.name]),
+        })
+      } else if (semver.eq(requirement.version, previous.version)) {
+        previous.items.add(item.name)
+      }
+    }
+  }
+  if (requirements.size === 0) return
+
+  const manager =
+    (await detectPackageManager(root, options.packageManager)) ?? 'npm'
+  for (const [name, requirement] of requirements) {
+    const installed = await readInstalledBenosVersion(root, name)
+    if (installed && semver.gte(installed, requirement.version)) continue
+    const [command, args] = packageManagerArgs(manager, [
+      `${name}@^${requirement.version}`,
+    ])
+    const itemNames = [...requirement.items].join(', ')
+    const current = installed
+      ? `${name}@${installed}`
+      : `${name} (not installed)`
+    throw new Error(
+      `Cannot add ${itemNames}: it requires ${name} >=${requirement.version}, but the project has ${current}. Upgrade it before adding component files:
+  ${command} ${args.join(' ')}`,
+    )
+  }
+}
+
 function packageManagerHelp() {
   return 'No package-manager choice is clear. Pass --package-manager npm|pnpm|yarn|bun.'
 }
@@ -183,8 +247,12 @@ export async function addItems(options) {
     throw new Error('Registry item names must be lowercase kebab-case.')
 
   const registryUrl = options.registry ?? config.registry
-  const { index } = await loadIndex(root, registryUrl)
-  const resolved = await resolveItems(root, index, requested)
+  const indexResource = await loadIndex(root, registryUrl, { deferCache: true })
+  const resolved = await resolveItems(root, indexResource.index, requested, {
+    deferCache: true,
+  })
+  await assertMinimumBenosVersions(root, resolved, options)
+  await cacheResolvedResources(root, indexResource, resolved)
   const { planned, writes } = await planFiles(root, config, resolved)
   const packageDependencies = addDependenciesToPlan(resolved)
   const currentDependencies = {
@@ -232,7 +300,9 @@ export async function addItems(options) {
     ...dependencyAdds.map((dependency) => `install ${dependency}`),
     ...resolved.map(({ item }) => `record ${item.name}@${item.release}`),
   ]
-  console.log(`Registry ${index.release}:\n${planLines.join('\n')}`)
+  console.log(
+    `Registry ${indexResource.index.release}:\n${planLines.join('\n')}`,
+  )
   if (planLines.length === 0) return
   await confirmPlan('Apply this non-destructive plan?', options.yes)
 

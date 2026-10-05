@@ -292,9 +292,9 @@ function MenuFixture(): JSX.Element {
       <button {...api().getTriggerProps()}>File actions</button>
       <div {...api().getPositionerProps()}>
         <div {...api().getContentProps()}>
-          <button {...api().getItemProps({ value: 'alpha' })}>Alpha</button>
-          <button {...api().getItemProps({ value: 'bravo' })}>Bravo</button>
-          <button {...api().getItemProps({ value: 'charlie' })}>Charlie</button>
+          <div {...api().getItemProps({ value: 'alpha' })}>Alpha</div>
+          <div {...api().getItemProps({ value: 'bravo' })}>Bravo</div>
+          <div {...api().getItemProps({ value: 'charlie' })}>Charlie</div>
         </div>
       </div>
       <button id="after-menu" tabIndex={0}>

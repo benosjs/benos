@@ -56,6 +56,7 @@ const batch2Names = [
   'accordion',
 ]
 const batch3Names = ['dialog', 'popover', 'tooltip', 'dropdown-menu', 'toast']
+const batch4Names = ['sortable-table']
 
 try {
   await mkdir(join(batch1RegistryDirectory, 'items'), { recursive: true })
@@ -171,8 +172,14 @@ try {
     ['--filter', '@benosjs/core', 'pack', '--pack-destination', temporary],
     { cwd: root },
   )
+  await runCommand(
+    'pnpm',
+    ['--filter', '@benosjs/dom', 'pack', '--pack-destination', temporary],
+    { cwd: root },
+  )
   const localRegistry = await createLocalPackagesRegistry([
-    join(temporary, 'benosjs-core-0.1.2.tgz'),
+    join(temporary, 'benosjs-core-0.1.3.tgz'),
+    join(temporary, 'benosjs-dom-0.1.2.tgz'),
     join(temporary, 'benosjs-primitives-0.2.0.tgz'),
   ])
   if (manager === 'yarn') {
@@ -205,6 +212,11 @@ try {
     ]) {
       await rm(join(app, lockfile), { force: true })
     }
+    const appPackagePath = join(app, 'package.json')
+    const appPackage = JSON.parse(await readFile(appPackagePath, 'utf8'))
+    appPackage.dependencies['@benosjs/core'] = '^0.1.3'
+    appPackage.dependencies['@benosjs/primitives'] = '^0.2.0'
+    await writeFile(appPackagePath, JSON.stringify(appPackage, null, 2) + '\n')
     await runCommand(manager, ['install'], { cwd: app })
     await runCommand(
       process.execPath,
@@ -226,6 +238,20 @@ try {
         cli,
         'add',
         ...batch3Names,
+        '--yes',
+        '--registry',
+        batch1Registry,
+        '--package-manager',
+        manager,
+      ],
+      { cwd: app },
+    )
+    await runCommand(
+      process.execPath,
+      [
+        cli,
+        'add',
+        ...batch4Names,
         '--yes',
         '--registry',
         batch1Registry,
@@ -304,6 +330,28 @@ try {
     throw new Error(
       'benos add did not install overlay components with their shared host dependency.',
     )
+  }
+  for (const name of batch4Names) {
+    const component = join(app, 'src/components/ui', name + '.tsx')
+    const stylesheet = join(app, 'src/styles', name + '.css')
+    if (
+      !(await readFile(component, 'utf8')).includes(
+        'export function SortableTable',
+      )
+    ) {
+      throw new Error('benos add did not copy the sortable table component.')
+    }
+    if (
+      !(await readFile(stylesheet, 'utf8')).includes('.benos-sortable-table')
+    ) {
+      throw new Error('benos add did not copy the sortable table stylesheet.')
+    }
+  }
+  const batch4Lock = JSON.parse(
+    await readFile(join(app, 'benos.lock.json'), 'utf8'),
+  )
+  if (batch4Lock.items['sortable-table']?.files?.length !== 2) {
+    throw new Error('benos add did not record sortable-table files.')
   }
   const dependencyProbe =
     manager === 'yarn'

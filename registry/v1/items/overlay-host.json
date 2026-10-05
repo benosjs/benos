@@ -6,6 +6,12 @@
   "title": "Overlay host support",
   "description": "Shared themed portal host used by overlay components.",
   "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.1.2"
+    }
+  ],
   "registryDependencies": [],
   "files": [
     {

@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "sortable-table",
+  "type": "registry:component",
+  "title": "Sortable table",
+  "description": "An accessible keyed table with a three-state sortable header.",
+  "dependencies": [
+    {
+      "name": "@benosjs/core",
+      "version": "^0.1.3"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "^0.1.2"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.1.3"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.1.2"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "sortable-table.tsx",
+      "target": "components/sortable-table.tsx",
+      "contentType": "text/tsx",
+      "content": "import { computed, createUniqueId, signal } from '@benosjs/core'\nimport { For, Show, mergeProps, splitProps } from '@benosjs/dom'\nimport type { JSX } from '@benosjs/dom'\n\nexport type SortDirection = 'ascending' | 'descending'\n\nexport interface SortableTableColumn<Row> {\n  key: string\n  label: string\n  value: (row: Row) => string | number | null | undefined\n  type?: 'text' | 'number'\n}\n\nexport type SortableTableProps<Row> = Omit<\n  JSX.IntrinsicElements['table'],\n  'children' | 'class' | 'ref' | 'id' | 'rows'\n> & {\n  id?: string\n  class?: string\n  caption: string\n  rows: readonly Row[]\n  rowKey: (row: Row) => PropertyKey\n  columns: readonly SortableTableColumn<Row>[]\n  emptyMessage?: string\n  ref?: (element: HTMLTableElement) => void\n}\n\nexport function SortableTable<Row>(props: SortableTableProps<Row>): JSX.Element {\n  const merged = mergeProps({ emptyMessage: 'No rows to display.' }, props)\n  const [local, native] = splitProps(merged, [\n    'id',\n    'class',\n    'ref',\n    'caption',\n    'rows',\n    'rowKey',\n    'columns',\n    'emptyMessage',\n  ] as const)\n  const id = local.id ?? createUniqueId()\n  const sort = signal<{ key: string; direction: SortDirection } | null>(null)\n  const rows = computed(() => {\n    const current = sort()\n    if (!current) return local.rows\n    const column = local.columns.find((candidate) => candidate.key === current.key)\n    if (!column) return local.rows\n    const collator = new Intl.Collator(undefined, {\n      numeric: column.type !== 'text',\n      sensitivity: 'base',\n    })\n    return [...local.rows].sort((left, right) => {\n      const a = column.value(left)\n      const b = column.value(right)\n      const order =\n        a == null ? (b == null ? 0 : 1) : b == null ? -1 : collator.compare(String(a), String(b))\n      return current.direction === 'ascending' ? order : -order\n    })\n  })\n\n  function toggleSort(key: string): void {\n    const current = sort()\n    sort.set(\n      !current || current.key !== key\n        ? { key, direction: 'ascending' }\n        : current.direction === 'ascending'\n          ? { key, direction: 'descending' }\n          : null,\n    )\n  }\n\n  return (\n    <table\n      {...native}\n      id={id}\n      class={['benos-sortable-table', local.class].filter(Boolean).join(' ')}\n      ref={(element) => local.ref?.(element)}\n    >\n      <caption class=\"benos-sortable-table__caption\">{local.caption}</caption>\n      <thead>\n        <tr>\n          <For each={local.columns} by={(column) => column.key}>\n            {(column) => {\n              const currentColumn = column()\n              return (\n                <th\n                  scope=\"col\"\n                  aria-sort={\n                    sort()?.key === currentColumn.key ? (sort()?.direction ?? 'none') : 'none'\n                  }\n                >\n                  <button\n                    class=\"benos-sortable-table__sort\"\n                    type=\"button\"\n                    onClick={() => toggleSort(currentColumn.key)}\n                  >\n                    {currentColumn.label}\n                    <span aria-hidden=\"true\" class=\"benos-sortable-table__indicator\">\n                      {sort()?.key === currentColumn.key\n                        ? sort()?.direction === 'ascending'\n                          ? '↑'\n                          : '↓'\n                        : '↕'}\n                    </span>\n                  </button>\n                </th>\n              )\n            }}\n          </For>\n        </tr>\n      </thead>\n      <tbody>\n        <Show\n          when={rows().length > 0}\n          fallback={\n            <tr>\n              <td colSpan={local.columns.length} class=\"benos-sortable-table__empty\">\n                {local.emptyMessage}\n              </td>\n            </tr>\n          }\n        >\n          <For each={rows()} by={(row) => local.rowKey(row)}>\n            {(row) => (\n              <tr data-row-key={String(local.rowKey(row()))}>\n                <For each={local.columns} by={(column) => column.key}>\n                  {(column) => {\n                    const currentColumn = column()\n                    return (\n                      <td\n                        class={\n                          currentColumn.type === 'number'\n                            ? 'benos-sortable-table__number'\n                            : 'benos-sortable-table__text'\n                        }\n                      >\n                        {currentColumn.value(row()) ?? '—'}\n                      </td>\n                    )\n                  }}\n                </For>\n              </tr>\n            )}\n          </For>\n        </Show>\n      </tbody>\n    </table>\n  )\n}\n",
+      "checksum": "sha256:11ca03f0eb41d01a7c20fc876fd7774d041286244c01ffdf969c29c0007a57c2"
+    },
+    {
+      "path": "sortable-table.css",
+      "target": "css/sortable-table.css",
+      "contentType": "text/css",
+      "content": ".benos-sortable-table {\n  border-collapse: collapse;\n  color: var(--benos-color-text);\n  font-size: var(--benos-text-xs, 0.75rem);\n  inline-size: 100%;\n  table-layout: fixed;\n}\n\n.benos-sortable-table caption {\n  color: var(--benos-color-text);\n  font-size: var(--benos-text-sm, 0.875rem);\n  font-weight: 650;\n  padding-block-end: var(--benos-space-2);\n  text-align: start;\n}\n\n.benos-sortable-table th,\n.benos-sortable-table td {\n  border-block-end: 1px solid var(--benos-color-border);\n  padding: var(--benos-space-2) var(--benos-space-3);\n  text-align: start;\n}\n\n.benos-sortable-table th {\n  background: var(--benos-color-brand-soft);\n  font-weight: 650;\n}\n\n.benos-sortable-table__sort {\n  align-items: center;\n  background: transparent;\n  border: 0;\n  color: inherit;\n  cursor: pointer;\n  display: inline-flex;\n  font: inherit;\n  gap: var(--benos-space-2);\n  padding: 0;\n  text-align: start;\n}\n\n.benos-sortable-table__sort:focus-visible {\n  border-radius: var(--benos-radius-sm);\n  outline: 3px solid var(--benos-color-focus);\n  outline-offset: 3px;\n}\n\n.benos-sortable-table__indicator {\n  color: var(--benos-color-brand);\n  inline-size: 1em;\n  text-align: center;\n}\n\n.benos-sortable-table__text {\n  max-inline-size: 16rem;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n\n.benos-sortable-table td.benos-sortable-table__number {\n  text-align: end;\n  font-variant-numeric: tabular-nums;\n}\n\n.benos-sortable-table td.benos-sortable-table__empty {\n  color: var(--benos-color-text-muted);\n  padding-block: var(--benos-space-5) !important;\n  text-align: center;\n}\n",
+      "checksum": "sha256:f3770c61d1537acbfa62da4cf7263ad8a6198bcde1bf58269c55a400410d2ea3"
+    }
+  ]
+}

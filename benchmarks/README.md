@@ -558,3 +558,51 @@ finished:
 
 All five ratios pass the 2× production guard. No benchmark workload or
 production runtime path changed in batch 3.
+
+## UI U4 batch 4 table comparison (2026-10-05)
+
+Fresh production build sizes remain inside the unchanged limits. Batch 4 adds
+only registry source, CSS, tests, and benchmark code; core and DOM runtime
+sources did not change.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard used the median of seven runs with five timed
+samples each:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.04 |        4.77 | 1.27× |
+| 20-deep computed chain write + read |       6.38 |        5.28 | 1.21× |
+| 200-effect fanout write             |       2.11 |        1.18 | 1.74× |
+| Dynamic dependency switch           |       3.52 |        2.44 | 1.44× |
+| Repeated equal write                |       0.81 |        0.68 | 1.19× |
+
+Both adapters were built with Vite's production build and run in Chromium. Each
+round alternated which framework ran first. The fixture starts in reverse
+numeric name order so sorting requires keyed row movement. It renders the same
+three columns, caption, data, and table CSS. Initial render timing begins just
+before mount (after deterministic row data is prepared); sort timing begins at
+header activation. Both end after two `requestAnimationFrame` callbacks, which
+is a render/paint opportunity boundary and a practical browser proxy, not a
+Chrome-tracing paint timestamp. Results are the median of seven measured
+rounds after one warmup; brackets give min–max spread.
+
+| Workload                    |          Benos (ms) |          Solid (ms) | Benos / Solid |
+| --------------------------- | ------------------: | ------------------: | ------------: |
+| Initial render, 5,000 rows  | 255.0 [174.6–326.7] |    93.9 [87.7–99.3] |         2.72× |
+| Sort, 5,000 rows            |  126.8 [87.5–136.3] |  115.0 [92.3–124.3] |         1.10× |
+| Initial render, 10,000 rows | 491.4 [387.0–554.3] | 199.6 [173.9–265.1] |         2.46× |
+| Sort, 10,000 rows           | 266.2 [234.0–447.5] | 240.2 [197.4–361.4] |         1.11× |
+
+Benos is about 2.5–2.7× slower on initial mounting and about 10–11% slower
+for a full keyed sort in these runs. The initial-mount difference is consistent
+with the additional descriptor, accessor, and owner work per cell in the
+source-owned component; this benchmark does not isolate those costs, so that is
+a likely explanation rather than a profile finding. Sort spreads overlap
+substantially, so the small sort gap should be treated as directional. Raw
+samples and protocol metadata are in
+[`js-framework-benchmark/results/u4-batch4-table.json`](js-framework-benchmark/results/u4-batch4-table.json).

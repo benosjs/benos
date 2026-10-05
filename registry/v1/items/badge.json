@@ -6,6 +6,12 @@
   "title": "Badge",
   "description": "A compact status label with brand and semantic tones.",
   "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.1.2"
+    }
+  ],
   "registryDependencies": [],
   "files": [
     {

@@ -6,6 +6,12 @@
   "title": "Button",
   "description": "A typed button with accessible focus, size, and intent variants.",
   "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.1.2"
+    }
+  ],
   "registryDependencies": [],
   "files": [
     {

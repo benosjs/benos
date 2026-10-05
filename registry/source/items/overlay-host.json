@@ -12,5 +12,11 @@
       "contentType": "text/typescript",
       "sourceFile": "components/overlay-host.ts"
     }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.1.2"
+    }
   ]
 }

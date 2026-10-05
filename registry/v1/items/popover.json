@@ -8,7 +8,7 @@
   "dependencies": [
     {
       "name": "@benosjs/core",
-      "version": "^0.1.1"
+      "version": "^0.1.3"
     },
     {
       "name": "@benosjs/dom",
@@ -21,6 +21,20 @@
     {
       "name": "@zag-js/popover",
       "version": "1.44.0"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.1.3"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.1.2"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "0.2.0"
     }
   ],
   "registryDependencies": [

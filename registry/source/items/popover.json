@@ -6,7 +6,7 @@
   "dependencies": [
     {
       "name": "@benosjs/core",
-      "version": "^0.1.1"
+      "version": "^0.1.3"
     },
     {
       "name": "@benosjs/dom",
@@ -34,6 +34,20 @@
       "target": "css/popover.css",
       "contentType": "text/css",
       "sourceFile": "css/popover.css"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.1.3"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.1.2"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "0.2.0"
     }
   ]
 }

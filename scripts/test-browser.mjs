@@ -5,7 +5,7 @@ import { resolve } from 'node:path'
 const root = resolve(import.meta.dirname, '..')
 const cli = resolve(root, 'node_modules/@playwright/test/cli.js')
 const exitCode = await new Promise((resolveExit) => {
-  const child = spawn(process.execPath, [cli, 'test'], {
+  const child = spawn(process.execPath, [cli, 'test', '--workers=2'], {
     cwd: root,
     stdio: 'inherit',
   })

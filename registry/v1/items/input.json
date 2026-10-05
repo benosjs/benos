@@ -6,6 +6,12 @@
   "title": "Input",
   "description": "A styled native input with size and invalid-state support.",
   "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.1.2"
+    }
+  ],
   "registryDependencies": [],
   "files": [
     {

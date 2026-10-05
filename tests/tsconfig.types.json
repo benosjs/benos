@@ -23,6 +23,7 @@
     "./ui-batch1.types.ts",
     "./ui-batch2.types.ts",
     "./ui-batch3.types.ts",
+    "./ui-batch4.types.ts",
     "../registry/source/components/*.tsx"
   ]
 }

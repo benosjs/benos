@@ -19,7 +19,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:4937e681fb78127f239140e573212b6caf65dfa457b2c25b820d2e2b57cfc83a"
+      "checksum": "sha256:0c94e9e99bde5499f525bd4629618d17eae86ad726453c452d92158be62d4260"
     },
     {
       "name": "badge",
@@ -29,7 +29,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/badge.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:2d82a69bfa5a57b73aa3967166f98a506c81dacbaf935aa244322a89a4e824bc"
+      "checksum": "sha256:ade3097dae72ad81a093518e4148b03bfb629dad2a7be16379da24f8b96f2be9"
     },
     {
       "name": "button",
@@ -39,7 +39,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/button.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:01b1c1fdff6458aa5da9c18eb8a9f9be464d9cc0c1abec102e823b3de2b75e15"
+      "checksum": "sha256:4f131e6646fcb1b1e45d6c8ca070f3717a34d3ca71e395efaa17f312bf217de5"
     },
     {
       "name": "card",
@@ -49,7 +49,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/card.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:a1ba739c0a1c36abed5820dfcfe4a15d8af324ffd5dedec78af39412413afab8"
+      "checksum": "sha256:18ff4eab487b77f832c998e607568fea2c49d420ab479a0766f542b9435d2ba6"
     },
     {
       "name": "checkbox",
@@ -68,7 +68,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:f4cea878d42c22331e2a68ca361184ed7d93230940720c322ac6e1b40c2857c3"
+      "checksum": "sha256:59bbf3449c7b02176658b44e8eec17ae1820f3c15c1d26368a3797593eb526c5"
     },
     {
       "name": "dialog",
@@ -79,7 +79,7 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.1.1"
+          "version": "^0.1.3"
         },
         {
           "name": "@benosjs/dom",
@@ -97,7 +97,7 @@
       "registryDependencies": [
         "overlay-host"
       ],
-      "checksum": "sha256:9b5cc8279302542440fb6c88e915ae0da4792b0c478fc71a1020cd55f1cd0701"
+      "checksum": "sha256:457b4a0754dc8276fa6c5141d5c17b9c50e11208d8384325d3ecad5299c5ac83"
     },
     {
       "name": "dropdown-menu",
@@ -108,7 +108,7 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.1.1"
+          "version": "^0.1.3"
         },
         {
           "name": "@benosjs/dom",
@@ -126,7 +126,7 @@
       "registryDependencies": [
         "overlay-host"
       ],
-      "checksum": "sha256:e63f9993b5baa6031ce4a17458ba7fb885de8e454e0197913d9b85793514ab73"
+      "checksum": "sha256:342b1f27ff86f4bc1c58d54cd76f6356c137ee4099664c89239ad1a5e9901b04"
     },
     {
       "name": "input",
@@ -136,7 +136,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/input.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:0ad8d440afe266b5b38fa3df63b8a46e07bab1ce068d783da630eb7ab798fa0e"
+      "checksum": "sha256:4be470559ef95c2fb40a17d0beb33a2f8c9632df28979692183e20fa0bcb0b5e"
     },
     {
       "name": "label",
@@ -146,7 +146,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/label.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:53ce8f34368b48074a01bb2907c3ba3569ce00b761b85a71b1cf4e24101f060e"
+      "checksum": "sha256:4abca3d5340fac45a89897ce13adeb2d1cf75145a51dda989150fb3d1f2149a0"
     },
     {
       "name": "overlay-host",
@@ -156,7 +156,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/overlay-host.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:4f66f0041bd21e9f9d911950c410a95b1039af8b74a2b8f886534029b2c190af"
+      "checksum": "sha256:607b5672974615b79b5b2d95228836b75a2de6aac86db1679e7fb8fb12fde57c"
     },
     {
       "name": "popover",
@@ -167,7 +167,7 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.1.1"
+          "version": "^0.1.3"
         },
         {
           "name": "@benosjs/dom",
@@ -185,7 +185,7 @@
       "registryDependencies": [
         "overlay-host"
       ],
-      "checksum": "sha256:164840ddc3c443d5e80cf8cbfb2c648747c3b79f0dedc1c7548e9193620145ed"
+      "checksum": "sha256:dd3f8e6c4ccff570ea8d83fa05940cec906d5484164449af8e0814378c81ac12"
     },
     {
       "name": "radio-group",
@@ -204,7 +204,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:e55c69b5ef61a1f8073c9eff9627970204eeeb56e366aac4661e5af3b303a4a0"
+      "checksum": "sha256:44581e5794e61ef3c71ad4aed2dab7f8a4fca17973dd49b422772155e7a50118"
     },
     {
       "name": "select",
@@ -223,7 +223,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:5b518ebd798f57b32659c73bf638ee6833d4420270c7850a6b050596c16e3198"
+      "checksum": "sha256:e4be8e723e3b7454d85411831f19ea4af657ed5442a3be024142dc0925b8cc4e"
     },
     {
       "name": "separator",
@@ -233,7 +233,26 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/separator.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:35b2fd670faf9e398e18bf1d7ee07225967f3e9b6ba6e57a626f83eae3f4ee90"
+      "checksum": "sha256:c98331715da6b796f3894a2ae07ad6ac05c355f6b476e1aa9964ab92f1fd6785"
+    },
+    {
+      "name": "sortable-table",
+      "type": "registry:component",
+      "title": "Sortable table",
+      "description": "An accessible keyed table with a three-state sortable header.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/sortable-table.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.1.3"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.1.2"
+        }
+      ],
+      "registryDependencies": [],
+      "checksum": "sha256:c4131eb936b4b5d5f727b33495e9f5984af0e17aba92588a3ebca6a21ba8c0dc"
     },
     {
       "name": "switch",
@@ -252,7 +271,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:52feaab5830d529115427396ad62d0932701431111a7b35349a02e600ac7ee15"
+      "checksum": "sha256:a114a1c913f55f926e2e94e3609f497b2b3b461c170abc20f7b15f8196e38aef"
     },
     {
       "name": "tabs",
@@ -271,7 +290,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:a776d2a0a03621530aedb992da8f3a12df938df697462bce75b07c36d7e4c276"
+      "checksum": "sha256:635f06ec57fc41f5b53c5849405456c8064780faf54f11816b443b5356dd1034"
     },
     {
       "name": "textarea",
@@ -281,7 +300,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/textarea.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:dd8cc16b56646cb586895bb5cf77be7343be2ec097005c0f7331a19658de8958"
+      "checksum": "sha256:d799809ee7f38b0045bc4cf6efa0c69a22ed242d724f41fca31a0d5b1cf90df3"
     },
     {
       "name": "toast",
@@ -292,7 +311,7 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.1.1"
+          "version": "^0.1.3"
         },
         {
           "name": "@benosjs/dom",
@@ -314,7 +333,7 @@
       "registryDependencies": [
         "overlay-host"
       ],
-      "checksum": "sha256:0c659e3d1d95b9431ce9e8c78cf49bff9570f69239fea9fe574f9b3059056d18"
+      "checksum": "sha256:4dce7482e97bb01859fa24ffcfab7f1a99c4c6cf21ff1544dfd0531068a1e6e6"
     },
     {
       "name": "tooltip",
@@ -325,7 +344,7 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.1.1"
+          "version": "^0.1.3"
         },
         {
           "name": "@benosjs/dom",
@@ -343,7 +362,7 @@
       "registryDependencies": [
         "overlay-host"
       ],
-      "checksum": "sha256:265a9c923d5340f4f2eea340cf837d26798a645d8b623d09e25985e34b22c343"
+      "checksum": "sha256:b6a9bb6bb043a299a44cd8a72f9288c24a338d9a38342753ec3e3bc56cddd82c"
     }
   ]
 }

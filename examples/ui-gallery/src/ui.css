@@ -16,6 +16,7 @@
 @import '../../../registry/source/css/tooltip.css';
 @import '../../../registry/source/css/dropdown-menu.css';
 @import '../../../registry/source/css/toast.css';
+@import '../../../registry/source/css/sortable-table.css';
 
 body {
   background: var(--benos-color-canvas);

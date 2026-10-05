@@ -4,6 +4,7 @@ import {
   chmod,
   mkdir,
   mkdtemp,
+  readdir,
   readFile,
   rm,
   symlink,
@@ -47,6 +48,19 @@ function runCli(cwd: string, ...args: string[]) {
   return runCliInEnv(cwd, {}, ...args)
 }
 
+async function installPackageFixture(
+  app: string,
+  name: string,
+  version: string,
+) {
+  const packageDirectory = join(app, 'node_modules', ...name.split('/'))
+  await mkdir(packageDirectory, { recursive: true })
+  await writeFile(
+    join(packageDirectory, 'package.json'),
+    `${JSON.stringify({ name, version }, null, 2)}\n`,
+  )
+}
+
 async function createProject(directory: string, aliases = true) {
   await mkdir(directory, { recursive: true })
   await writeFile(
@@ -83,7 +97,12 @@ async function createProject(directory: string, aliases = true) {
 
 async function writeRegistry(
   rootDirectory: string,
-  options?: { target?: string; dependency?: string; dependencyRange?: string },
+  options?: {
+    target?: string
+    dependency?: string
+    dependencyRange?: string
+    minimumBenosVersions?: Array<{ name: string; version: string }>
+  },
 ) {
   const registryDirectory = join(rootDirectory, 'registry')
   await mkdir(registryDirectory, { recursive: true })
@@ -103,6 +122,7 @@ async function writeRegistry(
           },
         ]
       : [],
+    minimumBenosVersions: options?.minimumBenosVersions ?? [],
     registryDependencies: [],
     files: [
       {
@@ -156,6 +176,7 @@ async function writeRegistryGraph(
       title: name,
       description: `The ${name} fixture.`,
       dependencies: [],
+      minimumBenosVersions: [],
       registryDependencies,
       files: [
         {
@@ -266,6 +287,109 @@ describe('benos init', () => {
       expect(result.status).not.toBe(0)
       expect(result.stderr).toContain('rerun with --yes')
       await expect(access(join(app, 'benos.json'))).rejects.toThrow()
+    })
+  })
+})
+
+describe('benos add minimum Benos versions', () => {
+  it('refuses an outdated installed package before writing component files', async () => {
+    await withTemp(async (temporary) => {
+      const app = join(temporary, 'app')
+      await createProject(app)
+      const packageJsonPath = join(app, 'package.json')
+      const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf8'))
+      packageJson.dependencies['@benosjs/core'] = '^0.1.2'
+      await writeFile(
+        packageJsonPath,
+        `${JSON.stringify(packageJson, null, 2)}\n`,
+      )
+      await installPackageFixture(app, '@benosjs/core', '0.1.2')
+      const registry = await writeRegistry(temporary, {
+        minimumBenosVersions: [{ name: '@benosjs/core', version: '0.1.3' }],
+      })
+      expect(runCli(app, 'init', '--yes', '--registry', registry).status).toBe(
+        0,
+      )
+      const lockPath = join(app, 'benos.lock.json')
+      const lockBefore = await readFile(lockPath, 'utf8')
+      const packageBefore = await readFile(packageJsonPath, 'utf8')
+      const cachePath = join(app, '.benos', 'cache')
+      const cacheBefore = await readdir(cachePath).catch((error) => {
+        if (error.code === 'ENOENT') return null
+        throw error
+      })
+
+      const result = runCli(
+        app,
+        'add',
+        'button',
+        '--yes',
+        '--registry',
+        registry,
+        '--package-manager',
+        'pnpm',
+      )
+
+      expect(result.status).toBe(1)
+      expect(result.stderr).toContain(
+        'requires @benosjs/core >=0.1.3, but the project has @benosjs/core@0.1.2',
+      )
+      expect(result.stderr).toContain('pnpm add @benosjs/core@^0.1.3')
+      await expect(
+        readFile(join(app, 'src/components/ui/button.tsx'), 'utf8'),
+      ).rejects.toMatchObject({ code: 'ENOENT' })
+      expect(await readFile(lockPath, 'utf8')).toBe(lockBefore)
+      expect(await readFile(packageJsonPath, 'utf8')).toBe(packageBefore)
+      const cacheAfter = await readdir(cachePath).catch((error) => {
+        if (error.code === 'ENOENT') return null
+        throw error
+      })
+      expect(cacheAfter).toEqual(cacheBefore)
+    })
+  })
+
+  it('adds the component when the installed package meets its minimum', async () => {
+    await withTemp(async (temporary) => {
+      const app = join(temporary, 'app')
+      await createProject(app)
+      const packageJsonPath = join(app, 'package.json')
+      const packageJson = JSON.parse(await readFile(packageJsonPath, 'utf8'))
+      packageJson.dependencies['@benosjs/core'] = '^0.1.3'
+      await writeFile(
+        packageJsonPath,
+        `${JSON.stringify(packageJson, null, 2)}\n`,
+      )
+      await installPackageFixture(app, '@benosjs/core', '0.1.3')
+      const registry = await writeRegistry(temporary, {
+        minimumBenosVersions: [{ name: '@benosjs/core', version: '0.1.3' }],
+      })
+      expect(runCli(app, 'init', '--yes', '--registry', registry).status).toBe(
+        0,
+      )
+
+      const result = runCli(
+        app,
+        'add',
+        'button',
+        '--yes',
+        '--registry',
+        registry,
+        '--package-manager',
+        'pnpm',
+      )
+
+      expect(result.status, result.stderr).toBe(0)
+      expect(result.stdout).toContain('Added button')
+      expect(
+        await readFile(join(app, 'src/components/ui/button.tsx'), 'utf8'),
+      ).toContain('export const Button')
+      expect(await readdir(join(app, '.benos', 'cache'))).toContain(
+        'items-button.json',
+      )
+      const lock = JSON.parse(
+        await readFile(join(app, 'benos.lock.json'), 'utf8'),
+      )
+      expect(lock.items.button.version).toBe('0.2.0')
     })
   })
 })

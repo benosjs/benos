@@ -6,6 +6,12 @@
   "title": "Card",
   "description": "A neutral content surface with default, outlined, and raised variants.",
   "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.1.2"
+    }
+  ],
   "registryDependencies": [],
   "files": [
     {

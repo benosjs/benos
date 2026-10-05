@@ -237,6 +237,12 @@ for (const name of primitiveNames) {
       await expect(menu).toBeHidden()
       await expect(trigger).toBeFocused()
       await trigger.press('ArrowDown')
+      await expect(menu).toBeVisible()
+      await expect(menu).toHaveAttribute(
+        'aria-activedescendant',
+        'fixture-menu/alpha',
+      )
+      await expect(menu).toBeFocused()
       await page.keyboard.press('Tab')
       // Zag's isValidTabEvent guard prevents Tab from leaving this menu, even
       // though APG specifies that Tab exits and closes it.

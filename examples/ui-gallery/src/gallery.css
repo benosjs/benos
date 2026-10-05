@@ -159,6 +159,26 @@ h1 {
   padding-block-start: 14px;
 }
 
+.table-note {
+  color: var(--benos-color-text-muted);
+  font-size: var(--benos-text-xs);
+  margin: 0 0 var(--benos-space-3);
+}
+
+.table-toolbar {
+  align-items: center;
+  display: flex;
+  gap: var(--benos-space-3);
+  justify-content: space-between;
+  margin-block-end: var(--benos-space-3);
+}
+
+.table-toolbar > span {
+  color: var(--benos-color-text-muted);
+  font-size: var(--benos-text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
 .sample-group h3 {
   font-size: 13px;
   letter-spacing: 0.01em;

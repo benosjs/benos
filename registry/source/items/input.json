@@ -18,5 +18,11 @@
       "contentType": "text/css",
       "sourceFile": "css/input.css"
     }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.1.2"
+    }
   ]
 }

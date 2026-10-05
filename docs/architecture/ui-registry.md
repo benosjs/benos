@@ -44,6 +44,7 @@ Proposed index:
 Each item document lists relative registry paths, target templates, content types, checksums, and inline UTF-8 file content, following shadcn's source-registry approach. The index and item `dependencies` fields are arrays of `{ "name": "package", "version": "semver-range" }` records. No target may escape configured directories.
 
 - npm dependencies are explicit package/range records, not bare package names. Batch 1 has none; Batch 2 declares `@benosjs/primitives` and the corresponding Zag machine packages, and source imports use public package entry points rather than internal Benos subpaths.
+- Every item payload includes `minimumBenosVersions`, an array of exact minimum versions such as `[ { "name": "@benosjs/core", "version": "0.1.3" } ]`. This is separate from npm dependency ranges: the minimum records the oldest runtime that implements APIs used by the source, while the dependency range expresses install compatibility. `benos add` checks installed package manifests for every resolved item before writing component files, changing the application manifest or lockfile, or populating the cache. If a package is absent or too old, it refuses and prints the detected package manager's exact upgrade command, such as `pnpm add @benosjs/core@^0.1.3`.
 - Every registry component's public props include `id?: string`. Components that need a machine or relationship ID forward it to the primitive; absent values come from `createUniqueId()`. Stateless components apply the optional ID to their root element for a consistent component API.
 - registryDependencies name other registry items such as tokens or shared helpers. Resolve recursively, deduplicate by item/version, and apply deterministic topological ordering.
 - files contain source-owned TSX/TypeScript/CSS. All TSX imports public @benosjs paths. A target starts with `components/` or `css/`; the CLI maps those prefixes to `benos.json` destinations and rejects traversal, absolute paths, and symlink escapes.
@@ -98,9 +99,10 @@ For benos add button input dialog:
 
 1. Load and validate the configured HTTPS index, or an explicitly selected local registry in development.
 2. Resolve requested items and transitive registry dependencies. Detect missing names, cycles, version conflicts, and duplicate destinations before writing.
-3. Resolve npm dependency ranges without downgrading installed compatible packages. Show any manifest/lockfile change.
-4. Build a full plan of paths, collisions, package changes, CSS, config, and lock changes. Interactive mode displays it; CI mode requires explicit acceptance such as --yes.
-5. Apply validated writes atomically per install group and record exact item versions/checksums.
+3. Check installed `@benosjs/*` package versions against each resolved item's `minimumBenosVersions`. On failure, print the manager-specific upgrade command and do not write files, package metadata, lock entries, or registry cache data.
+4. Resolve npm dependency ranges without downgrading installed compatible packages. Show any manifest/lockfile change.
+5. Build a full plan of paths, collisions, package changes, CSS, config, and lock changes. Interactive mode displays it; CI mode requires explicit acceptance such as --yes.
+6. After compatibility succeeds, cache verified registry payloads, apply validated writes atomically per install group, and record exact item versions/checksums.
 
 Identical registry version, config, and requested names produce deterministic dependency plans and file bytes.
 
@@ -135,6 +137,7 @@ Identical registry version, config, and requested names produce deterministic de
 - Security fixtures for traversal, absolute/drive paths, symlinks, case collisions, oversized files, redirect policy, and non-HTTPS URLs.
 - Same index+lock yields identical output; index movement does not rewrite installed base metadata.
 - npm/pnpm/Yarn/Bun consumers type-check on Ubuntu, Windows, and macOS.
+- The minimum-version gate refuses old and absent installed Benos packages without writing project state or cache data, prints the exact package-manager upgrade command, and succeeds once installed package versions meet the item requirements.
 
 ## Hard-to-reverse decisions
 

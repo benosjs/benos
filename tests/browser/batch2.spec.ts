@@ -31,8 +31,8 @@ test('gallery shows all six primitives with selected and open states', async ({
   const panels = page.locator('.mode-panel')
   await expect(panels).toHaveCount(3)
   await expect(
-    page.getByLabel('Components in batches 1, 2, and 3').locator('span'),
-  ).toHaveCount(18)
+    page.getByLabel('Components in batches 1, 2, 3, and 4').locator('span'),
+  ).toHaveCount(19)
 
   for (let index = 0; index < 3; index += 1) {
     const panel = panels.nth(index)
@@ -379,18 +379,18 @@ for (const name of componentNames) {
         await trigger.press('ArrowDown')
         const listbox = page.getByRole('listbox')
         await expect(listbox).toBeVisible()
-        await listbox.press('End')
+        await page.keyboard.press('End')
         await expect(page.getByRole('option').nth(2)).toHaveAttribute(
           'data-highlighted',
           '',
         )
-        await listbox.press('Home')
-        await listbox.press('s')
+        await page.keyboard.press('Home')
+        await page.keyboard.press('s')
         await expect(page.getByRole('option').nth(1)).toHaveAttribute(
           'data-highlighted',
           '',
         )
-        await listbox.press('Enter')
+        await page.keyboard.press('Enter')
         await expect(trigger).toContainText('South')
         await trigger.press('ArrowDown')
         await page.keyboard.press('Escape')

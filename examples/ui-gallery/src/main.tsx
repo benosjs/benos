@@ -19,14 +19,57 @@ import { DropdownMenu } from '../../../registry/source/components/dropdown-menu.
 import { Popover } from '../../../registry/source/components/popover.js'
 import { Toast } from '../../../registry/source/components/toast.js'
 import { Tooltip } from '../../../registry/source/components/tooltip.js'
+import { SortableTable } from '../../../registry/source/components/sortable-table.js'
+import type { SortableTableColumn } from '../../../registry/source/components/sortable-table.js'
 import './ui.css'
 import './gallery.css'
 
 type ThemeMode = 'light' | 'dark' | 'rtl'
 
+type ExampleRow = {
+  id: string
+  name: string
+  region: string
+  requests: number
+}
+
+const sampleTableRows: readonly ExampleRow[] = [
+  { id: 'u-1', name: 'Amina Saleh', region: 'Beirut', requests: 128 },
+  { id: 'u-2', name: 'Daniel Haddad', region: 'Tripoli', requests: 42 },
+  {
+    id: 'u-3',
+    name: 'Maya Khoury with a deliberately long display name',
+    region: 'Sidon',
+    requests: 305,
+  },
+  { id: 'u-4', name: 'Omar Nasser', region: 'Byblos', requests: 87 },
+]
+
+const largeTableRows: readonly ExampleRow[] = Array.from(
+  { length: 10_000 },
+  (_, index) => ({
+    id: `member-${index + 1}`,
+    name: index === 12 ? sampleTableRows[2].name : `Member ${index + 1}`,
+    region: ['Beirut', 'Tripoli', 'Sidon', 'Byblos'][index % 4],
+    requests: ((index + 1) * 37) % 1_200,
+  }),
+)
+
+const tableColumns: readonly SortableTableColumn<ExampleRow>[] = [
+  { key: 'name', label: 'Name', value: (row) => row.name },
+  { key: 'region', label: 'Region', value: (row) => row.region },
+  {
+    key: 'requests',
+    label: 'Requests',
+    type: 'number',
+    value: (row) => row.requests,
+  },
+]
+
 function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
   const rtl = props.mode === 'rtl'
   const toastOpen = signal(false)
+  const tableRows = signal(sampleTableRows)
 
   return (
     <section
@@ -279,6 +322,40 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
         </div>
       </section>
 
+      <section class="sample-group" aria-labelledby={'table-' + props.mode}>
+        <h3 id={'table-' + props.mode}>Sortable table</h3>
+        <p class="table-note">
+          Sortable columns use native buttons; sorting reorders the same keyed
+          rows.
+        </p>
+        <div class="table-toolbar">
+          <Button
+            variant="secondary"
+            onClick={() =>
+              tableRows.set(
+                tableRows() === largeTableRows
+                  ? sampleTableRows
+                  : largeTableRows,
+              )
+            }
+          >
+            {tableRows() === largeTableRows
+              ? 'Show sample rows'
+              : 'Show 10,000 rows'}
+          </Button>
+          <span aria-live="polite">
+            {tableRows().length.toLocaleString()} rows
+          </span>
+        </div>
+        <SortableTable
+          id={'members-' + props.mode}
+          caption={rtl ? 'أعضاء الفريق' : 'Team members'}
+          rows={tableRows()}
+          rowKey={(row) => row.id}
+          columns={tableColumns}
+        />
+      </section>
+
       <section class="sample-group" aria-labelledby={'overlays-' + props.mode}>
         <h3 id={'overlays-' + props.mode}>Overlays</h3>
         <p class="overlay-note">
@@ -386,7 +463,7 @@ export function mountGallery(host: HTMLElement): () => void {
         </header>
 
         <section class="intro">
-          <p class="eyebrow">Source-owned components · Batches 1, 2, and 3</p>
+          <p class="eyebrow">Source-owned components · Batches 1–4</p>
           <h1>Small building blocks, in your hands.</h1>
           <p>
             Native HTML, Benos getter-backed props, and a quiet navy palette.
@@ -394,7 +471,7 @@ export function mountGallery(host: HTMLElement): () => void {
           </p>
           <div
             class="component-list"
-            aria-label="Components in batches 1, 2, and 3"
+            aria-label="Components in batches 1, 2, 3, and 4"
           >
             <span>Button</span>
             <span>Input</span>
@@ -414,6 +491,7 @@ export function mountGallery(host: HTMLElement): () => void {
             <span>Tooltip</span>
             <span>Dropdown menu</span>
             <span>Toast</span>
+            <span>Sortable table</span>
           </div>
         </section>
 
@@ -424,7 +502,7 @@ export function mountGallery(host: HTMLElement): () => void {
         </div>
 
         <footer class="site-footer">
-          <span>Batches 1, 2, and 3 · source-owned styled components</span>
+          <span>Batches 1–4 · source-owned styled components</span>
           <span>Colors follow the Benos navy and light marks.</span>
         </footer>
       </main>
