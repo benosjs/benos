@@ -2,8 +2,7 @@
 
 **Date:** 2026-10-05
 
-**Status:** Implementation and local verification complete; GitHub Actions is
-pending the authorized push.
+**Status:** Implementation, local verification, and GitHub Actions complete.
 
 ## Registry compatibility gate
 
@@ -52,8 +51,9 @@ ESLint/Prettier with pnpm.
   2× Preact guard.
 - Fresh production sizes: core 4,051 / 4,096 gzip bytes; core + DOM 10,200 /
   10,240 gzip bytes. No core or DOM runtime source changed.
-- GitHub Actions: pending; this checkpoint will be updated after the
-  `ui-system` workflow finishes.
+- GitHub Actions: [run 37286446852](https://github.com/benosjs/benos/actions/runs/37286446852)
+  passed the main verification job, all 12 OS/package-manager CLI matrix cells,
+  and create-benos on Ubuntu, Windows, and macOS.
 
 ## Production table benchmark
 
