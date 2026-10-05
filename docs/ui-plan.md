@@ -258,4 +258,10 @@ Complete **U0** and **U1** only, then stop at the U1 checkpoint for my review.
 
 ## U6 documentation and starter status (2026-10-05)
 
-- **In progress:** 19 guide pages and a guide index cover install, tokens, copied source, updates/conflicts, component APIs, variants, and accessibility behavior. `create-benos` now has a no-by-default prompt and `--ui`/`--no-ui`; the opt-in starter uses Button and Input. The gallery links each component to its guide and has a production deployment guide. Local and matrix verification plus the CI run are recorded in [the U6 checkpoint](checkpoints/ui-U6.md).
+- **Complete:** 19 guide pages and a guide index cover installation, tokens,
+  copied source, updates/conflicts, component APIs, variants, and accessibility
+  behavior. `create-benos` has the no-by-default prompt and `--ui`/`--no-ui`;
+  the opt-in starter uses Button and Input. The gallery links every component
+  to its guide and has a production deployment guide. Local verification and
+  all 16 jobs in [CI run 37310690258](https://github.com/benosjs/benos/actions/runs/37310690258)
+  passed. Full results are in [the U6 checkpoint](checkpoints/ui-U6.md).

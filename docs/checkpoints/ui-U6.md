@@ -1,65 +1,69 @@
 # U6 checkpoint
 
-**Status:** implementation and local verification are complete. The final
-Ubuntu, Windows, and macOS CI matrix is pending the push for this checkpoint.
+**Status:** complete. All local verification and the full GitHub Actions
+workflow passed. No packages were published and the gallery was not deployed.
 
 ## What changed
 
-- Added the [UI guide](../ui/README.md) and one page for each of the 19
-  components. Pages cover APIs, variants, and accessibility. The guide includes
-  installation, token theming, editing copied source, `diff`/`update` and
-  conflict resolution, and the minimum-version gate. Select and Dropdown Menu
-  document their current Zag 1.44.0 Tab behavior; RadioGroup documents WebKit's
-  native RTL ArrowLeft behavior.
-- Expanded `check:doc-examples` to run every guide TSX snippet through the
-  Benos compiler in `none` and `safe` modes and then strict TypeScript checking.
+- Added the [UI guide](../ui/README.md) and a guide page for each of the 19
+  components. The guide covers installation with `benos init` and `benos add`,
+  theme tokens, editing copied source, `diff`/`update`, conflict resolution,
+  and minimum-version requirements. Select and Dropdown Menu describe their
+  current Zag 1.44.0 Tab behavior; RadioGroup describes WebKit's native RTL
+  ArrowLeft behavior.
+- Expanded `check:doc-examples` to compile every guide example in `none` and
+  `safe` optimization modes and then strict-type-check it.
 - Added the default-No “Add Benos UI components?” prompt and `--ui`/`--no-ui`
-  flags to create-benos. Opting in installs the generated app dependencies,
-  runs `benos init`, adds Button and Input, and switches the starter to those
-  components. The UI starter is 150 lines of TSX; its CSS reuses the existing
-  76-line starter stylesheet plus two UI-specific rules.
-- Added both opt-in and opt-out assertions to the existing OS/package-manager
-  consumer matrix. The exact matrix is configured in `.github/workflows/ci.yml`:
-
-| OS      | npm     | pnpm    | Yarn    | Bun     |
-| ------- | ------- | ------- | ------- | ------- |
-| Ubuntu  | Pending | Pending | Pending | Pending |
-| Windows | Pending | Pending | Pending | Pending |
-| macOS   | Pending | Pending | Pending | Pending |
-
-- Added guide links for every component to the gallery and a production Vite
-  build. [Deployment instructions](../ui-gallery-deployment.md) describe the
-  Vercel settings; nothing has been deployed.
-- Clarified the U5 conflict artifacts' resolution instructions so the guide's
-  update workflow explains how to advance the pinned base without overwriting
-  local edits.
+  flags to create-benos. The opt-in path installs the app dependencies, runs
+  `benos init`, adds Button and Input, and uses them in the starter.
+- Added the opt-in and opt-out cases to the Ubuntu/Windows/macOS by
+  npm/pnpm/Yarn/Bun consumer matrix.
+- Added links from all 19 gallery entries to their guide pages and verified a
+  production gallery build. [Deployment instructions](../ui-gallery-deployment.md)
+  document the Vercel settings; no deployment was performed.
 
 ## Verification
 
-| Check                                                            | Result                                                                                                                                                         |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm install --lockfile-only` and frozen install                | Pass                                                                                                                                                           |
-| `pnpm build`                                                     | Pass                                                                                                                                                           |
-| `pnpm gallery:build`                                             | Pass; JavaScript 332.27 KB (86.29 KB gzip), CSS 30.73 KB (5.19 KB gzip)                                                                                        |
-| `pnpm test`                                                      | Pass; 221 tests across 20 files                                                                                                                                |
-| `pnpm --filter create-benos test`                                | Pass; 4 tests                                                                                                                                                  |
-| Packed create-benos E2E                                          | Pass; packed CLI scaffolds and the generated app passes typecheck, build, test, and lint                                                                       |
-| `pnpm check:doc-examples`                                        | Pass; 28 TSX examples compiled in both modes and strict type-checked                                                                                           |
-| `pnpm typecheck:types` and `pnpm check:jsx-types`                | Pass                                                                                                                                                           |
-| `pnpm lint`                                                      | Pass                                                                                                                                                           |
-| `pnpm check:packed`, `check:public-imports`, and `check:engines` | Pass                                                                                                                                                           |
-| `pnpm size`                                                      | Core 4,051/4,096 bytes; core + DOM 10,200/10,240 bytes                                                                                                         |
-| Local `BENOS_PACKAGE_MANAGER=pnpm` UI CLI consumer run           | Pass; default No, `--no-ui`, and `--ui`; UI starter typecheck/build/test/lint all pass                                                                         |
-| Focused updated catalog-state browser test                       | Pass in Chromium, Firefox, and WebKit                                                                                                                          |
-| Full browser suite                                               | 402 passed; 3 failed on the old gallery label assertion. Updated the assertion; focused rerun passes in all three browsers. Full post-fix suite is part of CI. |
-| Ubuntu/Windows/macOS × npm/pnpm/Yarn/Bun matrix                  | Pending CI                                                                                                                                                     |
+The final workflow is [CI run 37310690258](https://github.com/benosjs/benos/actions/runs/37310690258),
+triggered by commit `79095698461e34a6abc3c63e55e563f3960a9ee8`. All 16 jobs
+passed: the verification job, three create-benos OS jobs, and all 12 UI CLI
+matrix jobs.
+
+| OS      | npm  | pnpm | Yarn | Bun  |
+| ------- | ---- | ---- | ---- | ---- |
+| Ubuntu  | Pass | Pass | Pass | Pass |
+| Windows | Pass | Pass | Pass | Pass |
+| macOS   | Pass | Pass | Pass | Pass |
+
+| Check                                                        | Result                                                                                          |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `pnpm install --lockfile-only` and frozen install            | Pass                                                                                            |
+| `pnpm build`                                                 | Pass                                                                                            |
+| `pnpm gallery:build`                                         | Pass; JavaScript 332.27 KB (86.29 KB gzip), CSS 30.73 KB (5.19 KB gzip)                         |
+| `pnpm test`                                                  | Pass; 221 tests across 20 files                                                                 |
+| `pnpm --filter create-benos test`                            | Pass; 4 tests                                                                                   |
+| Packed create-benos E2E                                      | Pass; generated app type-check, build, test, and lint passed on Ubuntu, Windows, and macOS      |
+| UI CLI matrix                                                | Pass; all 12 OS/package-manager cells shown above                                               |
+| `pnpm check:doc-examples`                                    | Pass; 28 TSX examples compiled in both modes and strict-type-checked                            |
+| `pnpm typecheck:types`, `pnpm check:jsx-types`               | Pass                                                                                            |
+| `pnpm lint`                                                  | Pass                                                                                            |
+| `pnpm check:packed`, `check:public-imports`, `check:engines` | Pass                                                                                            |
+| `pnpm audit:template`                                        | Pass; fresh packed scaffold install had no engine or deprecation warnings and 0 vulnerabilities |
+| `pnpm size`                                                  | Core 4,051/4,096 bytes; core + DOM 10,200/10,240 bytes                                          |
+| `pnpm bench:guard`                                           | Pass                                                                                            |
+| `pnpm test:browser`                                          | Pass; 405 tests across Chromium, Firefox, and WebKit in 6.1 minutes                             |
+
+The first U6 CI run found that `audit:template` executed the packed CLI before
+installing its declared dependencies. The audit script now installs the packed
+CLI and its packed `benos` dependency in the extracted package before running
+it. The corrected run above passes.
 
 ## Release and deployment notes
 
-`create-benos` now depends on the `benos` CLI workspace package. Packing
-rewrites `workspace:^` to a normal semver range, and the packed E2E installs
-the packed CLI archive. The CLI package must be published before a future
-create-benos release containing this feature. No package was published here.
+`create-benos` depends on the `benos` CLI workspace package. Packing rewrites
+`workspace:^` to a normal semver range, and the packed E2E installs the packed
+CLI archive. Publish the CLI before a future create-benos release containing
+this integration. No package was published here.
 
 The starter's Website link remains omitted per the earlier instruction to skip
 it until the public website URL is known. The gallery's component guide links
