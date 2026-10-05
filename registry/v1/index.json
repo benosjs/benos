@@ -95,9 +95,10 @@
         }
       ],
       "registryDependencies": [
-        "overlay-host"
+        "overlay-host",
+        "button"
       ],
-      "checksum": "sha256:457b4a0754dc8276fa6c5141d5c17b9c50e11208d8384325d3ecad5299c5ac83"
+      "checksum": "sha256:2671e95fe8c647c655fb497d5268ce79334e2c966d3a378142dc2773c3697469"
     },
     {
       "name": "dropdown-menu",
@@ -124,9 +125,10 @@
         }
       ],
       "registryDependencies": [
-        "overlay-host"
+        "overlay-host",
+        "button"
       ],
-      "checksum": "sha256:342b1f27ff86f4bc1c58d54cd76f6356c137ee4099664c89239ad1a5e9901b04"
+      "checksum": "sha256:6d531010feff2bf9d22dc2862e332ab4c7193b6fec81fdba5287499b6464d6c4"
     },
     {
       "name": "input",
@@ -183,9 +185,10 @@
         }
       ],
       "registryDependencies": [
-        "overlay-host"
+        "overlay-host",
+        "button"
       ],
-      "checksum": "sha256:dd3f8e6c4ccff570ea8d83fa05940cec906d5484164449af8e0814378c81ac12"
+      "checksum": "sha256:54da5aec510fa1adb32d81ccb4efc497539bd5262202680129e8856326fd13a6"
     },
     {
       "name": "radio-group",
@@ -252,7 +255,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:c4131eb936b4b5d5f727b33495e9f5984af0e17aba92588a3ebca6a21ba8c0dc"
+      "checksum": "sha256:060274a72d22ddc96ae628e909c4bbdb17ee98d2f59218d7a8750ea53a1ce2d1"
     },
     {
       "name": "switch",
@@ -333,7 +336,7 @@
       "registryDependencies": [
         "overlay-host"
       ],
-      "checksum": "sha256:4dce7482e97bb01859fa24ffcfab7f1a99c4c6cf21ff1544dfd0531068a1e6e6"
+      "checksum": "sha256:b01dc0f9cf93e3f0bfb8dc62261f3aa85a1e7c0c2e33bc842de0cb65dd312415"
     },
     {
       "name": "tooltip",
@@ -360,9 +363,10 @@
         }
       ],
       "registryDependencies": [
-        "overlay-host"
+        "overlay-host",
+        "button"
       ],
-      "checksum": "sha256:b6a9bb6bb043a299a44cd8a72f9288c24a338d9a38342753ec3e3bc56cddd82c"
+      "checksum": "sha256:70407cf21d977f759c5891bdd045340353b8f7fd528b700aad48aca2b10fa178"
     }
   ]
 }

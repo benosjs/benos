@@ -1,20 +1,29 @@
+@import './button.css';
+
 .benos-tooltip {
   display: inline-flex;
 }
 
 .benos-tooltip__trigger {
-  background: transparent;
-  border: 0;
-  border-radius: var(--benos-radius-sm, 0.25rem);
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  padding: 0;
+  gap: var(--benos-space-2, 0.5rem);
 }
 
 .benos-tooltip__trigger:focus-visible {
   outline: 3px solid var(--benos-color-focus, #2459b2);
   outline-offset: 3px;
+}
+
+.benos-tooltip__icon {
+  align-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  display: inline-flex;
+  font-size: 0.65em;
+  font-weight: 750;
+  inline-size: 1.1em;
+  justify-content: center;
+  line-height: 1;
+  min-block-size: 1.1em;
 }
 
 .benos-tooltip__positioner {

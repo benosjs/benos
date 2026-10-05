@@ -7,7 +7,12 @@ import { resolve } from 'node:path'
 import { chromium } from '@playwright/test'
 
 const directory = resolve(import.meta.dirname)
-const frameworks = ['table-benos', 'table-solid']
+const frameworks = [
+  'table-native-baseline',
+  'table-benos-baseline',
+  'table-benos',
+  'table-solid',
+]
 const sizes = [5_000, 10_000]
 const warmups = 1
 const rounds = 7
@@ -101,37 +106,38 @@ try {
           throw new Error(
             `${framework} rendered ${initialRows} of ${size} initial rows.`,
           )
-        const sorted = await page.evaluate(async () => {
-          const start = performance.now()
-          const button = document.querySelector('.benos-sortable-table__sort')
-          if (!(button instanceof HTMLButtonElement))
-            throw new Error('Sortable Name header was not rendered.')
-          button.click()
-          await new Promise((resolveFrame) =>
-            requestAnimationFrame(resolveFrame),
-          )
-          await new Promise((resolveFrame) =>
-            requestAnimationFrame(resolveFrame),
-          )
-          return {
-            elapsed: performance.now() - start,
-            count: document.querySelectorAll('tbody tr').length,
-            firstKey: document
-              .querySelector('tbody tr')
-              ?.getAttribute('data-row-key'),
-          }
-        })
-        if (sorted.count !== size || sorted.firstKey !== 'member-1')
-          throw new Error(
-            `${framework} sort produced ${sorted.count} rows, first key ${sorted.firstKey}.`,
-          )
-        const sort = sorted.elapsed
+        let sort
+        if (framework === 'table-benos' || framework === 'table-solid') {
+          const sorted = await page.evaluate(async () => {
+            const start = performance.now()
+            const button = document.querySelector('.benos-sortable-table__sort')
+            if (!(button instanceof HTMLButtonElement))
+              throw new Error('Sortable Name header was not rendered.')
+            button.click()
+            await new Promise((resolveFrame) =>
+              requestAnimationFrame(resolveFrame),
+            )
+            await new Promise((resolveFrame) =>
+              requestAnimationFrame(resolveFrame),
+            )
+            return {
+              elapsed: performance.now() - start,
+              count: document.querySelectorAll('tbody tr').length,
+              firstName: document.querySelector('tbody tr td')?.textContent,
+            }
+          })
+          if (sorted.count !== size || sorted.firstName !== 'Member 1')
+            throw new Error(
+              `${framework} sort produced ${sorted.count} rows, first value ${sorted.firstName}.`,
+            )
+          sort = sorted.elapsed
+        }
         if (round >= 0) {
           samples[framework][size].initial.push(initial)
-          samples[framework][size].sort.push(sort)
+          if (sort !== undefined) samples[framework][size].sort.push(sort)
         }
         process.stdout.write(
-          `round ${round + warmups + 1}/${rounds + warmups}: ${framework} ${size} rows initial ${initial.toFixed(2)} ms, sort ${sort.toFixed(2)} ms\n`,
+          `round ${round + warmups + 1}/${rounds + warmups}: ${framework} ${size} rows initial ${initial.toFixed(2)} ms${sort === undefined ? '' : `, sort ${sort.toFixed(2)} ms`}\n`,
         )
       }
     }
@@ -154,7 +160,11 @@ for (const framework of frameworks) {
   summary[framework] = {}
   for (const size of sizes) {
     summary[framework][size] = {}
-    for (const metric of ['initial', 'sort']) {
+    const metrics =
+      framework === 'table-benos' || framework === 'table-solid'
+        ? ['initial', 'sort']
+        : ['initial']
+    for (const metric of metrics) {
       const values = samples[framework][size][metric]
       summary[framework][size][metric] = {
         medianMs: median(values),
@@ -171,14 +181,22 @@ const output = {
     browser: 'Chromium',
     warmups,
     rounds,
-    boundary: 'two requestAnimationFrame callbacks after mutation',
+    boundary: 'two requestAnimationFrame callbacks after render or mutation',
+    variants: {
+      'table-native-baseline':
+        'direct DOM construction with equivalent table markup',
+      'table-benos-baseline':
+        'handwritten Benos JSX with keyed For rows and static columns',
+      'table-benos': 'SortableTable registry component',
+      'table-solid': 'handwritten equivalent Solid table',
+    },
   },
   summary,
 }
 const resultsDirectory = resolve(directory, 'results')
 await mkdir(resultsDirectory, { recursive: true })
 await writeFile(
-  resolve(resultsDirectory, 'u4-batch4-table.json'),
+  resolve(resultsDirectory, 'u4-batch4-profile.json'),
   `${JSON.stringify(output, null, 2)}\n`,
 )
 console.log(JSON.stringify(output, null, 2))

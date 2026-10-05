@@ -75,7 +75,9 @@ export function SortableTable<Row>(props: SortableTableProps<Row>): JSX.Element 
       class={['benos-sortable-table', local.class].filter(Boolean).join(' ')}
       ref={(element) => local.ref?.(element)}
     >
-      <caption class="benos-sortable-table__caption">{local.caption}</caption>
+      <caption class="benos-sortable-table__caption" dir="auto">
+        {local.caption}
+      </caption>
       <thead>
         <tr>
           <For each={local.columns} by={(column) => column.key}>
@@ -84,6 +86,7 @@ export function SortableTable<Row>(props: SortableTableProps<Row>): JSX.Element 
               return (
                 <th
                   scope="col"
+                  dir="auto"
                   aria-sort={
                     sort()?.key === currentColumn.key ? (sort()?.direction ?? 'none') : 'none'
                   }
@@ -113,7 +116,7 @@ export function SortableTable<Row>(props: SortableTableProps<Row>): JSX.Element 
           when={rows().length > 0}
           fallback={
             <tr>
-              <td colSpan={local.columns.length} class="benos-sortable-table__empty">
+              <td colSpan={local.columns.length} class="benos-sortable-table__empty" dir="auto">
                 {local.emptyMessage}
               </td>
             </tr>
@@ -121,23 +124,19 @@ export function SortableTable<Row>(props: SortableTableProps<Row>): JSX.Element 
         >
           <For each={rows()} by={(row) => local.rowKey(row)}>
             {(row) => (
-              <tr data-row-key={String(local.rowKey(row()))}>
-                <For each={local.columns} by={(column) => column.key}>
-                  {(column) => {
-                    const currentColumn = column()
-                    return (
-                      <td
-                        class={
-                          currentColumn.type === 'number'
-                            ? 'benos-sortable-table__number'
-                            : 'benos-sortable-table__text'
-                        }
-                      >
-                        {currentColumn.value(row()) ?? '—'}
-                      </td>
-                    )
-                  }}
-                </For>
+              <tr>
+                {local.columns.map((column) => (
+                  <td
+                    dir={column.type === 'number' ? undefined : 'auto'}
+                    class={
+                      column.type === 'number'
+                        ? 'benos-sortable-table__number'
+                        : 'benos-sortable-table__text'
+                    }
+                  >
+                    {column.value(row()) ?? '—'}
+                  </td>
+                ))}
               </tr>
             )}
           </For>

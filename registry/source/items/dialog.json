@@ -21,7 +21,7 @@
       "version": "1.44.0"
     }
   ],
-  "registryDependencies": ["overlay-host"],
+  "registryDependencies": ["overlay-host", "button"],
   "files": [
     {
       "path": "dialog.tsx",

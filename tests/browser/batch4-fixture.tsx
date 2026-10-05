@@ -16,11 +16,15 @@ const rows: readonly Row[] = [
   },
   { id: 'delta', name: 'Delta', score: 21 },
 ]
+const arabicRow: Row = {
+  id: 'arabic',
+  name: 'مريم خوري مع اسم طويل للعرض',
+  score: 5,
+}
 const columns: readonly SortableTableColumn<Row>[] = [
   { key: 'name', label: 'Name', value: (row) => row.name },
   { key: 'score', label: 'Score', value: (row) => row.score, type: 'number' },
 ]
-
 declare global {
   interface Window {
     __benosBatchFour: { dispose: () => void }
@@ -31,6 +35,7 @@ const host = document.querySelector<HTMLElement>('#batch4-app')
 if (!host) throw new Error('Batch 4 fixture host is missing')
 const empty = new URLSearchParams(location.search).has('empty')
 const rtl = new URLSearchParams(location.search).has('rtl')
+const bidi = new URLSearchParams(location.search).has('bidi')
 document.documentElement.dir = rtl ? 'rtl' : 'ltr'
 
 function Fixture(): JSX.Element {
@@ -40,7 +45,7 @@ function Fixture(): JSX.Element {
       <SortableTable
         id="members"
         caption="Project members"
-        rows={empty ? [] : rows}
+        rows={empty ? [] : bidi ? [...rows, arabicRow] : rows}
         rowKey={(row) => row.id}
         columns={columns}
         emptyMessage="No members yet."

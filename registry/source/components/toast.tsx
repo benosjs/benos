@@ -108,11 +108,11 @@ export function Toast(props: ToastProps): JSX.Element {
         <div class="benos-toast__viewport">
           <div class="benos-toast__item" {...api().getRootProps()} aria-live="polite" tabIndex={-1}>
             <div class="benos-toast__copy">
-              <strong class="benos-toast__title" {...api().getTitleProps()}>
+              <strong class="benos-toast__title" {...api().getTitleProps()} dir="auto">
                 {local.title}
               </strong>
               {local.description !== undefined && (
-                <p class="benos-toast__description" {...api().getDescriptionProps()}>
+                <p class="benos-toast__description" {...api().getDescriptionProps()} dir="auto">
                   {local.description}
                 </p>
               )}
@@ -123,6 +123,7 @@ export function Toast(props: ToastProps): JSX.Element {
                 type="button"
                 tabIndex={0}
                 {...api().getCloseTriggerProps()}
+                dir="auto"
               >
                 {local.closeLabel}
               </button>

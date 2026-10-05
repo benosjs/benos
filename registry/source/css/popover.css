@@ -1,3 +1,5 @@
+@import './button.css';
+
 .benos-popover__positioner {
   max-block-size: calc(100dvh - 1rem);
   max-inline-size: calc(100vw - 1rem);

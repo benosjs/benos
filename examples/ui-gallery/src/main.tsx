@@ -43,6 +43,12 @@ const sampleTableRows: readonly ExampleRow[] = [
     requests: 305,
   },
   { id: 'u-4', name: 'Omar Nasser', region: 'Byblos', requests: 87 },
+  {
+    id: 'u-5',
+    name: 'مريم خوري مع اسم طويل للعرض',
+    region: 'بيروت',
+    requests: 64,
+  },
 ]
 
 const largeTableRows: readonly ExampleRow[] = Array.from(
@@ -324,13 +330,15 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
 
       <section class="sample-group" aria-labelledby={'table-' + props.mode}>
         <h3 id={'table-' + props.mode}>Sortable table</h3>
-        <p class="table-note">
-          Sortable columns use native buttons; sorting reorders the same keyed
-          rows.
+        <p class="table-note" dir={rtl ? 'rtl' : undefined}>
+          {rtl
+            ? 'تتيح الأعمدة القابلة للفرز إعادة ترتيب الصفوف نفسها.'
+            : 'Sortable columns use native buttons; sorting reorders the same keyed rows.'}
         </p>
         <div class="table-toolbar">
           <Button
             variant="secondary"
+            dir={rtl ? 'rtl' : 'ltr'}
             onClick={() =>
               tableRows.set(
                 tableRows() === largeTableRows
@@ -340,11 +348,17 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
             }
           >
             {tableRows() === largeTableRows
-              ? 'Show sample rows'
-              : 'Show 10,000 rows'}
+              ? rtl
+                ? 'عرض الصفوف التجريبية'
+                : 'Show sample rows'
+              : rtl
+                ? 'عرض ١٠٬٠٠٠ صف'
+                : 'Show 10,000 rows'}
           </Button>
-          <span aria-live="polite">
-            {tableRows().length.toLocaleString()} rows
+          <span aria-live="polite" dir={rtl ? 'rtl' : undefined}>
+            {rtl
+              ? `عدد الصفوف: ${tableRows().length.toLocaleString('ar')}`
+              : `${tableRows().length.toLocaleString()} rows`}
           </span>
         </div>
         <SortableTable
@@ -358,8 +372,10 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
 
       <section class="sample-group" aria-labelledby={'overlays-' + props.mode}>
         <h3 id={'overlays-' + props.mode}>Overlays</h3>
-        <p class="overlay-note">
-          Tooltips add optional context; keep essential instructions visible.
+        <p class="overlay-note" dir={rtl ? 'rtl' : undefined}>
+          {rtl
+            ? 'تضيف التلميحات سياقًا اختياريًا؛ أبقِ التعليمات الأساسية ظاهرة.'
+            : 'Tooltips add optional context; keep essential instructions visible.'}
         </p>
         <div class="overlay-grid">
           <Dialog

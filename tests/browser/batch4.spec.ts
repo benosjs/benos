@@ -10,7 +10,9 @@ test('renders a named semantic table and cycles sort state in place', async ({
   await page.goto('/tests/browser/batch4-fixture.html')
   const table = page.getByRole('table', { name: 'Project members' })
   const header = page.getByRole('columnheader', { name: 'Name' })
-  const row = page.locator('[data-row-key="bravo"]')
+  const row = page
+    .getByRole('row')
+    .filter({ hasText: 'Bravo with a long display value' })
   await expect(table).toBeVisible()
   await expect(header).toHaveAttribute('aria-sort', 'none')
   await row.evaluate((element) => {
@@ -20,10 +22,7 @@ test('renders a named semantic table and cycles sort state in place', async ({
 
   await page.getByRole('button', { name: 'Name' }).click()
   await expect(header).toHaveAttribute('aria-sort', 'ascending')
-  await expect(page.locator('tbody tr').first()).toHaveAttribute(
-    'data-row-key',
-    'alpha',
-  )
+  await expect(page.locator('tbody tr').first()).toContainText('Alpha')
   await expect(row).toHaveJSProperty('retainedMarker', 'same-node')
   await expect(
     page.locator('.benos-sortable-table__indicator').first(),
@@ -33,23 +32,14 @@ test('renders a named semantic table and cycles sort state in place', async ({
   await nameButton.focus()
   await nameButton.press('Enter')
   await expect(header).toHaveAttribute('aria-sort', 'descending')
-  await expect(page.locator('tbody tr').first()).toHaveAttribute(
-    'data-row-key',
-    'delta',
-  )
+  await expect(page.locator('tbody tr').first()).toContainText('Delta')
   await nameButton.press('Space')
   await expect(header).toHaveAttribute('aria-sort', 'none')
-  await expect(page.locator('tbody tr').first()).toHaveAttribute(
-    'data-row-key',
-    'charlie',
-  )
+  await expect(page.locator('tbody tr').first()).toContainText('Charlie')
   await expect(row).toHaveJSProperty('retainedMarker', 'same-node')
 
   await page.getByRole('button', { name: 'Score' }).click()
-  await expect(page.locator('tbody tr').first()).toHaveAttribute(
-    'data-row-key',
-    'bravo',
-  )
+  await expect(page.locator('tbody tr').first()).toContainText('Bravo')
 })
 
 test('shows a useful empty state and truncates long text', async ({ page }) => {
@@ -63,6 +53,32 @@ test('shows a useful empty state and truncates long text', async ({ page }) => {
   })
   await expect(longText).toHaveCSS('text-overflow', 'ellipsis')
   await expect(longText).toHaveCSS('white-space', 'nowrap')
+})
+
+test('mixed-direction cell text follows its own direction in RTL and LTR tables', async ({
+  page,
+}) => {
+  await page.goto('/tests/browser/batch4-fixture.html?rtl')
+  const englishInRtl = page
+    .getByRole('row')
+    .filter({ hasText: 'Bravo with a long display value' })
+    .locator('.benos-sortable-table__text')
+  await expect(englishInRtl).toHaveAttribute('dir', 'auto')
+  expect(
+    await englishInRtl.evaluate((cell) => getComputedStyle(cell).direction),
+  ).toBe('ltr')
+  await expect(englishInRtl).toHaveCSS('text-overflow', 'ellipsis')
+
+  await page.goto('/tests/browser/batch4-fixture.html?bidi')
+  const arabicInLtr = page
+    .getByRole('row')
+    .filter({ hasText: 'مريم خوري' })
+    .locator('.benos-sortable-table__text')
+  await expect(arabicInLtr).toHaveAttribute('dir', 'auto')
+  expect(
+    await arabicInLtr.evaluate((cell) => getComputedStyle(cell).direction),
+  ).toBe('rtl')
+  await expect(arabicInLtr).toHaveCSS('text-overflow', 'ellipsis')
 })
 
 test('aligns numeric columns to the reading direction', async ({ page }) => {

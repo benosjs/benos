@@ -58,7 +58,7 @@ function App() {
       <tbody>
         <For each={ordered()}>
           {(row: TableRow) => (
-            <tr data-row-key={row.id}>
+            <tr>
               <td class="benos-sortable-table__text">{row.name}</td>
               <td class="benos-sortable-table__text">{row.region}</td>
               <td class="benos-sortable-table__number">{row.requests}</td>

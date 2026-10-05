@@ -606,3 +606,65 @@ a likely explanation rather than a profile finding. Sort spreads overlap
 substantially, so the small sort gap should be treated as directional. Raw
 samples and protocol metadata are in
 [`js-framework-benchmark/results/u4-batch4-table.json`](js-framework-benchmark/results/u4-batch4-table.json).
+
+## UI U4 gallery review follow-up (2026-10-05)
+
+The sortable-table mount profile now includes four production-built fixtures:
+direct DOM, a handwritten Benos keyed table, the registry `SortableTable`, and
+an equivalent Solid table. The runner alternates the four fixtures in
+Chromium. It prepares row data before the mount timer and ends after two
+animation frames. Values below pool three independent runs of seven measured
+rounds each after one warmup (21 samples); brackets are the observed min–max
+spread. The two-frame boundary is a render/paint opportunity proxy rather than
+a traced Paint event.
+
+| Variant                    |    Initial, 5,000 rows |   Initial, 10,000 rows |     Sort, 5,000 rows |      Sort, 10,000 rows |
+| -------------------------- | ---------------------: | ---------------------: | -------------------: | ---------------------: |
+| Direct DOM baseline        |   78.7 [69.2–183.7] ms | 146.7 [135.0–169.2] ms |                    — |                      — |
+| Handwritten Benos baseline | 151.8 [135.6–174.8] ms | 292.9 [276.0–365.6] ms |                    — |                      — |
+| Registry SortableTable     | 150.7 [134.9–236.1] ms | 308.3 [272.9–485.5] ms | 88.5 [78.7–140.5] ms | 178.2 [164.7–306.4] ms |
+| Solid table                |   76.4 [63.6–108.6] ms | 144.6 [130.1–278.8] ms | 84.2 [73.3–152.1] ms | 212.2 [166.3–465.1] ms |
+
+The registry component adds no measurable initial-render cost at 5,000 rows
+against the handwritten Benos baseline (150.7 vs 151.8 ms). At 10,000 rows it
+measures 5.3% higher (308.3 vs 292.9 ms), but the spreads overlap broadly and
+the three independent runs varied; that difference is not enough evidence to
+justify further component changes. The general Benos rendering baseline is
+about 1.9–2.0× the direct-DOM baseline. The registry mount is about 2.0× Solid
+at both sizes. Sort medians are similar to Solid and their spreads overlap.
+
+The first profiling pass before optimization measured registry mount at 202.4
+ms vs 156.4 ms handwritten Benos at 5,000 rows, and 371.7 ms vs 300.5 ms at
+10,000 rows. It used a keyed inner `<For>` to reconcile the same static columns
+for every row. Replacing that redundant per-row column reconciler with one
+array map removed the observed 29.4% / 23.7% increment: the current pooled
+medians are effectively even at 5,000 rows and within the noisy spread at
+10,000. Sorting remains keyed by the caller's stable row key. Columns are
+provided as a static descriptor list; the previous inner `<For>` did not
+actually pass the attempted dynamic-column replacement test either.
+
+Core and core + DOM were rebuilt with Node 22.18.0 before the gallery-review
+checkpoint:
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard was rerun after the rebuild; each row is the
+median of seven runs with five timed samples per run.
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.07 |        4.80 | 1.27× |
+| 20-deep computed chain write + read |       6.32 |        5.24 | 1.20× |
+| 200-effect fanout write             |       2.12 |        1.17 | 1.79× |
+| Dynamic dependency switch           |       3.48 |        2.45 | 1.43× |
+| Repeated equal write                |       0.82 |        0.50 | 1.55× |
+
+The current sizes and kernel medians are also recorded in the accompanying
+checkpoint at
+[`docs/checkpoints/ui-U4-gallery-followup.md`](../docs/checkpoints/ui-U4-gallery-followup.md).
+Raw profiles are in
+[`u4-batch4-profile.json`](js-framework-benchmark/results/u4-batch4-profile.json)
+and the three archived run files beside it.

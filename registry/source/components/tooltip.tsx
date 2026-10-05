@@ -98,19 +98,23 @@ export function Tooltip(props: TooltipProps): JSX.Element {
       ref={ref}
     >
       <button
-        class="benos-tooltip__trigger"
+        class="benos-button benos-button--outline benos-button--sm benos-tooltip__trigger"
         type="button"
         tabIndex={0}
         {...api().getTriggerProps()}
+        dir="auto"
         aria-label={local.label}
         ref={(element) => rootRef?.(element)}
       >
         {local.trigger}
+        <span class="benos-tooltip__icon" aria-hidden="true">
+          i
+        </span>
       </button>
       <Show when={api().open}>
         <Portal mount={target()}>
           <div class="benos-tooltip__positioner" {...api().getPositionerProps()}>
-            <div class="benos-tooltip__content" {...api().getContentProps()}>
+            <div class="benos-tooltip__content" {...api().getContentProps()} dir="auto">
               {local.children}
             </div>
           </div>

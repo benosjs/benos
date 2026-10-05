@@ -31,6 +31,7 @@ const callerDir =
     : undefined
 const requestedTheme = parameters.get('scopeTheme')
 const controlled = parameters.get('controlled') === 'true'
+const customTrigger = parameters.get('customTrigger') === 'true'
 const dark = mode === 'dark' || mode === 'dark-rtl'
 const rtl = mode === 'rtl' || mode === 'dark-rtl'
 document.documentElement.dataset.theme = dark ? 'dark' : 'light'
@@ -60,7 +61,15 @@ function Fixture(): JSX.Element {
           id="fixture-dialog"
           title="Edit profile"
           description="Update your display name."
-          trigger="Open dialog"
+          trigger={
+            customTrigger
+              ? (triggerProps) => (
+                  <Button {...triggerProps} variant="outline">
+                    Custom dialog trigger
+                  </Button>
+                )
+              : 'Open dialog'
+          }
           dir={callerDir}
           open={controlled ? overlayOpen() : undefined}
           onOpenChange={(details) => {
@@ -79,7 +88,15 @@ function Fixture(): JSX.Element {
           <Popover
             id="fixture-popover"
             label="More details"
-            trigger="Open details"
+            trigger={
+              customTrigger
+                ? (triggerProps) => (
+                    <Button {...triggerProps} variant="outline">
+                      Custom popover trigger
+                    </Button>
+                  )
+                : 'Open details'
+            }
             dir={callerDir}
             open={controlled ? overlayOpen() : undefined}
             onOpenChange={(details) => {
@@ -117,7 +134,15 @@ function Fixture(): JSX.Element {
           <DropdownMenu
             id="fixture-menu"
             label="File actions"
-            trigger="Actions"
+            trigger={
+              customTrigger
+                ? (triggerProps) => (
+                    <Button {...triggerProps} variant="outline">
+                      Custom menu trigger
+                    </Button>
+                  )
+                : 'Actions'
+            }
             dir={callerDir}
             open={controlled ? overlayOpen() : undefined}
             onOpenChange={(details) => {

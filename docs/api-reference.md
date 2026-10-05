@@ -109,6 +109,36 @@ if (!(host instanceof HTMLElement)) throw new Error('Missing #app')
 render(() => <List ready rows={['a', 'b']} />, host)
 ```
 
+### Styled registry components
+
+`Dialog`, `Popover`, and `DropdownMenu` render a native trigger button styled
+with the same Button classes by default (`secondary`, medium). Set
+`triggerVariant`, `triggerSize`, and `triggerClass` to choose another default
+style. Their `trigger` prop can also be a render callback when you need to use a
+custom Button component. Spread the supplied button props onto the custom
+button so the primitive's ARIA attributes, handlers, and ref stay connected:
+
+```tsx
+import { Button } from '@/components/button'
+import { Dialog } from '@/components/dialog'
+
+;<Dialog
+  title="Edit profile"
+  trigger={(triggerProps) => (
+    <Button {...triggerProps} variant="outline">
+      Edit profile
+    </Button>
+  )}
+>
+  <p>Update your profile details.</p>
+</Dialog>
+```
+
+The registry installer adds the Button stylesheet dependency for these
+triggers. Tooltip triggers are keyboard-focusable buttons with a visible info
+icon. Table captions, headers, empty messages, and cells use automatic text
+direction so mixed Arabic and English text keeps its natural reading direction.
+
 ### JSX attributes and refs
 
 Intrinsic types are generated from standard HTML, SVG, MathML, and ARIA

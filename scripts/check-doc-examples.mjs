@@ -44,6 +44,7 @@ try {
         typeRoots: [join(root, 'node_modules/@types')],
         baseUrl: root,
         paths: {
+          '@/*': ['registry/source/*'],
           '@benosjs/core': ['packages/core/src/index.ts'],
           '@benosjs/dom': ['packages/dom/src/index.ts'],
           '@benosjs/dom/*': ['packages/dom/src/*'],

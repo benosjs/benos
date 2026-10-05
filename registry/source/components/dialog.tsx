@@ -3,6 +3,10 @@ import { mergeProps, Portal, Show, splitProps } from '@benosjs/dom'
 import type { Child, JSX } from '@benosjs/dom'
 import type { DialogOptions } from '@benosjs/primitives/dialog'
 import { createOverlayHost } from './overlay-host.js'
+import type { ButtonProps } from './button.js'
+
+export type DialogTriggerRenderProps = Omit<ButtonProps, 'children' | 'variant' | 'size'>
+export type DialogTrigger = Child | ((props: DialogTriggerRenderProps) => JSX.Element)
 
 export type DialogProps = Pick<
   DialogOptions,
@@ -22,7 +26,10 @@ export type DialogProps = Pick<
   class?: string
   title: Child
   description?: Child
-  trigger: Child
+  trigger: DialogTrigger
+  triggerVariant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+  triggerSize?: 'sm' | 'md' | 'lg'
+  triggerClass?: string
   closeLabel?: string
   children: Child
   'aria-label'?: string
@@ -40,6 +47,8 @@ export function Dialog(props: DialogProps): JSX.Element {
       restoreFocus: true,
       role: 'dialog' as const,
       closeLabel: 'Close dialog',
+      triggerVariant: 'secondary' as const,
+      triggerSize: 'md' as const,
     },
     props,
   )
@@ -50,6 +59,9 @@ export function Dialog(props: DialogProps): JSX.Element {
     'title',
     'description',
     'trigger',
+    'triggerVariant',
+    'triggerSize',
+    'triggerClass',
     'children',
     'closeLabel',
     'open',
@@ -89,9 +101,35 @@ export function Dialog(props: DialogProps): JSX.Element {
     () => rootElement,
   )
   const api = machine.api
-  const triggerProps = api().getTriggerProps()
-  const machineTriggerRef = triggerProps.ref as ((element: HTMLButtonElement) => void) | undefined
+  const machineTriggerProps = api().getTriggerProps()
+  const machineTriggerRef = machineTriggerProps.ref as
+    ((element: HTMLButtonElement) => void) | undefined
   const triggerRef = (element: HTMLButtonElement) => machineTriggerRef?.(element)
+  const triggerProps = {
+    ...machineTriggerProps,
+    type: 'button',
+    tabIndex: 0,
+    dir: 'auto',
+    ref: triggerRef,
+  } as DialogTriggerRenderProps
+  const trigger =
+    typeof local.trigger === 'function' ? (
+      local.trigger(triggerProps)
+    ) : (
+      <button
+        {...triggerProps}
+        class={[
+          'benos-button',
+          'benos-button--' + local.triggerVariant,
+          'benos-button--' + local.triggerSize,
+          local.triggerClass,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {local.trigger}
+      </button>
+    )
   const ref = (element: HTMLDivElement) => {
     rootElement = element
     local.ref?.(element)
@@ -104,9 +142,7 @@ export function Dialog(props: DialogProps): JSX.Element {
       class={['benos-dialog', local.class].filter(Boolean).join(' ')}
       ref={ref}
     >
-      <button type="button" tabIndex={0} {...triggerProps} ref={triggerRef}>
-        {local.trigger}
-      </button>
+      {trigger}
       <Show when={api().open}>
         <Portal mount={target()}>
           <div class="benos-dialog__positioner" {...api().getPositionerProps()}>
@@ -117,21 +153,24 @@ export function Dialog(props: DialogProps): JSX.Element {
               {...(local['aria-label'] === undefined ? {} : { 'aria-label': local['aria-label'] })}
             >
               <header class="benos-dialog__header">
-                <h2 class="benos-dialog__title" {...api().getTitleProps()}>
+                <h2 class="benos-dialog__title" {...api().getTitleProps()} dir="auto">
                   {local.title}
                 </h2>
                 {local.description !== undefined && (
-                  <p class="benos-dialog__description" {...api().getDescriptionProps()}>
+                  <p class="benos-dialog__description" {...api().getDescriptionProps()} dir="auto">
                     {local.description}
                   </p>
                 )}
               </header>
-              <div class="benos-dialog__body">{local.children}</div>
+              <div class="benos-dialog__body" dir="auto">
+                {local.children}
+              </div>
               <button
                 class="benos-dialog__close"
                 type="button"
                 tabIndex={0}
                 {...api().getCloseTriggerProps()}
+                dir="auto"
               >
                 {local.closeLabel}
               </button>

@@ -3,6 +3,10 @@ import { mergeProps, Portal, Show, splitProps } from '@benosjs/dom'
 import type { Child, JSX } from '@benosjs/dom'
 import type { MenuOptions } from '@benosjs/primitives/menu'
 import { createOverlayHost } from './overlay-host.js'
+import type { ButtonProps } from './button.js'
+
+export type DropdownMenuTriggerRenderProps = Omit<ButtonProps, 'children' | 'variant' | 'size'>
+export type DropdownMenuTrigger = Child | ((props: DropdownMenuTriggerRenderProps) => JSX.Element)
 
 export interface DropdownMenuItem {
   value: string
@@ -25,7 +29,10 @@ export type DropdownMenuProps = Pick<
   id?: string
   class?: string
   label: string
-  trigger: Child
+  trigger: DropdownMenuTrigger
+  triggerVariant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+  triggerSize?: 'sm' | 'md' | 'lg'
+  triggerClass?: string
   items: readonly DropdownMenuItem[]
   ref?: (element: HTMLDivElement) => void
 }
@@ -36,6 +43,8 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
       closeOnSelect: true,
       loopFocus: true,
       typeahead: true,
+      triggerVariant: 'secondary' as const,
+      triggerSize: 'md' as const,
       positioning: {
         placement: 'bottom-start',
         strategy: 'fixed',
@@ -53,6 +62,9 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     'ref',
     'label',
     'trigger',
+    'triggerVariant',
+    'triggerSize',
+    'triggerClass',
     'items',
     'open',
     'defaultOpen',
@@ -86,9 +98,34 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
     () => rootElement,
   )
   const api = menu.api
-  const triggerProps = api().getTriggerProps()
-  const machineTriggerRef = triggerProps.ref as ((element: HTMLButtonElement) => void) | undefined
+  const machineTriggerProps = api().getTriggerProps()
+  const machineTriggerRef = machineTriggerProps.ref as
+    ((element: HTMLButtonElement) => void) | undefined
   const triggerRef = (element: HTMLButtonElement) => machineTriggerRef?.(element)
+  const triggerProps = {
+    ...machineTriggerProps,
+    type: 'button',
+    dir: 'auto',
+    ref: triggerRef,
+  } as DropdownMenuTriggerRenderProps
+  const trigger =
+    typeof local.trigger === 'function' ? (
+      local.trigger(triggerProps)
+    ) : (
+      <button
+        {...triggerProps}
+        class={[
+          'benos-button',
+          'benos-button--' + local.triggerVariant,
+          'benos-button--' + local.triggerSize,
+          local.triggerClass,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {local.trigger}
+      </button>
+    )
   const ref = (element: HTMLDivElement) => {
     rootElement = element
     local.ref?.(element)
@@ -101,9 +138,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
       class={['benos-dropdown-menu', local.class].filter(Boolean).join(' ')}
       ref={ref}
     >
-      <button type="button" {...triggerProps} ref={triggerRef}>
-        {local.trigger}
-      </button>
+      {trigger}
       <Show when={api().open}>
         <Portal mount={target()}>
           <div class="benos-dropdown-menu__positioner" {...api().getPositionerProps()}>
@@ -116,6 +151,7 @@ export function DropdownMenu(props: DropdownMenuProps): JSX.Element {
                     value: item.value,
                     disabled: item.disabled,
                   })}
+                  dir="auto"
                 >
                   {item.label}
                 </button>

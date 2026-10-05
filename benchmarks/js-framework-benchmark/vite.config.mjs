@@ -8,8 +8,7 @@ import benos from '../../packages/vite/src/index.js'
 const framework = process.env.JFB_FRAMEWORK ?? 'benos'
 const root = fileURLToPath(new URL('.', import.meta.url))
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
-const tableFramework =
-  framework === 'table-benos' || framework === 'table-solid'
+const tableFramework = framework.startsWith('table-')
 const entryExtension = tableFramework
   ? 'tsx'
   : framework === 'solid' || framework === 'react'
@@ -36,7 +35,8 @@ const plugins = [
 if (framework === 'vue') plugins.push(vue())
 if (framework === 'svelte') plugins.push(svelte())
 if (framework === 'solid' || framework === 'table-solid') plugins.push(solid())
-if (framework === 'table-benos') plugins.push(benos({ optimization: 'safe' }))
+if (framework.startsWith('table-benos'))
+  plugins.push(benos({ optimization: 'safe' }))
 
 export default defineConfig({
   root,

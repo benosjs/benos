@@ -30,12 +30,14 @@ async function renderComponent(
   scope?: 'rtl',
   controlled = false,
   scopeTheme?: 'light' | 'dark',
+  customTrigger = false,
 ): Promise<void> {
   const parameters = new URLSearchParams({ component, mode })
   if (callerDir) parameters.set('callerDir', callerDir)
   if (scope) parameters.set('scope', scope)
   if (controlled) parameters.set('controlled', 'true')
   if (scopeTheme) parameters.set('scopeTheme', scopeTheme)
+  if (customTrigger) parameters.set('customTrigger', 'true')
   await page.goto(`/tests/browser/batch3-fixture.html?${parameters}`)
   await page.waitForFunction(() => Boolean(window.__benosBatchThree))
 }
@@ -93,6 +95,45 @@ async function runAxe(page: Page): Promise<void> {
 }
 
 for (const component of componentNames) {
+  test(`${component}: displayed user content uses automatic text direction`, async ({
+    page,
+  }) => {
+    await renderComponent(page, component, 'rtl')
+    await openComponent(page, component)
+    const selectors: Record<ComponentName, string[]> = {
+      dialog: [
+        '.benos-dialog__title',
+        '.benos-dialog__description',
+        '.benos-dialog__body',
+        '.benos-dialog__close',
+        '.benos-dialog [data-part="trigger"]',
+      ],
+      popover: [
+        '.benos-popover__body',
+        '.benos-popover__close',
+        '.benos-popover [data-part="trigger"]',
+      ],
+      tooltip: [
+        '.benos-tooltip__content',
+        '.benos-tooltip [data-part="trigger"]',
+      ],
+      'dropdown-menu': [
+        '.benos-dropdown-menu__item',
+        '.benos-dropdown-menu [data-part="trigger"]',
+      ],
+      toast: [
+        '.benos-toast__title',
+        '.benos-toast__description',
+        '.benos-toast__close',
+      ],
+    }
+    for (const selector of selectors[component]) {
+      const content = page.locator(selector).first()
+      await expect(content).toHaveAttribute('dir', 'auto')
+      await expect(content).toHaveCSS('direction', 'ltr')
+    }
+  })
+
   test(`${component}: axe in light, dark, RTL, and dark RTL`, async ({
     page,
   }) => {
@@ -429,6 +470,117 @@ test('gallery overlay triggers open in light, dark, and RTL panels', async ({
     await expect(toast).toBeVisible()
     await toast.getByRole('button', { name: 'Dismiss notification' }).click()
     await expect(toast).toBeHidden()
+  }
+})
+
+test('gallery RTL copy keeps explanatory text and punctuation in RTL order', async ({
+  page,
+}) => {
+  await page.goto('/examples/ui-gallery/')
+  const panel = page.locator('.mode-panel').nth(2)
+  const tableNote = panel.locator('.table-note')
+  const overlayNote = panel.locator('.overlay-note')
+  await expect(tableNote).toContainText('الصفوف')
+  await expect(overlayNote).toContainText('التعليمات')
+  await expect(tableNote).toHaveCSS('direction', 'rtl')
+  await expect(overlayNote).toHaveCSS('direction', 'rtl')
+  await expect(panel.getByText(/عدد الصفوف/)).toHaveCSS('direction', 'rtl')
+  await expect(
+    panel.getByRole('button', { name: 'عرض ١٠٬٠٠٠ صف' }),
+  ).toBeVisible()
+})
+
+test('overlay trigger visuals match Button styles in light, dark, and RTL panels', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/examples/ui-gallery/')
+  await page.mouse.move(0, 0)
+  const panels = page.locator('.mode-panel')
+
+  for (let index = 0; index < 3; index += 1) {
+    const panel = panels.nth(index)
+    const reference = panel
+      .locator('.button-row .benos-button--secondary')
+      .first()
+    const expected = await reference.evaluate((element) => {
+      const style = getComputedStyle(element)
+      return {
+        background: style.backgroundColor,
+        borderRadius: style.borderTopLeftRadius,
+        minHeight: style.minHeight,
+        paddingInline: style.paddingInline,
+        borderStyle: style.borderTopStyle,
+        borderWidth: style.borderTopWidth,
+      }
+    })
+
+    for (const component of ['dialog', 'popover', 'dropdown-menu'] as const) {
+      const trigger = panel.locator(`.benos-${component} [data-part="trigger"]`)
+      await expect(trigger).toHaveClass(/benos-button--secondary/)
+      await expect(trigger).toHaveClass(/benos-button--md/)
+      expect(
+        await trigger.evaluate((element) => {
+          const style = getComputedStyle(element)
+          return {
+            background: style.backgroundColor,
+            borderRadius: style.borderTopLeftRadius,
+            minHeight: style.minHeight,
+            paddingInline: style.paddingInline,
+            borderStyle: style.borderTopStyle,
+            borderWidth: style.borderTopWidth,
+          }
+        }),
+      ).toEqual(expected)
+    }
+
+    const tooltipTrigger = panel.locator('.benos-tooltip [data-part="trigger"]')
+    await expect(tooltipTrigger).toHaveClass(/benos-button--outline/)
+    await expect(tooltipTrigger).toHaveAttribute('tabindex', '0')
+    await expect(tooltipTrigger.locator('.benos-tooltip__icon')).toBeVisible()
+    await tooltipTrigger.focus()
+    await expect(tooltipTrigger).toBeFocused()
+    expect(
+      await tooltipTrigger
+        .locator('.benos-tooltip__icon')
+        .evaluate((icon) => getComputedStyle(icon).borderRadius),
+    ).toBe('50%')
+  }
+})
+
+test('overlay trigger render callbacks support custom Button instances', async ({
+  page,
+}) => {
+  for (const component of ['dialog', 'popover', 'dropdown-menu'] as const) {
+    await renderComponent(
+      page,
+      component,
+      'light',
+      undefined,
+      undefined,
+      false,
+      undefined,
+      true,
+    )
+    const selector =
+      component === 'dropdown-menu'
+        ? '.benos-dropdown-menu [data-part="trigger"]'
+        : `.benos-${component} [data-part="trigger"]`
+    const trigger = page.locator(selector)
+    await expect(trigger).toHaveClass(/benos-button--outline/)
+
+    if (component === 'dropdown-menu') await trigger.press('ArrowDown')
+    else await trigger.click()
+
+    const overlay =
+      component === 'dialog'
+        ? page.locator('.benos-dialog__content')
+        : component === 'popover'
+          ? page.locator('.benos-popover__content')
+          : page.locator('.benos-dropdown-menu__content')
+    await expect(overlay).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(overlay).toBeHidden()
   }
 })
 

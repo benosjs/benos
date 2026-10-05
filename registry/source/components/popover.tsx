@@ -3,6 +3,10 @@ import { mergeProps, Portal, Show, splitProps } from '@benosjs/dom'
 import type { Child, JSX } from '@benosjs/dom'
 import type { PopoverOptions } from '@benosjs/primitives/popover'
 import { createOverlayHost } from './overlay-host.js'
+import type { ButtonProps } from './button.js'
+
+export type PopoverTriggerRenderProps = Omit<ButtonProps, 'children' | 'variant' | 'size'>
+export type PopoverTrigger = Child | ((props: PopoverTriggerRenderProps) => JSX.Element)
 
 export type PopoverProps = Pick<
   PopoverOptions,
@@ -18,7 +22,10 @@ export type PopoverProps = Pick<
   id?: string
   class?: string
   label: string
-  trigger: Child
+  trigger: PopoverTrigger
+  triggerVariant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+  triggerSize?: 'sm' | 'md' | 'lg'
+  triggerClass?: string
   children: Child
   closeLabel?: string
   ref?: (element: HTMLDivElement) => void
@@ -31,6 +38,8 @@ export function Popover(props: PopoverProps): JSX.Element {
       autoFocus: true,
       closeOnInteractOutside: true,
       closeLabel: 'Close',
+      triggerVariant: 'secondary' as const,
+      triggerSize: 'md' as const,
       positioning: {
         placement: 'bottom-start',
         strategy: 'fixed',
@@ -48,6 +57,9 @@ export function Popover(props: PopoverProps): JSX.Element {
     'ref',
     'label',
     'trigger',
+    'triggerVariant',
+    'triggerSize',
+    'triggerClass',
     'children',
     'closeLabel',
     'open',
@@ -80,7 +92,32 @@ export function Popover(props: PopoverProps): JSX.Element {
     () => rootElement,
   )
   const api = machine.api
-  const rootRef = api().getTriggerProps().ref as ((element: HTMLButtonElement) => void) | undefined
+  const machineTriggerProps = api().getTriggerProps()
+  const rootRef = machineTriggerProps.ref as ((element: HTMLButtonElement) => void) | undefined
+  const triggerProps = {
+    ...machineTriggerProps,
+    type: 'button',
+    dir: 'auto',
+    ref: (element: HTMLButtonElement) => rootRef?.(element),
+  } as PopoverTriggerRenderProps
+  const trigger =
+    typeof local.trigger === 'function' ? (
+      local.trigger(triggerProps)
+    ) : (
+      <button
+        {...triggerProps}
+        class={[
+          'benos-button',
+          'benos-button--' + local.triggerVariant,
+          'benos-button--' + local.triggerSize,
+          local.triggerClass,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {local.trigger}
+      </button>
+    )
   const ref = (element: HTMLDivElement) => {
     rootElement = element
     local.ref?.(element)
@@ -93,11 +130,7 @@ export function Popover(props: PopoverProps): JSX.Element {
       class={['benos-popover', local.class].filter(Boolean).join(' ')}
       ref={ref}
     >
-      <div {...api().getAnchorProps()}>
-        <button type="button" {...api().getTriggerProps()} ref={(element) => rootRef?.(element)}>
-          {local.trigger}
-        </button>
-      </div>
+      <div {...api().getAnchorProps()}>{trigger}</div>
       <Show when={api().open}>
         <Portal mount={target()}>
           <div class="benos-popover__positioner" {...api().getPositionerProps()}>
@@ -107,8 +140,15 @@ export function Popover(props: PopoverProps): JSX.Element {
               aria-label={local.label}
               {...api().getContentProps()}
             >
-              <div class="benos-popover__body">{local.children}</div>
-              <button class="benos-popover__close" type="button" {...api().getCloseTriggerProps()}>
+              <div class="benos-popover__body" dir="auto">
+                {local.children}
+              </div>
+              <button
+                class="benos-popover__close"
+                type="button"
+                {...api().getCloseTriggerProps()}
+                dir="auto"
+              >
                 {local.closeLabel}
               </button>
             </section>
