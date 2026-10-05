@@ -22,6 +22,7 @@ const packageDirectories = [
   'compiler',
   'vite',
   'eslint-plugin',
+  'benos',
   'create-benos',
 ]
 const temporary = await mkdtemp(join(tmpdir(), 'benos-template-audit-'))
@@ -71,10 +72,28 @@ try {
 
   const createArchive = archiveByPackage.get('create-benos')
   if (!createArchive) throw new Error('create-benos archive is missing')
+  const benosArchive = archiveByPackage.get('benos')
+  if (!benosArchive) throw new Error('benos CLI archive is missing')
   await run('tar', ['-xzf', createArchive, '-C', extractedCreator], {
     cwd: root,
   })
-  const cli = join(extractedCreator, 'package', 'src', 'index.mjs')
+  const creatorPackage = join(extractedCreator, 'package')
+  const creatorManifestPath = join(creatorPackage, 'package.json')
+  const creatorManifest = JSON.parse(
+    await readFile(creatorManifestPath, 'utf8'),
+  )
+  creatorManifest.pnpm = {
+    overrides: {
+      ...creatorManifest.pnpm?.overrides,
+      benos: localArchivePath(creatorPackage, benosArchive),
+    },
+  }
+  await writeFile(
+    creatorManifestPath,
+    `${JSON.stringify(creatorManifest, null, 2)}\n`,
+  )
+  await runPnpm(['install', '--ignore-scripts'], { cwd: creatorPackage })
+  const cli = join(creatorPackage, 'src', 'index.mjs')
   await run(process.execPath, [cli, app], { cwd: root })
 
   const packageFile = join(app, 'package.json')
