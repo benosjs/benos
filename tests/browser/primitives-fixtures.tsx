@@ -77,7 +77,6 @@ function RadioGroupFixture(): JSX.Element {
     id: 'fixture-radio',
     defaultValue: 'alpha',
     orientation: 'horizontal',
-    dir: document.documentElement.dir as 'ltr' | 'rtl',
   }))
   const api = group.api
   const values = [
@@ -151,7 +150,6 @@ function TabsFixture(): JSX.Element {
     id: 'fixture-tabs',
     defaultValue: 'alpha',
     activationMode: 'automatic',
-    dir: document.documentElement.dir as 'ltr' | 'rtl',
   }))
   const api = tabs.api
   return (

@@ -1,0 +1,82 @@
+# U4 batch 3 checkpoint
+
+**Date:** 2026-10-05
+
+**Status:** Implementation and local verification complete; CI run pending.
+
+## Coverage
+
+| Component     | Types and IDs                                                 | Fresh create-benos project                                                        | Keyboard and behavior                                                                                                    | axe-core                                       | Gallery                                                                                     |
+| ------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| Dialog        | `tests/ui-batch3.types.ts`; typed props, optional ID override | Passed unchanged with pnpm: strict type-check, build, test, Benos ESLint/Prettier | Chromium, Firefox, WebKit: focus enters, Tab trap, Escape closes, focus returns; scroll lock and background inert/hidden | All three browsers; light, dark, RTL, dark RTL | Opens from each light, dark, and RTL panel; portal theme, direction, and layer tested       |
+| Popover       | `tests/ui-batch3.types.ts`; typed props, optional ID override | Passed unchanged with pnpm: strict type-check, build, test, Benos ESLint/Prettier | Chromium, Firefox, WebKit: trigger, Escape dismissal, focus return                                                       | All three browsers; light, dark, RTL, dark RTL | Opens from each light, dark, and RTL panel; portal scope and viewport-edge placement tested |
+| Tooltip       | `tests/ui-batch3.types.ts`; typed props, optional ID override | Passed unchanged with pnpm: strict type-check, build, test, Benos ESLint/Prettier | Chromium, Firefox, WebKit: keyboard Tab focus, hover, Escape; essential instructions remain visible                      | All three browsers; light, dark, RTL, dark RTL | Opens from each light, dark, and RTL panel; portal scope tested                             |
+| Dropdown Menu | `tests/ui-batch3.types.ts`; typed props, optional ID override | Passed unchanged with pnpm: strict type-check, build, test, Benos ESLint/Prettier | Chromium, Firefox, WebKit: arrows, Home/End, Escape, focus; Tab behavior recorded below                                  | All three browsers; light, dark, RTL, dark RTL | Opens from each light, dark, and RTL panel; portal scope and viewport-edge placement tested |
+| Toast         | `tests/ui-batch3.types.ts`; typed props, optional ID override | Passed unchanged with pnpm: strict type-check, build, test, Benos ESLint/Prettier | Chromium, Firefox, WebKit: polite status announcement, no focus stealing, dismissal                                      | All three browsers; light, dark, RTL, dark RTL | Opens from each light, dark, and RTL panel; portal scope tested                             |
+
+The fresh-project script adds all 18 registry components to one newly scaffolded
+project and runs the project checks without editing installed component files.
+The full run passed strict TypeScript, Vite production build, Vitest, and Benos
+ESLint/Prettier with pnpm. The browser suite contains 363 test cases. Its full
+local CI-mode run finished with 361 passed and two cases passed on automatic
+retry; the gallery Select and popover direction cases then passed in a focused
+rerun after the gallery test began closing the Select with Escape.
+
+Each batch 3 axe fixture is scanned in four theme/direction modes in all three
+browsers (60 component/mode/browser scans). All five overlays are checked for
+their token layer, effective direction, and theme when portaled outside the
+styled owner subtree. Dialog tests cover focus placement and return, its Tab
+trap, Escape, scroll locking, and hiding the background from assistive
+technology. Popover, Tooltip, and Dropdown Menu are measured near viewport
+edges. Tooltip tests show it on keyboard focus and hover while essential text
+remains visible. Toast uses a polite live region and leaves focus on the
+trigger. Reduced-motion tests cover all five.
+
+## Direction and keyboard notes
+
+- The adapter derives effective direction from the component's host element
+  (or the document root), passes it to Zag's machine, and filters Zag's
+  generated `dir` from DOM props unless the caller explicitly provided one.
+  This lets every one of the eleven machine-backed primitives inherit LTR or
+  RTL without an emitted `dir="ltr"`. Browser tests cover both directions for
+  all eleven. `dir` is still forwarded when explicitly set.
+- The Zag direction reflection behavior and the adapter interoperability
+  question are documented in the unfiled
+  [upstream note](../upstream/zag-direction-default.md). The note does not
+  claim Zag chooses LTR when its option is omitted.
+- Dropdown Menu Tab behavior remains as in Zag 1.44.0 and is linked to the
+  existing [upstream issue draft](../upstream/zag-menu-tab.md). Benos adds no
+  key-interception workaround.
+- The test runner calls Playwright directly and contains no macOS
+  `AppleKeyboardUIMode` reads or writes. WebKit tab navigation tests use
+  explicit focusable elements in the fixture.
+- The Tooltip trigger now has `tabIndex={0}`. This makes the native trigger
+  reachable by the WebKit fixture's explicit sequential keyboard navigation.
+
+## Verification and sizes
+
+- `pnpm build`: passed with Node 22.18.0.
+- `pnpm test`: 204 tests passed across 19 files.
+- `pnpm typecheck:types`, `pnpm lint`, `pnpm check:engines`,
+  `pnpm audit:template`, `pnpm registry:check`, `pnpm check:doc-examples`,
+  `pnpm check:public-imports`, `pnpm check:packed`, `pnpm check:jsx-types`,
+  and `pnpm gallery:build`: passed.
+- Full packed fresh-project validation: passed with pnpm; no engine or
+  deprecation warnings, no audit vulnerabilities, all 18 components added,
+  then type-check, build, test, and lint passed.
+- Rebuilt production sizes: core 4,051 / 4,096 gzip bytes; core + DOM
+  10,200 / 10,240 gzip bytes. No core or DOM runtime source changed.
+- The median-of-seven production benchmark table is recorded in
+  [benchmarks/README.md](../../benchmarks/README.md); all five workload ratios
+  pass the 2× guard.
+- GitHub Actions: pending push; add the workflow URL and final matrix status
+  after the branch run completes.
+
+## Compatibility note
+
+The fresh-project script substitutes local packed workspace builds for
+`@benosjs/core` and `@benosjs/primitives` while validating this unreleased
+registry work. The current published `@benosjs/core@0.1.2` predates the
+public `createUniqueId()` export used by the primitives. Do not publish or
+serve these registry items against the current public core until a compatible
+core package version is released.

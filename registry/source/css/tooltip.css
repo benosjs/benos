@@ -1,0 +1,60 @@
+.benos-tooltip {
+  display: inline-flex;
+}
+
+.benos-tooltip__trigger {
+  background: transparent;
+  border: 0;
+  border-radius: var(--benos-radius-sm, 0.25rem);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.benos-tooltip__trigger:focus-visible {
+  outline: 3px solid var(--benos-color-focus, #2459b2);
+  outline-offset: 3px;
+}
+
+.benos-tooltip__positioner {
+  max-inline-size: calc(100vw - 1rem);
+  z-index: var(--benos-z-popover, 20);
+}
+
+.benos-tooltip__positioner[hidden],
+.benos-tooltip__positioner[data-state='closed'] {
+  display: none;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.benos-tooltip__content {
+  animation: benos-tooltip-enter var(--benos-motion-fast, 120ms)
+    var(--benos-ease-standard, ease-out);
+  background: var(--benos-color-text, #172033);
+  border-radius: var(--benos-radius-sm, 0.25rem);
+  box-shadow: var(--benos-shadow-md, 0 8px 24px rgb(23 32 51 / 12%));
+  color: var(--benos-color-surface, #fff);
+  font-size: var(--benos-text-xs, 0.75rem);
+  line-height: var(--benos-line-height-body, 1.5);
+  max-inline-size: min(18rem, calc(100vw - 1rem));
+  padding: var(--benos-space-2, 0.5rem) var(--benos-space-3, 0.75rem);
+}
+
+@keyframes benos-tooltip-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.2rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .benos-tooltip__content {
+    animation: none;
+  }
+}

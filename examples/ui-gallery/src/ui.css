@@ -11,6 +11,11 @@
 @import '../../../registry/source/css/select.css';
 @import '../../../registry/source/css/tabs.css';
 @import '../../../registry/source/css/accordion.css';
+@import '../../../registry/source/css/dialog.css';
+@import '../../../registry/source/css/popover.css';
+@import '../../../registry/source/css/tooltip.css';
+@import '../../../registry/source/css/dropdown-menu.css';
+@import '../../../registry/source/css/toast.css';
 
 body {
   background: var(--benos-color-canvas);
@@ -51,7 +56,12 @@ body {
   --benos-line-height-body: 1.5;
   --benos-shadow-md: 0 8px 24px rgb(23 32 51 / 12%);
   --benos-motion-fast: 120ms;
+  --benos-motion-normal: 180ms;
   --benos-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --benos-z-dropdown: 10;
+  --benos-z-popover: 20;
+  --benos-z-dialog: 30;
+  --benos-z-toast: 40;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -74,6 +84,10 @@ body {
     --benos-color-warning: #ffd08a;
     --benos-color-on-brand: #102044;
     --benos-color-on-danger: #172238;
+    --benos-z-dropdown: 10;
+    --benos-z-popover: 20;
+    --benos-z-dialog: 30;
+    --benos-z-toast: 40;
   }
 }
 
@@ -95,4 +109,8 @@ body {
   --benos-color-warning: #ffd08a;
   --benos-color-on-brand: #102044;
   --benos-color-on-danger: #172238;
+  --benos-z-dropdown: 10;
+  --benos-z-popover: 20;
+  --benos-z-dialog: 30;
+  --benos-z-toast: 40;
 }

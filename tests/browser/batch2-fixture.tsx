@@ -62,6 +62,7 @@ function Fixture(): JSX.Element {
     <button
       class="benos-button benos-button--primary benos-button--md"
       id="batch2-after"
+      tabIndex={0}
     >
       Continue
     </button>
@@ -111,7 +112,6 @@ function Fixture(): JSX.Element {
           defaultValue={controlled ? undefined : 'standard'}
           onValueChange={(details) => radioValue.set(details.value)}
           orientation="horizontal"
-          dir={rtl ? 'rtl' : 'ltr'}
           items={[
             { value: 'standard', label: 'Standard' },
             { value: 'express', label: 'Express' },
@@ -132,7 +132,6 @@ function Fixture(): JSX.Element {
           value={controlled ? selectValue() : undefined}
           defaultValue={controlled ? undefined : ['north']}
           onValueChange={(details) => selectValue.set(details.value)}
-          dir={rtl ? 'rtl' : 'ltr'}
           positioning={{ sameWidth: true }}
           items={[
             { value: 'north', label: 'North' },
@@ -154,7 +153,6 @@ function Fixture(): JSX.Element {
           value={controlled ? tabsValue() : undefined}
           defaultValue={controlled ? undefined : 'profile'}
           onValueChange={(details) => tabsValue.set(details.value)}
-          dir={rtl ? 'rtl' : 'ltr'}
           items={[
             { value: 'profile', label: 'Profile', content: 'Profile details' },
             {
@@ -177,7 +175,6 @@ function Fixture(): JSX.Element {
         value={controlled ? accordionValue() : undefined}
         defaultValue={controlled ? undefined : ['shipping']}
         onValueChange={(details) => accordionValue.set(details.value)}
-        dir={rtl ? 'rtl' : 'ltr'}
         items={[
           {
             value: 'shipping',

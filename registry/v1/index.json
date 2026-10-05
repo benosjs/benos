@@ -19,7 +19,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:543700254f667e290a54484242da4d9afea5d781151a510ef86ab6b5fd3de2e0"
+      "checksum": "sha256:4937e681fb78127f239140e573212b6caf65dfa457b2c25b820d2e2b57cfc83a"
     },
     {
       "name": "badge",
@@ -71,6 +71,64 @@
       "checksum": "sha256:f4cea878d42c22331e2a68ca361184ed7d93230940720c322ac6e1b40c2857c3"
     },
     {
+      "name": "dialog",
+      "type": "registry:component",
+      "title": "Dialog",
+      "description": "A focus-trapped modal dialog with themed portal rendering.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/dialog.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.1.1"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.1.1"
+        },
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/dialog",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [
+        "overlay-host"
+      ],
+      "checksum": "sha256:9b5cc8279302542440fb6c88e915ae0da4792b0c478fc71a1020cd55f1cd0701"
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:component",
+      "title": "Dropdown menu",
+      "description": "A typeahead-enabled action menu with collision-aware placement.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/dropdown-menu.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.1.1"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.1.1"
+        },
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/menu",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [
+        "overlay-host"
+      ],
+      "checksum": "sha256:e63f9993b5baa6031ce4a17458ba7fb885de8e454e0197913d9b85793514ab73"
+    },
+    {
       "name": "input",
       "type": "registry:component",
       "title": "Input",
@@ -89,6 +147,45 @@
       "dependencies": [],
       "registryDependencies": [],
       "checksum": "sha256:53ce8f34368b48074a01bb2907c3ba3569ce00b761b85a71b1cf4e24101f060e"
+    },
+    {
+      "name": "overlay-host",
+      "type": "registry:style",
+      "title": "Overlay host support",
+      "description": "Shared themed portal host used by overlay components.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/overlay-host.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:4f66f0041bd21e9f9d911950c410a95b1039af8b74a2b8f886534029b2c190af"
+    },
+    {
+      "name": "popover",
+      "type": "registry:component",
+      "title": "Popover",
+      "description": "A collision-aware popover with focus management and themed portal rendering.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/popover.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.1.1"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.1.1"
+        },
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/popover",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [
+        "overlay-host"
+      ],
+      "checksum": "sha256:164840ddc3c443d5e80cf8cbfb2c648747c3b79f0dedc1c7548e9193620145ed"
     },
     {
       "name": "radio-group",
@@ -185,6 +282,68 @@
       "dependencies": [],
       "registryDependencies": [],
       "checksum": "sha256:dd8cc16b56646cb586895bb5cf77be7343be2ec097005c0f7331a19658de8958"
+    },
+    {
+      "name": "toast",
+      "type": "registry:component",
+      "title": "Toast",
+      "description": "A themed live notification with non-stealing focus behavior.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/toast.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.1.1"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.1.1"
+        },
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/toast",
+          "version": "1.44.0"
+        },
+        {
+          "name": "@zag-js/vanilla",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [
+        "overlay-host"
+      ],
+      "checksum": "sha256:0c659e3d1d95b9431ce9e8c78cf49bff9570f69239fea9fe574f9b3059056d18"
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:component",
+      "title": "Tooltip",
+      "description": "Supplemental hover and keyboard-focus help with collision-aware placement.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/tooltip.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.1.1"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.1.1"
+        },
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/tooltip",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [
+        "overlay-host"
+      ],
+      "checksum": "sha256:265a9c923d5340f4f2eea340cf837d26798a645d8b623d09e25985e34b22c343"
     }
   ]
 }

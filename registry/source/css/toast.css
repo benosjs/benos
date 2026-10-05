@@ -1,0 +1,89 @@
+.benos-toast__viewport {
+  display: grid;
+  gap: var(--benos-space-3, 0.75rem);
+  inline-size: min(24rem, calc(100vw - 2rem));
+  inset-block-start: 1rem;
+  inset-inline-end: 1rem;
+  pointer-events: none;
+  position: fixed;
+  z-index: var(--benos-z-toast, 40);
+}
+
+.benos-toast__item {
+  align-items: start;
+  animation: benos-toast-enter var(--benos-motion-normal, 180ms)
+    var(--benos-ease-standard, ease-out);
+  background: var(--benos-color-surface-raised, #fff);
+  border: 1px solid var(--benos-color-border, #d8deea);
+  border-inline-start: 4px solid var(--benos-color-brand, #12306b);
+  border-radius: var(--benos-radius-md, 0.5rem);
+  box-shadow: var(--benos-shadow-overlay, 0 18px 48px rgb(8 16 32 / 24%));
+  color: var(--benos-color-text, #172033);
+  display: flex;
+  font-size: var(--benos-text-sm, 0.875rem);
+  gap: var(--benos-space-3, 0.75rem);
+  justify-content: space-between;
+  padding: var(--benos-space-3, 0.75rem);
+  pointer-events: auto;
+  position: relative !important;
+}
+
+.benos-toast__item[data-type='success'] {
+  border-inline-start-color: var(--benos-color-success, #16794b);
+}
+
+.benos-toast__item[data-type='error'] {
+  border-inline-start-color: var(--benos-color-danger, #b42318);
+}
+
+.benos-toast__item[data-type='warning'] {
+  border-inline-start-color: var(--benos-color-warning, #8a4b08);
+}
+
+.benos-toast__copy {
+  min-inline-size: 0;
+}
+
+.benos-toast__title {
+  display: block;
+  font-weight: 700;
+}
+
+.benos-toast__description {
+  color: var(--benos-color-text, #172033);
+  line-height: var(--benos-line-height-body, 1.5);
+  margin: var(--benos-space-1, 0.25rem) 0 0;
+}
+
+.benos-toast__close {
+  background: transparent;
+  border: 0;
+  border-radius: var(--benos-radius-sm, 0.25rem);
+  color: var(--benos-color-text, #172033);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--benos-text-xs, 0.75rem);
+  padding: var(--benos-space-1, 0.25rem);
+}
+
+.benos-toast__close:focus-visible {
+  outline: 2px solid var(--benos-color-focus, #2459b2);
+  outline-offset: 2px;
+}
+
+@keyframes benos-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateX(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .benos-toast__item {
+    animation: none;
+  }
+}

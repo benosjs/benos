@@ -24,6 +24,7 @@ export function createMachineController<
   definition: Machine<T>,
   getProps: () => Props,
   connect: (service: Service<T>) => Connected,
+  getDirectionElement?: () => unknown,
 ): PrimitiveController<
   NonNullable<T['state']>,
   Connected,
@@ -32,7 +33,24 @@ export function createMachineController<
   const initialProps = untrack(getProps)
   const id = initialProps.id ?? createUniqueId()
   let latestProps = { ...initialProps, id } as MachineProps<T>
-  const machine = new VanillaMachine<T>(definition, () => latestProps)
+  const direction = (): 'ltr' | 'rtl' => {
+    const requested = latestProps.dir
+    if (requested === 'ltr' || requested === 'rtl') return requested
+    const browser = globalThis as typeof globalThis & {
+      document?: {
+        documentElement: { getAttribute(name: string): string | null }
+      }
+      getComputedStyle?: (element: unknown) => { direction: string }
+    }
+    const root = browser.document?.documentElement
+    const source = getDirectionElement?.() ?? root
+    if (!root || !source || !browser.getComputedStyle) return 'ltr'
+
+    return browser.getComputedStyle(source).direction === 'rtl' ? 'rtl' : 'ltr'
+  }
+  const getMachineProps = (): MachineProps<T> =>
+    ({ ...latestProps, dir: direction() }) as MachineProps<T>
+  const machine = new VanillaMachine<T>(definition, getMachineProps)
   const revision = signal(0)
   const readApi = (): Connected => connect(machine.service)
   const liveApi = new Proxy(Object.create(null) as Connected, {
@@ -60,8 +78,13 @@ export function createMachineController<
             const latestMethod = Reflect.get(latestApi as object, key) as
               ((...values: unknown[]) => unknown) | undefined
             if (typeof latestMethod !== 'function') return undefined
-            const latestProps = Reflect.apply(latestMethod, latestApi, args)
-            return Reflect.get(latestProps as object, prop)
+            const apiProps = Reflect.apply(latestMethod, latestApi, args) as
+              Record<PropertyKey, unknown> | undefined
+            // Pass effective direction to the machine for interaction logic,
+            // but let the DOM inherit unless the caller explicitly opted in.
+            if (prop === 'dir' && latestProps.dir === undefined)
+              return undefined
+            return apiProps ? Reflect.get(apiProps, prop) : undefined
           }
           return new Proxy(Object.create(null) as object, {
             ownKeys: () => keys,
@@ -112,7 +135,7 @@ export function createMachineController<
   disposePropsEffect = effect(() => {
     const next = getProps()
     latestProps = { ...next, id } as MachineProps<T>
-    if (started && !stopped) machine.updateProps(() => latestProps)
+    if (started && !stopped) machine.updateProps(getMachineProps)
   })
 
   onMount(() => {

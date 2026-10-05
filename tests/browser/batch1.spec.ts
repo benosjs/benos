@@ -106,7 +106,7 @@ for (const name of componentNames) {
         await button.press('Enter')
         await button.press('Space')
         await expect(page.locator('#batch-activations')).toHaveText('2')
-        await button.press('Tab')
+        await page.keyboard.press('Tab')
         await expect(page.locator('#batch-after')).toBeFocused()
       } else if (name === 'input') {
         const input = page.getByRole('textbox', {
@@ -135,7 +135,7 @@ for (const name of componentNames) {
       } else if (name === 'label') {
         await page.getByText('Display name').click()
         await expect(page.locator('#batch-label-control')).toBeFocused()
-        await page.locator('#batch-label-control').press('Tab')
+        await page.keyboard.press('Tab')
         await expect(page.locator('#batch-after')).toBeFocused()
       } else if (name === 'card') {
         await page.getByRole('button', { name: 'Edit account' }).focus()
@@ -162,7 +162,7 @@ for (const name of componentNames) {
   })
 }
 
-test('WebKit full keyboard mode traverses native buttons and links', async ({
+test('WebKit traverses explicit fixture tab stops without OS setting changes', async ({
   page,
 }) => {
   await page.goto('/tests/browser/keyboard-access.html')
@@ -177,6 +177,7 @@ test('WebKit full keyboard mode traverses native buttons and links', async ({
 test('gallery visual scales, logical field text, and dark danger contrast', async ({
   page,
 }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/examples/ui-gallery/')
   await expect(page.locator('.mode-panel')).toHaveCount(3)
   const scale = await page.evaluate(() => {

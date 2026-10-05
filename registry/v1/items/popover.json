@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "popover",
+  "type": "registry:component",
+  "title": "Popover",
+  "description": "A collision-aware popover with focus management and themed portal rendering.",
+  "dependencies": [
+    {
+      "name": "@benosjs/core",
+      "version": "^0.1.1"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "^0.1.1"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/popover",
+      "version": "1.44.0"
+    }
+  ],
+  "registryDependencies": [
+    "overlay-host"
+  ],
+  "files": [
+    {
+      "path": "popover.tsx",
+      "target": "components/popover.tsx",
+      "contentType": "text/tsx",
+      "content": "import { createPopover } from '@benosjs/primitives/popover'\nimport { mergeProps, Portal, Show, splitProps } from '@benosjs/dom'\nimport type { Child, JSX } from '@benosjs/dom'\nimport type { PopoverOptions } from '@benosjs/primitives/popover'\nimport { createOverlayHost } from './overlay-host.js'\n\nexport type PopoverProps = Pick<\n  PopoverOptions,\n  | 'open'\n  | 'defaultOpen'\n  | 'modal'\n  | 'autoFocus'\n  | 'closeOnInteractOutside'\n  | 'positioning'\n  | 'dir'\n  | 'onOpenChange'\n> & {\n  id?: string\n  class?: string\n  label: string\n  trigger: Child\n  children: Child\n  closeLabel?: string\n  ref?: (element: HTMLDivElement) => void\n}\n\nexport function Popover(props: PopoverProps): JSX.Element {\n  const merged = mergeProps(\n    {\n      modal: false,\n      autoFocus: true,\n      closeOnInteractOutside: true,\n      closeLabel: 'Close',\n      positioning: {\n        placement: 'bottom-start',\n        strategy: 'fixed',\n        flip: true,\n        shift: 8,\n        overflowPadding: 8,\n        fitViewport: true,\n      },\n    },\n    props,\n  )\n  const [local, native] = splitProps(merged, [\n    'id',\n    'class',\n    'ref',\n    'label',\n    'trigger',\n    'children',\n    'closeLabel',\n    'open',\n    'defaultOpen',\n    'modal',\n    'autoFocus',\n    'closeOnInteractOutside',\n    'positioning',\n    'dir',\n    'onOpenChange',\n  ] as const)\n  let rootElement: HTMLDivElement | undefined\n  const target = createOverlayHost(\n    () => rootElement,\n    () => local.dir,\n  )\n  const machine = createPopover(\n    () => ({\n      ...(local.id === undefined ? {} : { id: local.id }),\n      ...(local.open === undefined ? {} : { open: local.open }),\n      ...(local.defaultOpen === undefined ? {} : { defaultOpen: local.defaultOpen }),\n      modal: local.modal,\n      autoFocus: local.autoFocus,\n      portalled: true,\n      closeOnInteractOutside: local.closeOnInteractOutside,\n      positioning: { ...merged.positioning, ...local.positioning },\n      ...(local.dir === undefined ? {} : { dir: local.dir }),\n      ...(local.onOpenChange === undefined ? {} : { onOpenChange: local.onOpenChange }),\n    }),\n    () => rootElement,\n  )\n  const api = machine.api\n  const rootRef = api().getTriggerProps().ref as ((element: HTMLButtonElement) => void) | undefined\n  const ref = (element: HTMLDivElement) => {\n    rootElement = element\n    local.ref?.(element)\n  }\n\n  return (\n    <div\n      {...native}\n      id={local.id}\n      class={['benos-popover', local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      <div {...api().getAnchorProps()}>\n        <button type=\"button\" {...api().getTriggerProps()} ref={(element) => rootRef?.(element)}>\n          {local.trigger}\n        </button>\n      </div>\n      <Show when={api().open}>\n        <Portal mount={target()}>\n          <div class=\"benos-popover__positioner\" {...api().getPositionerProps()}>\n            <section\n              class=\"benos-popover__content\"\n              role=\"dialog\"\n              aria-label={local.label}\n              {...api().getContentProps()}\n            >\n              <div class=\"benos-popover__body\">{local.children}</div>\n              <button class=\"benos-popover__close\" type=\"button\" {...api().getCloseTriggerProps()}>\n                {local.closeLabel}\n              </button>\n            </section>\n          </div>\n        </Portal>\n      </Show>\n    </div>\n  )\n}\n",
+      "checksum": "sha256:ad24cc8cd6e47cea57cf324ae8048fda4767075cfa72fe088563f389cd0920bb"
+    },
+    {
+      "path": "popover.css",
+      "target": "css/popover.css",
+      "contentType": "text/css",
+      "content": ".benos-popover__positioner {\n  max-block-size: calc(100dvh - 1rem);\n  max-inline-size: calc(100vw - 1rem);\n  z-index: var(--benos-z-popover, 20);\n}\n\n.benos-popover__positioner[hidden],\n.benos-popover__positioner[data-state='closed'] {\n  display: none;\n  pointer-events: none;\n  visibility: hidden;\n}\n\n.benos-popover__content {\n  animation: benos-popover-enter var(--benos-motion-fast, 120ms)\n    var(--benos-ease-standard, ease-out);\n  background: var(--benos-color-surface-raised, #fff);\n  border: 1px solid var(--benos-color-border, #d8deea);\n  border-radius: var(--benos-radius-md, 0.5rem);\n  box-shadow: var(--benos-shadow-overlay, 0 18px 48px rgb(8 16 32 / 24%));\n  color: var(--benos-color-text, #172033);\n  max-block-size: calc(100dvh - 2rem);\n  max-inline-size: min(22rem, calc(100vw - 1rem));\n  overflow: auto;\n  padding: var(--benos-space-4, 1rem);\n}\n\n.benos-popover__body {\n  font-size: var(--benos-text-sm, 0.875rem);\n  line-height: var(--benos-line-height-body, 1.5);\n}\n\n.benos-popover__close {\n  background: transparent;\n  border: 0;\n  color: var(--benos-color-brand, #12306b);\n  cursor: pointer;\n  font: inherit;\n  font-size: var(--benos-text-xs, 0.75rem);\n  margin-block-start: var(--benos-space-3, 0.75rem);\n  padding: 0;\n}\n\n.benos-popover__close:focus-visible {\n  outline: 2px solid var(--benos-color-focus, #2459b2);\n  outline-offset: 2px;\n}\n\n@keyframes benos-popover-enter {\n  from {\n    opacity: 0;\n    transform: translateY(-0.25rem);\n  }\n  to {\n    opacity: 1;\n    transform: none;\n  }\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .benos-popover__content {\n    animation: none;\n  }\n}\n",
+      "checksum": "sha256:689f6c5bd40ad912deb4d8f63b24bf0a0af630104c4ba127c2084140c4c3ff93"
+    }
+  ]
+}

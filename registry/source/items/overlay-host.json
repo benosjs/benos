@@ -1,0 +1,16 @@
+{
+  "name": "overlay-host",
+  "title": "Overlay host support",
+  "description": "Shared themed portal host used by overlay components.",
+  "type": "registry:style",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "overlay-host.ts",
+      "target": "components/overlay-host.ts",
+      "contentType": "text/typescript",
+      "sourceFile": "components/overlay-host.ts"
+    }
+  ]
+}

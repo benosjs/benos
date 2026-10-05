@@ -5,8 +5,14 @@ import { normalizeProps } from './normalize.js'
 
 export type TooltipOptions = Omit<ZagTooltipProps, 'id'> & { id?: string }
 
-export function createTooltip(getProps: () => TooltipOptions) {
-  return createMachineController(machine, getProps, (service) =>
-    connect(service, normalizeProps),
+export function createTooltip(
+  getProps: () => TooltipOptions,
+  getDirectionElement?: () => unknown,
+) {
+  return createMachineController(
+    machine,
+    getProps,
+    (service) => connect(service, normalizeProps),
+    getDirectionElement,
   )
 }

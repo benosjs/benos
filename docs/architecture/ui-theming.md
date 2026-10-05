@@ -1,8 +1,8 @@
 # UI theming and visual tokens
 
-**Status:** U1 design approved; U3 installs the base semantic tokens; U4 batch 1 styles use them. Token names are a hard-to-reverse API; unused token families remain provisional until later U4 batches.
+**Status:** U1 design approved; U3 installs the base semantic tokens; U4 batches 1–3 styles use them. Token names are a hard-to-reverse API; unused token families remain provisional until later U4 batches.
 
-**Scope label:** base tokens and batch 1 component styles are implemented for U4; remaining token families are designed now and may be built in later U4 batches (required for 0.2.0).
+**Scope label:** base tokens and batch 1–3 component styles are implemented for U4; remaining token families are designed now and may be built in later U4 batches (required for 0.2.0).
 
 ## Goals
 
@@ -60,6 +60,8 @@ benos init installs one token stylesheet at the configured path. Each copied com
 - data-theme="light" or data-theme="dark" on the app root overrides the system.
 - data-theme="auto" returns to system preference. CSS alone must render a usable initial theme.
 - Tokens inherit into nested containers. Portal content outside a themed subtree needs an explicit theme on the portal target/content or the app must theme the target.
+- Batch 3's shared overlay host copies computed `--benos-*` variables and `color-scheme` from the overlay owner before appending to `document.body`, so Dialog, Popover, Tooltip, DropdownMenu, and Toast keep their theme outside a nested theme subtree. It also carries the effective inherited RTL direction to the portal host.
+- Overlay components use `--benos-z-dropdown`, `--benos-z-popover`, `--benos-z-dialog`, and `--benos-z-toast` in ascending layer order. Popover, Tooltip, and DropdownMenu use Zag positioning with flip/shift/viewport constraints; browser geometry checks cover triggers near viewport edges in both writing directions.
 - U1 does not require persisted preference or an inline script. If a later starter adds persistence, document a CSP-compatible mechanism.
 
 Classes are namespaced, e.g. .benos-button and .benos-dialog. Public customization uses documented class props, CSS variables, and ordinary selectors. Examples use class, not className, because Benos rejects className in JSX. No runtime JavaScript is required for theme selection.

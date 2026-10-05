@@ -31,8 +31,8 @@ test('gallery shows all six primitives with selected and open states', async ({
   const panels = page.locator('.mode-panel')
   await expect(panels).toHaveCount(3)
   await expect(
-    page.getByLabel('Components in batches 1 and 2').locator('span'),
-  ).toHaveCount(13)
+    page.getByLabel('Components in batches 1, 2, and 3').locator('span'),
+  ).toHaveCount(18)
 
   for (let index = 0; index < 3; index += 1) {
     const panel = panels.nth(index)
@@ -60,7 +60,7 @@ test('gallery shows all six primitives with selected and open states', async ({
     expect(selectTop - radioBottom).toBeLessThan(20)
     await selectTrigger.click()
     await expect(panel.locator('.benos-select__content')).toBeVisible()
-    await selectTrigger.click()
+    await page.keyboard.press('Escape')
     await expect(panel.locator('.benos-select__content')).toBeHidden()
     const selectWidth = await panel
       .locator('.benos-select')
@@ -204,6 +204,7 @@ test('Select closed and open states do not change surrounding layout', async ({
 test('checked checkbox marks have strong contrast in both color modes', async ({
   page,
 }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/examples/ui-gallery/')
   const contrast = await page
     .locator(
@@ -331,13 +332,23 @@ for (const name of componentNames) {
       expect(await page.evaluate(() => window.__benosBatchTwo.rootId())).toBe(
         ids[name],
       )
+      await expect(page.locator('#batch2-app [dir="ltr"]')).toHaveCount(0)
+      if (mode === 'rtl' || mode === 'dark-rtl') {
+        await expect(page.locator('html')).toHaveAttribute('dir', 'rtl')
+        const directions = await page
+          .locator('#batch2-app *')
+          .evaluateAll((elements) =>
+            elements.map((element) => getComputedStyle(element).direction),
+          )
+        expect(directions.every((direction) => direction === 'rtl')).toBe(true)
+      }
 
       if (name === 'checkbox') {
         const checkbox = page.getByRole('checkbox', { name: 'Accept terms' })
         await checkbox.focus()
         await checkbox.press('Space')
         await expect(checkbox).toBeChecked()
-        await checkbox.press('Tab')
+        await page.keyboard.press('Tab')
         await expect(page.locator('#batch2-after')).toBeFocused()
       } else if (name === 'switch') {
         const toggle = page.getByRole('switch', { name: 'Product updates' })
@@ -346,7 +357,7 @@ for (const name of componentNames) {
         await toggle.focus()
         await toggle.press('Space')
         await expect(toggle).not.toBeChecked()
-        await toggle.press('Tab')
+        await page.keyboard.press('Tab')
         await expect(page.locator('#batch2-after')).toBeFocused()
       } else if (name === 'radio-group') {
         const radios = page.getByRole('radio')
@@ -401,7 +412,7 @@ for (const name of componentNames) {
         await expect(tabs.nth(2)).toBeFocused()
         await tabs.nth(2).press('Home')
         await expect(tabs.nth(0)).toBeFocused()
-        await tabs.nth(0).press('Tab')
+        await page.keyboard.press('Tab')
         await expect(page.getByRole('tabpanel').first()).toBeFocused()
       } else {
         const triggers = page.getByRole('button', {
@@ -418,7 +429,7 @@ for (const name of componentNames) {
         await expect(
           triggers.nth(0).locator('.benos-accordion__indicator'),
         ).toHaveAttribute('data-state', 'open')
-        await triggers.nth(0).press('Tab')
+        await page.keyboard.press('Tab')
         await expect(triggers.nth(1)).toBeFocused()
       }
 

@@ -1,0 +1,17 @@
+.batch3-fixture {
+  min-block-size: 200vh;
+  padding: 20px;
+}
+
+.edge-trigger {
+  inset-block-end: 12px;
+  inset-inline-end: 12px;
+  position: fixed;
+}
+
+html {
+  --benos-z-dropdown: 10;
+  --benos-z-popover: 20;
+  --benos-z-dialog: 30;
+  --benos-z-toast: 40;
+}

@@ -94,6 +94,7 @@ export function Accordion(props: AccordionProps): JSX.Element {
             <button
               class="benos-accordion__trigger"
               type="button"
+              tabIndex={0}
               {...api().getItemTriggerProps({
                 value: item.value,
                 disabled: item.disabled,

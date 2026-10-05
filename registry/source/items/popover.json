@@ -1,0 +1,39 @@
+{
+  "name": "popover",
+  "title": "Popover",
+  "description": "A collision-aware popover with focus management and themed portal rendering.",
+  "type": "registry:component",
+  "dependencies": [
+    {
+      "name": "@benosjs/core",
+      "version": "^0.1.1"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "^0.1.1"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/popover",
+      "version": "1.44.0"
+    }
+  ],
+  "registryDependencies": ["overlay-host"],
+  "files": [
+    {
+      "path": "popover.tsx",
+      "target": "components/popover.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/popover.tsx"
+    },
+    {
+      "path": "popover.css",
+      "target": "css/popover.css",
+      "contentType": "text/css",
+      "sourceFile": "css/popover.css"
+    }
+  ]
+}

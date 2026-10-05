@@ -56,7 +56,9 @@ function ButtonFixture(): JSX.Element {
       <Button id="batch-disabled-button" disabled>
         Disabled
       </Button>
-      <button id="batch-after">After button</button>
+      <button id="batch-after" tabIndex={0}>
+        After button
+      </button>
       <output aria-hidden="true" id="batch-activations">
         {activations()}
       </output>
@@ -79,7 +81,9 @@ function InputFixture(): JSX.Element {
         aria-describedby="batch-input-error"
       />
       <span id="batch-input-error">Enter a valid email address.</span>
-      <button id="batch-after">After input</button>
+      <button id="batch-after" tabIndex={0}>
+        After input
+      </button>
     </div>
   )
 }
@@ -93,7 +97,9 @@ function TextareaFixture(): JSX.Element {
       <Textarea id="batch-textarea-disabled" disabled />
       <Label for="batch-textarea-invalid">Invalid message</Label>
       <Textarea id="batch-textarea-invalid" invalid />
-      <button id="batch-after">After textarea</button>
+      <button id="batch-after" tabIndex={0}>
+        After textarea
+      </button>
     </div>
   )
 }
@@ -105,7 +111,9 @@ function LabelFixture(): JSX.Element {
         Display name
       </Label>
       <input id="batch-label-control" />
-      <button id="batch-after">After label</button>
+      <button id="batch-after" tabIndex={0}>
+        After label
+      </button>
     </div>
   )
 }
@@ -118,7 +126,9 @@ function CardFixture(): JSX.Element {
         <p>Manage the details on your profile.</p>
         <button id="batch-card-action">Edit account</button>
       </Card>
-      <button id="batch-after">After card</button>
+      <button id="batch-after" tabIndex={0}>
+        After card
+      </button>
     </div>
   )
 }
@@ -130,7 +140,9 @@ function BadgeFixture(): JSX.Element {
       <Badge id="batch-badge" ref={recordRef} tone="success">
         Connected
       </Badge>
-      <button id="batch-after">After badge</button>
+      <button id="batch-after" tabIndex={0}>
+        After badge
+      </button>
     </div>
   )
 }
@@ -140,7 +152,9 @@ function SeparatorFixture(): JSX.Element {
     <div class="separator-fixture">
       <button id="batch-before">Before separator</button>
       <Separator id="batch-separator" ref={recordRef} />
-      <button id="batch-after">After separator</button>
+      <button id="batch-after" tabIndex={0}>
+        After separator
+      </button>
     </div>
   )
 }

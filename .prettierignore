@@ -1,5 +1,6 @@
 node_modules
 **/dist
+registry/v1
 coverage
 pnpm-lock.yaml
 benchmarks/js-framework-benchmark/src/SvelteApp.svelte

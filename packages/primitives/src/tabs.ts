@@ -5,8 +5,14 @@ import { normalizeProps } from './normalize.js'
 
 export type TabsOptions = Omit<ZagTabsProps, 'id'> & { id?: string }
 
-export function createTabs(getProps: () => TabsOptions) {
-  return createMachineController(machine, getProps, (service) =>
-    connect(service, normalizeProps),
+export function createTabs(
+  getProps: () => TabsOptions,
+  getDirectionElement?: () => unknown,
+) {
+  return createMachineController(
+    machine,
+    getProps,
+    (service) => connect(service, normalizeProps),
+    getDirectionElement,
   )
 }

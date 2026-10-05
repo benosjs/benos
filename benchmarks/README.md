@@ -532,3 +532,29 @@ finished:
 
 All ratios pass the 2× production guard. No kernel benchmark workload or
 production runtime path changed in the review.
+
+## UI U4 batch 3 (2026-10-05)
+
+Rebuilt production artifacts with Node 22.18.0 before measuring. Batch 3 adds
+registry components and styles plus one explicit keyboard tab stop on the
+Tooltip trigger; no core or DOM runtime source changed.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard used the median of seven runs, each with five
+timed samples. It was run after the full browser and consumer test jobs had
+finished:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.39 |        5.03 | 1.29× |
+| 20-deep computed chain write + read |       6.83 |        5.59 | 1.24× |
+| 200-effect fanout write             |       2.31 |        1.29 | 1.70× |
+| Dynamic dependency switch           |       3.65 |        2.60 | 1.40× |
+| Repeated equal write                |       0.84 |        0.55 | 1.60× |
+
+All five ratios pass the 2× production guard. No benchmark workload or
+production runtime path changed in batch 3.

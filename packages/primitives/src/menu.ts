@@ -5,8 +5,14 @@ import { normalizeProps } from './normalize.js'
 
 export type MenuOptions = Omit<ZagMenuProps, 'id'> & { id?: string }
 
-export function createMenu(getProps: () => MenuOptions) {
-  return createMachineController(machine, getProps, (service) =>
-    connect(service, normalizeProps),
+export function createMenu(
+  getProps: () => MenuOptions,
+  getDirectionElement?: () => unknown,
+) {
+  return createMachineController(
+    machine,
+    getProps,
+    (service) => connect(service, normalizeProps),
+    getDirectionElement,
   )
 }

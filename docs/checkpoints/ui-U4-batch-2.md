@@ -49,11 +49,12 @@ states and verifies the following control does not move.
   keeps the first option selected, while Chromium and Firefox move to the
   next option. Zag forwards direction and delegates arrow movement to native
   radio controls; this is documented as WebKit behavior, not a Zag defect.
-- The browser wrapper sets macOS `AppleKeyboardUIMode=2` for full keyboard
-  access and restores the previous value afterward. Playwright WebKit did not
-  honor this global setting in the earlier probe; the deterministic traversal
-  fixture explicitly includes its link with `tabindex="0"`, as described in
-  the [U4 preflight notes](../ui-plan.md#u4-preflight-findings-investigation-only-no-u4-implementation).
+- An earlier browser-wrapper revision set and restored macOS
+  `AppleKeyboardUIMode=2`; this was removed in batch 3 review. The browser
+  runner now never reads or changes host operating-system settings. Playwright
+  WebKit did not honor that setting in the earlier probe; the deterministic
+  traversal fixture explicitly includes its link with `tabindex="0"`, as
+  described in the [U4 preflight notes](../ui-plan.md#u4-preflight-findings-investigation-only-no-u4-implementation).
 - No axe violations or known adapter-specific accessibility issues remain.
 
 ## Verification and sizes

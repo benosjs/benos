@@ -11,7 +11,14 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@benosjs/core": ["../../packages/core/dist/types/index.d.ts"],
+      "@zag-js/toast": [
+        "../../packages/primitives/node_modules/@zag-js/toast/dist/index.d.mts"
+      ],
+      "@zag-js/vanilla": [
+        "../../packages/primitives/node_modules/@zag-js/vanilla/dist/index.d.mts"
+      ]
     }
   },
   "include": ["src", "vite.config.ts"]

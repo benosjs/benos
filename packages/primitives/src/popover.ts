@@ -5,8 +5,14 @@ import { normalizeProps } from './normalize.js'
 
 export type PopoverOptions = Omit<ZagPopoverProps, 'id'> & { id?: string }
 
-export function createPopover(getProps: () => PopoverOptions) {
-  return createMachineController(machine, getProps, (service) =>
-    connect(service, normalizeProps),
+export function createPopover(
+  getProps: () => PopoverOptions,
+  getDirectionElement?: () => unknown,
+) {
+  return createMachineController(
+    machine,
+    getProps,
+    (service) => connect(service, normalizeProps),
+    getDirectionElement,
   )
 }

@@ -60,6 +60,12 @@ export default defineConfig({
           ),
         }),
       ),
+      ...['dialog', 'menu', 'popover', 'tooltip', 'toast'].map((name) => ({
+        find: `@benosjs/primitives/${name}`,
+        replacement: alias(
+          `../../packages/primitives/dist/js/${name}.development.js`,
+        ),
+      })),
       {
         find: '@benosjs/primitives/select',
         replacement: alias(
@@ -74,6 +80,12 @@ export default defineConfig({
           ),
         }),
       ),
+      ...['dialog', 'menu', 'popover', 'tooltip', 'toast'].map((name) => ({
+        find: `@zag-js/${name}`,
+        replacement: alias(
+          `../../packages/primitives/node_modules/@zag-js/${name}/dist/index.mjs`,
+        ),
+      })),
       {
         find: '@zag-js/toast',
         replacement: alias(

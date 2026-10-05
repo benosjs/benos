@@ -1,0 +1,39 @@
+{
+  "name": "dialog",
+  "title": "Dialog",
+  "description": "A focus-trapped modal dialog with themed portal rendering.",
+  "type": "registry:component",
+  "dependencies": [
+    {
+      "name": "@benosjs/core",
+      "version": "^0.1.1"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "^0.1.1"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/dialog",
+      "version": "1.44.0"
+    }
+  ],
+  "registryDependencies": ["overlay-host"],
+  "files": [
+    {
+      "path": "dialog.tsx",
+      "target": "components/dialog.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/dialog.tsx"
+    },
+    {
+      "path": "dialog.css",
+      "target": "css/dialog.css",
+      "contentType": "text/css",
+      "sourceFile": "css/dialog.css"
+    }
+  ]
+}

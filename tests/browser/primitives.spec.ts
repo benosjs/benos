@@ -300,3 +300,23 @@ for (const name of ['radio-group', 'tabs'] as const) {
     }
   })
 }
+
+for (const name of primitiveNames) {
+  test(`${name}: inherits page direction without emitting an implicit LTR`, async ({
+    page,
+  }) => {
+    for (const direction of ['ltr', 'rtl'] as const) {
+      await renderPrimitive(page, name, direction)
+
+      await expect(page.locator('html')).toHaveAttribute('dir', direction)
+      await expect(page.locator('#app [dir="ltr"]')).toHaveCount(0)
+      const directions = await page
+        .locator('#app *')
+        .evaluateAll((elements) =>
+          elements.map((element) => getComputedStyle(element).direction),
+        )
+      expect(directions.length).toBeGreaterThan(0)
+      expect(directions.every((value) => value === direction)).toBe(true)
+    }
+  })
+}

@@ -1,0 +1,91 @@
+.benos-dialog__positioner {
+  align-items: center;
+  display: grid;
+  inset: 0;
+  justify-items: center;
+  overflow: auto;
+  padding: var(--benos-space-4, 1rem);
+  position: fixed;
+  z-index: var(--benos-z-dialog, 30);
+}
+
+.benos-dialog__positioner[hidden],
+.benos-dialog__positioner[data-state='closed'] {
+  display: none;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.benos-dialog__backdrop {
+  background: rgb(8 16 32 / 58%);
+  inset: 0;
+  position: fixed;
+}
+
+.benos-dialog__content {
+  animation: benos-dialog-enter var(--benos-motion-normal, 180ms)
+    var(--benos-ease-standard, ease-out);
+  background: var(--benos-color-surface-raised, #fff);
+  border: 1px solid var(--benos-color-border, #d8deea);
+  border-radius: var(--benos-radius-lg, 0.75rem);
+  box-shadow: var(--benos-shadow-overlay, 0 18px 48px rgb(8 16 32 / 24%));
+  color: var(--benos-color-text, #172033);
+  inline-size: min(34rem, calc(100vw - 2rem));
+  max-block-size: calc(100dvh - 2rem);
+  overflow: auto;
+  padding: var(--benos-space-5, 1.5rem);
+  position: relative;
+  z-index: 1;
+}
+
+.benos-dialog__title {
+  font-size: var(--benos-text-lg, 1.125rem);
+  line-height: 1.25;
+  margin: 0;
+}
+
+.benos-dialog__description {
+  color: var(--benos-color-text-muted, #566176);
+  font-size: var(--benos-text-sm, 0.875rem);
+  margin: var(--benos-space-2, 0.5rem) 0 0;
+}
+
+.benos-dialog__body {
+  font-size: var(--benos-text-sm, 0.875rem);
+  line-height: var(--benos-line-height-body, 1.5);
+  padding-block: var(--benos-space-4, 1rem);
+}
+
+.benos-dialog__close {
+  background: var(--benos-color-brand, #12306b);
+  border: 0;
+  border-radius: var(--benos-radius-md, 0.5rem);
+  color: var(--benos-color-on-brand, #fff);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--benos-text-sm, 0.875rem);
+  min-block-size: 2.5rem;
+  padding-inline: var(--benos-space-4, 1rem);
+}
+
+.benos-dialog__close:focus-visible {
+  outline: 3px solid var(--benos-color-focus, #2459b2);
+  outline-offset: 2px;
+}
+
+@keyframes benos-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .benos-dialog__content {
+    animation: none;
+  }
+}

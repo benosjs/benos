@@ -1,6 +1,6 @@
 # UI component registry
 
-**Status:** U1 design and U3 registry foundation are complete. U4 batches 1 and 2 add thirteen styled components to schema-v1 payloads. Schema and versioned URL structure are hard-to-reverse.
+**Status:** U1 design and U3 registry foundation are complete. U4 batches 1–3 add eighteen styled components and their shared overlay-host dependency to schema-v1 payloads. Schema and versioned URL structure are hard-to-reverse.
 
 **Scope label:** registry foundations are implemented in U3; component payloads arrive in U4, and update-base retention is exercised in U5 (required for 0.2.0).
 
@@ -66,7 +66,7 @@ The generated v1 index contains source payloads for completed U4 batches. CI run
 accepts `file:` URLs and loopback HTTP only for explicit local development and
 tests; released registry URLs remain HTTPS and tag-pinned.
 
-Every U4 registry component is added unchanged to a fresh create-benos project in the OS/package-manager matrix; that project runs strict TypeScript and Benos ESLint checks across copied source.
+Every U4 registry component is added unchanged to a fresh create-benos project in the OS/package-manager matrix; that project runs strict TypeScript and Benos ESLint checks across copied source. Related overlay items declare the shared `overlay-host` helper as a registry dependency so adding multiple overlays does not create duplicate file destinations.
 
 If the old base cannot be fetched, refuse automatic merge and preserve local files. A validated local cache is acceptable. Removing an item from the current catalog prevents new installation but does not erase old payloads needed for updates.
 

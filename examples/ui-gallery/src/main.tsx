@@ -1,4 +1,5 @@
-import { render } from '@benosjs/dom'
+import { signal } from '@benosjs/core'
+import { render, Show } from '@benosjs/dom'
 import type { JSX } from '@benosjs/dom'
 import { Badge } from '../../../registry/source/components/badge.js'
 import { Button } from '../../../registry/source/components/button.js'
@@ -13,6 +14,11 @@ import { RadioGroup } from '../../../registry/source/components/radio-group.js'
 import { Select } from '../../../registry/source/components/select.js'
 import { Tabs } from '../../../registry/source/components/tabs.js'
 import { Accordion } from '../../../registry/source/components/accordion.js'
+import { Dialog } from '../../../registry/source/components/dialog.js'
+import { DropdownMenu } from '../../../registry/source/components/dropdown-menu.js'
+import { Popover } from '../../../registry/source/components/popover.js'
+import { Toast } from '../../../registry/source/components/toast.js'
+import { Tooltip } from '../../../registry/source/components/tooltip.js'
 import './ui.css'
 import './gallery.css'
 
@@ -20,6 +26,7 @@ type ThemeMode = 'light' | 'dark' | 'rtl'
 
 function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
   const rtl = props.mode === 'rtl'
+  const toastOpen = signal(false)
 
   return (
     <section
@@ -271,6 +278,81 @@ function ComponentSamples(props: { mode: ThemeMode }): JSX.Element {
           />
         </div>
       </section>
+
+      <section class="sample-group" aria-labelledby={'overlays-' + props.mode}>
+        <h3 id={'overlays-' + props.mode}>Overlays</h3>
+        <p class="overlay-note">
+          Tooltips add optional context; keep essential instructions visible.
+        </p>
+        <div class="overlay-grid">
+          <Dialog
+            id={'dialog-' + props.mode}
+            title={rtl ? 'تفاصيل الحساب' : 'Account details'}
+            description={
+              rtl
+                ? 'حدّث تفضيلاتك في نافذة آمنة.'
+                : 'Update your preferences in a focused dialog.'
+            }
+            trigger={rtl ? 'افتح الحوار' : 'Open dialog'}
+          >
+            <p>
+              {rtl
+                ? 'تبقى الخلفية محمية حتى إغلاق هذه النافذة.'
+                : 'The page behind this dialog stays protected until it closes.'}
+            </p>
+            <Input aria-label="Display name" value="Alex" />
+          </Dialog>
+          <Popover
+            id={'popover-' + props.mode}
+            label={rtl ? 'معلومات إضافية' : 'More information'}
+            trigger={rtl ? 'المزيد' : 'More details'}
+          >
+            <p>
+              {rtl
+                ? 'يمكنك قراءة التفاصيل أو إغلاق هذه اللوحة.'
+                : 'Read the extra details or close this panel.'}
+            </p>
+          </Popover>
+          <Tooltip
+            id={'tooltip-' + props.mode}
+            label={rtl ? 'معلومة مساعدة' : 'Optional help'}
+            trigger={rtl ? 'مرّر أو انتقل إلى المساعدة' : 'Help'}
+          >
+            {rtl
+              ? 'هذه المعلومة الإضافية تظهر عند التركيز أو المرور.'
+              : 'This supplemental hint appears on focus or hover.'}
+          </Tooltip>
+          <DropdownMenu
+            id={'menu-' + props.mode}
+            label={rtl ? 'إجراءات الملف' : 'File actions'}
+            trigger={rtl ? 'الإجراءات' : 'Actions'}
+            items={[
+              { value: 'rename', label: rtl ? 'إعادة التسمية' : 'Rename' },
+              { value: 'duplicate', label: rtl ? 'نسخ' : 'Duplicate' },
+              { value: 'archive', label: rtl ? 'أرشفة' : 'Archive' },
+            ]}
+          />
+          <div class="toast-sample">
+            <Button variant="secondary" onClick={() => toastOpen.set(true)}>
+              {rtl ? 'إظهار إشعار' : 'Show toast'}
+            </Button>
+            <Show when={toastOpen()}>
+              <Toast
+                id={'toast-' + props.mode}
+                type="success"
+                title={rtl ? 'تم الحفظ' : 'Changes saved'}
+                description={
+                  rtl ? 'تم تحديث تفضيلاتك.' : 'Your preferences were updated.'
+                }
+                duration={Infinity}
+                onStatusChange={(details) => {
+                  if (details.status === 'unmounted') toastOpen.set(false)
+                }}
+              />
+            </Show>
+          </div>
+        </div>
+      </section>
     </section>
   )
 }
@@ -304,7 +386,7 @@ export function mountGallery(host: HTMLElement): () => void {
         </header>
 
         <section class="intro">
-          <p class="eyebrow">Source-owned components · Batches 1 and 2</p>
+          <p class="eyebrow">Source-owned components · Batches 1, 2, and 3</p>
           <h1>Small building blocks, in your hands.</h1>
           <p>
             Native HTML, Benos getter-backed props, and a quiet navy palette.
@@ -312,7 +394,7 @@ export function mountGallery(host: HTMLElement): () => void {
           </p>
           <div
             class="component-list"
-            aria-label="Components in batches 1 and 2"
+            aria-label="Components in batches 1, 2, and 3"
           >
             <span>Button</span>
             <span>Input</span>
@@ -327,6 +409,11 @@ export function mountGallery(host: HTMLElement): () => void {
             <span>Select</span>
             <span>Tabs</span>
             <span>Accordion</span>
+            <span>Dialog</span>
+            <span>Popover</span>
+            <span>Tooltip</span>
+            <span>Dropdown menu</span>
+            <span>Toast</span>
           </div>
         </section>
 
@@ -337,7 +424,7 @@ export function mountGallery(host: HTMLElement): () => void {
         </div>
 
         <footer class="site-footer">
-          <span>Batches 1 and 2 · source-owned styled components</span>
+          <span>Batches 1, 2, and 3 · source-owned styled components</span>
           <span>Colors follow the Benos navy and light marks.</span>
         </footer>
       </main>

@@ -7,8 +7,14 @@ export type RadioGroupOptions = Omit<ZagRadioGroupProps, 'id'> & {
   id?: string
 }
 
-export function createRadioGroup(getProps: () => RadioGroupOptions) {
-  return createMachineController(machine, getProps, (service) =>
-    connect(service, normalizeProps),
+export function createRadioGroup(
+  getProps: () => RadioGroupOptions,
+  getDirectionElement?: () => unknown,
+) {
+  return createMachineController(
+    machine,
+    getProps,
+    (service) => connect(service, normalizeProps),
+    getDirectionElement,
   )
 }

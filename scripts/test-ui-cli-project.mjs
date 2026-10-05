@@ -15,7 +15,7 @@ import { pathToFileURL } from 'node:url'
 import { spawnSync } from 'node:child_process'
 import { runCommand } from '../packages/benos/src/process.mjs'
 import { createFixtureRegistry } from '../tests/fixtures/ui-registry/create.mjs'
-import { createLocalPrimitivesRegistry } from '../tests/fixtures/ui-registry/local-primitives-registry.mjs'
+import { createLocalPackagesRegistry } from '../tests/fixtures/ui-registry/local-primitives-registry.mjs'
 
 const root = resolve(import.meta.dirname, '..')
 const manager = process.env.BENOS_PACKAGE_MANAGER
@@ -55,6 +55,7 @@ const batch2Names = [
   'tabs',
   'accordion',
 ]
+const batch3Names = ['dialog', 'popover', 'tooltip', 'dropdown-menu', 'toast']
 
 try {
   await mkdir(join(batch1RegistryDirectory, 'items'), { recursive: true })
@@ -165,9 +166,15 @@ try {
     ],
     { cwd: root },
   )
-  const localRegistry = await createLocalPrimitivesRegistry(
-    join(temporary, 'benosjs-primitives-0.2.0.tgz'),
+  await runCommand(
+    'pnpm',
+    ['--filter', '@benosjs/core', 'pack', '--pack-destination', temporary],
+    { cwd: root },
   )
+  const localRegistry = await createLocalPackagesRegistry([
+    join(temporary, 'benosjs-core-0.1.2.tgz'),
+    join(temporary, 'benosjs-primitives-0.2.0.tgz'),
+  ])
   if (manager === 'yarn') {
     // Yarn 4 blocks plain HTTP registries by default. This fixture registry is
     // intentionally loopback-only, so trust only its local host for this test.
@@ -185,12 +192,40 @@ try {
   process.env.NPM_CONFIG_REGISTRY = localRegistry.url
   process.env.YARN_NPM_REGISTRY_SERVER = localRegistry.url
   try {
+    // Re-resolve from the local package feed so the same-version published
+    // core already cached by the initial starter install cannot mask the
+    // workspace-packed build that includes the pending public API additions.
+    await rm(join(app, 'node_modules'), { recursive: true, force: true })
+    for (const lockfile of [
+      'package-lock.json',
+      'pnpm-lock.yaml',
+      'yarn.lock',
+      'bun.lock',
+      'bun.lockb',
+    ]) {
+      await rm(join(app, lockfile), { force: true })
+    }
+    await runCommand(manager, ['install'], { cwd: app })
     await runCommand(
       process.execPath,
       [
         cli,
         'add',
         ...batch2Names,
+        '--yes',
+        '--registry',
+        batch1Registry,
+        '--package-manager',
+        manager,
+      ],
+      { cwd: app },
+    )
+    await runCommand(
+      process.execPath,
+      [
+        cli,
+        'add',
+        ...batch3Names,
         '--yes',
         '--registry',
         batch1Registry,
@@ -236,6 +271,39 @@ try {
     )
   ) {
     throw new Error('benos add did not record all batch 2 component files.')
+  }
+  for (const name of batch3Names) {
+    const component = join(app, 'src/components/ui', name + '.tsx')
+    const stylesheet = join(app, 'src/styles', name + '.css')
+    const componentSource = await readFile(component, 'utf8')
+    const exportName =
+      {
+        'dropdown-menu': 'DropdownMenu',
+      }[name] ?? name.charAt(0).toUpperCase() + name.slice(1)
+    if (!componentSource.includes('export function ' + exportName)) {
+      throw new Error(
+        'benos add did not copy the ' + name + ' component source.',
+      )
+    }
+    if (!(await readFile(stylesheet, 'utf8')).includes('.benos-')) {
+      throw new Error('benos add did not copy the ' + name + ' stylesheet.')
+    }
+  }
+  const overlaysLock = JSON.parse(
+    await readFile(join(app, 'benos.lock.json'), 'utf8'),
+  )
+  if (
+    !batch3Names.every(
+      (name) => overlaysLock.items[name]?.files?.length === 2,
+    ) ||
+    overlaysLock.items['overlay-host']?.files?.length !== 1 ||
+    !(
+      await readFile(join(app, 'src/components/ui/overlay-host.ts'), 'utf8')
+    ).includes('benosOverlayHost')
+  ) {
+    throw new Error(
+      'benos add did not install overlay components with their shared host dependency.',
+    )
   }
   const dependencyProbe =
     manager === 'yarn'

@@ -10,8 +10,12 @@ export type ToastOptions<Content = unknown> = Omit<
 
 export function createToast<Content = unknown>(
   getProps: () => ToastOptions<Content>,
+  getDirectionElement?: () => unknown,
 ) {
-  return createMachineController(machine, getProps, (service) =>
-    connect(service, normalizeProps),
+  return createMachineController(
+    machine,
+    getProps,
+    (service) => connect(service, normalizeProps),
+    getDirectionElement,
   )
 }

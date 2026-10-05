@@ -1,0 +1,39 @@
+{
+  "name": "tooltip",
+  "title": "Tooltip",
+  "description": "Supplemental hover and keyboard-focus help with collision-aware placement.",
+  "type": "registry:component",
+  "dependencies": [
+    {
+      "name": "@benosjs/core",
+      "version": "^0.1.1"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "^0.1.1"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/tooltip",
+      "version": "1.44.0"
+    }
+  ],
+  "registryDependencies": ["overlay-host"],
+  "files": [
+    {
+      "path": "tooltip.tsx",
+      "target": "components/tooltip.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/tooltip.tsx"
+    },
+    {
+      "path": "tooltip.css",
+      "target": "css/tooltip.css",
+      "contentType": "text/css",
+      "sourceFile": "css/tooltip.css"
+    }
+  ]
+}

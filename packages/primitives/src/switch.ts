@@ -5,8 +5,14 @@ import { normalizeProps } from './normalize.js'
 
 export type SwitchOptions = Omit<ZagSwitchProps, 'id'> & { id?: string }
 
-export function createSwitch(getProps: () => SwitchOptions) {
-  return createMachineController(machine, getProps, (service) =>
-    connect(service, normalizeProps),
+export function createSwitch(
+  getProps: () => SwitchOptions,
+  getDirectionElement?: () => unknown,
+) {
+  return createMachineController(
+    machine,
+    getProps,
+    (service) => connect(service, normalizeProps),
+    getDirectionElement,
   )
 }

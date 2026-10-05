@@ -30,36 +30,56 @@ async function bodyOf(request) {
   return Buffer.concat(chunks)
 }
 
-export async function createLocalPrimitivesRegistry(tarballPath) {
-  const tarball = await readFile(tarballPath)
-  const manifest = tarEntry(gunzipSync(tarball), 'package/package.json')
-  const packagePath = `/@benosjs/primitives/-/benosjs-primitives-${manifest.version}.tgz`
-  const packument = (origin) => ({
-    name: manifest.name,
-    'dist-tags': { latest: manifest.version },
-    versions: {
-      [manifest.version]: {
-        ...manifest,
-        dist: {
-          tarball: new globalThis.URL(packagePath, origin).href,
-          shasum: createHash('sha1').update(tarball).digest('hex'),
-          integrity: `sha512-${createHash('sha512').update(tarball).digest('base64')}`,
+export async function createLocalPackagesRegistry(tarballPaths) {
+  const packages = await Promise.all(
+    tarballPaths.map(async (tarballPath) => {
+      const tarball = await readFile(tarballPath)
+      const manifest = tarEntry(gunzipSync(tarball), 'package/package.json')
+      const filename = `${manifest.name.replace(/^@/, '').replaceAll('/', '-')}-${manifest.version}.tgz`
+      const packagePath = `/${manifest.name}/-/${filename}`
+      return {
+        tarball,
+        manifest,
+        packagePath,
+        packument(origin) {
+          return {
+            name: manifest.name,
+            'dist-tags': { latest: manifest.version },
+            versions: {
+              [manifest.version]: {
+                ...manifest,
+                dist: {
+                  tarball: new globalThis.URL(packagePath, origin).href,
+                  shasum: createHash('sha1').update(tarball).digest('hex'),
+                  integrity: `sha512-${createHash('sha512').update(tarball).digest('base64')}`,
+                },
+              },
+            },
+          }
         },
-      },
-    },
-  })
+      }
+    }),
+  )
 
   const server = createServer(async (request, response) => {
     const url = new globalThis.URL(request.url ?? '/', 'http://localhost')
     const pathname = decodeURIComponent(url.pathname)
-    if (pathname === '/@benosjs/primitives') {
+    const localPackage = packages.find(
+      ({ manifest, packagePath }) =>
+        pathname === `/${manifest.name}` || pathname === packagePath,
+    )
+    if (localPackage && pathname === `/${localPackage.manifest.name}`) {
       response.setHeader('content-type', 'application/json')
-      response.end(JSON.stringify(packument(`http://${request.headers.host}`)))
+      response.end(
+        JSON.stringify(
+          localPackage.packument(`http://${request.headers.host}`),
+        ),
+      )
       return
     }
-    if (pathname === packagePath) {
+    if (localPackage && pathname === localPackage.packagePath) {
       response.setHeader('content-type', 'application/octet-stream')
-      response.end(tarball)
+      response.end(localPackage.tarball)
       return
     }
 

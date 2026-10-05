@@ -11,7 +11,9 @@
       "@benosjs/core": ["../packages/core/src/index.ts"],
       "@benosjs/core/internal": ["../packages/core/src/internal.ts"],
       "@benosjs/dom": ["../packages/dom/src/index.ts"],
-      "@benosjs/dom/jsx-runtime": ["../packages/dom/src/jsx-runtime.ts"]
+      "@benosjs/dom/jsx-runtime": ["../packages/dom/src/jsx-runtime.ts"],
+      "@zag-js/toast": ["../packages/primitives/node_modules/@zag-js/toast"],
+      "@zag-js/vanilla": ["../packages/primitives/node_modules/@zag-js/vanilla"]
     },
     "types": ["node"]
   },
@@ -20,6 +22,7 @@
     "../packages/primitives/tests/types.compile.ts",
     "./ui-batch1.types.ts",
     "./ui-batch2.types.ts",
+    "./ui-batch3.types.ts",
     "../registry/source/components/*.tsx"
   ]
 }

@@ -5,8 +5,14 @@ import { normalizeProps } from './normalize.js'
 
 export type AccordionOptions = Omit<ZagAccordionProps, 'id'> & { id?: string }
 
-export function createAccordion(getProps: () => AccordionOptions) {
-  return createMachineController(machine, getProps, (service) =>
-    connect(service, normalizeProps),
+export function createAccordion(
+  getProps: () => AccordionOptions,
+  getDirectionElement?: () => unknown,
+) {
+  return createMachineController(
+    machine,
+    getProps,
+    (service) => connect(service, normalizeProps),
+    getDirectionElement,
   )
 }
