@@ -20,8 +20,21 @@ function runCommand(command, args, options = {}) {
     })
     let interrupted = false
     const handleInterrupt = () => {
+      if (interrupted) return
       interrupted = true
-      child.kill('SIGINT')
+      if (process.platform === 'win32' && child.pid) {
+        const treeKiller = spawn(
+          'taskkill',
+          ['/PID', String(child.pid), '/T', '/F'],
+          { stdio: 'ignore', shell: false },
+        )
+        treeKiller.once('error', () => child.kill('SIGINT'))
+        treeKiller.once('close', (code) => {
+          if (code !== 0) child.kill('SIGINT')
+        })
+      } else {
+        child.kill('SIGINT')
+      }
     }
     if (options.allowInterrupt) process.on('SIGINT', handleInterrupt)
     child.once('error', (error) => {
