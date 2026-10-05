@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-05
 
-**Status:** Implementation and local verification complete; CI run pending.
+**Status:** Complete; final CI run passed on `ui-system`.
 
 ## Coverage
 
@@ -17,10 +17,10 @@
 The fresh-project script adds all 18 registry components to one newly scaffolded
 project and runs the project checks without editing installed component files.
 The full run passed strict TypeScript, Vite production build, Vitest, and Benos
-ESLint/Prettier with pnpm. The browser suite contains 363 test cases. Its full
-local CI-mode run finished with 361 passed and two cases passed on automatic
-retry; the gallery Select and popover direction cases then passed in a focused
-rerun after the gallery test began closing the Select with Escape.
+ESLint/Prettier with pnpm. The browser suite contains 363 test cases. The
+focused Batch 3 WebKit run passed all 39 cases; the final full CI browser suite passed all 363 cases across
+Chromium, Firefox, and WebKit. An earlier local run needed two automatic retries;
+the final CI result did not report retries or failures.
 
 Each batch 3 axe fixture is scanned in four theme/direction modes in all three
 browsers (60 component/mode/browser scans). All five overlays are checked for
@@ -69,8 +69,17 @@ trigger. Reduced-motion tests cover all five.
 - The median-of-seven production benchmark table is recorded in
   [benchmarks/README.md](../../benchmarks/README.md); all five workload ratios
   pass the 2× guard.
-- GitHub Actions: pending push; add the workflow URL and final matrix status
-  after the branch run completes.
+- Final GitHub Actions run: [37276102544](https://github.com/benosjs/benos/actions/runs/37276102544)
+  passed on commit `fd7776b`. The `verify` job passed build, registry and gallery
+  checks, type checks, lint, size and benchmark guards, and all 363 browser tests.
+  All 12 OS/package-manager consumer cells and all three create-benos OS jobs
+  passed.
+- CI issues fixed before the successful run: Windows checked out the new shared
+  registry TypeScript source with CRLF, which changed its generated checksum;
+  `.gitattributes` now keeps that registry source at LF. WebKit axe initially
+  flagged fixture-only native button colors (`#fff` on `#c0c0c0`); the fixture
+  now applies the same theme tokens and focus treatment as its component
+  fixtures. No component runtime or public API change was needed.
 
 ## Compatibility note
 
