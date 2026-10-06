@@ -96,16 +96,14 @@ async function runInteractiveScaffold(
   let stage = 0
   let localUrl
   return await new Promise((resolvePromise, reject) => {
-    const timeout = setTimeout(() => {
-      terminal.kill()
-      reject(new Error(`Interactive create-benos timed out:\n${output}`))
-    }, 150_000)
+    let timeout
+    let exitSubscription
     const prompts = [
       { stage: 1, text: 'What is your project named?' },
       { stage: 2, text: 'Add Benos UI components?' },
       { stage: 3, text: `Install with ${packageManager} and start now?` },
     ]
-    terminal.onData((data) => {
+    const dataSubscription = terminal.onData((data) => {
       output += data
       const cleanOutput = stripAnsi(output)
       const nextPrompt = prompts.find(
@@ -126,8 +124,24 @@ async function runInteractiveScaffold(
         setTimeout(() => terminal.write('\u0003'), 100)
       }
     })
-    terminal.onExit(({ exitCode, signal }) => {
+    const cleanup = ({ kill = false } = {}) => {
       clearTimeout(timeout)
+      dataSubscription.dispose()
+      exitSubscription?.dispose()
+      if (kill || process.platform === 'win32') {
+        try {
+          terminal.kill()
+        } catch {
+          // A terminal that has already exited may reject a second kill.
+        }
+      }
+    }
+    timeout = setTimeout(() => {
+      cleanup({ kill: true })
+      reject(new Error(`Interactive create-benos timed out:\n${output}`))
+    }, 150_000)
+    exitSubscription = terminal.onExit(({ exitCode, signal }) => {
+      cleanup()
       if (!localUrl) {
         if (!declineStart) {
           reject(
