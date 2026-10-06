@@ -62,7 +62,7 @@ function runWindowsShell(commandLine, description, cwd) {
 function runNpx(args) {
   if (process.platform !== 'win32') return runCommand('npx', args, { cwd: app })
   const npxShim = join(dirname(process.execPath), 'npx.cmd')
-  const commandLine = `""${npxShim}" ${args.join(' ')}"`
+  const commandLine = `call "${npxShim}" ${args.join(' ')}`
   return runWindowsShell(commandLine, `npx ${args.join(' ')}`, app)
 }
 
@@ -363,7 +363,7 @@ try {
       return runCommand(installedBin, args, { cwd: app })
     if (!installedBin.endsWith('.cmd'))
       return runCommand(process.execPath, [installedBin, ...args], { cwd: app })
-    const commandLine = `""${installedBin}" ${args.join(' ')}"`
+    const commandLine = `call "${installedBin}" ${args.join(' ')}`
     return runWindowsShell(commandLine, 'benos.cmd', app)
   }
   await runInstalledBin(['list', '--installed'])
