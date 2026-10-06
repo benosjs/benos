@@ -363,7 +363,7 @@ try {
       const nestedManifest = JSON.parse(await readFile(nestedCore, 'utf8'))
       if (!nestedManifest.exports?.['./internal']?.default) {
         throw new Error(
-          `${manager} installed a stale nested @benosjs/core package under @benosjs/dom.`,
+          `${manager} installed a nested @benosjs/core without the internal export: ${JSON.stringify({ version: nestedManifest.version, exports: nestedManifest.exports })}.`,
         )
       }
     } catch (error) {

@@ -248,15 +248,7 @@ try {
   }
 
   try {
-    await runNpx([
-      'benos',
-      'add',
-      'button',
-      'dialog',
-      '--yes',
-      '--package-manager',
-      manager,
-    ])
+    await runNpx(['benos', 'add', 'button', 'dialog', '--yes'])
   } catch (error) {
     if (process.platform === 'win32') {
       const shim = await readFile(
