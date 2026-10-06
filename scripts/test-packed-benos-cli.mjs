@@ -216,21 +216,32 @@ try {
     throw new Error('npx benos init did not initialize the fresh project.')
   }
 
-  await runCommand(
-    'npx',
-    [
-      'benos',
-      'add',
-      'button',
-      'dialog',
-      '--yes',
-      '--registry',
-      registryUrl,
-      '--package-manager',
-      manager,
-    ],
-    { cwd: app },
-  )
+  try {
+    await runCommand(
+      'npx',
+      [
+        'benos',
+        'add',
+        'button',
+        'dialog',
+        '--yes',
+        '--registry',
+        registryUrl,
+        '--package-manager',
+        manager,
+      ],
+      { cwd: app },
+    )
+  } catch (error) {
+    if (process.platform === 'win32') {
+      const shim = await readFile(
+        join(app, 'node_modules/.bin/benos.cmd'),
+        'utf8',
+      ).catch(() => undefined)
+      if (shim) console.error(`Windows benos.cmd contents:\n${shim}`)
+    }
+    throw error
+  }
   for (const [name, symbol] of [
     ['button', 'Button'],
     ['dialog', 'Dialog'],
@@ -303,7 +314,9 @@ try {
   const binCandidates =
     process.platform === 'win32' && manager !== 'bun'
       ? ['benos.cmd']
-      : ['benos', ...(process.platform === 'win32' ? ['benos.cmd'] : [])]
+      : process.platform === 'win32'
+        ? ['benos.exe', 'benos']
+        : ['benos']
   let installedBin
   for (const candidate of binCandidates) {
     const path = join(binDirectory, candidate)
@@ -323,6 +336,8 @@ try {
   }
   async function runInstalledBin(args) {
     if (process.platform !== 'win32')
+      return runCommand(installedBin, args, { cwd: app })
+    if (installedBin.endsWith('.exe'))
       return runCommand(installedBin, args, { cwd: app })
     if (!installedBin.endsWith('.cmd'))
       return runCommand(process.execPath, [installedBin, ...args], { cwd: app })
