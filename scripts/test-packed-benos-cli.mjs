@@ -61,9 +61,14 @@ function runWindowsShell(commandLine, description, cwd) {
 
 function runNpx(args) {
   if (process.platform !== 'win32') return runCommand('npx', args, { cwd: app })
-  const npxShim = join(dirname(process.execPath), 'npx.cmd')
-  const commandLine = `call "${npxShim}" ${args.join(' ')}`
-  return runWindowsShell(commandLine, `npx ${args.join(' ')}`, app)
+  const npxCli = join(
+    dirname(process.execPath),
+    'node_modules',
+    'npm',
+    'bin',
+    'npx-cli.js',
+  )
+  return runCommand(process.execPath, [npxCli, ...args], { cwd: app })
 }
 
 const temporary = await mkdtemp(
