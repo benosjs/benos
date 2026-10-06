@@ -5,6 +5,7 @@ import {
   copyFile,
   mkdir,
   mkdtemp,
+  readdir,
   readFile,
   rm,
   writeFile,
@@ -298,16 +299,33 @@ try {
     throw new Error('benos add did not install the declared Zag dependency.')
   }
 
-  const installedBin = join(
-    app,
-    'node_modules',
-    '.bin',
-    process.platform === 'win32' ? 'benos.cmd' : 'benos',
-  )
-  await access(installedBin)
+  const binDirectory = join(app, 'node_modules', '.bin')
+  const binCandidates =
+    process.platform === 'win32' && manager !== 'bun'
+      ? ['benos.cmd']
+      : ['benos', ...(process.platform === 'win32' ? ['benos.cmd'] : [])]
+  let installedBin
+  for (const candidate of binCandidates) {
+    const path = join(binDirectory, candidate)
+    try {
+      await access(path)
+      installedBin = path
+      break
+    } catch {
+      // This manager may use a different bin shim extension.
+    }
+  }
+  if (!installedBin) {
+    const entries = await readdir(binDirectory).catch(() => [])
+    throw new Error(
+      `${manager} did not create a benos shim in node_modules/.bin: ${entries.join(', ')}`,
+    )
+  }
   async function runInstalledBin(args) {
     if (process.platform !== 'win32')
       return runCommand(installedBin, args, { cwd: app })
+    if (!installedBin.endsWith('.cmd'))
+      return runCommand(process.execPath, [installedBin, ...args], { cwd: app })
     const commandLine = `""${installedBin}" ${args.join(' ')}"`
     return new Promise((resolve, reject) => {
       const child = spawn(

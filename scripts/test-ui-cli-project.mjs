@@ -312,6 +312,25 @@ try {
       `[install]\nregistry = "${localRegistry.url}"\n`,
     )
   }
+  const registryArgs = ['--registry', batch1Registry]
+  await runCommand(process.execPath, [cli, 'init', '--yes', ...registryArgs], {
+    cwd: uiApp,
+    env: scaffoldEnv,
+  })
+  await runCommand(
+    process.execPath,
+    [
+      cli,
+      'add',
+      'button',
+      'input',
+      '--yes',
+      '--package-manager',
+      manager,
+      ...registryArgs,
+    ],
+    { cwd: uiApp, env: scaffoldEnv },
+  )
   await runCommand(manager, ['install'], { cwd: uiApp, env: scaffoldEnv })
   const uiStarter = await readFile(join(uiApp, 'src/main.tsx'), 'utf8')
   if (
