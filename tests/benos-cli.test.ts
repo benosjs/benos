@@ -22,7 +22,7 @@ import {
 import { validateIndex } from '../packages/benos/src/registry.mjs'
 
 const root = resolve(fileURLToPath(new URL('../', import.meta.url)))
-const cli = resolve(root, 'packages/benos/src/index.mjs')
+const cli = resolve(root, 'packages/benos/bin/benos.mjs')
 const hash = (value: string | Buffer) =>
   `sha256:${createHash('sha256').update(value).digest('hex')}`
 
@@ -543,6 +543,110 @@ describe('benos add and list', () => {
       expect(result.stderr).toContain(
         'Pass --package-manager npm|pnpm|yarn|bun',
       )
+      await expect(
+        access(join(app, 'src/components/ui/button.tsx')),
+      ).rejects.toThrow()
+    })
+  })
+
+  it('installs a missing minimum Benos package automatically before completing add', async () => {
+    await withTemp(async (temporary) => {
+      const app = join(temporary, 'app')
+      const fakeBin = join(temporary, 'bin')
+      const managerArgsPath = join(temporary, 'manager-args.txt')
+      await createProject(app)
+      await writeFile(join(app, 'pnpm-lock.yaml'), 'lockfileVersion: 9.0\n')
+      await mkdir(fakeBin)
+      const fakeNpm = join(
+        fakeBin,
+        process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
+      )
+      await writeFile(
+        fakeNpm,
+        process.platform === 'win32'
+          ? `@echo off\r\necho %* > "${managerArgsPath}"\r\nexit /b 0\r\n`
+          : `#!/usr/bin/env node\nconst fs = require('node:fs'); fs.writeFileSync(${JSON.stringify(managerArgsPath)}, process.argv.slice(2).join(' '));\n`,
+      )
+      if (process.platform !== 'win32') await chmod(fakeNpm, 0o755)
+      const registry = await writeRegistry(temporary, {
+        minimumBenosVersions: [
+          { name: '@benosjs/primitives', version: '0.2.1' },
+        ],
+      })
+      expect(runCli(app, 'init', '--yes', '--registry', registry).status).toBe(
+        0,
+      )
+
+      const result = runCliInEnv(
+        app,
+        { PATH: `${fakeBin}${delimiter}${process.env.PATH}` },
+        'add',
+        'button',
+        '--yes',
+        '--registry',
+        registry,
+      )
+      expect(result.status, result.stderr).toBe(0)
+      expect(result.stdout).toContain('install @benosjs/primitives@^0.2.1')
+      expect(result.stdout).toContain(
+        'Installing registry dependencies with pnpm',
+      )
+      expect(await readFile(managerArgsPath, 'utf8')).toBe(
+        'add @benosjs/primitives@^0.2.1',
+      )
+      await expect(
+        access(join(app, 'src/components/ui/button.tsx')),
+      ).resolves.toBeUndefined()
+      const lock = JSON.parse(
+        await readFile(join(app, 'benos.lock.json'), 'utf8'),
+      )
+      expect(lock.items.button.version).toBe('0.2.0')
+    })
+  })
+
+  it('still refuses an installed minimum Benos package that is too old', async () => {
+    await withTemp(async (temporary) => {
+      const app = join(temporary, 'app')
+      const fakeBin = join(temporary, 'bin')
+      const managerArgsPath = join(temporary, 'manager-args.txt')
+      await createProject(app)
+      await installPackageFixture(app, '@benosjs/primitives', '0.2.0')
+      await mkdir(fakeBin)
+      const fakeNpm = join(
+        fakeBin,
+        process.platform === 'win32' ? 'npm.cmd' : 'npm',
+      )
+      await writeFile(
+        fakeNpm,
+        process.platform === 'win32'
+          ? `@echo off\r\necho %* > "${managerArgsPath}"\r\nexit /b 0\r\n`
+          : `#!/usr/bin/env node\nconst fs = require('node:fs'); fs.writeFileSync(${JSON.stringify(managerArgsPath)}, process.argv.slice(2).join(' '));\n`,
+      )
+      if (process.platform !== 'win32') await chmod(fakeNpm, 0o755)
+      const registry = await writeRegistry(temporary, {
+        minimumBenosVersions: [
+          { name: '@benosjs/primitives', version: '0.2.1' },
+        ],
+      })
+      expect(runCli(app, 'init', '--yes', '--registry', registry).status).toBe(
+        0,
+      )
+
+      const result = runCliInEnv(
+        app,
+        { PATH: `${fakeBin}${delimiter}${process.env.PATH}` },
+        'add',
+        'button',
+        '--yes',
+        '--registry',
+        registry,
+        '--package-manager',
+        'npm',
+      )
+      expect(result.status).not.toBe(0)
+      expect(result.stderr).toContain('@benosjs/primitives@0.2.0')
+      expect(result.stderr).toContain('npm install @benosjs/primitives@^0.2.1')
+      await expect(readFile(managerArgsPath, 'utf8')).rejects.toThrow()
       await expect(
         access(join(app, 'src/components/ui/button.tsx')),
       ).rejects.toThrow()

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "release": "0.2.0",
+  "release": "0.2.1",
   "name": "checkbox",
   "type": "registry:component",
   "title": "Checkbox",
@@ -8,7 +8,7 @@
   "dependencies": [
     {
       "name": "@benosjs/primitives",
-      "version": "^0.2.0"
+      "version": "^0.2.1"
     },
     {
       "name": "@zag-js/checkbox",
@@ -18,15 +18,15 @@
   "minimumBenosVersions": [
     {
       "name": "@benosjs/core",
-      "version": "0.2.0"
+      "version": "0.2.1"
     },
     {
       "name": "@benosjs/dom",
-      "version": "0.2.0"
+      "version": "0.2.1"
     },
     {
       "name": "@benosjs/primitives",
-      "version": "0.2.0"
+      "version": "0.2.1"
     }
   ],
   "registryDependencies": [],

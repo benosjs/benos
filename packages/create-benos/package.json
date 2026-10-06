@@ -1,6 +1,6 @@
 {
   "name": "create-benos",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Create a Benos TypeScript application.",
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/compiler",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "The TypeScript and JSX compiler for Benos applications.",
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "release": "0.2.0",
+  "release": "0.2.1",
   "name": "sortable-table",
   "type": "registry:component",
   "title": "Sortable table",
@@ -8,21 +8,21 @@
   "dependencies": [
     {
       "name": "@benosjs/core",
-      "version": "^0.2.0"
+      "version": "^0.2.1"
     },
     {
       "name": "@benosjs/dom",
-      "version": "^0.2.0"
+      "version": "^0.2.1"
     }
   ],
   "minimumBenosVersions": [
     {
       "name": "@benosjs/core",
-      "version": "0.2.0"
+      "version": "0.2.1"
     },
     {
       "name": "@benosjs/dom",
-      "version": "0.2.0"
+      "version": "0.2.1"
     }
   ],
   "registryDependencies": [],

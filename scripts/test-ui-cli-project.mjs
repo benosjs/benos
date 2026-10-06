@@ -36,6 +36,7 @@ const localBenosPackages = [
 const previousRegistryEnvironment = {
   npm: process.env.npm_config_registry,
   NPM: process.env.NPM_CONFIG_REGISTRY,
+  bun: process.env.BUN_CONFIG_REGISTRY,
   yarn: process.env.YARN_NPM_REGISTRY_SERVER,
   yarnUnsafeHttp: process.env.YARN_UNSAFE_HTTP_WHITELIST,
 }
@@ -54,7 +55,7 @@ const temporary = await mkdtemp(
 )
 const app = join(temporary, 'benos-app')
 const scaffold = resolve(root, 'packages/create-benos/src/index.mjs')
-const cli = resolve(root, 'packages/benos/src/index.mjs')
+const cli = resolve(root, 'packages/benos/bin/benos.mjs')
 const nodePtyRoot = resolve(
   dirname(fileURLToPath(import.meta.resolve('node-pty'))),
   '..',
@@ -220,7 +221,15 @@ async function createUpdatedFixtureRegistry(sourceUrl, directory) {
 }
 
 try {
+  const packedManifests = new Map()
   for (const packageName of localBenosPackages) {
+    const manifest = JSON.parse(
+      await readFile(
+        join(root, 'packages', packageName, 'package.json'),
+        'utf8',
+      ),
+    )
+    packedManifests.set(packageName, manifest)
     await runCommand(
       'pnpm',
       ['pack', '--pack-destination', temporary, '--silent'],
@@ -228,12 +237,17 @@ try {
     )
   }
   localRegistry = await createLocalPackagesRegistry(
-    localBenosPackages.map((packageName) =>
-      join(temporary, `benosjs-${packageName}-0.2.0.tgz`),
-    ),
+    localBenosPackages.map((packageName) => {
+      const manifest = packedManifests.get(packageName)
+      return join(
+        temporary,
+        `${manifest.name.replace(/^@/, '').replaceAll('/', '-')}-${manifest.version}.tgz`,
+      )
+    }),
   )
   process.env.npm_config_registry = localRegistry.url
   process.env.NPM_CONFIG_REGISTRY = localRegistry.url
+  process.env.BUN_CONFIG_REGISTRY = localRegistry.url
   process.env.YARN_NPM_REGISTRY_SERVER = localRegistry.url
   if (manager === 'yarn') {
     // Yarn 4 reads array config from a comma-separated environment value.
@@ -276,19 +290,86 @@ try {
     throw new Error('--no-ui unexpectedly initialized or imported Benos UI.')
   }
   const uiApp = join(temporary, 'starter-ui')
+  const uiAppArgs = [
+    scaffold,
+    uiApp,
+    '--ui',
+    '--no-install',
+    '--no-start',
+    '--registry',
+    batch1Registry,
+  ]
+  uiAppArgs.push('--yes')
+  await runCommand(process.execPath, uiAppArgs, { cwd: root, env: scaffoldEnv })
+  if (manager === 'yarn') {
+    await writeFile(
+      join(uiApp, '.yarnrc.yml'),
+      `nodeLinker: node-modules\nnpmRegistryServer: ${localRegistry.url}\nnpmScopes:\n  benosjs:\n    npmRegistryServer: ${localRegistry.url}\nunsafeHttpWhitelist:\n  - 127.0.0.1\n`,
+    )
+  } else if (manager === 'bun') {
+    await writeFile(
+      join(uiApp, 'bunfig.toml'),
+      `[install]\nregistry = "${localRegistry.url}"\n\n[install.scopes]\nbenosjs = "${localRegistry.url}"\n\n[install.cache]\ndisable = true\ndisableManifest = true\n`,
+    )
+  }
+  const registryArgs = ['--registry', batch1Registry]
+  await runCommand(process.execPath, [cli, 'init', '--yes', ...registryArgs], {
+    cwd: uiApp,
+    env: scaffoldEnv,
+  })
   await runCommand(
     process.execPath,
     [
-      scaffold,
-      uiApp,
-      '--ui',
-      '--install',
-      '--no-start',
-      '--registry',
-      batch1Registry,
+      cli,
+      'add',
+      'button',
+      'input',
+      '--yes',
+      '--package-manager',
+      manager,
+      ...registryArgs,
     ],
-    { cwd: root, env: scaffoldEnv },
+    { cwd: uiApp, env: scaffoldEnv },
   )
+  await runCommand(manager, ['install'], { cwd: uiApp, env: scaffoldEnv })
+  for (const packageName of ['@benosjs/core', '@benosjs/dom']) {
+    if (!localRegistry.servedTarballs.has(packageName)) {
+      throw new Error(
+        `${manager} did not install the packed ${packageName} tarball from the local registry.`,
+      )
+    }
+    const packageRoot = join(uiApp, 'node_modules', ...packageName.split('/'))
+    const packageManifest = JSON.parse(
+      await readFile(join(packageRoot, 'package.json'), 'utf8'),
+    )
+    const typeEntry = packageManifest.exports?.['.']?.types
+    if (
+      packageManifest.version !== '0.2.1' ||
+      !typeEntry?.startsWith('./dist/types/')
+    ) {
+      throw new Error(
+        `${manager} installed ${packageName} ${packageManifest.version} without the packed Benos type exports.`,
+      )
+    }
+    await readFile(join(packageRoot, typeEntry.slice(2)))
+    const nestedCore = join(
+      packageRoot,
+      'node_modules',
+      '@benosjs',
+      'core',
+      'package.json',
+    )
+    try {
+      const nestedManifest = JSON.parse(await readFile(nestedCore, 'utf8'))
+      if (!nestedManifest.exports?.['./internal']?.default) {
+        throw new Error(
+          `${manager} installed a nested @benosjs/core without the internal export: ${JSON.stringify({ version: nestedManifest.version, exports: nestedManifest.exports })}.`,
+        )
+      }
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw error
+    }
+  }
   const uiStarter = await readFile(join(uiApp, 'src/main.tsx'), 'utf8')
   if (
     !uiStarter.includes("from '@/components/ui/button'") ||
@@ -492,8 +573,8 @@ try {
   }
   const appPackagePath = join(app, 'package.json')
   const appPackage = JSON.parse(await readFile(appPackagePath, 'utf8'))
-  appPackage.dependencies['@benosjs/core'] = '^0.2.0'
-  appPackage.dependencies['@benosjs/primitives'] = '^0.2.0'
+  appPackage.dependencies['@benosjs/core'] = '^0.2.1'
+  appPackage.dependencies['@benosjs/primitives'] = '^0.2.1'
   await writeFile(appPackagePath, JSON.stringify(appPackage, null, 2) + '\n')
   await runCommand(manager, ['install'], { cwd: app })
   await runCommand(
@@ -656,6 +737,9 @@ try {
   if (previousRegistryEnvironment.NPM === undefined)
     delete process.env.NPM_CONFIG_REGISTRY
   else process.env.NPM_CONFIG_REGISTRY = previousRegistryEnvironment.NPM
+  if (previousRegistryEnvironment.bun === undefined)
+    delete process.env.BUN_CONFIG_REGISTRY
+  else process.env.BUN_CONFIG_REGISTRY = previousRegistryEnvironment.bun
   if (previousRegistryEnvironment.yarn === undefined)
     delete process.env.YARN_NPM_REGISTRY_SERVER
   else process.env.YARN_NPM_REGISTRY_SERVER = previousRegistryEnvironment.yarn

@@ -27,14 +27,14 @@ Proposed index:
 
     {
       "schemaVersion": 1,
-      "release": "0.2.0",
+      "release": "0.2.1",
       "items": [
         {
           "name": "button",
           "type": "registry:component",
           "title": "Button",
           "description": "Accessible button styles and behavior",
-          "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/button.json",
+          "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.1/registry/v1/items/button.json",
           "dependencies": [],
           "registryDependencies": ["tokens"]
         }
@@ -44,7 +44,7 @@ Proposed index:
 Each item document lists relative registry paths, target templates, content types, checksums, and inline UTF-8 file content, following shadcn's source-registry approach. The index and item `dependencies` fields are arrays of `{ "name": "package", "version": "semver-range" }` records. No target may escape configured directories.
 
 - npm dependencies are explicit package/range records, not bare package names. Batch 1 has none; Batch 2 declares `@benosjs/primitives` and the corresponding Zag machine packages, and source imports use public package entry points rather than internal Benos subpaths.
-- Every item payload includes `minimumBenosVersions`, an array of exact minimum versions such as `[ { "name": "@benosjs/core", "version": "0.2.0" } ]`. This is separate from npm dependency ranges: the minimum records the oldest runtime that implements APIs used by the source, while the dependency range expresses install compatibility. `benos add` checks installed package manifests for every resolved item before writing component files, changing the application manifest or lockfile, or populating the cache. If a package is absent or too old, it refuses and prints the detected package manager's exact upgrade command, such as `pnpm add @benosjs/core@^0.2.0`.
+- Every item payload includes `minimumBenosVersions`, an array of exact minimum versions such as `[ { "name": "@benosjs/core", "version": "0.2.1" } ]`. This is separate from npm dependency ranges: the minimum records the oldest runtime that implements APIs used by the source, while the dependency range expresses install compatibility. `benos add` checks installed package manifests for every resolved item before source writes. If a required package is missing, it adds the package's declared minimum range to the detected package-manager install plan. If an installed package is too old, it refuses before file writes and prints the exact upgrade command, such as `pnpm add @benosjs/core@^0.2.1`.
 - Every registry component's public props include `id?: string`. Components that need a machine or relationship ID forward it to the primitive; absent values come from `createUniqueId()`. Stateless components apply the optional ID to their root element for a consistent component API.
 - registryDependencies name other registry items such as tokens or shared helpers. Resolve recursively, deduplicate by item/version, and apply deterministic topological ordering.
 - files contain source-owned TSX/TypeScript/CSS. All TSX imports public @benosjs paths. A target starts with `components/` or `css/`; the CLI maps those prefixes to `benos.json` destinations and rejects traversal, absolute paths, and symlink escapes.
@@ -58,7 +58,7 @@ Each item document lists relative registry paths, target templates, content type
 Use a mutable stable discovery index in the GitHub repository, but require each resolved item to point at immutable release-tag content:
 
 - Discovery index: repository path such as registry/v1/index.json on the main branch.
-- Released item: https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/{name}.json.
+- Released item: https://raw.githubusercontent.com/benosjs/benos/v0.2.1/registry/v1/items/{name}.json.
 - Each item records schema/release versions, checksums, and immutable file content. Retain old payloads throughout the supported update window.
 
 U3 fixes the initial path and host: benos.lock.json pins installed component version, immutable base URL, and checksum. The discovery index on `main` is mutable, but an item URL must include the release tag and never use the branch URL. Never fetch the old base from an unpinned branch. GitHub raw is the initial host because the repository is canonical and requires no service; a configured website may mirror the same JSON later. Do not invent a public website URL. CDN headers and ETags are optimizations, not version identity.
@@ -82,7 +82,7 @@ If the old base cannot be fetched, refuse automatic merge and preserve local fil
 benos init writes a small versioned root configuration:
 
     {
-      "$schema": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/benos.schema.json",
+      "$schema": "https://raw.githubusercontent.com/benosjs/benos/v0.2.1/registry/v1/benos.schema.json",
       "schemaVersion": 1,
       "registry": "https://raw.githubusercontent.com/benosjs/benos/main/registry/v1/index.json",
       "style": "benos",
@@ -105,8 +105,8 @@ For benos add button input dialog:
 
 1. Load and validate the configured HTTPS index, or an explicitly selected local registry in development.
 2. Resolve requested items and transitive registry dependencies. Detect missing names, cycles, version conflicts, and duplicate destinations before writing.
-3. Check installed `@benosjs/*` package versions against each resolved item's `minimumBenosVersions`. On failure, print the manager-specific upgrade command and do not write files, package metadata, lock entries, or registry cache data.
-4. Resolve npm dependency ranges without downgrading installed compatible packages. Show any manifest/lockfile change.
+3. Check installed `@benosjs/*` package versions against each resolved item's `minimumBenosVersions`. Missing packages are included in the manager install plan using the declared package dependency range. Installed packages that are too old cause a refusal with the exact manager-specific upgrade command before source writes.
+4. Resolve npm dependency ranges without downgrading installed compatible packages. Combine duplicate missing-package requirements and show any manifest/lockfile change.
 5. Build a full plan of paths, collisions, package changes, CSS, config, and lock changes. Interactive mode displays it; CI mode requires explicit acceptance such as --yes.
 6. After compatibility succeeds, cache verified registry payloads, apply validated writes atomically per install group, and record exact item versions/checksums.
 
@@ -143,7 +143,7 @@ Identical registry version, config, and requested names produce deterministic de
 - Security fixtures for traversal, absolute/drive paths, symlinks, case collisions, oversized files, redirect policy, and non-HTTPS URLs.
 - Same index+lock yields identical output; index movement does not rewrite installed base metadata.
 - npm/pnpm/Yarn/Bun consumers type-check on Ubuntu, Windows, and macOS.
-- The minimum-version gate refuses old and absent installed Benos packages without writing project state or cache data, prints the exact package-manager upgrade command, and succeeds once installed package versions meet the item requirements.
+- The minimum-version gate automatically installs required Benos packages that are absent and refuses installed packages that are too old, printing the exact package-manager upgrade command without writing component files.
 - `benos diff` covers all local/base/incoming states and does not write cache or project files. `benos update` uses the pinned base with a three-way line merge, preserves local line endings, isolates each component in a recoverable journaled transaction, and leaves conflicted files and lock entries unchanged. The CLI consumer matrix runs an actual CRLF disjoint merge on Ubuntu, Windows, and macOS with npm, pnpm, Yarn, and Bun.
 
 ## Hard-to-reverse decisions

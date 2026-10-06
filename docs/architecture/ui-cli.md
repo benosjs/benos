@@ -72,7 +72,7 @@ After printing any missing resolver lines, exit nonzero before writing config, t
 ### add <name...>
 
 - Resolve registry items and all dependencies before writes. Show files, CSS, npm changes, and conflicts.
-- Copy source into configured component path and styles into CSS path. Install @benosjs/primitives only for items whose resolved graph needs it; Batch 1 has no primitive dependency.
+- Copy source into configured component path and styles into CSS path. Install registry-declared npm dependencies and any missing `@benosjs/*` packages required by the resolved graph; Batch 1 has no primitive dependency. If a required Benos package is installed but too old, refuse before source writes and print the exact upgrade command.
 - A new path is created; identical content is a no-op; different existing content enters conflict handling.
 - --yes accepts a precomputed non-destructive plan, never permission to overwrite edits.
 - If dependency install fails, report completed writes and exact manual package-manager command; do not claim rollback of package-manager side effects.
