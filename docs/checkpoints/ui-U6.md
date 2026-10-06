@@ -24,8 +24,8 @@ workflow passed. No packages were published and the gallery was not deployed.
 
 ## Verification
 
-The final workflow is [CI run 37310690258](https://github.com/benosjs/benos/actions/runs/37310690258),
-triggered by commit `79095698461e34a6abc3c63e55e563f3960a9ee8`. All 16 jobs
+The final refreshed workflow is [CI run 37419141945](https://github.com/benosjs/benos/actions/runs/37419141945),
+triggered by commit `427178779be4a25901ad74832b2cd9aa7c6ac509`. All 16 jobs
 passed: the verification job, three create-benos OS jobs, and all 12 UI CLI
 matrix jobs.
 
@@ -41,7 +41,7 @@ matrix jobs.
 | `pnpm build`                                                 | Pass                                                                                            |
 | `pnpm gallery:build`                                         | Pass; JavaScript 332.27 KB (86.29 KB gzip), CSS 30.73 KB (5.19 KB gzip)                         |
 | `pnpm test`                                                  | Pass; 221 tests across 20 files                                                                 |
-| `pnpm --filter create-benos test`                            | Pass; 4 tests                                                                                   |
+| `pnpm --filter create-benos test`                            | Pass; 11 tests                                                                                  |
 | Packed create-benos E2E                                      | Pass; generated app type-check, build, test, and lint passed on Ubuntu, Windows, and macOS      |
 | UI CLI matrix                                                | Pass; all 12 OS/package-manager cells shown above                                               |
 | `pnpm check:doc-examples`                                    | Pass; 28 TSX examples compiled in both modes and strict-type-checked                            |
@@ -71,8 +71,7 @@ point to GitHub. No deployment was performed.
 
 ## Interactive-flow follow-up
 
-**Status:** implementation and local verification complete; the refreshed CI
-matrix is pending.
+**Status:** complete; local verification and refreshed CI passed.
 
 - Missing directory names now prompt with `benos-app` as the default. The
   existing UI question remains default No. A third question asks whether to
@@ -91,6 +90,10 @@ matrix is pending.
   install/start choices through a pseudo-terminal, verify the printed URL,
   stop the server, and confirm that the URL no longer responds. The same test
   runs with each of npm, pnpm, Yarn, and Bun on Ubuntu, Windows, and macOS.
+- Windows initially kept the UI CLI job alive after the generated app had
+  passed its checks. The PTY test now disposes its event subscriptions and
+  closes the ConPTY after exit. Windows npm, pnpm, Yarn, and Bun all complete
+  successfully in the final run.
 
 ### Local verification
 
@@ -109,5 +112,12 @@ matrix is pending.
 | `pnpm bench:guard`                                                                                                                         | Pass; every workload below 2× Preact                                                                                |
 | `pnpm size`                                                                                                                                | Pass; local Node 24.8.0 measured core 4,049/4,096 bytes and core + DOM 10,198/10,240 bytes                          |
 
-The complete OS/package-manager matrix is pending CI; its successful results
-will be added here after the run finishes.
+The final refreshed CI run [37419141945](https://github.com/benosjs/benos/actions/runs/37419141945)
+passed all 16 jobs, including full verification, create-benos on Ubuntu,
+Windows, and macOS, and the full matrix:
+
+| OS      | npm  | pnpm | Yarn | Bun  |
+| ------- | ---- | ---- | ---- | ---- |
+| Ubuntu  | Pass | Pass | Pass | Pass |
+| Windows | Pass | Pass | Pass | Pass |
+| macOS   | Pass | Pass | Pass | Pass |

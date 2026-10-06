@@ -267,13 +267,16 @@ Complete **U0** and **U1** only, then stop at the U1 checkpoint for my review.
 - **Implementation:** `benos diff` classifies tracked files against the exact pinned payload and current registry. `benos update` does line-based three-way merges, preserves local newline style, emits separate conflict copies, checks minimum Benos versions, and applies each component through a journaled transaction. `benos update` recovers interrupted transactions; `benos diff` detects them without writing.
 - **Verification:** local cases and the Ubuntu/Windows/macOS by npm/pnpm/Yarn/Bun consumer matrix are listed in [the U5 checkpoint](checkpoints/ui-U5.md). The checkpoint records final test totals, bundle sizes, and CI runs.
 
-## U6 documentation and starter status (2026-10-05)
+## U6 documentation and starter status (2026-10-06)
 
-- **Implementation and local checks complete; refreshed CI pending:** 19 guide pages and a guide index cover installation, tokens,
+- **Complete:** 19 guide pages and a guide index cover installation, tokens,
   copied source, updates/conflicts, component APIs, variants, and accessibility
   behavior. `create-benos` now has interactive name, UI, and install/start
   prompts, matching non-interactive flags, a safe no-TTY default, install
   failure recovery, and a pseudo-terminal server lifecycle test. The opt-in
   starter uses Button and Input. The gallery links every component to its
-  guide and has a production deployment guide. Local verification passed;
-  refreshed CI results will be recorded in [the U6 checkpoint](checkpoints/ui-U6.md).
+  guide and has a production deployment guide. Local verification and the full
+  CI workflow passed in [run 37419141945](https://github.com/benosjs/benos/actions/runs/37419141945),
+  including all 12 Ubuntu/Windows/macOS and npm/pnpm/Yarn/Bun matrix cells.
+  Windows PTY cleanup now disposes event listeners and closes ConPTY after the
+  interactive process exits. Results are in [the U6 checkpoint](checkpoints/ui-U6.md).
