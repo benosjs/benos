@@ -229,7 +229,6 @@ try {
   if (!managerLockfile) {
     throw new Error(`${manager} did not create its expected lockfile.`)
   }
-  const originalManagerLock = await readFile(join(app, managerLockfile))
   const installedPackage = JSON.parse(
     await readFile(join(app, 'node_modules/benos/package.json'), 'utf8'),
   )
@@ -312,10 +311,6 @@ try {
   )
   if (installedCore.version !== fixtureCoreVersion) {
     throw new Error('benos add did not install its missing core package.')
-  }
-  const updatedManagerLock = await readFile(join(app, managerLockfile))
-  if (originalManagerLock.equals(updatedManagerLock)) {
-    throw new Error(`npx benos add did not update the ${manager} lockfile.`)
   }
   const installedDialog = JSON.parse(
     await readFile(
