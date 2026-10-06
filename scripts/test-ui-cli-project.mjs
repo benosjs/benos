@@ -304,12 +304,12 @@ try {
   if (manager === 'yarn') {
     await writeFile(
       join(uiApp, '.yarnrc.yml'),
-      `nodeLinker: node-modules\nnpmRegistryServer: "${localRegistry.url}"\nunsafeHttpWhitelist:\n  - 127.0.0.1\n`,
+      `nodeLinker: node-modules\nnpmRegistryServer: ${localRegistry.url}\nnpmScopes:\n  benosjs:\n    npmRegistryServer: ${localRegistry.url}\nunsafeHttpWhitelist:\n  - 127.0.0.1\n`,
     )
   } else if (manager === 'bun') {
     await writeFile(
       join(uiApp, 'bunfig.toml'),
-      `[install]\nregistry = "${localRegistry.url}"\n`,
+      `[install]\nregistry = "${localRegistry.url}"\n\n[install.scopes]\nbenosjs = "${localRegistry.url}"\n`,
     )
   }
   const registryArgs = ['--registry', batch1Registry]
@@ -332,6 +332,22 @@ try {
     { cwd: uiApp, env: scaffoldEnv },
   )
   await runCommand(manager, ['install'], { cwd: uiApp, env: scaffoldEnv })
+  for (const packageName of ['@benosjs/core', '@benosjs/dom']) {
+    const packageRoot = join(uiApp, 'node_modules', ...packageName.split('/'))
+    const packageManifest = JSON.parse(
+      await readFile(join(packageRoot, 'package.json'), 'utf8'),
+    )
+    const typeEntry = packageManifest.exports?.['.']?.types
+    if (
+      packageManifest.version !== '0.2.1' ||
+      !typeEntry?.startsWith('./dist/types/')
+    ) {
+      throw new Error(
+        `${manager} installed ${packageName} ${packageManifest.version} without the packed Benos type exports.`,
+      )
+    }
+    await readFile(join(packageRoot, typeEntry.slice(2)))
+  }
   const uiStarter = await readFile(join(uiApp, 'src/main.tsx'), 'utf8')
   if (
     !uiStarter.includes("from '@/components/ui/button'") ||

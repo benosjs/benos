@@ -61,7 +61,8 @@ function runWindowsShell(commandLine, description, cwd) {
 
 function runNpx(args) {
   if (process.platform !== 'win32') return runCommand('npx', args, { cwd: app })
-  return runWindowsShell(`npx ${args.join(' ')}`, `npx ${args.join(' ')}`, app)
+  const commandLine = `""npx.cmd" ${args.join(' ')}"`
+  return runWindowsShell(commandLine, `npx ${args.join(' ')}`, app)
 }
 
 const temporary = await mkdtemp(
@@ -191,7 +192,12 @@ try {
   if (manager === 'yarn') {
     await writeFile(
       join(app, '.yarnrc.yml'),
-      'nodeLinker: node-modules\nunsafeHttpWhitelist:\n  - 127.0.0.1\n',
+      `nodeLinker: node-modules\nnpmRegistryServer: ${localRegistry.url}\nnpmScopes:\n  benosjs:\n    npmRegistryServer: ${localRegistry.url}\nunsafeHttpWhitelist:\n  - 127.0.0.1\n`,
+    )
+  } else if (manager === 'bun') {
+    await writeFile(
+      join(app, 'bunfig.toml'),
+      `[install]\nregistry = "${localRegistry.url}"\n\n[install.scopes]\nbenosjs = "${localRegistry.url}"\n`,
     )
   }
 
