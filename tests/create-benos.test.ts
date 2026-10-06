@@ -41,7 +41,9 @@ async function pack(
   const prefix =
     packageDirectory === 'create-benos'
       ? 'create-benos-'
-      : `benosjs-${packageDirectory}-`
+      : packageDirectory === 'benos'
+        ? 'benos-'
+        : `benosjs-${packageDirectory}-`
   const file = files.find((entry) => entry.startsWith(prefix))
   if (!file)
     throw new Error(`Packed ${packageDirectory} archive was not created`)
@@ -57,9 +59,10 @@ describe('create-benos packed scaffold', () => {
     await mkdir(archives)
     await mkdir(extracted)
     try {
-      const [createArchive, core, dom, compiler, vite, eslintPlugin] =
+      const [createArchive, benos, core, dom, compiler, vite, eslintPlugin] =
         await Promise.all([
           pack('create-benos', archives),
+          pack('benos', archives),
           pack('core', archives),
           pack('dom', archives),
           pack('compiler', archives),
@@ -67,9 +70,27 @@ describe('create-benos packed scaffold', () => {
           pack('eslint-plugin', archives),
         ])
       await run('tar', ['-xzf', createArchive, '-C', extracted])
-      const cli = join(extracted, 'package', 'src', 'index.mjs')
+      const createPackage = join(extracted, 'package')
+      const createManifestPath = join(createPackage, 'package.json')
+      const createManifest = JSON.parse(
+        await readFile(createManifestPath, 'utf8'),
+      ) as {
+        pnpm?: { overrides?: Record<string, string> }
+      }
+      createManifest.pnpm = {
+        overrides: {
+          ...createManifest.pnpm?.overrides,
+          benos: fileDependency(createPackage, benos),
+        },
+      }
+      await writeFile(
+        createManifestPath,
+        `${JSON.stringify(createManifest, null, 2)}\n`,
+      )
+      await runPnpm(['install', '--ignore-scripts'], { cwd: createPackage })
+      const cli = join(createPackage, 'src', 'index.mjs')
       const app = join(temporary, 'app')
-      await run('node', [cli, app])
+      await run('node', [cli, app, '--no-install', '--no-start'])
       const generated = JSON.parse(
         await readFile(join(app, 'package.json'), 'utf8'),
       ) as {
@@ -82,7 +103,7 @@ describe('create-benos packed scaffold', () => {
         engines?: { node?: string }
       }
       expect(generated.private).toBe(true)
-      expect(generated.version).toBe('0.1.2')
+      expect(generated.version).toBe('0.2.0')
       expect(generated.createBenosPackageManager).toBe('pnpm')
       const benosDependencies = Object.entries({
         ...generated.dependencies,
@@ -93,11 +114,25 @@ describe('create-benos packed scaffold', () => {
         expect(version, `${name} must use a published semver range`).toMatch(
           /^\^\d+\.\d+\.\d+$/,
         )
-        expect(version).toBe('^0.1.2')
+        expect(version).toBe('^0.2.0')
       }
       expect(generated.engines?.node).toBe('^22.18.0 || ^24.11.0 || >=26.0.0')
+      expect(await readFile(join(app, '.yarnrc.yml'), 'utf8')).toContain(
+        'nodeLinker: node-modules',
+      )
       const starterSource = await readFile(join(app, 'src/main.tsx'), 'utf8')
       const starterCss = await readFile(join(app, 'src/style.css'), 'utf8')
+      const viteConfig = await readFile(join(app, 'vite.config.ts'), 'utf8')
+      const tsconfig = JSON.parse(
+        await readFile(join(app, 'tsconfig.json'), 'utf8'),
+      ) as {
+        compilerOptions?: { baseUrl?: string; paths?: Record<string, string[]> }
+      }
+      expect(viteConfig).toContain('alias:')
+      expect(viteConfig).toContain(
+        "'@': fileURLToPath(new URL('./src', import.meta.url))",
+      )
+      expect(tsconfig.compilerOptions?.paths?.['@/*']).toEqual(['src/*'])
       expect(starterSource.split(/\r?\n/).length).toBeLessThan(150)
       expect(starterCss.split(/\r?\n/).length).toBeLessThan(100)
       expect(await readFile(join(app, 'index.html'), 'utf8')).toContain(
@@ -131,9 +166,11 @@ describe('create-benos packed scaffold', () => {
           ),
         )
         env.npm_config_user_agent = userAgent
-        await run('node', [cli, managerApp], {
-          env,
-        })
+        await run(
+          'node',
+          [cli, managerApp, '--no-install', '--no-start', '--yes'],
+          { env },
+        )
         const managerPackage = JSON.parse(
           await readFile(join(managerApp, 'package.json'), 'utf8'),
         ) as { createBenosPackageManager?: string }

@@ -1,0 +1,45 @@
+{
+  "name": "accordion",
+  "title": "Accordion",
+  "description": "An accessible disclosure group with single or multiple expanded items.",
+  "type": "registry:component",
+  "dependencies": [
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/accordion",
+      "version": "1.44.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "accordion.tsx",
+      "target": "components/accordion.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/accordion.tsx"
+    },
+    {
+      "path": "accordion.css",
+      "target": "css/accordion.css",
+      "contentType": "text/css",
+      "sourceFile": "css/accordion.css"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "0.2.0"
+    }
+  ]
+}

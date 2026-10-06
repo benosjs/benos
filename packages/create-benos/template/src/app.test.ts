@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { mountApp } from './main'
+import { mountApp } from '@/main'
 
 describe('Benos starter', () => {
   beforeEach(() => {
@@ -14,7 +14,7 @@ describe('Benos starter', () => {
     expect(document.querySelector('.run-unit')?.textContent).toBe('time')
     expect(document.querySelector('.counter-value')?.textContent).toBe('0')
 
-    document.querySelector<HTMLButtonElement>('[aria-label="Increase counter"]')!.click()
+    document.querySelector<HTMLButtonElement>('.counter-panel button')!.click()
     expect(document.querySelector('.counter-value')?.textContent).toBe('1')
     expect(rendered()).toBe('1')
     expect(document.querySelector('.run-unit')?.textContent).toBe('time')

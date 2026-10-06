@@ -1,0 +1,45 @@
+{
+  "name": "checkbox",
+  "title": "Checkbox",
+  "description": "An accessible checkbox with controlled and uncontrolled state.",
+  "type": "registry:component",
+  "dependencies": [
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/checkbox",
+      "version": "1.44.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "checkbox.tsx",
+      "target": "components/checkbox.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/checkbox.tsx"
+    },
+    {
+      "path": "checkbox.css",
+      "target": "css/checkbox.css",
+      "contentType": "text/css",
+      "sourceFile": "css/checkbox.css"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "0.2.0"
+    }
+  ]
+}

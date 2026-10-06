@@ -1,6 +1,6 @@
 {
   "name": "create-benos",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Create a Benos TypeScript application.",
   "repository": {
     "type": "git",
@@ -24,10 +24,16 @@
   },
   "files": [
     "src",
+    "starter-ui",
     "template"
   ],
   "scripts": {
-    "test": "node --test"
+    "test": "node --test tests/cli.test.mjs"
+  },
+  "dependencies": {
+    "@clack/prompts": "1.8.1",
+    "benos": "workspace:^",
+    "cross-spawn": "^7.0.6"
   },
   "bugs": {
     "url": "https://github.com/benosjs/benos/issues"

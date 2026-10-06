@@ -1,0 +1,90 @@
+.benos-accordion {
+  border-block-start: 1px solid var(--benos-color-border);
+  color: var(--benos-color-text);
+  font-size: var(--benos-text-xs, 0.75rem);
+}
+
+.benos-accordion__item {
+  border-block-end: 1px solid var(--benos-color-border);
+}
+
+.benos-accordion__heading {
+  font: inherit;
+  margin: 0;
+}
+
+.benos-accordion__trigger {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-weight: 600;
+  inline-size: 100%;
+  justify-content: space-between;
+  min-block-size: 3rem;
+  padding-block: var(--benos-space-3);
+  padding-inline: var(--benos-space-2);
+  text-align: start;
+}
+
+.benos-accordion__trigger:focus-visible {
+  border-radius: var(--benos-radius-sm);
+  outline: 3px solid var(--benos-color-focus);
+  outline-offset: 2px;
+}
+
+.benos-accordion__trigger[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.benos-accordion__indicator {
+  color: var(--benos-color-brand);
+  block-size: 1rem;
+  display: inline-block;
+  flex: none;
+  inline-size: 1rem;
+  position: relative;
+}
+
+.benos-accordion__content {
+  color: var(--benos-color-text-muted);
+  line-height: var(--benos-line-height-body);
+  padding-block: 0 var(--benos-space-4);
+  padding-inline: var(--benos-space-2);
+}
+
+.benos-accordion__content[data-state='closed'] {
+  display: none;
+}
+
+.benos-accordion__indicator::before,
+.benos-accordion__indicator::after {
+  background: currentColor;
+  border-radius: var(--benos-radius-pill);
+  content: '';
+  inline-size: 0.7rem;
+  block-size: 1.5px;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.benos-accordion__indicator::after {
+  transition: transform var(--benos-motion-fast) var(--benos-ease-standard);
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.benos-accordion__indicator[data-state='open']::after {
+  transform: translate(-50%, -50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .benos-accordion__indicator::after {
+    transition: none;
+  }
+}

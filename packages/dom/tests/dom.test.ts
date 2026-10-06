@@ -53,6 +53,31 @@ describe('@benosjs/dom', () => {
     expect(runs).toBe(1)
   })
 
+  it('does not track component setup reads in the parent child slot', () => {
+    const value = signal(1)
+    let componentRuns = 0
+    function Child(): JSX.Element {
+      componentRuns++
+      const snapshot = value()
+      return jsx('button', { children: `snapshot ${snapshot}` })
+    }
+    roots.push(
+      render(
+        () =>
+          jsx('div', {
+            children: jsx(Show, { when: true, children: jsx(Child, {}) }),
+          }),
+        document.body,
+      ),
+    )
+    const button = document.querySelector('button')
+    expect(button?.textContent).toBe('snapshot 1')
+    value.set(2)
+    expect(componentRuns).toBe(1)
+    expect(document.querySelector('button')).toBe(button)
+    expect(button?.textContent).toBe('snapshot 1')
+  })
+
   it('reconciles Show branches and removes singleton anchors', () => {
     const visible = signal(true)
     roots.push(

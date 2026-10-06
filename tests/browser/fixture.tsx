@@ -1,5 +1,11 @@
 import { onCleanup, onMount, signal } from '@benosjs/core'
 import { Portal, Show, render } from '@benosjs/dom'
+import { createCheckbox } from '@benosjs/primitives/checkbox'
+import {
+  primitiveNames,
+  renderPrimitiveFixture,
+  type PrimitiveName,
+} from './primitives-fixtures.js'
 
 type BrowserResult = Record<string, unknown>
 
@@ -15,6 +21,7 @@ function clear(): void {
   detachedHost?.remove()
   detachedHost = undefined
   appHost.replaceChildren()
+  document.documentElement.removeAttribute('dir')
   for (const node of [...document.body.children])
     if (node !== appHost) node.remove()
 }
@@ -259,6 +266,45 @@ function rtlFixture(): BrowserResult {
   }
 }
 
+function primitiveCheckbox(): BrowserResult {
+  clear()
+  const changes: string[] = []
+  function CheckboxDemo(): JSX.Element {
+    const checkbox = createCheckbox(() => ({
+      id: 'browser-terms',
+      defaultChecked: false,
+      onCheckedChange: (details) => changes.push(String(details.checked)),
+    }))
+    const api = checkbox.api
+    return (
+      <div>
+        <label {...api().getRootProps()}>
+          <input {...api().getHiddenInputProps()} checked={api().checked} />
+          <span {...api().getControlProps()} />
+          <span {...api().getLabelProps()}>Accept the terms</span>
+        </label>
+        <output id="primitive-checkbox-state" aria-live="polite">
+          {api().checked ? 'Checked' : 'Unchecked'}
+        </output>
+      </div>
+    )
+  }
+  mount(() => <CheckboxDemo />)
+  return {
+    inputId: document.querySelector('input')?.id,
+    labelId: document.querySelector('label span')?.id,
+    changes,
+  }
+}
+
+function primitive(name: string, direction = 'ltr'): void {
+  clear()
+  if (!primitiveNames.includes(name as PrimitiveName))
+    throw new Error(`Unknown primitive fixture: ${name}`)
+  document.documentElement.dir = direction
+  disposeCurrent = renderPrimitiveFixture(name as PrimitiveName, appHost)
+}
+
 ;(
   window as typeof window & { __benosBrowser?: Record<string, unknown> }
 ).__benosBrowser = {
@@ -271,4 +317,6 @@ function rtlFixture(): BrowserResult {
   accessibilityFixture,
   keyboardFixture,
   rtlFixture,
+  primitiveCheckbox,
+  primitive,
 }

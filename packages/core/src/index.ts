@@ -3,6 +3,7 @@ export {
   computed,
   createContext,
   createRoot,
+  createUniqueId,
   effect,
   getContext,
   onCleanup,

@@ -1,0 +1,158 @@
+{
+  "name": "@benosjs/primitives",
+  "version": "0.2.0",
+  "description": "Accessible Zag.js machine adapters for Benos UI primitives.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "benos",
+    "primitives",
+    "accessibility",
+    "zag",
+    "ui"
+  ],
+  "homepage": "https://github.com/benosjs/benos#readme",
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
+  },
+  "files": [
+    "dist/js",
+    "dist/types"
+  ],
+  "dependencies": {
+    "@benosjs/core": "workspace:*",
+    "@zag-js/core": "1.44.0",
+    "@zag-js/types": "1.44.0",
+    "@zag-js/vanilla": "1.44.0"
+  },
+  "peerDependencies": {
+    "@zag-js/accordion": "1.44.0",
+    "@zag-js/checkbox": "1.44.0",
+    "@zag-js/dialog": "1.44.0",
+    "@zag-js/menu": "1.44.0",
+    "@zag-js/popover": "1.44.0",
+    "@zag-js/radio-group": "1.44.0",
+    "@zag-js/select": "1.44.0",
+    "@zag-js/switch": "1.44.0",
+    "@zag-js/tabs": "1.44.0",
+    "@zag-js/toast": "1.44.0",
+    "@zag-js/tooltip": "1.44.0"
+  },
+  "peerDependenciesMeta": {
+    "@zag-js/accordion": {
+      "optional": true
+    },
+    "@zag-js/checkbox": {
+      "optional": true
+    },
+    "@zag-js/dialog": {
+      "optional": true
+    },
+    "@zag-js/menu": {
+      "optional": true
+    },
+    "@zag-js/popover": {
+      "optional": true
+    },
+    "@zag-js/radio-group": {
+      "optional": true
+    },
+    "@zag-js/select": {
+      "optional": true
+    },
+    "@zag-js/switch": {
+      "optional": true
+    },
+    "@zag-js/tabs": {
+      "optional": true
+    },
+    "@zag-js/toast": {
+      "optional": true
+    },
+    "@zag-js/tooltip": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@benosjs/dom": "workspace:*",
+    "@zag-js/accordion": "1.44.0",
+    "@zag-js/checkbox": "1.44.0",
+    "@zag-js/dialog": "1.44.0",
+    "@zag-js/menu": "1.44.0",
+    "@zag-js/popover": "1.44.0",
+    "@zag-js/radio-group": "1.44.0",
+    "@zag-js/select": "1.44.0",
+    "@zag-js/switch": "1.44.0",
+    "@zag-js/tabs": "1.44.0",
+    "@zag-js/toast": "1.44.0",
+    "@zag-js/tooltip": "1.44.0"
+  },
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts"
+    },
+    "./accordion": {
+      "types": "./dist/types/accordion.d.ts",
+      "development": "./dist/js/accordion.development.js",
+      "default": "./dist/js/accordion.production.js"
+    },
+    "./checkbox": {
+      "types": "./dist/types/checkbox.d.ts",
+      "development": "./dist/js/checkbox.development.js",
+      "default": "./dist/js/checkbox.production.js"
+    },
+    "./dialog": {
+      "types": "./dist/types/dialog.d.ts",
+      "development": "./dist/js/dialog.development.js",
+      "default": "./dist/js/dialog.production.js"
+    },
+    "./menu": {
+      "types": "./dist/types/menu.d.ts",
+      "development": "./dist/js/menu.development.js",
+      "default": "./dist/js/menu.production.js"
+    },
+    "./popover": {
+      "types": "./dist/types/popover.d.ts",
+      "development": "./dist/js/popover.development.js",
+      "default": "./dist/js/popover.production.js"
+    },
+    "./radio-group": {
+      "types": "./dist/types/radio-group.d.ts",
+      "development": "./dist/js/radio-group.development.js",
+      "default": "./dist/js/radio-group.production.js"
+    },
+    "./select": {
+      "types": "./dist/types/select.d.ts",
+      "development": "./dist/js/select.development.js",
+      "default": "./dist/js/select.production.js"
+    },
+    "./switch": {
+      "types": "./dist/types/switch.d.ts",
+      "development": "./dist/js/switch.development.js",
+      "default": "./dist/js/switch.production.js"
+    },
+    "./tabs": {
+      "types": "./dist/types/tabs.d.ts",
+      "development": "./dist/js/tabs.development.js",
+      "default": "./dist/js/tabs.production.js"
+    },
+    "./toast": {
+      "types": "./dist/types/toast.d.ts",
+      "development": "./dist/js/toast.development.js",
+      "default": "./dist/js/toast.production.js"
+    },
+    "./tooltip": {
+      "types": "./dist/types/tooltip.d.ts",
+      "development": "./dist/js/tooltip.development.js",
+      "default": "./dist/js/tooltip.production.js"
+    }
+  }
+}

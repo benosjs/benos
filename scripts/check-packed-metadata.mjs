@@ -1,6 +1,6 @@
 /* global URL, console */
 
-import { mkdir, mkdtemp, readdir, rm } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, readdir, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -15,8 +15,39 @@ const publishable = [
   'compiler',
   'vite',
   'eslint-plugin',
+  'primitives',
+  'benos',
   'create-benos',
 ]
+const cliPackages = new Set(['benos', 'create-benos'])
+const testOnlyDependencies = new Set([
+  '@playwright/test',
+  '@vitest/coverage-v8',
+  'axe-core',
+  'expect-type',
+  'fast-check',
+  'happy-dom',
+  'node-pty',
+  'vitest',
+])
+const isTestOnlyDependency = (dependency) =>
+  testOnlyDependencies.has(dependency) ||
+  dependency.startsWith('@playwright/') ||
+  dependency.startsWith('@vitest/')
+
+const workspaceManifest = JSON.parse(
+  await readFile(join(root, 'package.json'), 'utf8'),
+)
+for (const dependency of testOnlyDependencies) {
+  if (
+    !workspaceManifest.devDependencies?.[dependency] ||
+    workspaceManifest.dependencies?.[dependency]
+  ) {
+    throw new Error(
+      `Test-only tooling ${dependency} must be a root devDependency only`,
+    )
+  }
+}
 
 const temporary = await mkdtemp(join(tmpdir(), 'benos-packed-metadata-'))
 
@@ -57,6 +88,19 @@ try {
         `Packed ${packageDirectory} includes forbidden build artifacts: ${forbidden.join(', ')}`,
       )
     }
+    if (cliPackages.has(packageDirectory)) {
+      const nativeModules = entries.filter((entry) => {
+        const path = entry.replace(/^package\//, '')
+        return (
+          path.endsWith('.node') || path.split('/').includes('node_modules')
+        )
+      })
+      if (nativeModules.length) {
+        throw new Error(
+          `Packed ${packageDirectory} includes native or installed modules: ${nativeModules.join(', ')}`,
+        )
+      }
+    }
     const manifests = listing
       .split('\n')
       .map((entry) => entry.trim())
@@ -73,6 +117,82 @@ try {
         )
       }
       const metadata = JSON.parse(stdout)
+      if (manifest === 'package/package.json') {
+        const completeMetadata =
+          typeof metadata.description === 'string' &&
+          typeof metadata.repository?.url === 'string' &&
+          metadata.license === 'MIT' &&
+          Array.isArray(metadata.keywords) &&
+          metadata.keywords.length > 0 &&
+          typeof metadata.homepage === 'string' &&
+          typeof metadata.bugs?.url === 'string'
+        if (!completeMetadata) {
+          throw new Error(
+            `Packed ${packageDirectory} is missing release metadata`,
+          )
+        }
+        for (const requiredFile of ['README.md', 'LICENSE']) {
+          if (!packageEntries.has(requiredFile)) {
+            throw new Error(
+              `Packed ${packageDirectory} is missing ${requiredFile}`,
+            )
+          }
+        }
+        const { stdout: readme } = await run(
+          'tar',
+          ['-xOf', archive, 'package/README.md'],
+          { cwd: root },
+        )
+        if (
+          !/!\[Benos logo\]\(https:\/\/raw\.githubusercontent\.com\/benosjs\/benos\/main\/assets\/brand\/[^)]+\)/.test(
+            readme,
+          )
+        ) {
+          throw new Error(
+            `Packed ${packageDirectory} README is missing the absolute GitHub logo URL`,
+          )
+        }
+      }
+      if (
+        cliPackages.has(packageDirectory) &&
+        manifest === 'package/package.json'
+      ) {
+        const packageTestDependencies = Object.keys({
+          ...metadata.dependencies,
+          ...metadata.devDependencies,
+          ...metadata.optionalDependencies,
+          ...metadata.peerDependencies,
+        }).filter(isTestOnlyDependency)
+        if (packageTestDependencies.length) {
+          throw new Error(
+            `Packed ${packageDirectory} package manifest includes test-only tooling: ${packageTestDependencies.join(', ')}`,
+          )
+        }
+      }
+      for (const section of [
+        'dependencies',
+        'optionalDependencies',
+        'peerDependencies',
+      ]) {
+        const invalidTestDependencies = Object.keys(
+          metadata[section] ?? {},
+        ).filter(isTestOnlyDependency)
+        if (invalidTestDependencies.length) {
+          throw new Error(
+            `Packed ${packageDirectory}/${manifest} puts test-only tooling in ${section}: ${invalidTestDependencies.join(', ')}`,
+          )
+        }
+      }
+      if (metadata.devDependencies) {
+        const invalidDevDependencies = Object.keys(
+          metadata.devDependencies,
+        ).filter((dependency) => dependency === 'node-pty')
+        if (invalidDevDependencies.length) {
+          throw new Error(
+            `Packed ${packageDirectory}/${manifest} includes workspace-only native test tooling: ${invalidDevDependencies.join(', ')}`,
+          )
+        }
+      }
       const exports = metadata.exports
       if (exports) {
         const targets = []

@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "toast",
+  "type": "registry:component",
+  "title": "Toast",
+  "description": "A themed live notification with non-stealing focus behavior.",
+  "dependencies": [
+    {
+      "name": "@benosjs/core",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/toast",
+      "version": "1.44.0"
+    },
+    {
+      "name": "@zag-js/vanilla",
+      "version": "1.44.0"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [
+    "overlay-host"
+  ],
+  "files": [
+    {
+      "path": "toast.tsx",
+      "target": "components/toast.tsx",
+      "contentType": "text/tsx",
+      "content": "import { createUniqueId, onCleanup, onMount } from '@benosjs/core'\nimport { createToast } from '@benosjs/primitives/toast'\nimport { mergeProps, Portal, splitProps } from '@benosjs/dom'\nimport { createStore, group } from '@zag-js/toast'\nimport { VanillaMachine } from '@zag-js/vanilla'\nimport type { Child, JSX } from '@benosjs/dom'\nimport type { ToastOptions } from '@benosjs/primitives/toast'\nimport { createOverlayHost } from './overlay-host.js'\n\nexport type ToastProps = Omit<\n  Pick<\n    ToastOptions<Child>,\n    | 'title'\n    | 'description'\n    | 'type'\n    | 'duration'\n    | 'removeDelay'\n    | 'closable'\n    | 'action'\n    | 'dir'\n    | 'onStatusChange'\n  >,\n  'type'\n> & {\n  type?: ToastOptions<Child>['type']\n  id?: string\n  class?: string\n  closeLabel?: string\n  ref?: (element: HTMLDivElement) => void\n}\n\nexport function Toast(props: ToastProps): JSX.Element {\n  const merged = mergeProps(\n    {\n      type: 'info',\n      duration: 5000,\n      removeDelay: 180,\n      closable: true,\n      closeLabel: 'Dismiss notification',\n    },\n    props,\n  )\n  const [local, native] = splitProps(merged, [\n    'id',\n    'class',\n    'ref',\n    'title',\n    'description',\n    'type',\n    'duration',\n    'removeDelay',\n    'closable',\n    'action',\n    'dir',\n    'onStatusChange',\n    'closeLabel',\n  ] as const)\n  let rootElement: HTMLDivElement | undefined\n  const target = createOverlayHost(\n    () => rootElement,\n    () => local.dir,\n  )\n  const store = createStore({\n    placement: 'top-end',\n    duration: local.duration,\n    removeDelay: local.removeDelay,\n    offsets: '1rem',\n  })\n  const groupId = local.id ? local.id + '-group' : createUniqueId()\n  const toastGroup = new VanillaMachine(group.machine, () => ({\n    id: groupId,\n    store,\n    ...(local.dir === undefined ? {} : { dir: local.dir }),\n  }))\n  onMount(() => toastGroup.start())\n  onCleanup(() => toastGroup.stop())\n\n  const toast = createToast<Child>(\n    () => ({\n      ...(local.id === undefined ? {} : { id: local.id }),\n      parent: toastGroup.service,\n      ...(local.title === undefined ? {} : { title: local.title }),\n      ...(local.description === undefined ? {} : { description: local.description }),\n      type: local.type,\n      duration: local.duration,\n      removeDelay: local.removeDelay,\n      closable: local.closable,\n      ...(local.action === undefined ? {} : { action: local.action }),\n      ...(local.dir === undefined ? {} : { dir: local.dir }),\n      ...(local.onStatusChange === undefined ? {} : { onStatusChange: local.onStatusChange }),\n    }),\n    () => rootElement,\n  )\n  const api = toast.api\n  const ref = (element: HTMLDivElement) => {\n    rootElement = element\n    local.ref?.(element)\n  }\n\n  return (\n    <div\n      {...native}\n      id={local.id}\n      class={['benos-toast', local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      <Portal mount={target()}>\n        <div class=\"benos-toast__viewport\">\n          <div class=\"benos-toast__item\" {...api().getRootProps()} aria-live=\"polite\" tabIndex={-1}>\n            <div class=\"benos-toast__copy\">\n              <strong class=\"benos-toast__title\" {...api().getTitleProps()} dir=\"auto\">\n                {local.title}\n              </strong>\n              {local.description !== undefined && (\n                <p class=\"benos-toast__description\" {...api().getDescriptionProps()} dir=\"auto\">\n                  {local.description}\n                </p>\n              )}\n            </div>\n            {local.closable && (\n              <button\n                class=\"benos-toast__close\"\n                type=\"button\"\n                tabIndex={0}\n                {...api().getCloseTriggerProps()}\n                dir=\"auto\"\n              >\n                {local.closeLabel}\n              </button>\n            )}\n          </div>\n        </div>\n      </Portal>\n    </div>\n  )\n}\n",
+      "checksum": "sha256:1346482051a867661a595a29e9462f64a0381710bfbf8e0a19a437484b73312a"
+    },
+    {
+      "path": "toast.css",
+      "target": "css/toast.css",
+      "contentType": "text/css",
+      "content": ".benos-toast__viewport {\n  display: grid;\n  gap: var(--benos-space-3, 0.75rem);\n  inline-size: min(24rem, calc(100vw - 2rem));\n  inset-block-start: 1rem;\n  inset-inline-end: 1rem;\n  pointer-events: none;\n  position: fixed;\n  z-index: var(--benos-z-toast, 40);\n}\n\n.benos-toast__item {\n  align-items: start;\n  animation: benos-toast-enter var(--benos-motion-normal, 180ms)\n    var(--benos-ease-standard, ease-out);\n  background: var(--benos-color-surface-raised, #fff);\n  border: 1px solid var(--benos-color-border, #d8deea);\n  border-inline-start: 4px solid var(--benos-color-brand, #12306b);\n  border-radius: var(--benos-radius-md, 0.5rem);\n  box-shadow: var(--benos-shadow-overlay, 0 18px 48px rgb(8 16 32 / 24%));\n  color: var(--benos-color-text, #172033);\n  display: flex;\n  font-size: var(--benos-text-sm, 0.875rem);\n  gap: var(--benos-space-3, 0.75rem);\n  justify-content: space-between;\n  padding: var(--benos-space-3, 0.75rem);\n  pointer-events: auto;\n  position: relative !important;\n}\n\n.benos-toast__item[data-type='success'] {\n  border-inline-start-color: var(--benos-color-success, #16794b);\n}\n\n.benos-toast__item[data-type='error'] {\n  border-inline-start-color: var(--benos-color-danger, #b42318);\n}\n\n.benos-toast__item[data-type='warning'] {\n  border-inline-start-color: var(--benos-color-warning, #8a4b08);\n}\n\n.benos-toast__copy {\n  min-inline-size: 0;\n}\n\n.benos-toast__title {\n  display: block;\n  font-weight: 700;\n}\n\n.benos-toast__description {\n  color: var(--benos-color-text, #172033);\n  line-height: var(--benos-line-height-body, 1.5);\n  margin: var(--benos-space-1, 0.25rem) 0 0;\n}\n\n.benos-toast__close {\n  background: transparent;\n  border: 0;\n  border-radius: var(--benos-radius-sm, 0.25rem);\n  color: var(--benos-color-text, #172033);\n  cursor: pointer;\n  font: inherit;\n  font-size: var(--benos-text-xs, 0.75rem);\n  padding: var(--benos-space-1, 0.25rem);\n}\n\n.benos-toast__close:focus-visible {\n  outline: 2px solid var(--benos-color-focus, #2459b2);\n  outline-offset: 2px;\n}\n\n@keyframes benos-toast-enter {\n  from {\n    opacity: 0;\n    transform: translateX(0.5rem);\n  }\n  to {\n    opacity: 1;\n    transform: none;\n  }\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .benos-toast__item {\n    animation: none;\n  }\n}\n",
+      "checksum": "sha256:1ad57e34d6d4f10fc62bd2ca2c409faaaee96d7198c6eee37d0c11512510cb28"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "radio-group",
+  "type": "registry:component",
+  "title": "Radio Group",
+  "description": "A typed, keyboard-accessible group of mutually exclusive options.",
+  "dependencies": [
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/radio-group",
+      "version": "1.44.0"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "radio-group.tsx",
+      "target": "components/radio-group.tsx",
+      "contentType": "text/tsx",
+      "content": "import { createRadioGroup } from '@benosjs/primitives/radio-group'\nimport { mergeProps, splitProps } from '@benosjs/dom'\nimport type { RadioGroupOptions } from '@benosjs/primitives/radio-group'\nimport type { JSX } from '@benosjs/dom'\n\nexport interface RadioGroupItem {\n  value: string\n  label: string\n  disabled?: boolean\n}\n\nexport type RadioGroupProps = Pick<\n  RadioGroupOptions,\n  | 'value'\n  | 'defaultValue'\n  | 'disabled'\n  | 'invalid'\n  | 'required'\n  | 'readOnly'\n  | 'orientation'\n  | 'dir'\n  | 'name'\n  | 'form'\n  | 'onValueChange'\n> & {\n  id?: string\n  class?: string\n  label: string\n  items: readonly RadioGroupItem[]\n  title?: string\n  'aria-label'?: string\n  'aria-labelledby'?: string\n  'aria-describedby'?: string\n  ref?: (element: HTMLDivElement) => void\n}\n\nexport function RadioGroup(props: RadioGroupProps): JSX.Element {\n  const merged = mergeProps({ orientation: 'vertical' as const }, props)\n  const [local, native] = splitProps(merged, [\n    'id',\n    'class',\n    'ref',\n    'label',\n    'items',\n    'value',\n    'defaultValue',\n    'disabled',\n    'invalid',\n    'required',\n    'readOnly',\n    'orientation',\n    'dir',\n    'name',\n    'form',\n    'onValueChange',\n  ] as const)\n  const machine = createRadioGroup(() => ({\n    ...(local.id === undefined ? {} : { id: local.id }),\n    ...(local.value === undefined ? {} : { value: local.value }),\n    ...(local.defaultValue === undefined ? {} : { defaultValue: local.defaultValue }),\n    ...(local.disabled === undefined ? {} : { disabled: local.disabled }),\n    ...(local.invalid === undefined ? {} : { invalid: local.invalid }),\n    ...(local.required === undefined ? {} : { required: local.required }),\n    ...(local.readOnly === undefined ? {} : { readOnly: local.readOnly }),\n    orientation: local.orientation,\n    ...(local.dir === undefined ? {} : { dir: local.dir }),\n    ...(local.name === undefined ? {} : { name: local.name }),\n    ...(local.form === undefined ? {} : { form: local.form }),\n    ...(local.onValueChange === undefined ? {} : { onValueChange: local.onValueChange }),\n  }))\n  const api = machine.api\n  const root = api().getRootProps()\n  const rootRef = root.ref as ((element: HTMLDivElement) => void) | undefined\n  const ref = (element: HTMLDivElement) => {\n    rootRef?.(element)\n    local.ref?.(element)\n  }\n\n  return (\n    <div\n      {...root}\n      {...native}\n      id={local.id}\n      class={['benos-radio-group', local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      <span class=\"benos-radio-group__label\" {...api().getLabelProps()}>\n        {local.label}\n      </span>\n      <div class=\"benos-radio-group__items\">\n        {local.items.map((item) => (\n          <label\n            class=\"benos-radio-group__item\"\n            {...api().getItemProps({ value: item.value, disabled: item.disabled })}\n          >\n            <input\n              {...api().getItemHiddenInputProps({\n                value: item.value,\n                disabled: item.disabled,\n              })}\n            />\n            <span\n              class=\"benos-radio-group__control\"\n              {...api().getItemControlProps({ value: item.value })}\n            >\n              <span aria-hidden=\"true\" />\n            </span>\n            <span {...api().getItemTextProps({ value: item.value })}>{item.label}</span>\n          </label>\n        ))}\n      </div>\n    </div>\n  )\n}\n",
+      "checksum": "sha256:f05f277a484cf01323a367a96e3e22c8e2d9b88d6821d92bb8fc3ed79a25781c"
+    },
+    {
+      "path": "radio-group.css",
+      "target": "css/radio-group.css",
+      "contentType": "text/css",
+      "content": ".benos-radio-group {\n  color: var(--benos-color-text);\n  display: grid;\n  font-size: var(--benos-text-xs, 0.75rem);\n  gap: var(--benos-space-2);\n}\n\n.benos-radio-group__label {\n  font-size: var(--benos-text-xs, 0.75rem);\n  font-weight: 600;\n}\n\n.benos-radio-group__items {\n  display: flex;\n  flex-direction: column;\n  gap: var(--benos-space-2);\n}\n\n.benos-radio-group[data-orientation='horizontal'] .benos-radio-group__items {\n  flex-direction: row;\n  flex-wrap: wrap;\n}\n\n.benos-radio-group__item {\n  align-items: center;\n  cursor: pointer;\n  display: inline-flex;\n  gap: var(--benos-space-2);\n  position: relative;\n}\n\n.benos-radio-group__item input {\n  block-size: 1px;\n  clip-path: inset(50%);\n  inline-size: 1px;\n  overflow: hidden;\n  position: absolute;\n  white-space: nowrap;\n}\n\n.benos-radio-group__control {\n  align-items: center;\n  background: var(--benos-color-surface);\n  border: 1px solid var(--benos-color-border);\n  border-radius: 50%;\n  display: inline-flex;\n  flex: none;\n  inline-size: 1.125rem;\n  justify-content: center;\n  block-size: 1.125rem;\n}\n\n.benos-radio-group__control > span {\n  background: var(--benos-color-brand);\n  border-radius: 50%;\n  inline-size: 0.5rem;\n  block-size: 0.5rem;\n  opacity: 0;\n}\n\n.benos-radio-group__control[data-state='checked'] {\n  border-color: var(--benos-color-brand);\n}\n\n.benos-radio-group__control[data-state='checked'] > span {\n  opacity: 1;\n}\n\n.benos-radio-group__item input:focus-visible + .benos-radio-group__control {\n  outline: 3px solid var(--benos-color-focus);\n  outline-offset: 2px;\n}\n\n.benos-radio-group__item[data-disabled] {\n  cursor: not-allowed;\n  opacity: 0.58;\n}\n",
+      "checksum": "sha256:8db857c772c7d7d4254ff581ec5c9ef9f38943f556985793f24b88659ba72dff"
+    }
+  ]
+}

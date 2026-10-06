@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "tooltip",
+  "type": "registry:component",
+  "title": "Tooltip",
+  "description": "Supplemental hover and keyboard-focus help with collision-aware placement.",
+  "dependencies": [
+    {
+      "name": "@benosjs/core",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/tooltip",
+      "version": "1.44.0"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [
+    "overlay-host",
+    "button"
+  ],
+  "files": [
+    {
+      "path": "tooltip.tsx",
+      "target": "components/tooltip.tsx",
+      "contentType": "text/tsx",
+      "content": "import { createTooltip } from '@benosjs/primitives/tooltip'\nimport { mergeProps, Portal, Show, splitProps } from '@benosjs/dom'\nimport type { Child, JSX } from '@benosjs/dom'\nimport type { TooltipOptions } from '@benosjs/primitives/tooltip'\nimport { createOverlayHost } from './overlay-host.js'\n\nexport type TooltipProps = Pick<\n  TooltipOptions,\n  | 'open'\n  | 'defaultOpen'\n  | 'disabled'\n  | 'interactive'\n  | 'positioning'\n  | 'openDelay'\n  | 'closeDelay'\n  | 'dir'\n  | 'onOpenChange'\n> & {\n  id?: string\n  class?: string\n  label: string\n  trigger: Child\n  children: Child\n  ref?: (element: HTMLSpanElement) => void\n}\n\n/**\n * Tooltip content is supplemental. Keep essential instructions in visible\n * text so they are available on touch and when hover/focus is unavailable.\n */\nexport function Tooltip(props: TooltipProps): JSX.Element {\n  const merged = mergeProps(\n    {\n      disabled: false,\n      interactive: false,\n      openDelay: 400,\n      closeDelay: 150,\n      positioning: {\n        placement: 'top',\n        strategy: 'fixed',\n        flip: true,\n        shift: 8,\n        overflowPadding: 8,\n        fitViewport: true,\n      },\n    },\n    props,\n  )\n  const [local, native] = splitProps(merged, [\n    'id',\n    'class',\n    'ref',\n    'label',\n    'trigger',\n    'children',\n    'open',\n    'defaultOpen',\n    'disabled',\n    'interactive',\n    'positioning',\n    'openDelay',\n    'closeDelay',\n    'dir',\n    'onOpenChange',\n  ] as const)\n  let rootElement: HTMLSpanElement | undefined\n  const target = createOverlayHost(\n    () => rootElement,\n    () => local.dir,\n  )\n  const machine = createTooltip(\n    () => ({\n      ...(local.id === undefined ? {} : { id: local.id }),\n      ...(local.open === undefined ? {} : { open: local.open }),\n      ...(local.defaultOpen === undefined ? {} : { defaultOpen: local.defaultOpen }),\n      disabled: local.disabled,\n      interactive: local.interactive,\n      openDelay: local.openDelay,\n      closeDelay: local.closeDelay,\n      positioning: { ...merged.positioning, ...local.positioning },\n      ...(local.dir === undefined ? {} : { dir: local.dir }),\n      ...(local.onOpenChange === undefined ? {} : { onOpenChange: local.onOpenChange }),\n    }),\n    () => rootElement,\n  )\n  const api = machine.api\n  const rootRef = api().getTriggerProps().ref as ((element: HTMLButtonElement) => void) | undefined\n  const ref = (element: HTMLSpanElement) => {\n    rootElement = element\n    local.ref?.(element)\n  }\n\n  return (\n    <span\n      {...native}\n      id={local.id}\n      class={['benos-tooltip', local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      <button\n        class=\"benos-button benos-button--outline benos-button--sm benos-tooltip__trigger\"\n        type=\"button\"\n        tabIndex={0}\n        {...api().getTriggerProps()}\n        dir=\"auto\"\n        aria-label={local.label}\n        ref={(element) => rootRef?.(element)}\n      >\n        {local.trigger}\n        <span class=\"benos-tooltip__icon\" aria-hidden=\"true\">\n          i\n        </span>\n      </button>\n      <Show when={api().open}>\n        <Portal mount={target()}>\n          <div class=\"benos-tooltip__positioner\" {...api().getPositionerProps()}>\n            <div class=\"benos-tooltip__content\" {...api().getContentProps()} dir=\"auto\">\n              {local.children}\n            </div>\n          </div>\n        </Portal>\n      </Show>\n    </span>\n  )\n}\n",
+      "checksum": "sha256:56832f2724ce8ce66888d124b1b1a7aa9582cc7f9f269b60e90af1b9062adeb5"
+    },
+    {
+      "path": "tooltip.css",
+      "target": "css/tooltip.css",
+      "contentType": "text/css",
+      "content": "@import './button.css';\n\n.benos-tooltip {\n  display: inline-flex;\n}\n\n.benos-tooltip__trigger {\n  gap: var(--benos-space-2, 0.5rem);\n}\n\n.benos-tooltip__trigger:focus-visible {\n  outline: 3px solid var(--benos-color-focus, #2459b2);\n  outline-offset: 3px;\n}\n\n.benos-tooltip__icon {\n  align-items: center;\n  border: 1px solid currentColor;\n  border-radius: 50%;\n  display: inline-flex;\n  font-size: 0.65em;\n  font-weight: 750;\n  inline-size: 1.1em;\n  justify-content: center;\n  line-height: 1;\n  min-block-size: 1.1em;\n}\n\n.benos-tooltip__positioner {\n  max-inline-size: calc(100vw - 1rem);\n  z-index: var(--benos-z-popover, 20);\n}\n\n.benos-tooltip__positioner[hidden],\n.benos-tooltip__positioner[data-state='closed'] {\n  display: none;\n  pointer-events: none;\n  visibility: hidden;\n}\n\n.benos-tooltip__content {\n  animation: benos-tooltip-enter var(--benos-motion-fast, 120ms)\n    var(--benos-ease-standard, ease-out);\n  background: var(--benos-color-text, #172033);\n  border-radius: var(--benos-radius-sm, 0.25rem);\n  box-shadow: var(--benos-shadow-md, 0 8px 24px rgb(23 32 51 / 12%));\n  color: var(--benos-color-surface, #fff);\n  font-size: var(--benos-text-xs, 0.75rem);\n  line-height: var(--benos-line-height-body, 1.5);\n  max-inline-size: min(18rem, calc(100vw - 1rem));\n  padding: var(--benos-space-2, 0.5rem) var(--benos-space-3, 0.75rem);\n}\n\n@keyframes benos-tooltip-enter {\n  from {\n    opacity: 0;\n    transform: translateY(0.2rem);\n  }\n  to {\n    opacity: 1;\n    transform: none;\n  }\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .benos-tooltip__content {\n    animation: none;\n  }\n}\n",
+      "checksum": "sha256:6fa0965621a356cbddfe660f8873391c50ffd301e4599c703802d1411a980092"
+    }
+  ]
+}

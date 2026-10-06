@@ -1,0 +1,372 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "items": [
+    {
+      "name": "accordion",
+      "type": "registry:component",
+      "title": "Accordion",
+      "description": "An accessible disclosure group with single or multiple expanded items.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/accordion.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/accordion",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [],
+      "checksum": "sha256:9787923f31d03d17645f85d64a43e266995946041d8a28a8d5dea2182abc8c67"
+    },
+    {
+      "name": "badge",
+      "type": "registry:component",
+      "title": "Badge",
+      "description": "A compact status label with brand and semantic tones.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/badge.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:368e53f5c2b2e85deb494cfc1f550cbd74f1d9b188319494cb7292a2231b33c8"
+    },
+    {
+      "name": "button",
+      "type": "registry:component",
+      "title": "Button",
+      "description": "A typed button with accessible focus, size, and intent variants.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/button.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:96103cf0ecf05811223c05c513781e5ce687d556e038826ff2014ccf97883507"
+    },
+    {
+      "name": "card",
+      "type": "registry:component",
+      "title": "Card",
+      "description": "A neutral content surface with default, outlined, and raised variants.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/card.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:6882556edba4746ee65501dae6356754983087879970c191d9b6ae429dbcfa4a"
+    },
+    {
+      "name": "checkbox",
+      "type": "registry:component",
+      "title": "Checkbox",
+      "description": "An accessible checkbox with controlled and uncontrolled state.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/checkbox.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/checkbox",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [],
+      "checksum": "sha256:b107edfcbddf3f3da3073f41358098e244e2626fc14d35c640675882fb82ec33"
+    },
+    {
+      "name": "dialog",
+      "type": "registry:component",
+      "title": "Dialog",
+      "description": "A focus-trapped modal dialog with themed portal rendering.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/dialog.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/dialog",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [
+        "overlay-host",
+        "button"
+      ],
+      "checksum": "sha256:eadb9f9755dcf80fcfae7ab1b2a8a9d634deed206975c1425f33e8680ca25896"
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:component",
+      "title": "Dropdown menu",
+      "description": "A typeahead-enabled action menu with collision-aware placement.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/dropdown-menu.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/menu",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [
+        "overlay-host",
+        "button"
+      ],
+      "checksum": "sha256:fac61472b4720eb4c9e2226f858d38c05d4afbf50bf4c89417116824a84e85ac"
+    },
+    {
+      "name": "input",
+      "type": "registry:component",
+      "title": "Input",
+      "description": "A styled native input with size and invalid-state support.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/input.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:b34e745689e60beef9cfa5a97f823f340cf0dbd44cb02340c0141afd3cc83e3e"
+    },
+    {
+      "name": "label",
+      "type": "registry:component",
+      "title": "Label",
+      "description": "A styled, native label with typed control association.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/label.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:0589265e37298473cfa186c315eaf15312970095bbd17a3593fe5c2473235247"
+    },
+    {
+      "name": "overlay-host",
+      "type": "registry:style",
+      "title": "Overlay host support",
+      "description": "Shared themed portal host used by overlay components.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/overlay-host.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:5eb25231eeb87ce4e9736ab00ba1fe1d369bbf8ccbfba0efce89341ea2bd4e56"
+    },
+    {
+      "name": "popover",
+      "type": "registry:component",
+      "title": "Popover",
+      "description": "A collision-aware popover with focus management and themed portal rendering.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/popover.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/popover",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [
+        "overlay-host",
+        "button"
+      ],
+      "checksum": "sha256:4ddf3a02c1e299f34a5bcf638b327dd9668baa67f892fd71b905fa2345d234ff"
+    },
+    {
+      "name": "radio-group",
+      "type": "registry:component",
+      "title": "Radio Group",
+      "description": "A typed, keyboard-accessible group of mutually exclusive options.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/radio-group.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/radio-group",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [],
+      "checksum": "sha256:bb60b8122b6a134b29a1f2a7c60b83aff9fbab81551e65f7d0a3fdd309e0146d"
+    },
+    {
+      "name": "select",
+      "type": "registry:component",
+      "title": "Select",
+      "description": "A styled select-only combobox with Zag collection and keyboard behavior.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/select.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/select",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [],
+      "checksum": "sha256:1bfc4b82668ad356cf3019dff4a7021aa1519007075b2c36e0deda7e557966b5"
+    },
+    {
+      "name": "separator",
+      "type": "registry:component",
+      "title": "Separator",
+      "description": "An accessible horizontal or vertical separator.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/separator.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:189452cbbd76ce0c0305c8ffeaf66a58ae8cf9c6fd16b757e1551d2e81f2f571"
+    },
+    {
+      "name": "sortable-table",
+      "type": "registry:component",
+      "title": "Sortable table",
+      "description": "An accessible keyed table with a three-state sortable header.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/sortable-table.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.2.0"
+        }
+      ],
+      "registryDependencies": [],
+      "checksum": "sha256:f06d109ab81803213eb16b14a775d9d94d97852ecafbba6f24437e7170d6bafe"
+    },
+    {
+      "name": "switch",
+      "type": "registry:component",
+      "title": "Switch",
+      "description": "An accessible on/off switch with the switch role and native form behavior.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/switch.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/switch",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [],
+      "checksum": "sha256:de6eb2fb262e9e36881a4adac7cfdb012576256b99045d47e2f7c32decac9d87"
+    },
+    {
+      "name": "tabs",
+      "type": "registry:component",
+      "title": "Tabs",
+      "description": "A keyboard-navigable tab list with typed panels and activation modes.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/tabs.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/tabs",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [],
+      "checksum": "sha256:5cb8f1d2a1b32e37b08562b5164955d1cd752c2da525762d4598bd1416fe2550"
+    },
+    {
+      "name": "textarea",
+      "type": "registry:component",
+      "title": "Textarea",
+      "description": "A styled native textarea with size and invalid-state support.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/textarea.json",
+      "dependencies": [],
+      "registryDependencies": [],
+      "checksum": "sha256:a97b246b810ba4f6499fcf4662295fb630960388d431b3ac7ff19099b988e86e"
+    },
+    {
+      "name": "toast",
+      "type": "registry:component",
+      "title": "Toast",
+      "description": "A themed live notification with non-stealing focus behavior.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/toast.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/toast",
+          "version": "1.44.0"
+        },
+        {
+          "name": "@zag-js/vanilla",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [
+        "overlay-host"
+      ],
+      "checksum": "sha256:f72a609f21fb94bb28878ad1aa421fdb7f3687d726bf6587ee746558ecd71148"
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:component",
+      "title": "Tooltip",
+      "description": "Supplemental hover and keyboard-focus help with collision-aware placement.",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.2.0/registry/v1/items/tooltip.json",
+      "dependencies": [
+        {
+          "name": "@benosjs/core",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/dom",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@benosjs/primitives",
+          "version": "^0.2.0"
+        },
+        {
+          "name": "@zag-js/tooltip",
+          "version": "1.44.0"
+        }
+      ],
+      "registryDependencies": [
+        "overlay-host",
+        "button"
+      ],
+      "checksum": "sha256:dceddd4893d404e702eea68ace9291f87ec03c8ebad8d9649155ac7d4c876eaf"
+    }
+  ]
+}

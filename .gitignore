@@ -12,3 +12,5 @@ test-results/
 .npm/
 npm-debug.log*
 pnpm-debug.log*
+
+.benos/

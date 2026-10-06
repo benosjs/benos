@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/benosjs/benos/main/registry/v1/common.schema.json",
+  "$defs": {
+    "dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^(?:@[a-z0-9._-]+/)?[a-z0-9._-]+$"
+        },
+        "version": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

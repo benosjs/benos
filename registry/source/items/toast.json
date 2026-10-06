@@ -1,0 +1,57 @@
+{
+  "name": "toast",
+  "title": "Toast",
+  "description": "A themed live notification with non-stealing focus behavior.",
+  "type": "registry:component",
+  "dependencies": [
+    {
+      "name": "@benosjs/core",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/toast",
+      "version": "1.44.0"
+    },
+    {
+      "name": "@zag-js/vanilla",
+      "version": "1.44.0"
+    }
+  ],
+  "registryDependencies": ["overlay-host"],
+  "files": [
+    {
+      "path": "toast.tsx",
+      "target": "components/toast.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/toast.tsx"
+    },
+    {
+      "path": "toast.css",
+      "target": "css/toast.css",
+      "contentType": "text/css",
+      "sourceFile": "css/toast.css"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "0.2.0"
+    }
+  ]
+}

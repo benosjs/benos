@@ -2,6 +2,40 @@
 
 All notable changes to Benos are documented here.
 
+## [0.2.0] — 2026-10-06
+
+### Added
+
+- Publish the optional Benos UI system: `@benosjs/primitives` provides
+  accessible Zag.js adapters, and `benos` installs, lists, diffs, and safely
+  updates 19 editable UI components from the versioned registry.
+- Add `createUniqueId()` to `@benosjs/core`, with owner-scoped IDs ready for
+  deterministic server rendering in a future SSR implementation.
+- Add interactive `create-benos` prompts for the project name, optional UI
+  setup, and installing dependencies plus starting the dev server. Scriptable
+  flags cover each prompt, and non-interactive runs never start the server by
+  default.
+- Support `benos init`, `add`, `list`, `diff`, and three-way `update`, with
+  version gates, conflict artifacts, and recoverable per-component updates.
+
+### Changed
+
+- Align the eight publishable packages and the starter template on version
+  `0.2.0`. Registry items now require the `0.2.0` minimums for the Benos
+  packages they use.
+- Keep `node-pty` and all other workspace test tools in development-only
+  dependencies. Packed CLI checks reject native modules and runtime test-tool
+  dependencies.
+
+### Verification
+
+- Local release verification passed: 221 unit tests, 405 browser tests across
+  Chromium, Firefox, and WebKit, the packed create-benos consumer, and the pnpm
+  UI CLI consumer matrix. Type-level, documentation, package, gallery, lint,
+  bundle-size, and production benchmark checks also passed. The fresh template
+  install reported no engine or deprecation warnings and zero vulnerabilities.
+- This version is prepared for release and has not been tagged or published.
+
 ## [0.1.2] — 2026-10-02
 
 ### Changed

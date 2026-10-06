@@ -1,0 +1,41 @@
+{
+  "name": "sortable-table",
+  "title": "Sortable table",
+  "description": "An accessible keyed table with a three-state sortable header.",
+  "type": "registry:component",
+  "dependencies": [
+    {
+      "name": "@benosjs/core",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "^0.2.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "sortable-table.tsx",
+      "target": "components/sortable-table.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/sortable-table.tsx"
+    },
+    {
+      "path": "sortable-table.css",
+      "target": "css/sortable-table.css",
+      "contentType": "text/css",
+      "sourceFile": "css/sortable-table.css"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    }
+  ]
+}

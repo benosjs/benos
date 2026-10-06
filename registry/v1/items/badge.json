@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "badge",
+  "type": "registry:component",
+  "title": "Badge",
+  "description": "A compact status label with brand and semantic tones.",
+  "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "badge.tsx",
+      "target": "components/badge.tsx",
+      "contentType": "text/tsx",
+      "content": "import { mergeProps, splitProps } from '@benosjs/dom'\nimport type { JSX } from '@benosjs/dom'\n\nexport type BadgeTone = 'neutral' | 'brand' | 'success' | 'warning' | 'danger'\n\nexport type BadgeProps = Omit<JSX.IntrinsicElements['span'], 'class' | 'ref'> & {\n  id?: string\n  class?: string\n  tone?: BadgeTone\n  ref?: (element: HTMLSpanElement) => void\n}\n\nexport function Badge(props: BadgeProps): JSX.Element {\n  const merged = mergeProps({ tone: 'neutral' as const }, props)\n  const [local, native] = splitProps(merged, ['tone', 'class', 'ref', 'children'] as const)\n  const ref = (element: HTMLSpanElement) => local.ref?.(element)\n\n  return (\n    <span\n      {...native}\n      class={['benos-badge', 'benos-badge--' + local.tone, local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      {local.children}\n    </span>\n  )\n}\n",
+      "checksum": "sha256:bcb72091dc1ab61c436565186bd560acadc1a5b6c7bf92a69630db50752fe1ee"
+    },
+    {
+      "path": "badge.css",
+      "target": "css/badge.css",
+      "contentType": "text/css",
+      "content": ".benos-badge {\n  align-items: center;\n  border: 1px solid currentColor;\n  border-radius: var(--benos-radius-pill);\n  display: inline-flex;\n  font-size: var(--benos-text-xs);\n  font-weight: 650;\n  gap: var(--benos-space-1);\n  line-height: 1.4;\n  padding-block: 0.15em;\n  padding-inline: var(--benos-space-2);\n}\n\n.benos-badge--neutral {\n  color: var(--benos-color-text-muted);\n}\n\n.benos-badge--brand {\n  color: var(--benos-color-brand);\n}\n\n.benos-badge--success {\n  color: var(--benos-color-success);\n}\n\n.benos-badge--warning {\n  color: var(--benos-color-warning);\n}\n\n.benos-badge--danger {\n  color: var(--benos-color-danger);\n}\n",
+      "checksum": "sha256:53fef39a51a119d79fb324ed00d4256464ee47ba74435f37dd867602baa22a95"
+    }
+  ]
+}

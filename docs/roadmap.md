@@ -12,12 +12,20 @@ This roadmap covers work after v0.1. The phase scope and current status live in 
 - Update the starter's `happy-dom` and ESLint dependencies, align the Node
   engine range with Babel 8, and add dependency-engine and npm-audit CI checks.
 
-## v0.1.2 starter refresh (in preparation)
+## v0.1.2 starter refresh (completed)
 
 - Replace the generic scaffold with one compact, theme-aware starter that
   demonstrates run-once components and keyed list updates. Keep the example
   below 150 lines of TSX and 100 lines of CSS, and include the site logo and
   documentation links.
+
+## v0.2.0 framework and UI system (in preparation)
+
+- Release the optional `@benosjs/primitives` adapters and the `benos` CLI with
+  19 accessible, source-owned registry components.
+- Add the public `createUniqueId()` API and the interactive create-benos flow.
+- Publish all eight packages at `0.2.0` after the release checklist and CI
+  gates pass.
 
 ## First-party modules (optional, integrated)
 

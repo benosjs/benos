@@ -46,6 +46,58 @@ export default defineConfig({
           '../../packages/compiler/dist/js/index.development.js',
         ),
       },
+      {
+        find: '@zag-js/select',
+        replacement: alias(
+          '../../packages/primitives/node_modules/@zag-js/select/dist/index.mjs',
+        ),
+      },
+      ...['accordion', 'checkbox', 'radio-group', 'switch', 'tabs'].map(
+        (name) => ({
+          find: `@benosjs/primitives/${name}`,
+          replacement: alias(
+            `../../packages/primitives/dist/js/${name}.development.js`,
+          ),
+        }),
+      ),
+      ...['dialog', 'menu', 'popover', 'tooltip', 'toast'].map((name) => ({
+        find: `@benosjs/primitives/${name}`,
+        replacement: alias(
+          `../../packages/primitives/dist/js/${name}.development.js`,
+        ),
+      })),
+      {
+        find: '@benosjs/primitives/select',
+        replacement: alias(
+          '../../packages/primitives/dist/js/select.development.js',
+        ),
+      },
+      ...['accordion', 'checkbox', 'radio-group', 'switch', 'tabs'].map(
+        (name) => ({
+          find: `@zag-js/${name}`,
+          replacement: alias(
+            `../../packages/primitives/node_modules/@zag-js/${name}/dist/index.mjs`,
+          ),
+        }),
+      ),
+      ...['dialog', 'menu', 'popover', 'tooltip', 'toast'].map((name) => ({
+        find: `@zag-js/${name}`,
+        replacement: alias(
+          `../../packages/primitives/node_modules/@zag-js/${name}/dist/index.mjs`,
+        ),
+      })),
+      {
+        find: '@zag-js/toast',
+        replacement: alias(
+          '../../packages/primitives/node_modules/@zag-js/toast/dist/index.mjs',
+        ),
+      },
+      {
+        find: '@zag-js/vanilla',
+        replacement: alias(
+          '../../packages/primitives/node_modules/@zag-js/vanilla/dist/index.mjs',
+        ),
+      },
     ],
   },
   server: {

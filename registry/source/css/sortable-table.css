@@ -1,0 +1,70 @@
+.benos-sortable-table {
+  border-collapse: collapse;
+  color: var(--benos-color-text);
+  font-size: var(--benos-text-xs, 0.75rem);
+  inline-size: 100%;
+  table-layout: fixed;
+}
+
+.benos-sortable-table caption {
+  color: var(--benos-color-text);
+  font-size: var(--benos-text-sm, 0.875rem);
+  font-weight: 650;
+  padding-block-end: var(--benos-space-2);
+  text-align: start;
+}
+
+.benos-sortable-table th,
+.benos-sortable-table td {
+  border-block-end: 1px solid var(--benos-color-border);
+  padding: var(--benos-space-2) var(--benos-space-3);
+  text-align: start;
+}
+
+.benos-sortable-table th {
+  background: var(--benos-color-brand-soft);
+  font-weight: 650;
+}
+
+.benos-sortable-table__sort {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: var(--benos-space-2);
+  padding: 0;
+  text-align: start;
+}
+
+.benos-sortable-table__sort:focus-visible {
+  border-radius: var(--benos-radius-sm);
+  outline: 3px solid var(--benos-color-focus);
+  outline-offset: 3px;
+}
+
+.benos-sortable-table__indicator {
+  color: var(--benos-color-brand);
+  inline-size: 1em;
+  text-align: center;
+}
+
+.benos-sortable-table__text {
+  max-inline-size: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.benos-sortable-table td.benos-sortable-table__number {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.benos-sortable-table td.benos-sortable-table__empty {
+  color: var(--benos-color-text-muted);
+  padding-block: var(--benos-space-5) !important;
+  text-align: center;
+}

@@ -1,0 +1,28 @@
+{
+  "name": "input",
+  "title": "Input",
+  "description": "A styled native input with size and invalid-state support.",
+  "type": "registry:component",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "input.tsx",
+      "target": "components/input.tsx",
+      "contentType": "text/tsx",
+      "sourceFile": "components/input.tsx"
+    },
+    {
+      "path": "input.css",
+      "target": "css/input.css",
+      "contentType": "text/css",
+      "sourceFile": "css/input.css"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    }
+  ]
+}

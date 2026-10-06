@@ -1,0 +1,44 @@
+{
+  "release": "0.2.0",
+  "items": [
+    {
+      "name": "sample",
+      "type": "registry:component",
+      "title": "Sample Action",
+      "description": "Test-only action component with an npm dependency.",
+      "dependencies": [
+        {
+          "name": "clsx",
+          "version": "^2.1.1"
+        }
+      ],
+      "registryDependencies": ["tokens"],
+      "files": [
+        {
+          "path": "sample.tsx",
+          "target": "components/sample.tsx",
+          "contentType": "text/tsx",
+          "content": "import { clsx } from 'clsx'\n\nexport function SampleAction(props: { label: string; muted?: boolean }) {\n  return (\n    <button class={clsx('sample-action', props.muted && 'sample-action-muted')}>\n      {props.label}\n    </button>\n  )\n}\n"
+        }
+      ],
+      "minimumBenosVersions": []
+    },
+    {
+      "name": "tokens",
+      "type": "registry:style",
+      "title": "Sample Tokens",
+      "description": "Shared tokens required by the sample component.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "tokens.css",
+          "target": "css/tokens.css",
+          "contentType": "text/css",
+          "content": ":root {\n  --sample-action-gap: 0.5rem;\n}\n"
+        }
+      ],
+      "minimumBenosVersions": []
+    }
+  ]
+}

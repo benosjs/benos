@@ -1,0 +1,38 @@
+{
+  "name": "benos",
+  "version": "0.2.0",
+  "description": "Source-owned UI components and registry tooling for Benos.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "benos",
+    "ui",
+    "components",
+    "registry",
+    "cli"
+  ],
+  "homepage": "https://github.com/benosjs/benos#readme",
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
+  },
+  "type": "module",
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
+  },
+  "bin": {
+    "benos": "src/index.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "cross-spawn": "^7.0.6",
+    "semver": "^7.8.5"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}

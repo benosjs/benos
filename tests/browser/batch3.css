@@ -1,0 +1,32 @@
+.batch3-fixture {
+  min-block-size: 200vh;
+  padding: 20px;
+}
+
+.edge-trigger {
+  inset-block-end: 12px;
+  inset-inline-end: 12px;
+  position: fixed;
+}
+
+button:not(.benos-button) {
+  appearance: none;
+  background: var(--benos-color-surface);
+  border: 1px solid var(--benos-color-border);
+  border-radius: var(--benos-radius-sm);
+  color: var(--benos-color-text);
+  font: inherit;
+  padding: 0.25rem 0.5rem;
+}
+
+button:not(.benos-button):focus-visible {
+  outline: 3px solid var(--benos-color-focus);
+  outline-offset: 2px;
+}
+
+html {
+  --benos-z-dropdown: 10;
+  --benos-z-popover: 20;
+  --benos-z-dialog: 30;
+  --benos-z-toast: 40;
+}

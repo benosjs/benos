@@ -1,0 +1,48 @@
+.benos-input {
+  background: var(--benos-color-surface);
+  border: 1px solid var(--benos-color-border);
+  box-sizing: border-box;
+  border-radius: var(--benos-radius-md);
+  color: var(--benos-color-text);
+  display: block;
+  font: inherit;
+  font-size: var(--benos-text-xs, 0.75rem);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.benos-input--sm {
+  block-size: 2rem;
+  padding-inline: var(--benos-space-2);
+}
+
+.benos-input--md {
+  block-size: 2.5rem;
+  padding-inline: var(--benos-space-3);
+}
+
+.benos-input--lg {
+  block-size: 3rem;
+  padding-inline: var(--benos-space-4);
+}
+
+.benos-input::placeholder {
+  color: var(--benos-color-text-muted);
+  opacity: 1;
+}
+
+.benos-input:focus-visible {
+  border-color: var(--benos-color-focus);
+  outline: 3px solid var(--benos-color-focus);
+  outline-offset: 2px;
+}
+
+.benos-input[aria-invalid='true'] {
+  border-color: var(--benos-color-danger);
+}
+
+.benos-input:disabled {
+  background: var(--benos-color-canvas);
+  color: var(--benos-color-text-muted);
+  cursor: not-allowed;
+}

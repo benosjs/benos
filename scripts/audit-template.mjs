@@ -22,6 +22,7 @@ const packageDirectories = [
   'compiler',
   'vite',
   'eslint-plugin',
+  'benos',
   'create-benos',
 ]
 const temporary = await mkdtemp(join(tmpdir(), 'benos-template-audit-'))
@@ -71,11 +72,31 @@ try {
 
   const createArchive = archiveByPackage.get('create-benos')
   if (!createArchive) throw new Error('create-benos archive is missing')
+  const benosArchive = archiveByPackage.get('benos')
+  if (!benosArchive) throw new Error('benos CLI archive is missing')
   await run('tar', ['-xzf', createArchive, '-C', extractedCreator], {
     cwd: root,
   })
-  const cli = join(extractedCreator, 'package', 'src', 'index.mjs')
-  await run(process.execPath, [cli, app], { cwd: root })
+  const creatorPackage = join(extractedCreator, 'package')
+  const creatorManifestPath = join(creatorPackage, 'package.json')
+  const creatorManifest = JSON.parse(
+    await readFile(creatorManifestPath, 'utf8'),
+  )
+  creatorManifest.pnpm = {
+    overrides: {
+      ...creatorManifest.pnpm?.overrides,
+      benos: localArchivePath(creatorPackage, benosArchive),
+    },
+  }
+  await writeFile(
+    creatorManifestPath,
+    `${JSON.stringify(creatorManifest, null, 2)}\n`,
+  )
+  await runPnpm(['install', '--ignore-scripts'], { cwd: creatorPackage })
+  const cli = join(creatorPackage, 'src', 'index.mjs')
+  await run(process.execPath, [cli, app, '--no-install', '--no-start'], {
+    cwd: root,
+  })
 
   const packageFile = join(app, 'package.json')
   const metadata = JSON.parse(await readFile(packageFile, 'utf8'))
@@ -90,9 +111,9 @@ try {
     const dependencySet = metadata.dependencies?.[name]
       ? metadata.dependencies
       : metadata.devDependencies
-    if (dependencySet?.[name] !== '^0.1.2') {
+    if (dependencySet?.[name] !== '^0.2.0') {
       throw new Error(
-        `Scaffold must declare ${name} as ^0.1.2 before the local-pack override`,
+        `Scaffold must declare ${name} as ^0.2.0 before the local-pack override`,
       )
     }
     const archive = archiveByPackage.get(directory)

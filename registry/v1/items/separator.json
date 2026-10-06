@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "separator",
+  "type": "registry:component",
+  "title": "Separator",
+  "description": "An accessible horizontal or vertical separator.",
+  "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "separator.tsx",
+      "target": "components/separator.tsx",
+      "contentType": "text/tsx",
+      "content": "import { mergeProps, splitProps } from '@benosjs/dom'\nimport type { JSX } from '@benosjs/dom'\n\nexport type SeparatorOrientation = 'horizontal' | 'vertical'\n\nexport type SeparatorProps = Omit<\n  JSX.IntrinsicElements['div'],\n  'class' | 'ref' | 'role' | 'aria-orientation' | 'aria-hidden'\n> & {\n  id?: string\n  class?: string\n  orientation?: SeparatorOrientation\n  decorative?: boolean\n  ref?: (element: HTMLDivElement) => void\n}\n\nexport function Separator(props: SeparatorProps): JSX.Element {\n  const merged = mergeProps({ orientation: 'horizontal' as const, decorative: false }, props)\n  const [local, native] = splitProps(merged, [\n    'orientation',\n    'decorative',\n    'class',\n    'ref',\n    'children',\n  ] as const)\n  const ref = (element: HTMLDivElement) => local.ref?.(element)\n\n  return (\n    <div\n      {...native}\n      role={local.decorative ? 'presentation' : 'separator'}\n      aria-orientation={local.orientation}\n      aria-hidden={local.decorative ? 'true' : 'false'}\n      class={['benos-separator', 'benos-separator--' + local.orientation, local.class]\n        .filter(Boolean)\n        .join(' ')}\n      ref={ref}\n    />\n  )\n}\n",
+      "checksum": "sha256:28c7f32b78158756b2db6f4109e6747048ef33844a9209ed59b9059db569d1f7"
+    },
+    {
+      "path": "separator.css",
+      "target": "css/separator.css",
+      "contentType": "text/css",
+      "content": ".benos-separator {\n  background: var(--benos-color-border);\n  border: 0;\n  flex: none;\n}\n\n.benos-separator--horizontal {\n  block-size: 1px;\n  inline-size: 100%;\n}\n\n.benos-separator--vertical {\n  align-self: stretch;\n  block-size: auto;\n  inline-size: 1px;\n  min-block-size: 1rem;\n}\n",
+      "checksum": "sha256:bebe7c5a210ec4c8bb673ca9646ce1ece24fce204fe999de9696cb83adccd753"
+    }
+  ]
+}

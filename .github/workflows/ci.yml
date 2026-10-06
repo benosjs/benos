@@ -19,6 +19,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check:engines
       - run: pnpm build
+      - run: pnpm registry:check
+      - run: pnpm gallery:build
+      - run: pnpm exec tsc -p examples/ui-gallery/tsconfig.json --noEmit
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test
       - run: pnpm typecheck:types
@@ -52,3 +55,37 @@ jobs:
       - run: pnpm build
       - run: pnpm check:engines
       - run: pnpm exec vitest run tests/create-benos.test.ts
+
+  ui-cli-consumer:
+    name: UI CLI (${{ matrix.os }}, ${{ matrix.package_manager }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        package_manager: [npm, pnpm, yarn, bun]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: pnpm
+      - uses: oven-sh/setup-bun@v2
+        if: matrix.package_manager == 'bun'
+        with:
+          bun-version: 1.2.0
+      - name: Enable Yarn 4
+        if: matrix.package_manager == 'yarn'
+        run: |
+          corepack enable
+          corepack prepare yarn@4.5.0 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm registry:check
+      - name: Test a fresh create-benos consumer
+        env:
+          BENOS_PACKAGE_MANAGER: ${{ matrix.package_manager }}
+        run: node scripts/test-ui-cli-project.mjs

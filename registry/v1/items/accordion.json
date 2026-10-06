@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "accordion",
+  "type": "registry:component",
+  "title": "Accordion",
+  "description": "An accessible disclosure group with single or multiple expanded items.",
+  "dependencies": [
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/accordion",
+      "version": "1.44.0"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "accordion.tsx",
+      "target": "components/accordion.tsx",
+      "contentType": "text/tsx",
+      "content": "import { createAccordion } from '@benosjs/primitives/accordion'\nimport { mergeProps, splitProps } from '@benosjs/dom'\nimport type { Child, JSX } from '@benosjs/dom'\nimport type { AccordionOptions } from '@benosjs/primitives/accordion'\n\nexport interface AccordionItem {\n  value: string\n  title: string\n  content: Child\n  disabled?: boolean\n}\n\nexport type AccordionProps = Pick<\n  AccordionOptions,\n  | 'value'\n  | 'defaultValue'\n  | 'multiple'\n  | 'collapsible'\n  | 'disabled'\n  | 'orientation'\n  | 'dir'\n  | 'onValueChange'\n> & {\n  id?: string\n  class?: string\n  items: readonly AccordionItem[]\n  title?: string\n  'aria-label'?: string\n  'aria-labelledby'?: string\n  'aria-describedby'?: string\n  ref?: (element: HTMLDivElement) => void\n}\n\nexport function Accordion(props: AccordionProps): JSX.Element {\n  const merged = mergeProps(\n    {\n      defaultValue: [] as string[],\n      multiple: false,\n      collapsible: true,\n      orientation: 'vertical' as const,\n    },\n    props,\n  )\n  const [local, native] = splitProps(merged, [\n    'id',\n    'class',\n    'ref',\n    'items',\n    'value',\n    'defaultValue',\n    'multiple',\n    'collapsible',\n    'disabled',\n    'orientation',\n    'dir',\n    'onValueChange',\n  ] as const)\n  const machine = createAccordion(() => ({\n    ...(local.id === undefined ? {} : { id: local.id }),\n    ...(local.value === undefined ? {} : { value: local.value }),\n    defaultValue: local.defaultValue,\n    multiple: local.multiple,\n    collapsible: local.collapsible,\n    ...(local.disabled === undefined ? {} : { disabled: local.disabled }),\n    orientation: local.orientation,\n    ...(local.dir === undefined ? {} : { dir: local.dir }),\n    ...(local.onValueChange === undefined ? {} : { onValueChange: local.onValueChange }),\n  }))\n  const api = machine.api\n  const root = api().getRootProps()\n  const rootRef = root.ref as ((element: HTMLDivElement) => void) | undefined\n  const ref = (element: HTMLDivElement) => {\n    rootRef?.(element)\n    local.ref?.(element)\n  }\n\n  return (\n    <div\n      {...root}\n      {...native}\n      id={local.id}\n      class={['benos-accordion', local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      {local.items.map((item) => (\n        <section\n          class=\"benos-accordion__item\"\n          {...api().getItemProps({\n            value: item.value,\n            disabled: item.disabled,\n          })}\n        >\n          <h3 class=\"benos-accordion__heading\">\n            <button\n              class=\"benos-accordion__trigger\"\n              type=\"button\"\n              tabIndex={0}\n              {...api().getItemTriggerProps({\n                value: item.value,\n                disabled: item.disabled,\n              })}\n            >\n              <span>{item.title}</span>\n              <span\n                class=\"benos-accordion__indicator\"\n                aria-hidden=\"true\"\n                {...api().getItemIndicatorProps({ value: item.value })}\n              />\n            </button>\n          </h3>\n          <div\n            class=\"benos-accordion__content\"\n            {...api().getItemContentProps({ value: item.value })}\n          >\n            {item.content}\n          </div>\n        </section>\n      ))}\n    </div>\n  )\n}\n",
+      "checksum": "sha256:23f93ff97d32bd0894c7e979b4eac57f743c38210b0f358b488a5a1859fcb149"
+    },
+    {
+      "path": "accordion.css",
+      "target": "css/accordion.css",
+      "contentType": "text/css",
+      "content": ".benos-accordion {\n  border-block-start: 1px solid var(--benos-color-border);\n  color: var(--benos-color-text);\n  font-size: var(--benos-text-xs, 0.75rem);\n}\n\n.benos-accordion__item {\n  border-block-end: 1px solid var(--benos-color-border);\n}\n\n.benos-accordion__heading {\n  font: inherit;\n  margin: 0;\n}\n\n.benos-accordion__trigger {\n  align-items: center;\n  background: transparent;\n  border: 0;\n  color: inherit;\n  cursor: pointer;\n  display: flex;\n  font: inherit;\n  font-weight: 600;\n  inline-size: 100%;\n  justify-content: space-between;\n  min-block-size: 3rem;\n  padding-block: var(--benos-space-3);\n  padding-inline: var(--benos-space-2);\n  text-align: start;\n}\n\n.benos-accordion__trigger:focus-visible {\n  border-radius: var(--benos-radius-sm);\n  outline: 3px solid var(--benos-color-focus);\n  outline-offset: 2px;\n}\n\n.benos-accordion__trigger[data-disabled] {\n  cursor: not-allowed;\n  opacity: 0.58;\n}\n\n.benos-accordion__indicator {\n  color: var(--benos-color-brand);\n  block-size: 1rem;\n  display: inline-block;\n  flex: none;\n  inline-size: 1rem;\n  position: relative;\n}\n\n.benos-accordion__content {\n  color: var(--benos-color-text-muted);\n  line-height: var(--benos-line-height-body);\n  padding-block: 0 var(--benos-space-4);\n  padding-inline: var(--benos-space-2);\n}\n\n.benos-accordion__content[data-state='closed'] {\n  display: none;\n}\n\n.benos-accordion__indicator::before,\n.benos-accordion__indicator::after {\n  background: currentColor;\n  border-radius: var(--benos-radius-pill);\n  content: '';\n  inline-size: 0.7rem;\n  block-size: 1.5px;\n  inset-block-start: 50%;\n  inset-inline-start: 50%;\n  position: absolute;\n  transform: translate(-50%, -50%);\n}\n\n.benos-accordion__indicator::after {\n  transition: transform var(--benos-motion-fast) var(--benos-ease-standard);\n  transform: translate(-50%, -50%) rotate(90deg);\n}\n\n.benos-accordion__indicator[data-state='open']::after {\n  transform: translate(-50%, -50%);\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .benos-accordion__indicator::after {\n    transition: none;\n  }\n}\n",
+      "checksum": "sha256:fd0156deb46e144732a85f98288bdae30d30b636c12b560c8568036d21292ee6"
+    }
+  ]
+}

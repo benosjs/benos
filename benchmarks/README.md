@@ -398,3 +398,326 @@ with its median-of-seven protocol (each run has five timed samples):
 
 All kernel guard ratios remain below 2× Preact. The bundle sizes remain within
 their existing budgets.
+
+## UI U1 amendment / U2 Zag contract checkpoint (2026-10-02)
+
+Rebuilt production output with Node 22.18.0 before measuring. The U1 alias and
+workspace-name changes do not add runtime bytes. Sizes below are from the fresh
+build, not the earlier stale `dist` output. U2 stopped before adding primitive
+runtime code because Zag requires a stable machine `id` and Benos has no public
+ID-generation API; details are in `docs/checkpoints/ui-U2.md`.
+
+| Artifact                         |         Size |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,001 bytes |  4,096 bytes |  95 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,151 bytes | 10,240 bytes |  89 bytes |
+
+The production kernel guard used the median of seven runs, each with five timed
+samples:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       7.99 |        6.33 | 1.29× |
+| 20-deep computed chain write + read |      10.67 |        6.63 | 1.20× |
+| 200-effect fanout write             |       2.47 |        1.83 | 1.71× |
+| Dynamic dependency switch           |       4.77 |        3.35 | 1.47× |
+| Repeated equal write                |       1.00 |        0.61 | 1.60× |
+
+Every kernel ratio remained below the 2× Preact guard. These timings are a
+kernel checkpoint only; the U2 prototype did not change the runtime. Ratios
+are the median of the seven per-run ratios, while the two displayed time
+columns are separately medianed; their rounded values therefore need not divide
+to the displayed ratio.
+
+## UI U2 completion (2026-10-03)
+
+Built production output with Node 22.18.0 before measuring. `createUniqueId()`
+adds 50 gzip bytes to core and 47 bytes to core+DOM versus the fresh U1 build;
+both budgets remain unchanged. ID creation runs only during primitive setup,
+not during signal, computed, or effect updates.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,198 bytes | 10,240 bytes |  42 bytes |
+
+The production kernel guard was rerun with the median of seven runs, each run
+using five timed samples:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.07 |        4.82 | 1.27× |
+| 20-deep computed chain write + read |       6.26 |        5.24 | 1.20× |
+| 200-effect fanout write             |       2.03 |        1.16 | 1.73× |
+| Dynamic dependency switch           |       3.46 |        2.46 | 1.41× |
+| Repeated equal write                |       0.82 |        0.50 | 1.62× |
+
+All five ratios pass the 2× guard. The U2 adapter has no effect on the existing
+kernel hot paths.
+
+## UI U4 batch 1 (2026-10-03)
+
+The seven styled registry components do not modify `@benosjs/core` or
+`@benosjs/dom`; these measurements are from a fresh production rebuild.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard was rerun with the median of seven runs, each run
+using five timed samples:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.20 |        4.94 | 1.24× |
+| 20-deep computed chain write + read |       6.41 |        5.27 | 1.22× |
+| 200-effect fanout write             |       2.06 |        1.19 | 1.76× |
+| Dynamic dependency switch           |       3.57 |        2.49 | 1.41× |
+| Repeated equal write                |       0.84 |        0.53 | 1.60× |
+
+All five ratios pass the 2× guard. There were no core or DOM source changes.
+Component coverage and the gallery instructions are recorded in
+[`docs/checkpoints/ui-U4-batch-1.md`](../docs/checkpoints/ui-U4-batch-1.md).
+
+## UI U4 batch 2 (2026-10-03)
+
+Production artifacts were rebuilt before measurement. Batch 2 adds only
+registry source and styles; the Select collection import is a declared Zag
+dependency and no component code enters core or DOM.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard used the median of seven runs, each with five
+timed samples:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.15 |        4.93 | 1.28× |
+| 20-deep computed chain write + read |       6.38 |        5.30 | 1.19× |
+| 200-effect fanout write             |       2.14 |        1.18 | 1.79× |
+| Dynamic dependency switch           |       3.55 |        2.47 | 1.44× |
+| Repeated equal write                |       0.84 |        0.51 | 1.65× |
+
+All five ratios pass the 2× production guard. See the [U4 batch 2 checkpoint](../docs/checkpoints/ui-U4-batch-2.md) for the six-component browser and consumer matrix.
+
+## UI U4 batch 2 review fixes (2026-10-04)
+
+Rebuilt production artifacts locally with Node v24.8.0 before measuring. No
+core or DOM runtime source changed in this review; the Tab direction fix is in
+the UI registry component and the checkbox change is in registry CSS. The
+prior Node 22.18.0 checkpoint build measured 4,051 / 10,200 bytes; this local
+rebuild measures two fewer bytes for both artifacts. Both measurements remain
+under their unchanged budgets.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,049 bytes |  4,096 bytes |  47 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,198 bytes | 10,240 bytes |  42 bytes |
+
+The production benchmark guard used the median of seven runs, each with five
+timed samples. These medians were measured after other local verification jobs
+finished:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       5.97 |        4.72 | 1.27× |
+| 20-deep computed chain write + read |       6.21 |        4.99 | 1.26× |
+| 200-effect fanout write             |       2.01 |        1.16 | 1.74× |
+| Dynamic dependency switch           |       3.63 |        2.35 | 1.54× |
+| Repeated equal write                |       0.69 |        0.48 | 1.44× |
+
+All ratios pass the 2× production guard. No kernel benchmark workload or
+production runtime path changed in the review.
+
+## UI U4 batch 3 (2026-10-05)
+
+Rebuilt production artifacts with Node 22.18.0 before measuring. Batch 3 adds
+registry components and styles plus one explicit keyboard tab stop on the
+Tooltip trigger; no core or DOM runtime source changed.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard used the median of seven runs, each with five
+timed samples. It was run after the full browser and consumer test jobs had
+finished:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.39 |        5.03 | 1.29× |
+| 20-deep computed chain write + read |       6.83 |        5.59 | 1.24× |
+| 200-effect fanout write             |       2.31 |        1.29 | 1.70× |
+| Dynamic dependency switch           |       3.65 |        2.60 | 1.40× |
+| Repeated equal write                |       0.84 |        0.55 | 1.60× |
+
+All five ratios pass the 2× production guard. No benchmark workload or
+production runtime path changed in batch 3.
+
+## UI U4 batch 4 table comparison (2026-10-05)
+
+Fresh production build sizes remain inside the unchanged limits. Batch 4 adds
+only registry source, CSS, tests, and benchmark code; core and DOM runtime
+sources did not change.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard used the median of seven runs with five timed
+samples each:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.04 |        4.77 | 1.27× |
+| 20-deep computed chain write + read |       6.38 |        5.28 | 1.21× |
+| 200-effect fanout write             |       2.11 |        1.18 | 1.74× |
+| Dynamic dependency switch           |       3.52 |        2.44 | 1.44× |
+| Repeated equal write                |       0.81 |        0.68 | 1.19× |
+
+Both adapters were built with Vite's production build and run in Chromium. Each
+round alternated which framework ran first. The fixture starts in reverse
+numeric name order so sorting requires keyed row movement. It renders the same
+three columns, caption, data, and table CSS. Initial render timing begins just
+before mount (after deterministic row data is prepared); sort timing begins at
+header activation. Both end after two `requestAnimationFrame` callbacks, which
+is a render/paint opportunity boundary and a practical browser proxy, not a
+Chrome-tracing paint timestamp. Results are the median of seven measured
+rounds after one warmup; brackets give min–max spread.
+
+| Workload                    |          Benos (ms) |          Solid (ms) | Benos / Solid |
+| --------------------------- | ------------------: | ------------------: | ------------: |
+| Initial render, 5,000 rows  | 255.0 [174.6–326.7] |    93.9 [87.7–99.3] |         2.72× |
+| Sort, 5,000 rows            |  126.8 [87.5–136.3] |  115.0 [92.3–124.3] |         1.10× |
+| Initial render, 10,000 rows | 491.4 [387.0–554.3] | 199.6 [173.9–265.1] |         2.46× |
+| Sort, 10,000 rows           | 266.2 [234.0–447.5] | 240.2 [197.4–361.4] |         1.11× |
+
+Benos is about 2.5–2.7× slower on initial mounting and about 10–11% slower
+for a full keyed sort in these runs. The initial-mount difference is consistent
+with the additional descriptor, accessor, and owner work per cell in the
+source-owned component; this benchmark does not isolate those costs, so that is
+a likely explanation rather than a profile finding. Sort spreads overlap
+substantially, so the small sort gap should be treated as directional. Raw
+samples and protocol metadata are in
+[`js-framework-benchmark/results/u4-batch4-table.json`](js-framework-benchmark/results/u4-batch4-table.json).
+
+## UI U4 gallery review follow-up (2026-10-05)
+
+The sortable-table mount profile now includes four production-built fixtures:
+direct DOM, a handwritten Benos keyed table, the registry `SortableTable`, and
+an equivalent Solid table. The runner alternates the four fixtures in
+Chromium. It prepares row data before the mount timer and ends after two
+animation frames. Values below pool three independent runs of seven measured
+rounds each after one warmup (21 samples); brackets are the observed min–max
+spread. The two-frame boundary is a render/paint opportunity proxy rather than
+a traced Paint event.
+
+| Variant                    |    Initial, 5,000 rows |   Initial, 10,000 rows |     Sort, 5,000 rows |      Sort, 10,000 rows |
+| -------------------------- | ---------------------: | ---------------------: | -------------------: | ---------------------: |
+| Direct DOM baseline        |   78.7 [69.2–183.7] ms | 146.7 [135.0–169.2] ms |                    — |                      — |
+| Handwritten Benos baseline | 151.8 [135.6–174.8] ms | 292.9 [276.0–365.6] ms |                    — |                      — |
+| Registry SortableTable     | 150.7 [134.9–236.1] ms | 308.3 [272.9–485.5] ms | 88.5 [78.7–140.5] ms | 178.2 [164.7–306.4] ms |
+| Solid table                |   76.4 [63.6–108.6] ms | 144.6 [130.1–278.8] ms | 84.2 [73.3–152.1] ms | 212.2 [166.3–465.1] ms |
+
+The registry component adds no measurable initial-render cost at 5,000 rows
+against the handwritten Benos baseline (150.7 vs 151.8 ms). At 10,000 rows it
+measures 5.3% higher (308.3 vs 292.9 ms), but the spreads overlap broadly and
+the three independent runs varied; that difference is not enough evidence to
+justify further component changes. The general Benos rendering baseline is
+about 1.9–2.0× the direct-DOM baseline. The registry mount is about 2.0× Solid
+at both sizes. Sort medians are similar to Solid and their spreads overlap.
+
+The first profiling pass before optimization measured registry mount at 202.4
+ms vs 156.4 ms handwritten Benos at 5,000 rows, and 371.7 ms vs 300.5 ms at
+10,000 rows. It used a keyed inner `<For>` to reconcile the same static columns
+for every row. Replacing that redundant per-row column reconciler with one
+array map removed the observed 29.4% / 23.7% increment: the current pooled
+medians are effectively even at 5,000 rows and within the noisy spread at
+10,000. Sorting remains keyed by the caller's stable row key. Columns are
+provided as a static descriptor list; the previous inner `<For>` did not
+actually pass the attempted dynamic-column replacement test either.
+
+Core and core + DOM were rebuilt with Node 22.18.0 before the gallery-review
+checkpoint:
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard was rerun after the rebuild; each row is the
+median of seven runs with five timed samples per run.
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.07 |        4.80 | 1.27× |
+| 20-deep computed chain write + read |       6.32 |        5.24 | 1.20× |
+| 200-effect fanout write             |       2.12 |        1.17 | 1.79× |
+| Dynamic dependency switch           |       3.48 |        2.45 | 1.43× |
+| Repeated equal write                |       0.82 |        0.50 | 1.55× |
+
+The current sizes and kernel medians are also recorded in the accompanying
+checkpoint at
+[`docs/checkpoints/ui-U4-gallery-followup.md`](../docs/checkpoints/ui-U4-gallery-followup.md).
+Raw profiles are in
+[`u4-batch4-profile.json`](js-framework-benchmark/results/u4-batch4-profile.json)
+and the three archived run files beside it.
+
+## UI U6 interactive create-benos follow-up (2026-10-05)
+
+This follow-up changes only the create-benos CLI, its test harness, and
+documentation. It does not change core or DOM runtime code. The local
+verification shell used Node 24.8.0, which is below the workspace's declared
+minimum; CI uses Node 22.18.0. Record these local values for this checkpoint
+and use the CI size row as the supported-runtime confirmation.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,049 bytes |  4,096 bytes |  47 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,198 bytes | 10,240 bytes |  42 bytes |
+
+The production kernel guard was run on its own and reports the median of seven
+runs with five timed samples per run:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       5.97 |        4.76 | 1.26× |
+| 20-deep computed chain write + read |       6.25 |        4.92 | 1.28× |
+| 200-effect fanout write             |       1.99 |        1.14 | 1.74× |
+| Dynamic dependency switch           |       3.67 |        2.29 | 1.59× |
+| Repeated equal write                |       0.68 |        0.47 | 1.43× |
+
+All rows remain below the 2× guard. No framework hot path changed in this
+follow-up.
+
+## U7 v0.2.0 release preparation (2026-10-06)
+
+Rebuilt and measured with Node 24.19.0. The new release changes package
+metadata, registry version gates, documentation, and the CLI consumer test
+setup; it does not change the core or DOM runtime sources.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard reports the median of seven runs with five timed
+samples per run:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.24 |        4.96 | 1.26× |
+| 20-deep computed chain write + read |       6.32 |        4.94 | 1.28× |
+| 200-effect fanout write             |       2.04 |        1.16 | 1.76× |
+| Dynamic dependency switch           |       3.87 |        2.47 | 1.54× |
+| Repeated equal write                |       0.72 |        0.49 | 1.44× |
+
+Every row remains under the 2× CI guard. Local verification also passed the
+221 unit tests, all 405 Chromium/Firefox/WebKit browser tests, the packed
+create-benos consumer, and the pnpm UI CLI consumer matrix.

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "label",
+  "type": "registry:component",
+  "title": "Label",
+  "description": "A styled, native label with typed control association.",
+  "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "label.tsx",
+      "target": "components/label.tsx",
+      "contentType": "text/tsx",
+      "content": "import { mergeProps, splitProps } from '@benosjs/dom'\nimport type { JSX } from '@benosjs/dom'\n\nexport type LabelProps = Omit<JSX.IntrinsicElements['label'], 'class' | 'ref' | 'for'> & {\n  id?: string\n  class?: string\n  for?: string\n  ref?: (element: HTMLLabelElement) => void\n}\n\nexport function Label(props: LabelProps): JSX.Element {\n  const merged = mergeProps({}, props)\n  const [local, native] = splitProps(merged, ['for', 'class', 'ref', 'children'] as const)\n  const ref = (element: HTMLLabelElement) => local.ref?.(element)\n\n  return (\n    <label\n      {...native}\n      for={local.for}\n      class={['benos-label', local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      {local.children}\n    </label>\n  )\n}\n",
+      "checksum": "sha256:18d1a3972063d6d558b520ab0bfd0226660dc6dde791183435accc6e745b5d79"
+    },
+    {
+      "path": "label.css",
+      "target": "css/label.css",
+      "contentType": "text/css",
+      "content": ".benos-label {\n  color: var(--benos-color-text);\n  display: inline-block;\n  font-size: var(--benos-text-xs);\n  font-weight: 500;\n  line-height: var(--benos-line-height-body);\n}\n",
+      "checksum": "sha256:5bf72d27de5a56918e5a024b7a0b8437d2d1aa97d16336ac1c7c5f52a00ede10"
+    }
+  ]
+}

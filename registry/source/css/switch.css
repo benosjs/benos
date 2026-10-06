@@ -1,0 +1,71 @@
+.benos-switch {
+  align-items: center;
+  color: var(--benos-color-text);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: var(--benos-text-xs, 0.75rem);
+  gap: var(--benos-space-2);
+  line-height: var(--benos-line-height-body);
+  position: relative;
+}
+
+.benos-switch input {
+  block-size: 1px;
+  clip-path: inset(50%);
+  inline-size: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+}
+
+.benos-switch__control {
+  --_benos-switch-motion: var(--benos-motion-fast) var(--benos-ease-standard);
+
+  background: var(--benos-color-border);
+  border-radius: var(--benos-radius-pill);
+  display: inline-block;
+  flex: none;
+  inline-size: 2.5rem;
+  block-size: 1.5rem;
+  position: relative;
+  transition: background-color var(--_benos-switch-motion);
+}
+
+.benos-switch__control[data-state='checked'] {
+  background: var(--benos-color-brand);
+}
+
+.benos-switch__thumb {
+  background: var(--benos-color-surface);
+  border-radius: 50%;
+  block-size: 1.125rem;
+  inline-size: 1.125rem;
+  inset-block-start: 0.1875rem;
+  inset-inline-start: 0.1875rem;
+  position: absolute;
+  transition:
+    inset-inline-start var(--benos-motion-fast) var(--benos-ease-standard),
+    inset-inline-end var(--benos-motion-fast) var(--benos-ease-standard);
+}
+
+.benos-switch__control[data-state='checked'] .benos-switch__thumb {
+  inset-inline-end: 0.1875rem;
+  inset-inline-start: auto;
+}
+
+.benos-switch input:focus-visible + .benos-switch__control {
+  outline: 3px solid var(--benos-color-focus);
+  outline-offset: 2px;
+}
+
+.benos-switch[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .benos-switch__control,
+  .benos-switch__thumb {
+    transition: none;
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "button",
+  "type": "registry:component",
+  "title": "Button",
+  "description": "A typed button with accessible focus, size, and intent variants.",
+  "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "button.tsx",
+      "target": "components/button.tsx",
+      "contentType": "text/tsx",
+      "content": "import { mergeProps, splitProps } from '@benosjs/dom'\nimport type { JSX } from '@benosjs/dom'\n\nexport type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'\nexport type ButtonSize = 'sm' | 'md' | 'lg'\n\nexport type ButtonProps = Omit<JSX.IntrinsicElements['button'], 'class' | 'ref'> & {\n  id?: string\n  class?: string\n  variant?: ButtonVariant\n  size?: ButtonSize\n  ref?: (element: HTMLButtonElement) => void\n}\n\nexport function Button(props: ButtonProps): JSX.Element {\n  const merged = mergeProps(\n    {\n      type: 'button' as const,\n      variant: 'primary' as const,\n      size: 'md' as const,\n    },\n    props,\n  )\n  const [local, native] = splitProps(merged, [\n    'variant',\n    'size',\n    'class',\n    'ref',\n    'children',\n  ] as const)\n  const ref = (element: HTMLButtonElement) => local.ref?.(element)\n\n  return (\n    <button\n      {...native}\n      class={[\n        'benos-button',\n        'benos-button--' + local.variant,\n        'benos-button--' + local.size,\n        local.class,\n      ]\n        .filter(Boolean)\n        .join(' ')}\n      ref={ref}\n    >\n      {local.children}\n    </button>\n  )\n}\n",
+      "checksum": "sha256:77a7b66c88f4669c4cd109e68f36a3bdad69a9453840e043ed6a8883ec9984c3"
+    },
+    {
+      "path": "button.css",
+      "target": "css/button.css",
+      "contentType": "text/css",
+      "content": ".benos-button {\n  align-items: center;\n  border: 1px solid transparent;\n  border-radius: var(--benos-radius-md);\n  cursor: pointer;\n  display: inline-flex;\n  font: inherit;\n  font-size: var(--benos-text-xs, 0.75rem);\n  font-weight: 650;\n  gap: var(--benos-space-2);\n  justify-content: center;\n  line-height: 1.25;\n  transition:\n    background-color var(--benos-motion-fast) var(--benos-ease-standard),\n    border-color var(--benos-motion-fast) var(--benos-ease-standard),\n    color var(--benos-motion-fast) var(--benos-ease-standard);\n}\n\n.benos-button--sm {\n  min-block-size: 2rem;\n  padding-inline: var(--benos-space-3);\n}\n\n.benos-button--md {\n  min-block-size: 2.5rem;\n  padding-inline: var(--benos-space-4);\n}\n\n.benos-button--lg {\n  min-block-size: 3rem;\n  padding-inline: var(--benos-space-5);\n}\n\n.benos-button--primary {\n  background: var(--benos-color-brand);\n  color: var(--benos-color-on-brand);\n}\n\n.benos-button--primary:hover:not(:disabled) {\n  background: var(--benos-color-brand-strong);\n}\n\n.benos-button--secondary {\n  background: var(--benos-color-brand-soft);\n  border-color: var(--benos-color-border);\n  color: var(--benos-color-text);\n}\n\n.benos-button--secondary:hover:not(:disabled),\n.benos-button--outline:hover:not(:disabled) {\n  background: var(--benos-color-canvas);\n}\n\n.benos-button--outline {\n  background: transparent;\n  border-color: var(--benos-color-border);\n  color: var(--benos-color-text);\n}\n\n.benos-button--ghost {\n  background: transparent;\n  color: var(--benos-color-brand);\n}\n\n.benos-button--ghost:hover:not(:disabled) {\n  background: var(--benos-color-canvas);\n}\n\n.benos-button--danger {\n  background: var(--benos-color-danger);\n  color: var(--benos-color-on-danger);\n}\n\n.benos-button--danger:hover:not(:disabled) {\n  background: var(--benos-color-danger-strong);\n}\n\n.benos-button:focus-visible {\n  outline: 3px solid var(--benos-color-focus);\n  outline-offset: 2px;\n}\n\n.benos-button:disabled {\n  cursor: not-allowed;\n  opacity: 0.58;\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .benos-button {\n    transition: none;\n  }\n}\n",
+      "checksum": "sha256:dc351860a06f22354fbd7af4344e900682768aa859eb72d12a4a1edd7794fa9c"
+    }
+  ]
+}

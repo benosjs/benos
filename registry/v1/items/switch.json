@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "switch",
+  "type": "registry:component",
+  "title": "Switch",
+  "description": "An accessible on/off switch with the switch role and native form behavior.",
+  "dependencies": [
+    {
+      "name": "@benosjs/primitives",
+      "version": "^0.2.0"
+    },
+    {
+      "name": "@zag-js/switch",
+      "version": "1.44.0"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    },
+    {
+      "name": "@benosjs/primitives",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "switch.tsx",
+      "target": "components/switch.tsx",
+      "contentType": "text/tsx",
+      "content": "import { createSwitch } from '@benosjs/primitives/switch'\nimport { mergeProps, splitProps } from '@benosjs/dom'\nimport type { SwitchOptions } from '@benosjs/primitives/switch'\nimport type { JSX } from '@benosjs/dom'\n\nexport type SwitchProps = Omit<JSX.IntrinsicElements['label'], 'class' | 'for' | 'ref'> &\n  Pick<\n    SwitchOptions,\n    | 'checked'\n    | 'defaultChecked'\n    | 'disabled'\n    | 'invalid'\n    | 'required'\n    | 'readOnly'\n    | 'onCheckedChange'\n    | 'name'\n    | 'form'\n    | 'value'\n    | 'dir'\n    | 'label'\n  > & {\n    id?: string\n    class?: string\n    ref?: (element: HTMLLabelElement) => void\n  }\n\nexport function Switch(props: SwitchProps): JSX.Element {\n  const merged = mergeProps({ defaultChecked: false }, props)\n  const [local, native] = splitProps(merged, [\n    'id',\n    'class',\n    'ref',\n    'children',\n    'checked',\n    'defaultChecked',\n    'disabled',\n    'invalid',\n    'required',\n    'readOnly',\n    'onCheckedChange',\n    'name',\n    'form',\n    'value',\n    'dir',\n    'label',\n  ] as const)\n  const machine = createSwitch(() => ({\n    ...(local.id === undefined ? {} : { id: local.id }),\n    ...(local.label === undefined ? {} : { label: local.label }),\n    ...(local.checked === undefined ? {} : { checked: local.checked }),\n    defaultChecked: local.defaultChecked,\n    ...(local.disabled === undefined ? {} : { disabled: local.disabled }),\n    ...(local.invalid === undefined ? {} : { invalid: local.invalid }),\n    ...(local.required === undefined ? {} : { required: local.required }),\n    ...(local.readOnly === undefined ? {} : { readOnly: local.readOnly }),\n    ...(local.onCheckedChange === undefined ? {} : { onCheckedChange: local.onCheckedChange }),\n    ...(local.name === undefined ? {} : { name: local.name }),\n    ...(local.form === undefined ? {} : { form: local.form }),\n    ...(local.value === undefined ? {} : { value: local.value }),\n    ...(local.dir === undefined ? {} : { dir: local.dir }),\n  }))\n  const api = machine.api\n  const root = api().getRootProps()\n  const rootRef = root.ref as ((element: HTMLLabelElement) => void) | undefined\n  const ref = (element: HTMLLabelElement) => {\n    rootRef?.(element)\n    local.ref?.(element)\n  }\n\n  return (\n    <label\n      {...root}\n      {...native}\n      id={local.id}\n      class={['benos-switch', local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      <input {...api().getHiddenInputProps()} role=\"switch\" />\n      <span class=\"benos-switch__control\" {...api().getControlProps()}>\n        <span class=\"benos-switch__thumb\" {...api().getThumbProps()} />\n      </span>\n      <span class=\"benos-switch__label\" {...api().getLabelProps()}>\n        {local.children}\n      </span>\n    </label>\n  )\n}\n",
+      "checksum": "sha256:26893195fff529188ec3432d852520ad6614fc2be1105eda09693bb03a7c41d5"
+    },
+    {
+      "path": "switch.css",
+      "target": "css/switch.css",
+      "contentType": "text/css",
+      "content": ".benos-switch {\n  align-items: center;\n  color: var(--benos-color-text);\n  cursor: pointer;\n  display: inline-flex;\n  font-size: var(--benos-text-xs, 0.75rem);\n  gap: var(--benos-space-2);\n  line-height: var(--benos-line-height-body);\n  position: relative;\n}\n\n.benos-switch input {\n  block-size: 1px;\n  clip-path: inset(50%);\n  inline-size: 1px;\n  overflow: hidden;\n  position: absolute;\n  white-space: nowrap;\n}\n\n.benos-switch__control {\n  --_benos-switch-motion: var(--benos-motion-fast) var(--benos-ease-standard);\n\n  background: var(--benos-color-border);\n  border-radius: var(--benos-radius-pill);\n  display: inline-block;\n  flex: none;\n  inline-size: 2.5rem;\n  block-size: 1.5rem;\n  position: relative;\n  transition: background-color var(--_benos-switch-motion);\n}\n\n.benos-switch__control[data-state='checked'] {\n  background: var(--benos-color-brand);\n}\n\n.benos-switch__thumb {\n  background: var(--benos-color-surface);\n  border-radius: 50%;\n  block-size: 1.125rem;\n  inline-size: 1.125rem;\n  inset-block-start: 0.1875rem;\n  inset-inline-start: 0.1875rem;\n  position: absolute;\n  transition:\n    inset-inline-start var(--benos-motion-fast) var(--benos-ease-standard),\n    inset-inline-end var(--benos-motion-fast) var(--benos-ease-standard);\n}\n\n.benos-switch__control[data-state='checked'] .benos-switch__thumb {\n  inset-inline-end: 0.1875rem;\n  inset-inline-start: auto;\n}\n\n.benos-switch input:focus-visible + .benos-switch__control {\n  outline: 3px solid var(--benos-color-focus);\n  outline-offset: 2px;\n}\n\n.benos-switch[data-disabled] {\n  cursor: not-allowed;\n  opacity: 0.58;\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .benos-switch__control,\n  .benos-switch__thumb {\n    transition: none;\n  }\n}\n",
+      "checksum": "sha256:654f84d920709db99ed8ce6b0abf50fdd056133ddfcac2aef2d07372d9e6845b"
+    }
+  ]
+}

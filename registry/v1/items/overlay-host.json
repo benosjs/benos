@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "overlay-host",
+  "type": "registry:style",
+  "title": "Overlay host support",
+  "description": "Shared themed portal host used by overlay components.",
+  "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/core",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "overlay-host.ts",
+      "target": "components/overlay-host.ts",
+      "contentType": "text/typescript",
+      "content": "import { onCleanup, onMount, signal } from '@benosjs/core'\n\n/**\n * Portals overlay content beside the application while copying its inherited\n * theme variables and writing direction onto the portal host.\n */\nexport function createOverlayHost(\n  getAnchor: () => HTMLElement | undefined,\n  getRequestedDirection: () => 'ltr' | 'rtl' | undefined,\n) {\n  const target = signal<HTMLElement | null>(null)\n  let host: HTMLElement | undefined\n\n  onMount(() => {\n    const anchor = getAnchor()\n    if (!anchor) return\n\n    const anchorStyle = getComputedStyle(anchor)\n    const themeSource = anchor.closest<HTMLElement>('[data-theme]') ?? document.documentElement\n    const themeStyle = getComputedStyle(themeSource)\n    host = document.createElement('div')\n    host.dataset.benosOverlayHost = ''\n    host.dataset.theme =\n      themeSource.getAttribute('data-theme') === 'dark' || themeStyle.colorScheme.includes('dark')\n        ? 'dark'\n        : 'light'\n    host.style.colorScheme = themeStyle.colorScheme\n    host.setAttribute('role', 'region')\n    host.setAttribute('aria-label', 'Floating content')\n\n    const requestedDirection = getRequestedDirection()\n    const inheritedDirection = anchorStyle.direction\n    const directionOwner = anchor.closest<HTMLElement>('[dir]')\n    const explicitAncestorDirection = directionOwner?.getAttribute('dir')\n    const direction =\n      requestedDirection ??\n      (inheritedDirection === 'rtl' ||\n      (explicitAncestorDirection === 'ltr' && directionOwner !== document.documentElement)\n        ? inheritedDirection\n        : undefined)\n    if (direction) host.setAttribute('dir', direction)\n\n    for (let index = 0; index < anchorStyle.length; index += 1) {\n      const name = anchorStyle.item(index)\n      if (name.startsWith('--benos-'))\n        host.style.setProperty(name, anchorStyle.getPropertyValue(name))\n    }\n\n    document.body.append(host)\n    target.set(host)\n  })\n\n  onCleanup(() => {\n    target.set(null)\n    host?.remove()\n  })\n\n  return target\n}\n",
+      "checksum": "sha256:a519a31c88b7930e824b9b2e8a2cae219f1bda59fcb40eebf102a865bd3c4616"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "release": "0.2.0",
+  "name": "textarea",
+  "type": "registry:component",
+  "title": "Textarea",
+  "description": "A styled native textarea with size and invalid-state support.",
+  "dependencies": [],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.2.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "textarea.tsx",
+      "target": "components/textarea.tsx",
+      "contentType": "text/tsx",
+      "content": "import { mergeProps, splitProps } from '@benosjs/dom'\nimport type { JSX } from '@benosjs/dom'\n\nexport type TextareaSize = 'sm' | 'md' | 'lg'\n\nexport type TextareaProps = Omit<JSX.IntrinsicElements['textarea'], 'class' | 'ref'> & {\n  id?: string\n  class?: string\n  size?: TextareaSize\n  invalid?: boolean\n  ref?: (element: HTMLTextAreaElement) => void\n}\n\nexport function Textarea(props: TextareaProps): JSX.Element {\n  const merged = mergeProps({ size: 'md' as const, invalid: false }, props)\n  const [local, native] = splitProps(merged, [\n    'size',\n    'class',\n    'invalid',\n    'ref',\n    'children',\n    'aria-invalid',\n  ] as const)\n  const ariaInvalid =\n    local.invalid || local['aria-invalid'] === true || local['aria-invalid'] === 'true'\n      ? 'true'\n      : (local['aria-invalid'] ?? 'false')\n  const ref = (element: HTMLTextAreaElement) => local.ref?.(element)\n\n  return (\n    <textarea\n      {...native}\n      class={['benos-textarea', 'benos-textarea--' + local.size, local.class]\n        .filter(Boolean)\n        .join(' ')}\n      aria-invalid={ariaInvalid}\n      data-invalid={ariaInvalid === 'true' ? 'true' : 'false'}\n      ref={ref}\n    >\n      {local.children}\n    </textarea>\n  )\n}\n",
+      "checksum": "sha256:b3401a54afd2f7b796a54ff137321da8fb2dd3d08f3dce979225dc1d047942ea"
+    },
+    {
+      "path": "textarea.css",
+      "target": "css/textarea.css",
+      "contentType": "text/css",
+      "content": ".benos-textarea {\n  background: var(--benos-color-surface);\n  border: 1px solid var(--benos-color-border);\n  border-radius: var(--benos-radius-md);\n  color: var(--benos-color-text);\n  display: block;\n  font: inherit;\n  font-size: var(--benos-text-xs, 0.75rem);\n  inline-size: 100%;\n  min-block-size: 6rem;\n  min-inline-size: 0;\n  resize: vertical;\n}\n\n.benos-textarea--sm {\n  padding: var(--benos-space-2);\n}\n\n.benos-textarea--md {\n  padding: var(--benos-space-3);\n}\n\n.benos-textarea--lg {\n  padding: var(--benos-space-4);\n}\n\n.benos-textarea::placeholder {\n  color: var(--benos-color-text-muted);\n  opacity: 1;\n}\n\n.benos-textarea:focus-visible {\n  border-color: var(--benos-color-focus);\n  outline: 3px solid var(--benos-color-focus);\n  outline-offset: 2px;\n}\n\n.benos-textarea[aria-invalid='true'] {\n  border-color: var(--benos-color-danger);\n}\n\n.benos-textarea:disabled {\n  background: var(--benos-color-canvas);\n  color: var(--benos-color-text-muted);\n  cursor: not-allowed;\n}\n",
+      "checksum": "sha256:86e851f6210a2abe616f0cb2368eab59dd9ba07c9460391fbcb2cc04d6ffa94b"
+    }
+  ]
+}
