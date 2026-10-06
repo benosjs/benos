@@ -131,6 +131,24 @@ try {
             `Packed ${packageDirectory} is missing release metadata`,
           )
         }
+        if (metadata.bin) {
+          const binaries =
+            typeof metadata.bin === 'string'
+              ? { [metadata.name]: metadata.bin }
+              : metadata.bin
+          for (const [name, target] of Object.entries(binaries)) {
+            if (
+              typeof target !== 'string' ||
+              target.startsWith('/') ||
+              target.split(/[\\/]/).includes('..') ||
+              !packageEntries.has(target)
+            ) {
+              throw new Error(
+                `Packed ${packageDirectory} bin ${name} does not resolve to an included file: ${target}`,
+              )
+            }
+          }
+        }
         for (const requiredFile of ['README.md', 'LICENSE']) {
           if (!packageEntries.has(requiredFile)) {
             throw new Error(

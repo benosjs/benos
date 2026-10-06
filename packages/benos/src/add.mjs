@@ -210,13 +210,18 @@ export async function assertMinimumBenosVersions(root, allItems, options) {
       }
     }
   }
-  if (requirements.size === 0) return
+  if (requirements.size === 0) return []
 
   const manager =
     (await detectPackageManager(root, options.packageManager)) ?? 'npm'
+  const missing = []
   for (const [name, requirement] of requirements) {
     const installed = await readInstalledBenosVersion(root, name)
     if (installed && semver.gte(installed, requirement.version)) continue
+    if (!installed) {
+      missing.push(`${name}@^${requirement.version}`)
+      continue
+    }
     const [command, args] = packageManagerArgs(manager, [
       `${name}@^${requirement.version}`,
     ])
@@ -229,6 +234,7 @@ export async function assertMinimumBenosVersions(root, allItems, options) {
   ${command} ${args.join(' ')}`,
     )
   }
+  return missing
 }
 
 function packageManagerHelp() {
@@ -251,7 +257,11 @@ export async function addItems(options) {
   const resolved = await resolveItems(root, indexResource.index, requested, {
     deferCache: true,
   })
-  await assertMinimumBenosVersions(root, resolved, options)
+  const minimumDependencyAdds = await assertMinimumBenosVersions(
+    root,
+    resolved,
+    options,
+  )
   await cacheResolvedResources(root, indexResource, resolved)
   const { planned, writes } = await planFiles(root, config, resolved)
   const packageDependencies = addDependenciesToPlan(resolved)
@@ -259,11 +269,20 @@ export async function addItems(options) {
     ...packageJson.dependencies,
     ...packageJson.devDependencies,
   }
-  const dependencyAdds = []
+  const dependencyAdds = [...minimumDependencyAdds]
   for (const [name, version] of packageDependencies) {
     const installed = currentDependencies[name]
-    if (installed === undefined) dependencyAdds.push(`${name}@${version}`)
-    else if (!installedDependencyCovers(installed, version)) {
+    if (installed === undefined) {
+      const existing = dependencyAdds.find((spec) =>
+        spec.startsWith(`${name}@`),
+      )
+      if (!existing) dependencyAdds.push(`${name}@${version}`)
+      else if (!semver.intersects(version, existing.slice(name.length + 1))) {
+        throw new Error(
+          `Conflicting dependency requirements for ${name}: ${existing} and ${name}@${version}.`,
+        )
+      }
+    } else if (!installedDependencyCovers(installed, version)) {
       throw new Error(
         `${name} is declared as ${installed}, but the registry needs ${version}. Resolve the package range manually; Benos will not downgrade or replace it.`,
       )

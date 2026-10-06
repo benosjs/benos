@@ -6,8 +6,6 @@ import { diffItems } from './diff.mjs'
 import { initProject } from './init.mjs'
 import { listItems } from './list.mjs'
 import { updateItems } from './update.mjs'
-import { resolve } from 'node:path'
-import { pathToFileURL } from 'node:url'
 
 const HELP = `Usage: benos <command> [options]
 
@@ -88,16 +86,4 @@ export async function runCli(args) {
   if (command === 'diff') return diffItems(options)
   if (command === 'update') return updateItems(options)
   return listItems(options)
-}
-
-if (
-  process.argv[1] &&
-  import.meta.url === pathToFileURL(resolve(process.argv[1])).href
-) {
-  runCli(process.argv.slice(2)).catch((error) => {
-    console.error(
-      `benos: ${error instanceof Error ? error.message : String(error)}`,
-    )
-    process.exitCode = 1
-  })
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "release": "0.2.0",
+  "release": "0.2.1",
   "name": "textarea",
   "type": "registry:component",
   "title": "Textarea",
@@ -9,7 +9,7 @@
   "minimumBenosVersions": [
     {
       "name": "@benosjs/dom",
-      "version": "0.2.0"
+      "version": "0.2.1"
     }
   ],
   "registryDependencies": [],

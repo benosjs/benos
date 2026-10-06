@@ -103,7 +103,7 @@ describe('create-benos packed scaffold', () => {
         engines?: { node?: string }
       }
       expect(generated.private).toBe(true)
-      expect(generated.version).toBe('0.2.0')
+      expect(generated.version).toBe('0.2.1')
       expect(generated.createBenosPackageManager).toBe('pnpm')
       const benosDependencies = Object.entries({
         ...generated.dependencies,
@@ -114,7 +114,7 @@ describe('create-benos packed scaffold', () => {
         expect(version, `${name} must use a published semver range`).toMatch(
           /^\^\d+\.\d+\.\d+$/,
         )
-        expect(version).toBe('^0.2.0')
+        expect(version).toBe('^0.2.1')
       }
       expect(generated.engines?.node).toBe('^22.18.0 || ^24.11.0 || >=26.0.0')
       expect(await readFile(join(app, '.yarnrc.yml'), 'utf8')).toContain(

@@ -2,6 +2,27 @@
 
 All notable changes to Benos are documented here.
 
+## [0.2.1] — 2026-10-06
+
+### Fixed
+
+- Give the `benos` executable a dedicated bin entrypoint so npm's Unix
+  symlinks and Windows `.cmd` shims run the CLI reliably.
+- Automatically install a required `@benosjs/*` package when it is missing
+  during `benos add`; continue to refuse an installed package that is too old
+  and print its exact upgrade command.
+
+### Changed
+
+- Bump all eight publishable packages and the starter template to `0.2.1`.
+- Update registry component dependency ranges and minimum Benos versions to
+  `0.2.1`.
+
+### Verification
+
+- Release preparation is in progress. This version has not been tagged or
+  published.
+
 ## [0.2.0] — 2026-10-06
 
 ### Added

@@ -6,15 +6,15 @@
   "dependencies": [
     {
       "name": "@benosjs/core",
-      "version": "^0.2.0"
+      "version": "^0.2.1"
     },
     {
       "name": "@benosjs/dom",
-      "version": "^0.2.0"
+      "version": "^0.2.1"
     },
     {
       "name": "@benosjs/primitives",
-      "version": "^0.2.0"
+      "version": "^0.2.1"
     },
     {
       "name": "@zag-js/toast",
@@ -43,15 +43,15 @@
   "minimumBenosVersions": [
     {
       "name": "@benosjs/core",
-      "version": "0.2.0"
+      "version": "0.2.1"
     },
     {
       "name": "@benosjs/dom",
-      "version": "0.2.0"
+      "version": "0.2.1"
     },
     {
       "name": "@benosjs/primitives",
-      "version": "0.2.0"
+      "version": "0.2.1"
     }
   ]
 }

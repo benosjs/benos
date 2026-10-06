@@ -1,6 +1,6 @@
 {
   "name": "benos",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Source-owned UI components and registry tooling for Benos.",
   "repository": {
     "type": "git",
@@ -23,10 +23,11 @@
     "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
   },
   "bin": {
-    "benos": "src/index.mjs"
+    "benos": "bin/benos.mjs"
   },
   "files": [
-    "src"
+    "src",
+    "bin"
   ],
   "dependencies": {
     "cross-spawn": "^7.0.6",

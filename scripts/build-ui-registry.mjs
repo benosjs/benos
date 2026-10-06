@@ -204,7 +204,7 @@ async function getRelease(requested) {
     const current = JSON.parse(await readFile(indexPath, 'utf8'))
     return current.release
   } catch {
-    return '0.2.0'
+    return '0.2.1'
   }
 }
 

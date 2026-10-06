@@ -54,7 +54,7 @@ const temporary = await mkdtemp(
 )
 const app = join(temporary, 'benos-app')
 const scaffold = resolve(root, 'packages/create-benos/src/index.mjs')
-const cli = resolve(root, 'packages/benos/src/index.mjs')
+const cli = resolve(root, 'packages/benos/bin/benos.mjs')
 const nodePtyRoot = resolve(
   dirname(fileURLToPath(import.meta.resolve('node-pty'))),
   '..',
@@ -220,7 +220,15 @@ async function createUpdatedFixtureRegistry(sourceUrl, directory) {
 }
 
 try {
+  const packedManifests = new Map()
   for (const packageName of localBenosPackages) {
+    const manifest = JSON.parse(
+      await readFile(
+        join(root, 'packages', packageName, 'package.json'),
+        'utf8',
+      ),
+    )
+    packedManifests.set(packageName, manifest)
     await runCommand(
       'pnpm',
       ['pack', '--pack-destination', temporary, '--silent'],
@@ -228,9 +236,13 @@ try {
     )
   }
   localRegistry = await createLocalPackagesRegistry(
-    localBenosPackages.map((packageName) =>
-      join(temporary, `benosjs-${packageName}-0.2.0.tgz`),
-    ),
+    localBenosPackages.map((packageName) => {
+      const manifest = packedManifests.get(packageName)
+      return join(
+        temporary,
+        `${manifest.name.replace(/^@/, '').replaceAll('/', '-')}-${manifest.version}.tgz`,
+      )
+    }),
   )
   process.env.npm_config_registry = localRegistry.url
   process.env.NPM_CONFIG_REGISTRY = localRegistry.url
@@ -492,8 +504,8 @@ try {
   }
   const appPackagePath = join(app, 'package.json')
   const appPackage = JSON.parse(await readFile(appPackagePath, 'utf8'))
-  appPackage.dependencies['@benosjs/core'] = '^0.2.0'
-  appPackage.dependencies['@benosjs/primitives'] = '^0.2.0'
+  appPackage.dependencies['@benosjs/core'] = '^0.2.1'
+  appPackage.dependencies['@benosjs/primitives'] = '^0.2.1'
   await writeFile(appPackagePath, JSON.stringify(appPackage, null, 2) + '\n')
   await runCommand(manager, ['install'], { cwd: app })
   await runCommand(

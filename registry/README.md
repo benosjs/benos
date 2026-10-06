@@ -15,7 +15,7 @@ release versions and SHA-256 checksums. File targets use `components/` or
 `css/` as prefixes, mapped to the paths in `benos.json`.
 
 ```sh
-pnpm registry:build --release 0.2.0
+pnpm registry:build --release 0.2.1
 pnpm registry:check
 ```
 
