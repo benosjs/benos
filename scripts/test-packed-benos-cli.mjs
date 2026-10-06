@@ -249,8 +249,6 @@ try {
       'button',
       'dialog',
       '--yes',
-      '--registry',
-      registryUrl,
       '--package-manager',
       manager,
     ])
