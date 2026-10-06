@@ -230,7 +230,7 @@ try {
   )
   if (
     installedPackage.version !== manifests.get('benos').version ||
-    installedPackage.bin?.benos !== 'bin/benos.mjs'
+    installedPackage.bin?.benos !== 'bin/benos.cjs'
   ) {
     throw new Error('The fresh project did not install the packed benos CLI.')
   }
