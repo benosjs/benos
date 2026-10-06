@@ -5,6 +5,12 @@
 The `benos` CLI initializes a Benos UI workspace, copies components from the
 static registry, and lists available or installed items.
 
+Install it as a development tool in a Benos app:
+
+```sh
+npm install --save-dev benos
+```
+
 ```sh
 npx benos init
 npx benos add button

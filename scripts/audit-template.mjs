@@ -111,9 +111,9 @@ try {
     const dependencySet = metadata.dependencies?.[name]
       ? metadata.dependencies
       : metadata.devDependencies
-    if (dependencySet?.[name] !== '^0.1.2') {
+    if (dependencySet?.[name] !== '^0.2.0') {
       throw new Error(
-        `Scaffold must declare ${name} as ^0.1.2 before the local-pack override`,
+        `Scaffold must declare ${name} as ^0.2.0 before the local-pack override`,
       )
     }
     const archive = archiveByPackage.get(directory)

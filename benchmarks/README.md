@@ -695,3 +695,29 @@ runs with five timed samples per run:
 
 All rows remain below the 2× guard. No framework hot path changed in this
 follow-up.
+
+## U7 v0.2.0 release preparation (2026-10-06)
+
+Rebuilt and measured with Node 24.19.0. The new release changes package
+metadata, registry version gates, documentation, and the CLI consumer test
+setup; it does not change the core or DOM runtime sources.
+
+| Artifact                         |     Measured |       Budget | Remaining |
+| -------------------------------- | -----------: | -----------: | --------: |
+| `@benosjs/core`                  |  4,051 bytes |  4,096 bytes |  45 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,200 bytes | 10,240 bytes |  40 bytes |
+
+The production kernel guard reports the median of seven runs with five timed
+samples per run:
+
+| Kernel workload                     | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       6.24 |        4.96 | 1.26× |
+| 20-deep computed chain write + read |       6.32 |        4.94 | 1.28× |
+| 200-effect fanout write             |       2.04 |        1.16 | 1.76× |
+| Dynamic dependency switch           |       3.87 |        2.47 | 1.54× |
+| Repeated equal write                |       0.72 |        0.49 | 1.44× |
+
+Every row remains under the 2× CI guard. Local verification also passed the
+221 unit tests, all 405 Chromium/Firefox/WebKit browser tests, the packed
+create-benos consumer, and the pnpm UI CLI consumer matrix.

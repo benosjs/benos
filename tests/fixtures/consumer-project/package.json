@@ -1,6 +1,6 @@
 {
   "name": "benos-consumer-fixture",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Fresh consumer fixture for packed Benos packages.",
   "repository": {
     "type": "git",
@@ -20,9 +20,9 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@benosjs/core": "0.1.2",
-    "@benosjs/dom": "0.1.2",
-    "@benosjs/vite": "0.1.2"
+    "@benosjs/core": "0.2.0",
+    "@benosjs/dom": "0.2.0",
+    "@benosjs/vite": "0.2.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

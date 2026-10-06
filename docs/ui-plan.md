@@ -1,6 +1,6 @@
 # Benos UI System — Build Brief
 
-You are the lead architect and engineer for the **Benos UI system**: optional, accessible, source-owned UI components for Benos, the TypeScript-first fine-grained frontend framework published as `@benosjs/*` (currently v0.1.2).
+You are the lead architect and engineer for the **Benos UI system**: optional, accessible, source-owned UI components for Benos, the TypeScript-first fine-grained frontend framework published as `@benosjs/*` (v0.2.0 release preparation).
 
 Build it in phases with review checkpoints, exactly as v0.1 was built: design documents first, then implementation, with tests at every step. Push back when an idea is technically weak.
 

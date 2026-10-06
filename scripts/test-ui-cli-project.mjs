@@ -25,6 +25,21 @@ import { createLocalPackagesRegistry } from '../tests/fixtures/ui-registry/local
 
 const root = resolve(import.meta.dirname, '..')
 const manager = process.env.BENOS_PACKAGE_MANAGER
+const localBenosPackages = [
+  'core',
+  'dom',
+  'compiler',
+  'vite',
+  'eslint-plugin',
+  'primitives',
+]
+const previousRegistryEnvironment = {
+  npm: process.env.npm_config_registry,
+  NPM: process.env.NPM_CONFIG_REGISTRY,
+  yarn: process.env.YARN_NPM_REGISTRY_SERVER,
+  yarnUnsafeHttp: process.env.YARN_UNSAFE_HTTP_WHITELIST,
+}
+let localRegistry
 const supportedManagers = new Set(['npm', 'pnpm', 'yarn', 'bun'])
 if (!supportedManagers.has(manager)) {
   throw new Error('Set BENOS_PACKAGE_MANAGER to npm, pnpm, yarn, or bun.')
@@ -205,6 +220,26 @@ async function createUpdatedFixtureRegistry(sourceUrl, directory) {
 }
 
 try {
+  for (const packageName of localBenosPackages) {
+    await runCommand(
+      'pnpm',
+      ['pack', '--pack-destination', temporary, '--silent'],
+      { cwd: join(root, 'packages', packageName) },
+    )
+  }
+  localRegistry = await createLocalPackagesRegistry(
+    localBenosPackages.map((packageName) =>
+      join(temporary, `benosjs-${packageName}-0.2.0.tgz`),
+    ),
+  )
+  process.env.npm_config_registry = localRegistry.url
+  process.env.NPM_CONFIG_REGISTRY = localRegistry.url
+  process.env.YARN_NPM_REGISTRY_SERVER = localRegistry.url
+  if (manager === 'yarn') {
+    // Yarn 4 reads array config from a comma-separated environment value.
+    process.env.YARN_UNSAFE_HTTP_WHITELIST = '127.0.0.1'
+  }
+
   await mkdir(join(batch1RegistryDirectory, 'items'), { recursive: true })
   const batch1Index = JSON.parse(
     await readFile(resolve(root, 'registry/v1/index.json'), 'utf8'),
@@ -433,32 +468,6 @@ try {
   ) {
     throw new Error('benos add did not record all batch 1 component files.')
   }
-  await runCommand(
-    'pnpm',
-    [
-      '--filter',
-      '@benosjs/primitives',
-      'pack',
-      '--pack-destination',
-      temporary,
-    ],
-    { cwd: root },
-  )
-  await runCommand(
-    'pnpm',
-    ['--filter', '@benosjs/core', 'pack', '--pack-destination', temporary],
-    { cwd: root },
-  )
-  await runCommand(
-    'pnpm',
-    ['--filter', '@benosjs/dom', 'pack', '--pack-destination', temporary],
-    { cwd: root },
-  )
-  const localRegistry = await createLocalPackagesRegistry([
-    join(temporary, 'benosjs-core-0.1.3.tgz'),
-    join(temporary, 'benosjs-dom-0.1.2.tgz'),
-    join(temporary, 'benosjs-primitives-0.2.0.tgz'),
-  ])
   if (manager === 'yarn') {
     // Yarn 4 blocks plain HTTP registries by default. This fixture registry is
     // intentionally loopback-only, so trust only its local host for this test.
@@ -469,85 +478,66 @@ try {
       `${yarnConfig.trimEnd()}\nunsafeHttpWhitelist:\n  - 127.0.0.1\n`,
     )
   }
-  const previousRegistry = process.env.npm_config_registry
-  const previousNpmRegistry = process.env.NPM_CONFIG_REGISTRY
-  const previousYarnRegistry = process.env.YARN_NPM_REGISTRY_SERVER
-  process.env.npm_config_registry = localRegistry.url
-  process.env.NPM_CONFIG_REGISTRY = localRegistry.url
-  process.env.YARN_NPM_REGISTRY_SERVER = localRegistry.url
-  try {
-    // Re-resolve from the local package feed so the same-version published
-    // core already cached by the initial starter install cannot mask the
-    // workspace-packed build that includes the pending public API additions.
-    await rm(join(app, 'node_modules'), { recursive: true, force: true })
-    for (const lockfile of [
-      'package-lock.json',
-      'pnpm-lock.yaml',
-      'yarn.lock',
-      'bun.lock',
-      'bun.lockb',
-    ]) {
-      await rm(join(app, lockfile), { force: true })
-    }
-    const appPackagePath = join(app, 'package.json')
-    const appPackage = JSON.parse(await readFile(appPackagePath, 'utf8'))
-    appPackage.dependencies['@benosjs/core'] = '^0.1.3'
-    appPackage.dependencies['@benosjs/primitives'] = '^0.2.0'
-    await writeFile(appPackagePath, JSON.stringify(appPackage, null, 2) + '\n')
-    await runCommand(manager, ['install'], { cwd: app })
-    await runCommand(
-      process.execPath,
-      [
-        cli,
-        'add',
-        ...batch2Names,
-        '--yes',
-        '--registry',
-        batch1Registry,
-        '--package-manager',
-        manager,
-      ],
-      { cwd: app },
-    )
-    await runCommand(
-      process.execPath,
-      [
-        cli,
-        'add',
-        ...batch3Names,
-        '--yes',
-        '--registry',
-        batch1Registry,
-        '--package-manager',
-        manager,
-      ],
-      { cwd: app },
-    )
-    await runCommand(
-      process.execPath,
-      [
-        cli,
-        'add',
-        ...batch4Names,
-        '--yes',
-        '--registry',
-        batch1Registry,
-        '--package-manager',
-        manager,
-      ],
-      { cwd: app },
-    )
-  } finally {
-    if (previousRegistry === undefined) delete process.env.npm_config_registry
-    else process.env.npm_config_registry = previousRegistry
-    if (previousNpmRegistry === undefined)
-      delete process.env.NPM_CONFIG_REGISTRY
-    else process.env.NPM_CONFIG_REGISTRY = previousNpmRegistry
-    if (previousYarnRegistry === undefined)
-      delete process.env.YARN_NPM_REGISTRY_SERVER
-    else process.env.YARN_NPM_REGISTRY_SERVER = previousYarnRegistry
-    await localRegistry.close()
+  // Re-resolve from the local package feed so the same-version published
+  // package cache cannot mask this checkout's pending package changes.
+  await rm(join(app, 'node_modules'), { recursive: true, force: true })
+  for (const lockfile of [
+    'package-lock.json',
+    'pnpm-lock.yaml',
+    'yarn.lock',
+    'bun.lock',
+    'bun.lockb',
+  ]) {
+    await rm(join(app, lockfile), { force: true })
   }
+  const appPackagePath = join(app, 'package.json')
+  const appPackage = JSON.parse(await readFile(appPackagePath, 'utf8'))
+  appPackage.dependencies['@benosjs/core'] = '^0.2.0'
+  appPackage.dependencies['@benosjs/primitives'] = '^0.2.0'
+  await writeFile(appPackagePath, JSON.stringify(appPackage, null, 2) + '\n')
+  await runCommand(manager, ['install'], { cwd: app })
+  await runCommand(
+    process.execPath,
+    [
+      cli,
+      'add',
+      ...batch2Names,
+      '--yes',
+      '--registry',
+      batch1Registry,
+      '--package-manager',
+      manager,
+    ],
+    { cwd: app },
+  )
+  await runCommand(
+    process.execPath,
+    [
+      cli,
+      'add',
+      ...batch3Names,
+      '--yes',
+      '--registry',
+      batch1Registry,
+      '--package-manager',
+      manager,
+    ],
+    { cwd: app },
+  )
+  await runCommand(
+    process.execPath,
+    [
+      cli,
+      'add',
+      ...batch4Names,
+      '--yes',
+      '--registry',
+      batch1Registry,
+      '--package-manager',
+      manager,
+    ],
+    { cwd: app },
+  )
   for (const name of batch2Names) {
     const component = join(app, 'src/components/ui', name + '.tsx')
     const stylesheet = join(app, 'src/styles', name + '.css')
@@ -659,6 +649,21 @@ try {
   }
   console.log(`Fresh create-benos project passed with ${manager}.`)
 } finally {
+  await localRegistry?.close()
+  if (previousRegistryEnvironment.npm === undefined)
+    delete process.env.npm_config_registry
+  else process.env.npm_config_registry = previousRegistryEnvironment.npm
+  if (previousRegistryEnvironment.NPM === undefined)
+    delete process.env.NPM_CONFIG_REGISTRY
+  else process.env.NPM_CONFIG_REGISTRY = previousRegistryEnvironment.NPM
+  if (previousRegistryEnvironment.yarn === undefined)
+    delete process.env.YARN_NPM_REGISTRY_SERVER
+  else process.env.YARN_NPM_REGISTRY_SERVER = previousRegistryEnvironment.yarn
+  if (previousRegistryEnvironment.yarnUnsafeHttp === undefined)
+    delete process.env.YARN_UNSAFE_HTTP_WHITELIST
+  else
+    process.env.YARN_UNSAFE_HTTP_WHITELIST =
+      previousRegistryEnvironment.yarnUnsafeHttp
   if (process.env.BENOS_KEEP_TMP === '1') {
     console.log(`Kept fixture project at ${temporary}.`)
   } else {

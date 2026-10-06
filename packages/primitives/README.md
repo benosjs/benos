@@ -4,8 +4,8 @@
 
 Optional, unstyled adapters for Zag.js machines. Import only the machine
 subpath you use; the package root exports a type-only `PrimitiveController`.
-Install the matching optional Zag machine package alongside the adapter, for
-example `npm install @benosjs/primitives @zag-js/checkbox`.
+Install the adapters, Benos core, and the matching optional Zag machine package;
+for example, `npm install @benosjs/primitives @benosjs/core @zag-js/checkbox`.
 
 ```tsx
 import { createCheckbox } from '@benosjs/primitives/checkbox'
@@ -30,5 +30,5 @@ requires the public Zag toast-group service as its `parent` option.
 Available subpaths: `accordion`, `checkbox`, `dialog`, `menu`, `popover`,
 `radio-group`, `select`, `switch`, `tabs`, `toast`, and `tooltip`.
 
-See the [UI primitives design](../../docs/architecture/ui-primitives.md) and
-[API reference](../../docs/api-reference.md).
+See the [UI primitives design](https://github.com/benosjs/benos/blob/main/docs/architecture/ui-primitives.md)
+and [API reference](https://github.com/benosjs/benos/blob/main/docs/api-reference.md).
