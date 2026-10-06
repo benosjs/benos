@@ -41,6 +41,29 @@ if (manager === 'yarn') {
   process.env.YARN_UNSAFE_HTTP_WHITELIST = '127.0.0.1'
 }
 
+function runWindowsShell(commandLine, description, cwd) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(
+      process.env.ComSpec ?? 'cmd.exe',
+      ['/d', '/s', '/c', commandLine],
+      { cwd, stdio: 'inherit', windowsVerbatimArguments: true },
+    )
+    child.once('error', reject)
+    child.once('close', (code, signal) => {
+      if (code === 0) resolve({ code: 0 })
+      else {
+        const reason = signal ? `signal ${signal}` : `exit code ${code}`
+        reject(new Error(`${description} failed with ${reason}.`))
+      }
+    })
+  })
+}
+
+function runNpx(args) {
+  if (process.platform !== 'win32') return runCommand('npx', args, { cwd: app })
+  return runWindowsShell(`npx ${args.join(' ')}`, `npx ${args.join(' ')}`, app)
+}
+
 const temporary = await mkdtemp(
   join(process.env.RUNNER_TEMP ?? tmpdir(), 'benos-packed-cli-'),
 )
@@ -205,11 +228,7 @@ try {
     throw new Error('The fresh project did not install the packed benos CLI.')
   }
 
-  await runCommand(
-    'npx',
-    ['benos', 'init', '--yes', '--registry', registryUrl],
-    { cwd: app },
-  )
+  await runNpx(['benos', 'init', '--yes', '--registry', registryUrl])
   if (
     !(await readFile(join(app, 'benos.json'), 'utf8')).includes(registryUrl)
   ) {
@@ -217,21 +236,17 @@ try {
   }
 
   try {
-    await runCommand(
-      'npx',
-      [
-        'benos',
-        'add',
-        'button',
-        'dialog',
-        '--yes',
-        '--registry',
-        registryUrl,
-        '--package-manager',
-        manager,
-      ],
-      { cwd: app },
-    )
+    await runNpx([
+      'benos',
+      'add',
+      'button',
+      'dialog',
+      '--yes',
+      '--registry',
+      registryUrl,
+      '--package-manager',
+      manager,
+    ])
   } catch (error) {
     if (process.platform === 'win32') {
       const shim = await readFile(
@@ -342,21 +357,7 @@ try {
     if (!installedBin.endsWith('.cmd'))
       return runCommand(process.execPath, [installedBin, ...args], { cwd: app })
     const commandLine = `""${installedBin}" ${args.join(' ')}"`
-    return new Promise((resolve, reject) => {
-      const child = spawn(
-        process.env.ComSpec ?? 'cmd.exe',
-        ['/d', '/s', '/c', commandLine],
-        { cwd: app, stdio: 'inherit', windowsVerbatimArguments: true },
-      )
-      child.once('error', reject)
-      child.once('close', (code, signal) => {
-        if (code === 0) resolve({ code: 0 })
-        else {
-          const reason = signal ? `signal ${signal}` : `exit code ${code}`
-          reject(new Error(`benos.cmd failed with ${reason}.`))
-        }
-      })
-    })
+    return runWindowsShell(commandLine, 'benos.cmd', app)
   }
   await runInstalledBin(['list', '--installed'])
   let invalidCommand
