@@ -55,7 +55,7 @@ const temporary = await mkdtemp(
 )
 const app = join(temporary, 'benos-app')
 const scaffold = resolve(root, 'packages/create-benos/src/index.mjs')
-const cli = resolve(root, 'packages/benos/bin/benos.cjs')
+const cli = resolve(root, 'packages/benos/bin/benos.mjs')
 const nodePtyRoot = resolve(
   dirname(fileURLToPath(import.meta.resolve('node-pty'))),
   '..',
@@ -290,19 +290,31 @@ try {
     throw new Error('--no-ui unexpectedly initialized or imported Benos UI.')
   }
   const uiApp = join(temporary, 'starter-ui')
-  await runCommand(
-    process.execPath,
-    [
-      scaffold,
-      uiApp,
-      '--ui',
-      '--install',
-      '--no-start',
-      '--registry',
-      batch1Registry,
-    ],
-    { cwd: root, env: scaffoldEnv },
-  )
+  const uiAppArgs = [
+    scaffold,
+    uiApp,
+    '--ui',
+    '--install',
+    '--no-start',
+    '--registry',
+    batch1Registry,
+  ]
+  if (manager === 'yarn' || manager === 'bun') {
+    await mkdir(uiApp, { recursive: true })
+    if (manager === 'yarn') {
+      await writeFile(
+        join(uiApp, '.yarnrc.yml'),
+        `nodeLinker: node-modules\nnpmRegistryServer: "${localRegistry.url}"\nunsafeHttpWhitelist:\n  - 127.0.0.1\n`,
+      )
+    } else {
+      await writeFile(
+        join(uiApp, 'bunfig.toml'),
+        `[install]\nregistry = "${localRegistry.url}"\n`,
+      )
+    }
+    uiAppArgs.push('--yes')
+  }
+  await runCommand(process.execPath, uiAppArgs, { cwd: root, env: scaffoldEnv })
   const uiStarter = await readFile(join(uiApp, 'src/main.tsx'), 'utf8')
   if (
     !uiStarter.includes("from '@/components/ui/button'") ||

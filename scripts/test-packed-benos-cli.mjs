@@ -9,6 +9,7 @@ import {
   rm,
   writeFile,
 } from 'node:fs/promises'
+import { spawn } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { pathToFileURL, fileURLToPath } from 'node:url'
@@ -198,7 +199,7 @@ try {
   )
   if (
     installedPackage.version !== manifests.get('benos').version ||
-    installedPackage.bin?.benos !== 'bin/benos.cjs'
+    installedPackage.bin?.benos !== 'bin/benos.mjs'
   ) {
     throw new Error('The fresh project did not install the packed benos CLI.')
   }
@@ -308,11 +309,21 @@ try {
     if (process.platform !== 'win32')
       return runCommand(installedBin, args, { cwd: app })
     const commandLine = `""${installedBin}" ${args.join(' ')}"`
-    return runCommand(
-      process.env.ComSpec ?? 'cmd.exe',
-      ['/d', '/s', '/c', commandLine],
-      { cwd: app },
-    )
+    return new Promise((resolve, reject) => {
+      const child = spawn(
+        process.env.ComSpec ?? 'cmd.exe',
+        ['/d', '/s', '/c', commandLine],
+        { cwd: app, stdio: 'inherit', windowsVerbatimArguments: true },
+      )
+      child.once('error', reject)
+      child.once('close', (code, signal) => {
+        if (code === 0) resolve({ code: 0 })
+        else {
+          const reason = signal ? `signal ${signal}` : `exit code ${code}`
+          reject(new Error(`benos.cmd failed with ${reason}.`))
+        }
+      })
+    })
   }
   await runInstalledBin(['list', '--installed'])
   let invalidCommand
