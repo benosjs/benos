@@ -241,6 +241,33 @@ function packageManagerHelp() {
   return 'No package-manager choice is clear. Pass --package-manager npm|pnpm|yarn|bun.'
 }
 
+async function captureWindowsBenosShim(root) {
+  if (process.platform !== 'win32') return undefined
+  // A package manager can rewrite this live .cmd while benos add is running.
+  const path = resolve(root, 'node_modules', '.bin', 'benos.cmd')
+  try {
+    const stat = await lstat(path)
+    if (!stat.isFile()) return undefined
+    return { path, content: await readFile(path) }
+  } catch (error) {
+    if (error.code === 'ENOENT') return undefined
+    throw error
+  }
+}
+
+async function restoreWindowsBenosShim(snapshot) {
+  if (!snapshot) return
+  let current
+  try {
+    current = await readFile(snapshot.path)
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error
+  }
+  if (!current?.equals(snapshot.content)) {
+    await writeFile(snapshot.path, snapshot.content)
+  }
+}
+
 export async function addItems(options) {
   const root = await findProjectRoot(options.cwd ?? process.cwd())
   const config = await readUiConfig(root)
@@ -371,6 +398,7 @@ export async function addItems(options) {
   }
   if (dependencyAdds.length > 0) {
     console.log(`Installing registry dependencies with ${manager}...`)
+    const windowsShim = await captureWindowsBenosShim(root)
     try {
       await runManagerInstall(manager, dependencyAdds, root)
     } catch (error) {
@@ -379,6 +407,8 @@ export async function addItems(options) {
         `Component files and lock entries were written. Install dependencies manually with: ${command} ${args.join(' ')}`,
       )
       throw error
+    } finally {
+      await restoreWindowsBenosShim(windowsShim)
     }
   }
   console.log(`Added ${resolved.map(({ item }) => item.name).join(', ')}.`)
