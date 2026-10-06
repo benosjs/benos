@@ -294,27 +294,25 @@ try {
     scaffold,
     uiApp,
     '--ui',
-    '--install',
+    '--no-install',
     '--no-start',
     '--registry',
     batch1Registry,
   ]
-  if (manager === 'yarn' || manager === 'bun') {
-    await mkdir(uiApp, { recursive: true })
-    if (manager === 'yarn') {
-      await writeFile(
-        join(uiApp, '.yarnrc.yml'),
-        `nodeLinker: node-modules\nnpmRegistryServer: "${localRegistry.url}"\nunsafeHttpWhitelist:\n  - 127.0.0.1\n`,
-      )
-    } else {
-      await writeFile(
-        join(uiApp, 'bunfig.toml'),
-        `[install]\nregistry = "${localRegistry.url}"\n`,
-      )
-    }
-    uiAppArgs.push('--yes')
-  }
+  uiAppArgs.push('--yes')
   await runCommand(process.execPath, uiAppArgs, { cwd: root, env: scaffoldEnv })
+  if (manager === 'yarn') {
+    await writeFile(
+      join(uiApp, '.yarnrc.yml'),
+      `nodeLinker: node-modules\nnpmRegistryServer: "${localRegistry.url}"\nunsafeHttpWhitelist:\n  - 127.0.0.1\n`,
+    )
+  } else if (manager === 'bun') {
+    await writeFile(
+      join(uiApp, 'bunfig.toml'),
+      `[install]\nregistry = "${localRegistry.url}"\n`,
+    )
+  }
+  await runCommand(manager, ['install'], { cwd: uiApp, env: scaffoldEnv })
   const uiStarter = await readFile(join(uiApp, 'src/main.tsx'), 'utf8')
   if (
     !uiStarter.includes("from '@/components/ui/button'") ||
