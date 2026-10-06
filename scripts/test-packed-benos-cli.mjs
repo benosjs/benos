@@ -12,7 +12,7 @@ import {
 } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
 import { tmpdir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { pathToFileURL, fileURLToPath } from 'node:url'
 import process from 'node:process'
 import { runCommand } from '../packages/benos/src/process.mjs'
@@ -61,7 +61,8 @@ function runWindowsShell(commandLine, description, cwd) {
 
 function runNpx(args) {
   if (process.platform !== 'win32') return runCommand('npx', args, { cwd: app })
-  const commandLine = `""npx.cmd" ${args.join(' ')}"`
+  const npxShim = join(dirname(process.execPath), 'npx.cmd')
+  const commandLine = `""${npxShim}" ${args.join(' ')}"`
   return runWindowsShell(commandLine, `npx ${args.join(' ')}`, app)
 }
 
@@ -197,7 +198,7 @@ try {
   } else if (manager === 'bun') {
     await writeFile(
       join(app, 'bunfig.toml'),
-      `[install]\nregistry = "${localRegistry.url}"\n\n[install.scopes]\nbenosjs = "${localRegistry.url}"\n`,
+      `[install]\nregistry = "${localRegistry.url}"\n\n[install.scopes]\nbenosjs = "${localRegistry.url}"\n\n[install.cache]\ndisable = true\ndisableManifest = true\n`,
     )
   }
 

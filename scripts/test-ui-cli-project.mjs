@@ -309,7 +309,7 @@ try {
   } else if (manager === 'bun') {
     await writeFile(
       join(uiApp, 'bunfig.toml'),
-      `[install]\nregistry = "${localRegistry.url}"\n\n[install.scopes]\nbenosjs = "${localRegistry.url}"\n`,
+      `[install]\nregistry = "${localRegistry.url}"\n\n[install.scopes]\nbenosjs = "${localRegistry.url}"\n\n[install.cache]\ndisable = true\ndisableManifest = true\n`,
     )
   }
   const registryArgs = ['--registry', batch1Registry]
@@ -333,6 +333,11 @@ try {
   )
   await runCommand(manager, ['install'], { cwd: uiApp, env: scaffoldEnv })
   for (const packageName of ['@benosjs/core', '@benosjs/dom']) {
+    if (!localRegistry.servedTarballs.has(packageName)) {
+      throw new Error(
+        `${manager} did not install the packed ${packageName} tarball from the local registry.`,
+      )
+    }
     const packageRoot = join(uiApp, 'node_modules', ...packageName.split('/'))
     const packageManifest = JSON.parse(
       await readFile(join(packageRoot, 'package.json'), 'utf8'),
@@ -347,6 +352,23 @@ try {
       )
     }
     await readFile(join(packageRoot, typeEntry.slice(2)))
+    const nestedCore = join(
+      packageRoot,
+      'node_modules',
+      '@benosjs',
+      'core',
+      'package.json',
+    )
+    try {
+      const nestedManifest = JSON.parse(await readFile(nestedCore, 'utf8'))
+      if (!nestedManifest.exports?.['./internal']?.default) {
+        throw new Error(
+          `${manager} installed a stale nested @benosjs/core package under @benosjs/dom.`,
+        )
+      }
+    } catch (error) {
+      if (error?.code !== 'ENOENT') throw error
+    }
   }
   const uiStarter = await readFile(join(uiApp, 'src/main.tsx'), 'utf8')
   if (
