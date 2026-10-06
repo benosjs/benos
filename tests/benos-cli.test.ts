@@ -22,7 +22,7 @@ import {
 import { validateIndex } from '../packages/benos/src/registry.mjs'
 
 const root = resolve(fileURLToPath(new URL('../', import.meta.url)))
-const cli = resolve(root, 'packages/benos/bin/benos.mjs')
+const cli = resolve(root, 'packages/benos/bin/benos.cjs')
 const hash = (value: string | Buffer) =>
   `sha256:${createHash('sha256').update(value).digest('hex')}`
 

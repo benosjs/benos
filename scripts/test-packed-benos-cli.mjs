@@ -1,6 +1,7 @@
 /* global console */
 
 import {
+  access,
   copyFile,
   mkdir,
   mkdtemp,
@@ -21,6 +22,12 @@ const packageNames = ['benos']
 const fixtureCoreVersion = '0.2.1'
 const fixturePrimitivesVersion = '0.2.1'
 const fixtureDialogVersion = '1.44.0'
+const pnpmExecutable = process.env.PNPM_HOME
+  ? join(
+      process.env.PNPM_HOME,
+      process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
+    )
+  : 'pnpm'
 const supportedManagers = new Set(['npm', 'pnpm', 'yarn', 'bun'])
 delete process.env.npm_config_user_agent
 delete process.env.NPM_CONFIG_USER_AGENT
@@ -39,6 +46,7 @@ const app = join(temporary, 'fresh-project')
 const previousRegistryEnvironment = {
   npm: process.env.npm_config_registry,
   NPM: process.env.NPM_CONFIG_REGISTRY,
+  bun: process.env.BUN_CONFIG_REGISTRY,
   yarn: process.env.YARN_NPM_REGISTRY_SERVER,
 }
 let localRegistry
@@ -66,7 +74,7 @@ async function packFixtureDependency(name, version) {
   )
   await writeFile(join(fixtureRoot, 'index.js'), 'export {}\n')
   await runCommand(
-    'pnpm',
+    'npm',
     ['pack', '--pack-destination', temporary, '--silent'],
     { cwd: fixtureRoot },
   )
@@ -84,7 +92,7 @@ try {
     manifests.set(packageName, manifest)
     const archive = join(temporary, packageArchiveName(manifest))
     await runCommand(
-      'pnpm',
+      pnpmExecutable,
       ['pack', '--pack-destination', temporary, '--silent'],
       { cwd: packageRoot },
     )
@@ -102,6 +110,7 @@ try {
   ])
   process.env.npm_config_registry = localRegistry.url
   process.env.NPM_CONFIG_REGISTRY = localRegistry.url
+  process.env.BUN_CONFIG_REGISTRY = localRegistry.url
   process.env.npm_config_audit = 'false'
   process.env.NPM_CONFIG_AUDIT = 'false'
   process.env.YARN_NPM_REGISTRY_SERVER = localRegistry.url
@@ -189,7 +198,7 @@ try {
   )
   if (
     installedPackage.version !== manifests.get('benos').version ||
-    installedPackage.bin?.benos !== 'bin/benos.mjs'
+    installedPackage.bin?.benos !== 'bin/benos.cjs'
   ) {
     throw new Error('The fresh project did not install the packed benos CLI.')
   }
@@ -294,10 +303,21 @@ try {
     '.bin',
     process.platform === 'win32' ? 'benos.cmd' : 'benos',
   )
-  await runCommand(installedBin, ['list', '--installed'], { cwd: app })
+  await access(installedBin)
+  async function runInstalledBin(args) {
+    if (process.platform !== 'win32')
+      return runCommand(installedBin, args, { cwd: app })
+    const commandLine = `"${installedBin}" ${args.join(' ')}`
+    return runCommand(
+      process.env.ComSpec ?? 'cmd.exe',
+      ['/d', '/s', '/c', commandLine],
+      { cwd: app },
+    )
+  }
+  await runInstalledBin(['list', '--installed'])
   let invalidCommand
   try {
-    await runCommand(installedBin, ['not-a-benos-command'], { cwd: app })
+    await runInstalledBin(['not-a-benos-command'])
   } catch (error) {
     invalidCommand = error
   }
@@ -316,6 +336,9 @@ try {
   if (previousRegistryEnvironment.NPM === undefined)
     delete process.env.NPM_CONFIG_REGISTRY
   else process.env.NPM_CONFIG_REGISTRY = previousRegistryEnvironment.NPM
+  if (previousRegistryEnvironment.bun === undefined)
+    delete process.env.BUN_CONFIG_REGISTRY
+  else process.env.BUN_CONFIG_REGISTRY = previousRegistryEnvironment.bun
   if (previousRegistryEnvironment.yarn === undefined)
     delete process.env.YARN_NPM_REGISTRY_SERVER
   else process.env.YARN_NPM_REGISTRY_SERVER = previousRegistryEnvironment.yarn

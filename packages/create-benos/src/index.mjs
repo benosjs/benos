@@ -236,7 +236,7 @@ async function chooseInstallAndStart(options, manager, interactive) {
 }
 
 async function setupUi(directory, manager, registry) {
-  const cli = fileURLToPath(import.meta.resolve('benos/bin/benos.mjs'))
+  const cli = fileURLToPath(import.meta.resolve('benos/bin/benos.cjs'))
   const registryArgs = registry ? ['--registry', registry] : []
   await runCommand(process.execPath, [cli, 'init', '--yes', ...registryArgs], {
     cwd: directory,

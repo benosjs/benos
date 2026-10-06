@@ -5,7 +5,7 @@ import process from 'node:process'
 import { fileURLToPath, URL } from 'node:url'
 import { parsePackageManager } from '../src/process.mjs'
 
-const cli = fileURLToPath(new URL('../bin/benos.mjs', import.meta.url))
+const cli = fileURLToPath(new URL('../bin/benos.cjs', import.meta.url))
 
 test('benos help documents all supported UI commands', () => {
   const result = spawnSync(process.execPath, [cli, '--help'], {

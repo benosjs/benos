@@ -36,6 +36,7 @@ const localBenosPackages = [
 const previousRegistryEnvironment = {
   npm: process.env.npm_config_registry,
   NPM: process.env.NPM_CONFIG_REGISTRY,
+  bun: process.env.BUN_CONFIG_REGISTRY,
   yarn: process.env.YARN_NPM_REGISTRY_SERVER,
   yarnUnsafeHttp: process.env.YARN_UNSAFE_HTTP_WHITELIST,
 }
@@ -54,7 +55,7 @@ const temporary = await mkdtemp(
 )
 const app = join(temporary, 'benos-app')
 const scaffold = resolve(root, 'packages/create-benos/src/index.mjs')
-const cli = resolve(root, 'packages/benos/bin/benos.mjs')
+const cli = resolve(root, 'packages/benos/bin/benos.cjs')
 const nodePtyRoot = resolve(
   dirname(fileURLToPath(import.meta.resolve('node-pty'))),
   '..',
@@ -246,6 +247,7 @@ try {
   )
   process.env.npm_config_registry = localRegistry.url
   process.env.NPM_CONFIG_REGISTRY = localRegistry.url
+  process.env.BUN_CONFIG_REGISTRY = localRegistry.url
   process.env.YARN_NPM_REGISTRY_SERVER = localRegistry.url
   if (manager === 'yarn') {
     // Yarn 4 reads array config from a comma-separated environment value.
@@ -668,6 +670,9 @@ try {
   if (previousRegistryEnvironment.NPM === undefined)
     delete process.env.NPM_CONFIG_REGISTRY
   else process.env.NPM_CONFIG_REGISTRY = previousRegistryEnvironment.NPM
+  if (previousRegistryEnvironment.bun === undefined)
+    delete process.env.BUN_CONFIG_REGISTRY
+  else process.env.BUN_CONFIG_REGISTRY = previousRegistryEnvironment.bun
   if (previousRegistryEnvironment.yarn === undefined)
     delete process.env.YARN_NPM_REGISTRY_SERVER
   else process.env.YARN_NPM_REGISTRY_SERVER = previousRegistryEnvironment.yarn
