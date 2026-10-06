@@ -307,7 +307,7 @@ try {
   async function runInstalledBin(args) {
     if (process.platform !== 'win32')
       return runCommand(installedBin, args, { cwd: app })
-    const commandLine = `"${installedBin}" ${args.join(' ')}`
+    const commandLine = `""${installedBin}" ${args.join(' ')}"`
     return runCommand(
       process.env.ComSpec ?? 'cmd.exe',
       ['/d', '/s', '/c', commandLine],
