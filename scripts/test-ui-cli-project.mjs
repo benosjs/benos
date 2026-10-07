@@ -344,7 +344,7 @@ try {
     )
     const typeEntry = packageManifest.exports?.['.']?.types
     if (
-      packageManifest.version !== '0.2.1' ||
+      packageManifest.version !== '0.2.2' ||
       !typeEntry?.startsWith('./dist/types/')
     ) {
       throw new Error(
@@ -573,8 +573,8 @@ try {
   }
   const appPackagePath = join(app, 'package.json')
   const appPackage = JSON.parse(await readFile(appPackagePath, 'utf8'))
-  appPackage.dependencies['@benosjs/core'] = '^0.2.1'
-  appPackage.dependencies['@benosjs/primitives'] = '^0.2.1'
+  appPackage.dependencies['@benosjs/core'] = '^0.2.2'
+  appPackage.dependencies['@benosjs/primitives'] = '^0.2.2'
   await writeFile(appPackagePath, JSON.stringify(appPackage, null, 2) + '\n')
   await runCommand(manager, ['install'], { cwd: app })
   await runCommand(

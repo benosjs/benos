@@ -1,6 +1,6 @@
-# v0.2.1 release checklist
+# v0.2.2 release checklist
 
-This checklist prepares the eight unpublished 0.2.1 packages. Do not create the
+This checklist prepares the eight unpublished 0.2.2 packages. Do not create the
 tag or publish until the merged main branch has green CI and the package
 dry-runs below pass. Release order is deliberate: publish the immutable Git
 tag and verify the versioned registry first, then publish each package in
@@ -8,9 +8,9 @@ dependency order, checking its success output before continuing.
 
 ## 1. Preflight and package verification
 
-Confirm the `ui-system` pull request is merged to `main`, the working tree is
-clean, and CI is green for the merge commit. Confirm all eight publishable
-package manifests have version `0.2.1`, complete metadata, an MIT license, and
+Confirm the 0.2.2 pull request is merged to `main`, the working tree is clean,
+and CI is green for the merge commit. Confirm all eight publishable
+package manifests have version `0.2.2`, complete metadata, an MIT license, and
 a README. The root and package READMEs use the current logo.
 
 From a clean checkout, run:
@@ -70,24 +70,24 @@ Inspect each tarball for its README, LICENSE, built files, declarations, and
 runtime entry points. Do not proceed if a package's manifest, files, or
 version differs from the reviewed release.
 
-## 3. Push the v0.2.1 tag, then verify registry URLs
+## 3. Push the v0.2.2 tag, then verify registry URLs
 
 Run these steps on the merged `main` checkout. Tagging must happen before any
-package is published because the registry index points to immutable files at
-the `v0.2.1` Git tag.
+package is published. The index is read from the `v0.2.2` tag; its component
+URLs may point to an earlier immutable registry release and must all resolve.
 
 ```sh
 git switch main
 git pull --ff-only origin main
-git tag -a v0.2.1 -m "Release v0.2.1"
-git push origin v0.2.1
+git tag -a v0.2.2 -m "Release v0.2.2"
+git push origin v0.2.2
 ```
 
 Confirm every registry item URL resolves from the pushed tag:
 
 ```sh
 node --input-type=module <<'NODE'
-const base = 'https://raw.githubusercontent.com/benosjs/benos/v0.2.1'
+const base = 'https://raw.githubusercontent.com/benosjs/benos/v0.2.2'
 const indexUrl = base + '/registry/v1/index.json'
 const indexResponse = await fetch(indexUrl)
 if (!indexResponse.ok) throw new Error('Registry index failed: ' + indexResponse.status + ' ' + indexUrl)
@@ -126,7 +126,7 @@ pnpm --filter @benosjs/eslint-plugin publish --access public --publish-branch ma
 pnpm --filter @benosjs/primitives publish --access public --publish-branch main
 pnpm --filter benos publish --access public --publish-branch main
 pnpm --filter create-benos publish --access public --publish-branch main
-npm deprecate 'benos@0.2.0' 'The 0.2.0 CLI launcher does not run through npm bin symlinks or Windows shims. Upgrade to benos@0.2.1.'
+npm deprecate 'benos@0.2.0' 'The 0.2.0 CLI launcher does not run through npm bin symlinks or Windows shims. Upgrade to benos@0.2.2.'
 ```
 
 After the eight publish commands succeed, deprecate the broken 0.2.0 CLI
@@ -136,25 +136,25 @@ If an accidental prerelease such as `0.0.0-stage` is published, deprecate it
 immediately so npm warns users. For example:
 
 ```sh
-npm deprecate '@benosjs/dom@0.0.0-stage' 'Accidental prerelease; use 0.2.1.'
-npm deprecate '@benosjs/vite@0.0.0-stage' 'Accidental prerelease; use 0.2.1.'
+npm deprecate '@benosjs/dom@0.0.0-stage' 'Accidental prerelease; use 0.2.2.'
+npm deprecate '@benosjs/vite@0.0.0-stage' 'Accidental prerelease; use 0.2.2.'
 ```
 
 Replace the package name and version if another package is affected.
 
 ## 5. Verify npm and a fresh project
 
-Wait until all eight published versions report `0.2.1`:
+Wait until all eight published versions report `0.2.2`:
 
 ```sh
-npm view @benosjs/core@0.2.1 version
-npm view @benosjs/dom@0.2.1 version
-npm view @benosjs/compiler@0.2.1 version
-npm view @benosjs/vite@0.2.1 version
-npm view @benosjs/eslint-plugin@0.2.1 version
-npm view @benosjs/primitives@0.2.1 version
-npm view benos@0.2.1 version
-npm view create-benos@0.2.1 version
+npm view @benosjs/core@0.2.2 version
+npm view @benosjs/dom@0.2.2 version
+npm view @benosjs/compiler@0.2.2 version
+npm view @benosjs/vite@0.2.2 version
+npm view @benosjs/eslint-plugin@0.2.2 version
+npm view @benosjs/primitives@0.2.2 version
+npm view benos@0.2.2 version
+npm view create-benos@0.2.2 version
 ```
 
 Create a fresh app, install the published `benos` CLI, and add a component:

@@ -12,12 +12,25 @@ const templateRoot = resolve(packageRoot, '../template')
 
 function runCommand(command, args, options = {}) {
   return new Promise((resolvePromise, reject) => {
+    const captureOutput = options.captureOutput === true
     const child = spawn(command, args, {
       cwd: options.cwd,
       env: options.env ?? process.env,
-      stdio: 'inherit',
+      stdio: captureOutput ? ['ignore', 'pipe', 'pipe'] : 'inherit',
       shell: false,
     })
+    let stdout = ''
+    let stderr = ''
+    if (captureOutput) {
+      child.stdout.setEncoding('utf8')
+      child.stderr.setEncoding('utf8')
+      child.stdout.on('data', (chunk) => {
+        stdout += chunk
+      })
+      child.stderr.on('data', (chunk) => {
+        stderr += chunk
+      })
+    }
     let interrupted = false
     const handleInterrupt = () => {
       if (interrupted) return
@@ -44,10 +57,15 @@ function runCommand(command, args, options = {}) {
     child.once('close', (code, signal) => {
       if (options.allowInterrupt) process.off('SIGINT', handleInterrupt)
       if (code === 0 || (interrupted && options.allowInterrupt))
-        resolvePromise({ interrupted })
+        resolvePromise({ interrupted, stdout, stderr })
       else {
         const reason = signal ? `signal ${signal}` : `exit code ${code}`
-        reject(new Error(`${command} ${args.join(' ')} failed with ${reason}.`))
+        const captured = [stdout, stderr].filter(Boolean).join('\n').trim()
+        reject(
+          new Error(
+            `${command} ${args.join(' ')} failed with ${reason}.${captured ? `\n${captured}` : ''}`,
+          ),
+        )
       }
     })
   })
@@ -64,6 +82,7 @@ Options:
   --no-install           skip dependency installation
   --start                start the dev server after installation
   --no-start             do not start the dev server
+  --verbose              show detailed Benos UI setup output
   --registry <url>       use this registry when --ui is enabled
   --git                  run git init after scaffolding
   --help                 show this message
@@ -89,6 +108,7 @@ function parseArgs(args) {
   let install
   let start
   let registry
+  let verbose = false
   for (let index = 0; index < args.length; index++) {
     const arg = args[index]
     if (arg === '--help' || arg === '-h') {
@@ -101,6 +121,10 @@ function parseArgs(args) {
     }
     if (arg === '--git') {
       git = true
+      continue
+    }
+    if (arg === '--verbose') {
+      verbose = true
       continue
     }
     if (arg === '--ui') {
@@ -148,7 +172,7 @@ function parseArgs(args) {
     if (directory) throw new Error(`Unexpected argument: ${arg}`)
     directory = arg
   }
-  return { directory, yes, git, ui, install, start, registry }
+  return { directory, yes, git, ui, install, start, registry, verbose }
 }
 
 function hasTerminal() {
@@ -189,6 +213,46 @@ async function chooseProjectName(directory, interactive) {
       },
     }),
     'project name',
+  )
+  return name.trim()
+}
+
+function isValidPackageName(name) {
+  return /^[a-z0-9][a-z0-9._~-]{0,213}$/.test(name)
+}
+
+function packageNameFromProjectName(projectName) {
+  const name = projectName
+    .split(/[\\/]/)
+    .filter(Boolean)
+    .at(-1)
+    ?.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 214)
+    .replace(/-+$/g, '')
+  return name && isValidPackageName(name) ? name : undefined
+}
+
+async function choosePackageName(projectName, interactive) {
+  const suggested = packageNameFromProjectName(projectName)
+  if (suggested) return suggested
+  if (!interactive) {
+    throw new Error(
+      `Could not derive a valid npm package name from "${projectName}". Run create-benos in a terminal to enter a package name, or choose a directory name containing letters or numbers.`,
+    )
+  }
+  const name = promptValue(
+    await prompts.text({
+      message: 'What is your npm package name?',
+      placeholder: 'benos-app',
+      initialValue: 'benos-app',
+      validate(value) {
+        if (!isValidPackageName(value.trim()))
+          return 'Use a lowercase npm package name with letters, numbers, dots, underscores, or hyphens (max 214 characters).'
+      },
+    }),
+    'npm package name',
   )
   return name.trim()
 }
@@ -235,11 +299,12 @@ async function chooseInstallAndStart(options, manager, interactive) {
   return { install, start }
 }
 
-async function setupUi(directory, manager, registry) {
+async function setupUi(directory, manager, registry, verbose) {
   const cli = fileURLToPath(import.meta.resolve('benos/bin/benos.mjs'))
   const registryArgs = registry ? ['--registry', registry] : []
   await runCommand(process.execPath, [cli, 'init', '--yes', ...registryArgs], {
     cwd: directory,
+    captureOutput: !verbose,
   })
   await runCommand(
     process.execPath,
@@ -253,7 +318,7 @@ async function setupUi(directory, manager, registry) {
       manager,
       ...registryArgs,
     ],
-    { cwd: directory },
+    { cwd: directory, captureOutput: !verbose },
   )
 }
 
@@ -287,11 +352,11 @@ async function confirmOverwrite(directory, yes, interactive) {
   if (!answer) throw new Error('Scaffolding cancelled.')
 }
 
-async function replacePlaceholders(directory, manager) {
+async function replacePlaceholders(directory, manager, packageName) {
   const packageFile = join(directory, 'package.json')
   const packageJson = JSON.parse(await readFile(packageFile, 'utf8'))
-  packageJson.name =
-    directory.split(/[\\/]/).filter(Boolean).at(-1) ?? 'benos-app'
+  packageJson.name = packageName
+  packageJson.version = '0.0.0'
   packageJson.private = true
   packageJson.createBenosPackageManager = manager
   await writeFile(packageFile, `${JSON.stringify(packageJson, null, 2)}\n`)
@@ -305,22 +370,28 @@ async function main() {
   const interactive = hasTerminal()
   const shouldPrompt = interactive && !options.yes
   const projectName = await chooseProjectName(options.directory, shouldPrompt)
+  const packageName = await choosePackageName(projectName, shouldPrompt)
   const manager = packageManager()
   const withUi = await chooseUi(options.ui, shouldPrompt)
   const actions = await chooseInstallAndStart(options, manager, interactive)
   const directory = resolve(process.cwd(), projectName)
   await confirmOverwrite(directory, options.yes, shouldPrompt)
+  console.log(`Scaffolding project in ${directory}...`)
   await mkdir(directory, { recursive: true })
   await cp(templateRoot, directory, {
     recursive: true,
     force: true,
     errorOnExist: false,
   })
-  await replacePlaceholders(directory, manager)
+  await replacePlaceholders(directory, manager, packageName)
   if (withUi) await writeUiStarter(directory)
+  console.log(`Created a Benos app in ${directory}`)
+  console.log(`Detected package manager: ${manager}`)
   try {
-    if (actions.install)
+    if (actions.install) {
+      console.log(`Installing dependencies with ${manager}...`)
       await runCommand(manager, ['install'], { cwd: directory })
+    }
   } catch (error) {
     const detail = error instanceof Error ? error.message : String(error)
     throw new Error(
@@ -328,14 +399,14 @@ async function main() {
       { cause: error },
     )
   }
-  if (withUi && actions.install)
-    await setupUi(directory, manager, options.registry)
+  if (withUi && actions.install) {
+    console.log('Setting up Benos UI...')
+    await setupUi(directory, manager, options.registry, options.verbose)
+  }
   if (options.git) await runCommand('git', ['init'], { cwd: directory })
-  console.log(`Created a Benos app in ${directory}`)
-  console.log(`Detected package manager: ${manager}`)
   if (withUi) console.log('Added Benos UI Button and Input.')
   if (actions.start) {
-    console.log(`Starting the development server with ${manager} run dev...`)
+    console.log(`Starting dev server with ${manager} run dev...`)
     await runCommand(manager, ['run', 'dev'], {
       cwd: directory,
       allowInterrupt: true,

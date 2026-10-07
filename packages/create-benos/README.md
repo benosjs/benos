@@ -11,6 +11,10 @@ optional and defaults to no.
 npm create benos@latest my-app
 ```
 
+The folder keeps the name you enter, while the generated `package.json` uses a
+valid npm name. For example, `Benos-ui-test` creates that folder with package
+name `benos-ui-test`. Generated apps start at version `0.0.0`.
+
 Pass `--ui` to initialize Benos UI and add Button and Input. In an interactive
 terminal, the CLI asks “Add Benos UI components?” and defaults to no. Use
 `--no-ui` to skip the question explicitly. `--registry <url>` selects a
@@ -40,5 +44,8 @@ you want `--yes` without keeping a server running. `--git` initializes Git
 only when explicitly passed. Supplying either install/start flag skips that
 combined prompt; if `--start` is omitted, the server stays stopped. ESLint is
 included as the linter.
+
+Pass `--verbose` to show the detailed files written during `benos init` and
+`benos add`; by default, create-benos shows concise progress steps.
 
 MIT licensed. See [LICENSE](LICENSE).

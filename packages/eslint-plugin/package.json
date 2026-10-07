@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/eslint-plugin",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "ESLint rules for Benos component and prop conventions.",
   "repository": {
     "type": "git",
