@@ -2,6 +2,7 @@
 
 import assert from 'node:assert/strict'
 import { spawnSync } from 'node:child_process'
+import { createHash } from 'node:crypto'
 import {
   chmodSync,
   existsSync,
@@ -14,9 +15,34 @@ import {
 import { delimiter, join } from 'node:path'
 import { tmpdir } from 'node:os'
 import { test } from 'node:test'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const cli = fileURLToPath(new URL('../src/index.mjs', import.meta.url))
+
+function createLocalRegistry() {
+  const registryRoot = fileURLToPath(
+    new URL('../../../registry/v1/', import.meta.url),
+  )
+  const index = JSON.parse(
+    readFileSync(join(registryRoot, 'index.json'), 'utf8'),
+  )
+  const items = index.items
+    .filter((item) => ['button', 'input'].includes(item.name))
+    .map((item) => {
+      const path = join(registryRoot, 'items', `${item.name}.json`)
+      const bytes = readFileSync(path)
+      return {
+        ...item,
+        url: pathToFileURL(path).href,
+        checksum: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
+      }
+    })
+  const value = { ...index, items }
+  const temporary = mkdtempSync(join(tmpdir(), 'create-benos-registry-'))
+  const localIndex = join(temporary, 'index.json')
+  writeFileSync(localIndex, `${JSON.stringify(value, null, 2)}\n`)
+  return { url: pathToFileURL(localIndex).href, temporary }
+}
 
 function fakeNpmEnvironment(directory, failInstall = false) {
   const fakeBin = join(directory, 'bin')
@@ -70,6 +96,7 @@ test('CLI help shows optional UI flags and one curated template', () => {
   assert.match(result.stdout, /--no-install\s+skip dependency installation/)
   assert.match(result.stdout, /--start\s+start the dev server/)
   assert.match(result.stdout, /--no-start\s+do not start the dev server/)
+  assert.match(result.stdout, /--verbose\s+show detailed Benos UI setup output/)
   assert.doesNotMatch(result.stdout, /--template/)
 })
 
@@ -147,6 +174,96 @@ test('non-interactive no-install and no-start print exact next steps', (context)
     /What is your project named\?|Add Benos UI components\?|Install with npm/,
   )
   assert.equal(existsSync(join(temporary, 'starter', 'package.json')), true)
+})
+
+test('normalizes the npm package name while keeping the directory name typed', (context) => {
+  const temporary = mkdtempSync(join(tmpdir(), 'create-benos-name-'))
+  context.after(() => rmSync(temporary, { recursive: true, force: true }))
+  const result = spawnSync(
+    process.execPath,
+    [cli, 'Benos-ui-test', '--no-ui', '--no-install', '--no-start'],
+    { cwd: temporary, encoding: 'utf8' },
+  )
+
+  assert.equal(result.status, 0, result.stderr)
+  assert.equal(
+    existsSync(join(temporary, 'Benos-ui-test', 'package.json')),
+    true,
+  )
+  const manifest = JSON.parse(
+    readFileSync(join(temporary, 'Benos-ui-test', 'package.json'), 'utf8'),
+  )
+  assert.equal(manifest.name, 'benos-ui-test')
+  assert.equal(manifest.version, '0.0.0')
+})
+
+test('requires a package name when a folder name cannot be normalized non-interactively', (context) => {
+  const temporary = mkdtempSync(join(tmpdir(), 'create-benos-invalid-name-'))
+  context.after(() => rmSync(temporary, { recursive: true, force: true }))
+  const result = spawnSync(
+    process.execPath,
+    [cli, '💫', '--no-ui', '--no-install', '--no-start'],
+    { cwd: temporary, encoding: 'utf8' },
+  )
+
+  assert.notEqual(result.status, 0)
+  assert.match(result.stderr, /Could not derive a valid npm package name/)
+  assert.equal(existsSync(join(temporary, '💫')), false)
+})
+
+test('prints ordered progress and hides detailed UI output unless verbose', (context) => {
+  const temporary = mkdtempSync(join(tmpdir(), 'create-benos-progress-'))
+  context.after(() => rmSync(temporary, { recursive: true, force: true }))
+  const registry = createLocalRegistry()
+  context.after(() =>
+    rmSync(registry.temporary, { recursive: true, force: true }),
+  )
+  const { env } = fakeNpmEnvironment(temporary)
+  const app = join(temporary, 'progress-app')
+  const result = spawnSync(
+    process.execPath,
+    [cli, app, '--ui', '--install', '--start', '--registry', registry.url],
+    { cwd: temporary, env, encoding: 'utf8' },
+  )
+
+  assert.equal(result.status, 0, result.stderr)
+  const steps = [
+    'Scaffolding project in ',
+    'Created a Benos app in ',
+    'Installing dependencies with npm...',
+    'Setting up Benos UI...',
+    'Starting dev server with npm run dev...',
+  ]
+  let previous = -1
+  for (const step of steps) {
+    const position = result.stdout.indexOf(step)
+    assert.notEqual(position, -1, `missing output step: ${step}`)
+    assert.ok(position > previous, `${step} was out of order`)
+    previous = position
+  }
+  assert.doesNotMatch(
+    result.stdout,
+    /Changed: benos\.json|write src\/components\/ui\/button\.tsx/,
+  )
+
+  const verboseApp = join(temporary, 'verbose-app')
+  const verbose = spawnSync(
+    process.execPath,
+    [
+      cli,
+      verboseApp,
+      '--ui',
+      '--install',
+      '--no-start',
+      '--verbose',
+      '--registry',
+      registry.url,
+    ],
+    { cwd: temporary, env, encoding: 'utf8' },
+  )
+  assert.equal(verbose.status, 0, verbose.stderr)
+  assert.match(verbose.stdout, /Changed: benos\.json/)
+  assert.match(verbose.stdout, /write src\/components\/ui\/button\.tsx/)
 })
 
 test('non-interactive defaults install dependencies but never start the server', (context) => {

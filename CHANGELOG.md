@@ -2,6 +2,29 @@
 
 All notable changes to Benos are documented here.
 
+## [0.2.2] — 2026-10-07
+
+### Fixed
+
+- Normalize generated npm package names to lowercase safe names while keeping
+  the project directory exactly as entered. If a name has no usable letters or
+  numbers, interactive runs ask for a valid package name.
+- Start generated applications at version `0.0.0` instead of inheriting the
+  create-benos package version.
+
+### Changed
+
+- Show create-vite-style progress for scaffolding, dependency installation,
+  Benos UI setup, and server startup. The UI file list is hidden by default and
+  available with `--verbose`.
+- Bump all eight publishable packages and the starter's Benos dependency ranges
+  to `0.2.2`.
+
+### Verification
+
+- Release preparation is in progress. This version has not been tagged or
+  published.
+
 ## [0.2.1] — 2026-10-06
 
 ### Fixed
