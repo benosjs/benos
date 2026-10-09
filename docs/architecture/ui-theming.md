@@ -20,9 +20,9 @@
 
 ## Brand reference and palette
 
-The approved marks are `assets/brand/benos-mark-navy.png` and `assets/brand/benos-mark-light.png`; they match the variants used on the Benos website. The navy artwork's measured primary color is **#12306B**. Use the navy mark against light surfaces and the white mark against dark surfaces, selected with `<picture>`/`prefers-color-scheme` for the starter and favicon. GitHub/npm Markdown has no reliable color-scheme image selection, so READMEs use the navy mark on their light rendering surface. Do not use the old `assets/benos-logo.png` in new UI assets.
+The approved artwork is the supplied navy ribbon B. `assets/brand/benos-mark-navy.png`, `assets/brand/benos-mark-light.png`, and the legacy `assets/benos-logo.png` now contain the same image. It is an opaque navy mark on a white square, with a sampled navy core of **#052A65**. The starter, gallery, website, favicon, and READMEs use this same artwork in both color schemes; the white square remains visible on dark surfaces. The `<picture>` theme branches stay for compatibility, but they no longer select different artwork. Keep package README image links pointed at the navy asset's absolute GitHub URL. The documented semantic UI tokens below remain the current palette values; they are not changed by this logo replacement.
 
-Implemented semantic color token values, using the navy artwork's primary color and a separate dark-mode remapping:
+The semantic UI token values remain as documented below, with a separate dark-mode remapping. Replacing the logo does not change these values:
 
 - `--benos-color-brand`: `#12306B` light / `#A9C4FF` dark.
 - `--benos-color-brand-strong`: `#0B204A` light / `#C7D8FF` dark.
@@ -36,7 +36,7 @@ Implemented semantic color token values, using the navy artwork's primary color 
 
 The batch 1 axe fixtures reported no color-contrast violations in light, dark, RTL, or dark RTL mode in Chromium, Firefox, and WebKit. Continue checking large text, forced colors, and states not yet represented by U4 fixtures.
 
-Dark tokens are semantic remappings, not opacity inversions. Preserve legibility, boundaries, focus rings, disabled contrast, and status meaning. The supplied white mark is used on dark surfaces; the dark canvas and interactive brand surface must remain distinct from the mark and meet contrast requirements. Use the white variant when system or explicit theme selects dark mode; test normal and large text sizes against actual assets.
+Dark tokens are semantic remappings, not opacity inversions. Preserve legibility, boundaries, focus rings, disabled contrast, and status meaning. The logo's white square provides its background on dark surfaces; ensure surrounding space distinguishes that tile from controls and cards. Test normal and large text sizes against the actual asset.
 
 ## Token set
 
