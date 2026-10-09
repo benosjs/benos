@@ -2,6 +2,18 @@
 
 All notable changes to Benos are documented here.
 
+## [0.2.3] — 2026-10-09
+
+### Improved
+
+- When a Benos command runs outside a project, suggest the nearby Benos app
+  folder when there is one unambiguous match.
+
+### Changed
+
+- Bump all eight publishable packages and the starter's Benos dependency ranges
+  to `0.2.3`.
+
 ## [0.2.2] — 2026-10-07
 
 ### Fixed

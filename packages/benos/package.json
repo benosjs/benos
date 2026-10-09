@@ -1,6 +1,6 @@
 {
   "name": "benos",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Source-owned UI components and registry tooling for Benos.",
   "repository": {
     "type": "git",

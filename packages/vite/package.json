@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/vite",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Vite integration for the Benos TypeScript and JSX compiler.",
   "repository": {
     "type": "git",

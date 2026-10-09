@@ -2,6 +2,7 @@ import {
   access,
   lstat,
   mkdir,
+  readdir,
   readFile,
   realpath,
   writeFile,
@@ -150,13 +151,79 @@ export async function findProjectRoot(start = process.cwd()) {
     } catch {
       const parent = dirname(current)
       if (parent === current) {
+        const suggestion = await findNearbyBenosProject(start)
+        const hint = suggestion
+          ? `\nDid you mean to run this in ${suggestion}?`
+          : ''
         throw new Error(
-          `No package.json found from ${start}; run this command inside a Benos project.`,
+          `No package.json found from ${start}; run this command inside a Benos project.${hint}`,
         )
       }
       current = parent
     }
   }
+}
+
+async function isBenosProject(directory) {
+  try {
+    const packageJson = await readJson(
+      resolve(directory, 'package.json'),
+      'package.json',
+    )
+    const dependencies = {
+      ...packageJson.dependencies,
+      ...packageJson.devDependencies,
+      ...packageJson.optionalDependencies,
+      ...packageJson.peerDependencies,
+    }
+    if (['@benosjs/core', '@benosjs/dom'].some((name) => dependencies[name]))
+      return true
+    await access(resolve(directory, 'benos.json'))
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function findNearbyBenosProject(start) {
+  const absoluteStart = resolve(start)
+  const parent = dirname(absoluteStart)
+  const neighborhoods = [
+    { directory: absoluteStart, distance: 1 },
+    { directory: parent, distance: 2 },
+  ]
+  const seen = new Set()
+  const candidates = []
+
+  for (const neighborhood of neighborhoods) {
+    let entries
+    try {
+      entries = await readdir(neighborhood.directory, { withFileTypes: true })
+    } catch {
+      continue
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue
+      const directory = resolve(neighborhood.directory, entry.name)
+      if (seen.has(directory)) continue
+      seen.add(directory)
+      if (await isBenosProject(directory)) {
+        candidates.push({ directory, distance: neighborhood.distance })
+      }
+    }
+  }
+
+  if (candidates.length === 0) return undefined
+  const nearestDistance = Math.min(
+    ...candidates.map(({ distance }) => distance),
+  )
+  const nearest = candidates.filter(
+    ({ distance }) => distance === nearestDistance,
+  )
+  if (nearest.length !== 1) return undefined
+
+  const relativePath = relative(absoluteStart, nearest[0].directory)
+  return relativePath.startsWith('..') ? relativePath : `./${relativePath}`
 }
 
 export async function rejectSymlink(path, label) {

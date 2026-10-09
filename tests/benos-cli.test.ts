@@ -291,6 +291,60 @@ describe('benos init', () => {
   })
 })
 
+describe('benos project discovery', () => {
+  it('suggests a nearby folder when it contains a Benos project', async () => {
+    await withTemp(async (temporary) => {
+      const workspace = join(temporary, 'workspace')
+      const app = join(workspace, 'benos-app')
+      await mkdir(workspace, { recursive: true })
+      await createProject(app)
+
+      const result = runCli(workspace, 'list')
+      expect(result.status).not.toBe(0)
+      expect(result.stderr).toContain(
+        'Did you mean to run this in ./benos-app?',
+      )
+    })
+  })
+
+  it('does not suggest a nearby folder that is not a Benos project', async () => {
+    await withTemp(async (temporary) => {
+      const workspace = join(temporary, 'workspace')
+      const app = join(workspace, 'other-app')
+      await mkdir(app, { recursive: true })
+      await writeFile(
+        join(app, 'package.json'),
+        `${JSON.stringify(
+          {
+            name: 'other-app',
+            devDependencies: { '@benosjs/eslint-plugin': '^0.2.3' },
+          },
+          null,
+          2,
+        )}\n`,
+      )
+
+      const result = runCli(workspace, 'list')
+      expect(result.status).not.toBe(0)
+      expect(result.stderr).toContain('No package.json found')
+      expect(result.stderr).not.toContain('Did you mean to run this in')
+    })
+  })
+
+  it('omits the suggestion when multiple nearby Benos projects are ambiguous', async () => {
+    await withTemp(async (temporary) => {
+      const workspace = join(temporary, 'workspace')
+      await mkdir(workspace, { recursive: true })
+      await createProject(join(workspace, 'first-app'))
+      await createProject(join(workspace, 'second-app'))
+
+      const result = runCli(workspace, 'list')
+      expect(result.status).not.toBe(0)
+      expect(result.stderr).not.toContain('Did you mean to run this in')
+    })
+  })
+})
+
 describe('benos add minimum Benos versions', () => {
   it('refuses an outdated installed package before writing component files', async () => {
     await withTemp(async (temporary) => {

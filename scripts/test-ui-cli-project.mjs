@@ -24,6 +24,9 @@ import { createFixtureRegistry } from '../tests/fixtures/ui-registry/create.mjs'
 import { createLocalPackagesRegistry } from '../tests/fixtures/ui-registry/local-primitives-registry.mjs'
 
 const root = resolve(import.meta.dirname, '..')
+const currentBenosVersion = JSON.parse(
+  await readFile(resolve(root, 'packages/core/package.json'), 'utf8'),
+).version
 const manager = process.env.BENOS_PACKAGE_MANAGER
 const localBenosPackages = [
   'core',
@@ -344,7 +347,7 @@ try {
     )
     const typeEntry = packageManifest.exports?.['.']?.types
     if (
-      packageManifest.version !== '0.2.2' ||
+      packageManifest.version !== currentBenosVersion ||
       !typeEntry?.startsWith('./dist/types/')
     ) {
       throw new Error(
@@ -573,8 +576,8 @@ try {
   }
   const appPackagePath = join(app, 'package.json')
   const appPackage = JSON.parse(await readFile(appPackagePath, 'utf8'))
-  appPackage.dependencies['@benosjs/core'] = '^0.2.2'
-  appPackage.dependencies['@benosjs/primitives'] = '^0.2.2'
+  appPackage.dependencies['@benosjs/core'] = `^${currentBenosVersion}`
+  appPackage.dependencies['@benosjs/primitives'] = `^${currentBenosVersion}`
   await writeFile(appPackagePath, JSON.stringify(appPackage, null, 2) + '\n')
   await runCommand(manager, ['install'], { cwd: app })
   await runCommand(
