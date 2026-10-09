@@ -159,22 +159,4 @@ jobs:
       - name: Verify every published version
         env:
           RELEASE_VERSION: ${{ github.ref_name }}
-        run: |
-          expected="${RELEASE_VERSION#v}"
-          for package in \
-            @benosjs/core \
-            @benosjs/dom \
-            @benosjs/compiler \
-            @benosjs/vite \
-            @benosjs/eslint-plugin \
-            @benosjs/primitives \
-            benos \
-            create-benos
-          do
-            actual="$(npm view "${package}@${expected}" version)"
-            if [ "$actual" != "$expected" ]; then
-              echo "${package}: expected ${expected}, received ${actual}"
-              exit 1
-            fi
-            echo "Verified ${package}@${actual}"
-          done
+        run: node scripts/verify-published-versions.mjs "$RELEASE_VERSION"
