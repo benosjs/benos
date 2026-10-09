@@ -16,6 +16,9 @@ import { promisify } from 'node:util'
 
 const runFile = promisify(execFile)
 const root = resolve(fileURLToPath(new URL('../', import.meta.url)))
+const currentBenosVersion = JSON.parse(
+  await readFile(resolve(root, 'packages/core/package.json'), 'utf8'),
+).version
 const packageDirectories = [
   'core',
   'dom',
@@ -111,9 +114,9 @@ try {
     const dependencySet = metadata.dependencies?.[name]
       ? metadata.dependencies
       : metadata.devDependencies
-    if (dependencySet?.[name] !== '^0.2.2') {
+    if (dependencySet?.[name] !== `^${currentBenosVersion}`) {
       throw new Error(
-        `Scaffold must declare ${name} as ^0.2.2 before the local-pack override`,
+        `Scaffold must declare ${name} as ^${currentBenosVersion} before the local-pack override`,
       )
     }
     const archive = archiveByPackage.get(directory)

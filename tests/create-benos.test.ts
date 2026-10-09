@@ -109,12 +109,19 @@ describe('create-benos packed scaffold', () => {
         ...generated.dependencies,
         ...generated.devDependencies,
       }).filter(([name]) => name.startsWith('@benosjs/'))
+      const templateManifest = JSON.parse(
+        await readFile(
+          join(root, 'packages/create-benos/template/package.json'),
+          'utf8',
+        ),
+      ) as { dependencies: Record<string, string> }
+      const expectedBenosRange = templateManifest.dependencies['@benosjs/core']
       expect(benosDependencies).toHaveLength(5)
       for (const [name, version] of benosDependencies) {
         expect(version, `${name} must use a published semver range`).toMatch(
           /^\^\d+\.\d+\.\d+$/,
         )
-        expect(version).toBe('^0.2.2')
+        expect(version).toBe(expectedBenosRange)
       }
       expect(generated.engines?.node).toBe('^22.18.0 || ^24.11.0 || >=26.0.0')
       expect(await readFile(join(app, '.yarnrc.yml'), 'utf8')).toContain(
