@@ -20,7 +20,7 @@
 
 ## Brand reference and palette
 
-The approved artwork is the supplied navy ribbon B. `assets/brand/benos-mark-navy.png`, `assets/brand/benos-mark-light.png`, and the legacy `assets/benos-logo.png` now contain the same image. It is an opaque navy mark on a white square, with a sampled navy core of **#052A65**. The starter, gallery, website, favicon, and READMEs use this same artwork in both color schemes; the white square remains visible on dark surfaces. The `<picture>` theme branches stay for compatibility, but they no longer select different artwork. Keep package README image links pointed at the navy asset's absolute GitHub URL. The documented semantic UI tokens below remain the current palette values; they are not changed by this logo replacement.
+The approved artwork is the supplied navy ribbon B, processed into cropped, transparent 512×512 assets. `assets/brand/benos-mark-navy.png` and `assets/benos-logo.png` use its navy artwork; `assets/brand/benos-mark-light.png` uses the same silhouette in white for dark surfaces. The source's sampled navy core is **#052A65**. The starter, gallery, website, and favicon select the navy or white version for the current color scheme. Package README links point to the navy asset's absolute GitHub URL. The documented semantic UI tokens below remain the current palette values; they are not changed by this logo replacement.
 
 The semantic UI token values remain as documented below, with a separate dark-mode remapping. Replacing the logo does not change these values:
 
@@ -36,7 +36,7 @@ The semantic UI token values remain as documented below, with a separate dark-mo
 
 The batch 1 axe fixtures reported no color-contrast violations in light, dark, RTL, or dark RTL mode in Chromium, Firefox, and WebKit. Continue checking large text, forced colors, and states not yet represented by U4 fixtures.
 
-Dark tokens are semantic remappings, not opacity inversions. Preserve legibility, boundaries, focus rings, disabled contrast, and status meaning. The logo's white square provides its background on dark surfaces; ensure surrounding space distinguishes that tile from controls and cards. Test normal and large text sizes against the actual asset.
+Dark tokens are semantic remappings, not opacity inversions. Preserve legibility, boundaries, focus rings, disabled contrast, and status meaning. Use the transparent white logo on dark surfaces and check its contrast against the actual backgrounds. Test normal and large text sizes against the actual asset.
 
 ## Token set
 
