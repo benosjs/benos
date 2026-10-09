@@ -22,8 +22,8 @@ All notable changes to Benos are documented here.
 
 ### Verification
 
-- Release preparation is in progress. This version has not been tagged or
-  published.
+- Published at `0.2.2` across all eight packages after the `v0.2.2` tag was
+  verified. The published npm versions and starter were smoke-tested.
 
 ## [0.2.1] — 2026-10-06
 
@@ -40,11 +40,13 @@ All notable changes to Benos are documented here.
 - Bump all eight publishable packages and the starter template to `0.2.1`.
 - Update registry component dependency ranges and minimum Benos versions to
   `0.2.1`.
+- Deprecate `benos@0.2.0` with an upgrade message pointing to `0.2.1` because
+  its launcher failed through npm bin symlinks and Windows command shims.
 
 ### Verification
 
-- Release preparation is in progress. This version has not been tagged or
-  published.
+- Published at `0.2.1` across all eight packages. The packed CLI passed through
+  npm, pnpm, Yarn, and Bun launch paths on Ubuntu, Windows, and macOS.
 
 ## [0.2.0] — 2026-10-06
 
@@ -78,7 +80,8 @@ All notable changes to Benos are documented here.
   UI CLI consumer matrix. Type-level, documentation, package, gallery, lint,
   bundle-size, and production benchmark checks also passed. The fresh template
   install reported no engine or deprecation warnings and zero vulnerabilities.
-- This version is prepared for release and has not been tagged or published.
+- Published at `0.2.0` across all eight packages. The CLI version was later
+  deprecated after the launcher issue described in the `0.2.1` entry.
 
 ## [0.1.2] — 2026-10-02
 
@@ -104,7 +107,7 @@ All notable changes to Benos are documented here.
   the 2× Preact CI guard.
 - GitHub Actions runs the packed create-benos end-to-end test on Ubuntu,
   Windows, and macOS.
-- This version is prepared for release and has not been published.
+- Published at `0.1.2`.
 
 ## [0.1.1] — 2026-10-02
 
@@ -137,7 +140,7 @@ All notable changes to Benos are documented here.
   both within the existing budgets.
 - On Node 24.11.0, a fresh scaffold installed from packed 0.1.1 packages with
   no engine or deprecation warnings; `npm audit` reported zero vulnerabilities.
-- This version is prepared for release and has not been published.
+- Published at `0.1.1`.
 
 ## [0.1.0] — 2026-10-01
 

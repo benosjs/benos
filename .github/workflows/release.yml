@@ -1,0 +1,180 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-release
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Verify the tag matches every package version
+        run: node scripts/check-release-tag.mjs "$GITHUB_REF_NAME"
+      - run: pnpm check:engines
+      - run: pnpm build
+      - run: pnpm registry:check
+      - run: pnpm gallery:build
+      - run: pnpm exec tsc -p examples/ui-gallery/tsconfig.json --noEmit
+      - run: pnpm exec playwright install --with-deps chromium firefox webkit
+      - run: pnpm test
+      - run: pnpm typecheck:types
+      - run: pnpm check:jsx-types
+      - run: pnpm check:doc-examples
+      - run: pnpm check:public-imports
+      - run: pnpm check:packed
+      - run: pnpm audit:template
+      - run: pnpm lint
+      - run: pnpm size
+      - run: pnpm bench:guard
+      - run: pnpm test:browser
+      - name: Verify registry URLs from this tag
+        run: node scripts/check-registry-urls.mjs "$GITHUB_REF_NAME"
+
+  create-benos:
+    name: create-benos (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm check:engines
+      - run: pnpm exec vitest run tests/create-benos.test.ts
+
+  ui-cli-consumer:
+    name: UI CLI (${{ matrix.os }}, ${{ matrix.package_manager }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        package_manager: [npm, pnpm, yarn, bun]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: pnpm
+      - uses: oven-sh/setup-bun@v2
+        if: matrix.package_manager == 'bun'
+        with:
+          bun-version: 1.2.0
+      - name: Enable Yarn 4
+        if: matrix.package_manager == 'yarn'
+        run: |
+          corepack enable
+          corepack prepare yarn@4.5.0 --activate
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm registry:check
+      - name: Test packed benos CLI bin shims
+        env:
+          BENOS_PACKAGE_MANAGER: ${{ matrix.package_manager }}
+        run: node scripts/test-packed-benos-cli.mjs
+      - name: Test a fresh create-benos consumer
+        env:
+          BENOS_PACKAGE_MANAGER: ${{ matrix.package_manager }}
+        run: node scripts/test-ui-cli-project.mjs
+
+  publish:
+    name: Publish packages
+    needs: [verify, create-benos, ui-cli-consumer]
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://www.npmjs.com/org/benosjs
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Install npm with trusted publishing support
+        run: |
+          npm install --global npm@11.5.1
+          test "$(npm --version)" = "11.5.1"
+      - name: Publish @benosjs/core with provenance
+        run: pnpm --filter @benosjs/core publish --access public --provenance --no-git-checks
+      - name: Publish @benosjs/dom with provenance
+        run: pnpm --filter @benosjs/dom publish --access public --provenance --no-git-checks
+      - name: Publish @benosjs/compiler with provenance
+        run: pnpm --filter @benosjs/compiler publish --access public --provenance --no-git-checks
+      - name: Publish @benosjs/vite with provenance
+        run: pnpm --filter @benosjs/vite publish --access public --provenance --no-git-checks
+      - name: Publish @benosjs/eslint-plugin with provenance
+        run: pnpm --filter @benosjs/eslint-plugin publish --access public --provenance --no-git-checks
+      - name: Publish @benosjs/primitives with provenance
+        run: pnpm --filter @benosjs/primitives publish --access public --provenance --no-git-checks
+      - name: Publish benos with provenance
+        run: pnpm --filter benos publish --access public --provenance --no-git-checks
+      - name: Publish create-benos with provenance
+        run: pnpm --filter create-benos publish --access public --provenance --no-git-checks
+      - name: Verify every published version
+        env:
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          expected="${RELEASE_VERSION#v}"
+          for package in \
+            @benosjs/core \
+            @benosjs/dom \
+            @benosjs/compiler \
+            @benosjs/vite \
+            @benosjs/eslint-plugin \
+            @benosjs/primitives \
+            benos \
+            create-benos
+          do
+            actual="$(npm view "${package}@${expected}" version)"
+            if [ "$actual" != "$expected" ]; then
+              echo "${package}: expected ${expected}, received ${actual}"
+              exit 1
+            fi
+            echo "Verified ${package}@${actual}"
+          done

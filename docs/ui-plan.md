@@ -1,6 +1,15 @@
 # Benos UI System — Build Brief
 
-You are the lead architect and engineer for the **Benos UI system**: optional, accessible, source-owned UI components for Benos, the TypeScript-first fine-grained frontend framework published as `@benosjs/*` (v0.2.0 release preparation).
+**Current status:** the UI system is complete and shipped. Versions 0.2.0,
+0.2.1, and 0.2.2 are published across all eight packages. The shipped UI
+surface includes `@benosjs/primitives`, the 19-item source-owned registry,
+`benos init/add/list/diff/update`, and theming. `benos@0.2.0` is deprecated
+because its launcher failed through npm bin symlinks and Windows command
+shims.
+
+This brief records the design and implementation plan for the **Benos UI
+system**: optional, accessible, source-owned UI components for Benos, the
+TypeScript-first fine-grained frontend framework published as `@benosjs/*`.
 
 Build it in phases with review checkpoints, exactly as v0.1 was built: design documents first, then implementation, with tests at every step. Push back when an idea is technically weak.
 
@@ -162,9 +171,12 @@ OS/package-manager matrix cells, including clean server shutdown. Prepare the
 gallery for a production deployment as a website component catalog, with a
 link to each guide page, and document deployment steps without deploying it.
 
-### U7 — Release preparation (0.2.0)
+### U7 — Release preparation (0.2.0) — complete; releases published
 
-Full verification (all tests, three browsers, three operating systems, audit, budgets), CHANGELOG, package metadata, READMEs with the logo, and an updated release checklist. Run the publish dry-run, then stop and give me the exact publish commands. Do not publish.
+Full verification, three-browser and three-operating-system coverage, audit,
+bundle budgets, changelog, package metadata, logo READMEs, release checklist,
+and publish rehearsals were completed. The approved 0.2.0, 0.2.1, and 0.2.2
+releases are published.
 
 ---
 
