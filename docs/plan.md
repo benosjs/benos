@@ -1,6 +1,6 @@
 # Benos build plan
 
-This document is the source of truth for Benos scope and phase status. The master prompt establishes the initial architecture; this plan records the approved execution order and later corrections. Work stops at each checkpoint for review. No package is published and no Git history is changed without explicit approval.
+This document is the source of truth for Benos scope and phase status. The master prompt establishes the initial architecture; this plan records the approved execution order and later corrections. Work stops at each checkpoint for review. As of v0.2.2, all eight packages are published and the optional UI system is complete and shipped. Later package releases still require explicit approval.
 
 ## Phase 0 — Workspace — complete
 
@@ -68,7 +68,7 @@ Write the type-level sketch required by risk 1 in `risks.md`: one typed declarat
 - Reconcile Phase 5 findings and fix only approved v0.1 issues.
 - Verify bundle budgets, coverage, benchmark records, and agreement between implementation and architecture documents.
 - Write the getting-started guide and API reference for the v0.1 surface.
-- Do not publish packages.
+- The initial v0.1 readiness work ended before publication; the approved v0.2.0, v0.2.1, and v0.2.2 releases are now published.
 
 ### 6a — v0.1 blockers — complete
 
@@ -94,7 +94,7 @@ Write the type-level sketch required by risk 1 in `risks.md`: one typed declarat
 
 ### 6d — `create-benos` — complete
 
-- Implement the full `create-benos` requirements below, including end-to-end tests that scaffold into a temporary directory, install packed packages, and verify type-check, build, test, and lint. Do not publish.
+- Implement the full `create-benos` requirements below, including end-to-end tests that scaffold into a temporary directory, install packed packages, and verify type-check, build, test, and lint. The package was later published in the approved v0.2.x releases.
 
 ### 6e — Final verification — complete
 
@@ -112,6 +112,14 @@ Write the type-level sketch required by risk 1 in `risks.md`: one typed declarat
 - Include the minimal scripts and JSX configuration needed for a first render, and keep router, forms, query, SSR, UI primitives, and other out-of-scope modules out of the generated starter.
 - Recheck npm name and scope availability immediately before publication; publishing remains explicitly deferred until approval.
 
+## Current release and next scope
+
+Versions 0.2.0, 0.2.1, and 0.2.2 are published. The optional UI system is complete and shipped: primitives, the source-owned component registry, `benos init/add/list/diff/update`, and theming are part of the released product.
+
+Upcoming framework work remains blocks, router, query, forms, the full flagship integration, SSR, and devtools. The Phase 5d type-level sketch is complete; the integrated runtime modules remain upcoming. The sortable table's production initial render is the leading performance item: recorded workloads are roughly 2× Solid (2.46× at 10,000 rows and 2.72× at 5,000 rows); sorting is much closer.
+
+The top CLI follow-up for the next patch is to extend the no-project error with a nearby-folder suggestion: `Did you mean to run this in <folder>?`
+
 ## Scope boundary
 
-In scope through Phase 6: the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark validation, dashboard validation, documentation, and readiness tooling listed above. Router, forms, query, state, UI primitives, component registry, SSR, hydration, async resources, Suspense, devtools, React interop, and a general CLI remain out of scope unless a later approved plan changes this document.
+Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. Blocks, router, forms, query, the full flagship integration, SSR/hydration, async resources, Suspense, devtools, and React interop remain upcoming unless a later approved plan changes this document.

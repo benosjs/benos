@@ -1,60 +1,80 @@
-# v0.2.2 release checklist
+# Release checklist
 
-This checklist prepares the eight unpublished 0.2.2 packages. Do not create the
-tag or publish until the merged main branch has green CI and the package
-dry-runs below pass. Release order is deliberate: publish the immutable Git
-tag and verify the versioned registry first, then publish each package in
-dependency order, checking its success output before continuing.
+## Published release state
 
-## 1. Preflight and package verification
+- Versions `0.2.0`, `0.2.1`, and `0.2.2` are published for all eight
+  packages: `@benosjs/core`, `@benosjs/dom`, `@benosjs/compiler`,
+  `@benosjs/vite`, `@benosjs/eslint-plugin`, `@benosjs/primitives`, `benos`,
+  and `create-benos`.
+- The optional UI system shipped in 0.2.0: primitives, 19 registry components,
+  the `benos` component CLI, and theming.
+- `benos@0.2.0` is deprecated. The 0.2.1 release notes document the launcher
+  issue and point users to a fixed version.
+- The accidental `@benosjs/dom@0.0.0-stage` and
+  `@benosjs/vite@0.0.0-stage` versions are deprecated.
+- GitHub Releases exist for `v0.2.1` and `v0.2.2`; `v0.2.0` remains
+  represented by its existing tag.
 
-Confirm the 0.2.2 pull request is merged to `main`, the working tree is clean,
-and CI is green for the merge commit. Confirm all eight publishable
-package manifests have version `0.2.2`, complete metadata, an MIT license, and
-a README. The root and package READMEs use the current logo.
+## Automated release (default for future versions)
 
-From a clean checkout, run:
+The `.github/workflows/release.yml` workflow runs when a `v*` tag is pushed.
+It checks that the tag version matches all eight package manifests, runs the
+full verification suite and OS/package-manager consumer matrices, and checks
+the registry item URLs from that tag. Only after those jobs pass does the
+`publish` job wait for approval in the GitHub `release` environment. It then
+publishes in the order below with npm trusted publishing (GitHub OIDC),
+without an npm token, and verifies all eight versions with `npm view`.
+Trusted publishing automatically creates npm provenance for these public
+packages from this public GitHub repository.
+
+Before the first automated release, configure each of the eight package
+settings on npmjs.com under **Package → Settings → Trusted publishing**:
+
+| Field                | Value                |
+| -------------------- | -------------------- |
+| Provider             | GitHub Actions       |
+| Organization or user | `benosjs`            |
+| Repository           | `benos`              |
+| Workflow filename    | `release.yml`        |
+| Environment name     | `release`            |
+| Allowed action       | Direct `npm publish` |
+
+Repeat this configuration for all eight packages. On GitHub, open the
+repository **Settings → Environments → New environment**, create an environment
+named `release`, add `ahomsi0` as a required reviewer, and save it. The release
+job uses this environment, so publishing remains blocked until that reviewer
+approves the deployment.
+
+For a release:
+
+1. Update all eight package versions, registry minimums, and `CHANGELOG.md`.
+2. Merge the reviewed release change to `main` after CI is green.
+3. Create and push an annotated `vX.Y.Z` tag from the reviewed `main` commit.
+   The workflow rejects the tag if its version differs from any package.
+4. Confirm the verification, browser, three-OS create-benos, and
+   three-OS/four-package-manager UI CLI jobs pass. The workflow verifies the
+   versioned registry index and every immutable item URL before the publish
+   job becomes available.
+5. Review and approve the `release` environment deployment. The workflow
+   publishes each package sequentially and stops on the first error.
+6. Confirm all eight `npm view <package>@<version> version` checks match the
+   tag. If a CLI version must be deprecated, run and verify that separately.
+
+The workflow uses `pnpm publish --provenance`; it does not read or store an
+npm token. See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/)
+for npm-side configuration details.
+
+## Manual publish fallback
+
+Use this only when the automated workflow cannot be used. First confirm the
+reviewed `main` commit is clean and green in CI, package versions all match,
+and registry URLs resolve from the release tag. Log in interactively, then
+run the dry-run and `check:packed` before publishing. Stop after any failed
+command and inspect registry state before retrying.
 
 ```sh
-pnpm install --frozen-lockfile
-pnpm check:engines
-pnpm build
-pnpm registry:check
-pnpm test
-pnpm typecheck:types
-pnpm check:jsx-types
-pnpm check:doc-examples
-pnpm check:public-imports
-pnpm check:packed
-pnpm audit:template
-pnpm lint
-pnpm size
-pnpm bench:guard
-pnpm gallery:build
-pnpm exec tsc -p examples/ui-gallery/tsconfig.json --noEmit
-pnpm exec playwright install --with-deps chromium firefox webkit
-pnpm test:browser
-pnpm exec vitest run tests/create-benos.test.ts
-```
-
-`check:packed` packs all eight packages and validates exports, `workspace:`
-metadata, root stubs, and `.tsbuildinfo`. For `benos` and `create-benos`, it
-also rejects `.node` files, `node_modules` content, test-only dependencies in
-the package manifest, and test tooling in runtime dependency sections.
-`node-pty` and other workspace test tools must remain root devDependencies.
-The generated starter's Vitest and happy-dom remain devDependencies of that
-embedded application template.
-
-The scaffold audit must show no engine or deprecation warnings and no high or
-critical advisories. Confirm the core and core-plus-DOM budgets and benchmark
-guard pass.
-
-## 2. Rehearse packing and publishing
-
-Run and inspect a dry-run for each package in this exact order. These commands
-do not write to npm:
-
-```sh
+npm login
+npm whoami
 pnpm --filter @benosjs/core publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/dom publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/compiler publish --dry-run --access public --publish-branch main
@@ -66,56 +86,8 @@ pnpm --filter create-benos publish --dry-run --access public --publish-branch ma
 pnpm check:packed
 ```
 
-Inspect each tarball for its README, LICENSE, built files, declarations, and
-runtime entry points. Do not proceed if a package's manifest, files, or
-version differs from the reviewed release.
-
-## 3. Push the v0.2.2 tag, then verify registry URLs
-
-Run these steps on the merged `main` checkout. Tagging must happen before any
-package is published. The index is read from the `v0.2.2` tag; its component
-URLs may point to an earlier immutable registry release and must all resolve.
-
-```sh
-git switch main
-git pull --ff-only origin main
-git tag -a v0.2.2 -m "Release v0.2.2"
-git push origin v0.2.2
-```
-
-Confirm every registry item URL resolves from the pushed tag:
-
-```sh
-node --input-type=module <<'NODE'
-const base = 'https://raw.githubusercontent.com/benosjs/benos/v0.2.2'
-const indexUrl = base + '/registry/v1/index.json'
-const indexResponse = await fetch(indexUrl)
-if (!indexResponse.ok) throw new Error('Registry index failed: ' + indexResponse.status + ' ' + indexUrl)
-const index = await indexResponse.json()
-for (const item of index.items) {
-  const response = await fetch(item.url)
-  if (!response.ok) throw new Error('Registry item failed: ' + response.status + ' ' + item.url)
-  console.log('OK ' + item.name + ': ' + item.url)
-}
-NODE
-```
-
-Stop if the index or any item URL fails. Fix the tag contents and repeat the
-URL check before publishing.
-
-## 4. Publish packages one at a time
-
-Log into the npm account that owns the `@benosjs` organization, then verify
-the account:
-
-```sh
-npm login
-npm whoami
-```
-
-Publish in this order. After each command, confirm its success line and that it
-exited successfully before running the next command. Stop immediately on any
-failure and inspect the npm registry state.
+After the dry-runs pass, publish each package in this exact order, checking
+the command's success line before starting the next one:
 
 ```sh
 pnpm --filter @benosjs/core publish --access public --publish-branch main
@@ -126,50 +98,21 @@ pnpm --filter @benosjs/eslint-plugin publish --access public --publish-branch ma
 pnpm --filter @benosjs/primitives publish --access public --publish-branch main
 pnpm --filter benos publish --access public --publish-branch main
 pnpm --filter create-benos publish --access public --publish-branch main
-npm deprecate 'benos@0.2.0' 'The 0.2.0 CLI launcher does not run through npm bin symlinks or Windows shims. Upgrade to benos@0.2.2.'
 ```
 
-After the eight publish commands succeed, deprecate the broken 0.2.0 CLI
-release. Verify the deprecation with `npm view benos@0.2.0 deprecated`.
-
-If an accidental prerelease such as `0.0.0-stage` is published, deprecate it
-immediately so npm warns users. For example:
+Then verify the exact version for every package:
 
 ```sh
-npm deprecate '@benosjs/dom@0.0.0-stage' 'Accidental prerelease; use 0.2.2.'
-npm deprecate '@benosjs/vite@0.0.0-stage' 'Accidental prerelease; use 0.2.2.'
+npm view @benosjs/core version
+npm view @benosjs/dom version
+npm view @benosjs/compiler version
+npm view @benosjs/vite version
+npm view @benosjs/eslint-plugin version
+npm view @benosjs/primitives version
+npm view benos version
+npm view create-benos version
 ```
 
-Replace the package name and version if another package is affected.
-
-## 5. Verify npm and a fresh project
-
-Wait until all eight published versions report `0.2.2`:
-
-```sh
-npm view @benosjs/core@0.2.2 version
-npm view @benosjs/dom@0.2.2 version
-npm view @benosjs/compiler@0.2.2 version
-npm view @benosjs/vite@0.2.2 version
-npm view @benosjs/eslint-plugin@0.2.2 version
-npm view @benosjs/primitives@0.2.2 version
-npm view benos@0.2.2 version
-npm view create-benos@0.2.2 version
-```
-
-Create a fresh app, install the published `benos` CLI, and add a component:
-
-```sh
-npm create benos@latest -- benos-release-smoke --no-ui --install --no-start
-cd benos-release-smoke
-npx --yes benos@latest init --yes
-npx --yes benos@latest add button --yes
-npm run typecheck
-npm run build
-npm run test
-npm run lint
-```
-
-Confirm `Button` was copied into the project and the lock file records its
-registry version. Save the npm package and GitHub tag URLs with the release
-record.
+The deprecation for `benos@0.2.0` is already in place. If an accidental
+`0.0.0-stage` version is ever published, deprecate that exact package version
+with a message pointing to the intended stable release.
