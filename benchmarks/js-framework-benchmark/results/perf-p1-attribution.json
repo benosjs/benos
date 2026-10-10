@@ -1,0 +1,489 @@
+{
+  "protocol": {
+    "cpu": "Chromium V8 CPU profile, 500 µs sampling, minified production bundles, source maps used for package attribution; one warmup and three measured rounds, alternating Benos/Solid. Clicks delivered by CDP mouse input; profiles include click dispatch. Profile time includes opaque V8 program frames and is not a benchmark duration.",
+    "tableCpu": "One warmup and three interleaved CPU profiles per variant/size; Profiler started before navigation. Timings in perf-p1-sortable-table.json are the seven-round benchmark results.",
+    "heap": "Chromium HeapProfiler snapshots with forced GC at empty page, 1k rows, and 10k rows; per-row values are count and shallow-size deltas. DOM-node attributes are normalized to tag. One snapshot at each point; this is retained heap, not a census of short-lived allocations."
+  },
+  "cpu": {
+    "create-1k": {
+      "benos": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 13.908,
+          "owner": 0,
+          "events": 0.63,
+          "dom": 4.391,
+          "disposal": 0,
+          "gc": 0,
+          "app": 0.621,
+          "unattributed": 156.4,
+          "idle": 6.328
+        },
+        "sampleCpuMsMedian": 185.39
+      },
+      "solid": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 2.131,
+          "owner": 0,
+          "events": 0,
+          "dom": 0.257,
+          "disposal": 0,
+          "gc": 0,
+          "app": 0.697,
+          "unattributed": 178.073,
+          "idle": 5.212
+        },
+        "sampleCpuMsMedian": 188.302
+      }
+    },
+    "replace-1k": {
+      "benos": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 15.233,
+          "owner": 0,
+          "events": 0.634,
+          "dom": 4.401,
+          "disposal": 5.573,
+          "gc": 0,
+          "app": 1.601,
+          "unattributed": 196.176,
+          "idle": 2.682
+        },
+        "sampleCpuMsMedian": 226.593
+      },
+      "solid": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 3.509,
+          "owner": 0,
+          "events": 0,
+          "dom": 0.866,
+          "disposal": 0,
+          "gc": 0,
+          "app": 0,
+          "unattributed": 194.5,
+          "idle": 2.072
+        },
+        "sampleCpuMsMedian": 202.236
+      }
+    },
+    "clear-1k": {
+      "benos": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 2.126,
+          "owner": 0,
+          "events": 0.63,
+          "dom": 0,
+          "disposal": 6.451,
+          "gc": 0,
+          "app": 0,
+          "unattributed": 183.256,
+          "idle": 3.27
+        },
+        "sampleCpuMsMedian": 199.345
+      },
+      "solid": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 2.52,
+          "owner": 0,
+          "events": 0,
+          "dom": 0,
+          "disposal": 0,
+          "gc": 0,
+          "app": 0,
+          "unattributed": 179.176,
+          "idle": 2.547
+        },
+        "sampleCpuMsMedian": 184.907
+      }
+    },
+    "create-10k": {
+      "benos": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 106.488,
+          "owner": 0,
+          "events": 6.336,
+          "dom": 46.777,
+          "disposal": 0.553,
+          "gc": 33.43,
+          "app": 3.869,
+          "unattributed": 422.983,
+          "idle": 5.832
+        },
+        "sampleCpuMsMedian": 649.36
+      },
+      "solid": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 8.834,
+          "owner": 0,
+          "events": 0,
+          "dom": 13.751,
+          "disposal": 0,
+          "gc": 0.582,
+          "app": 5.077,
+          "unattributed": 416.545,
+          "idle": 4.641
+        },
+        "sampleCpuMsMedian": 455.783
+      }
+    },
+    "replace-10k": {
+      "benos": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 129.388,
+          "owner": 0,
+          "events": 10.803,
+          "dom": 39.815,
+          "disposal": 55.619,
+          "gc": 21.559,
+          "app": 4.996,
+          "unattributed": 429.654,
+          "idle": 1.657
+        },
+        "sampleCpuMsMedian": 695.975
+      },
+      "solid": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 15.481,
+          "owner": 0,
+          "events": 0,
+          "dom": 10.709,
+          "disposal": 0,
+          "gc": 0.624,
+          "app": 7.097,
+          "unattributed": 435.634,
+          "idle": 0
+        },
+        "sampleCpuMsMedian": 467.937
+      }
+    },
+    "clear-10k": {
+      "benos": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 15.84,
+          "owner": 0,
+          "events": 3.151,
+          "dom": 0,
+          "disposal": 50.919,
+          "gc": 0,
+          "app": 0,
+          "unattributed": 212.202,
+          "idle": 0
+        },
+        "sampleCpuMsMedian": 295.152
+      },
+      "solid": {
+        "medianSampledSelfMs": {
+          "template": 0,
+          "binding": 26.612,
+          "owner": 0,
+          "events": 0,
+          "dom": 0,
+          "disposal": 0,
+          "gc": 0,
+          "app": 0,
+          "unattributed": 255.133,
+          "idle": 3.257
+        },
+        "sampleCpuMsMedian": 288.406
+      }
+    }
+  },
+  "table": {
+    "table-native-baseline-5000": {
+      "initialProfiledMs": {
+        "median": 100.3,
+        "min": 99,
+        "max": 101
+      },
+      "cpuSampleMsMedian": 139.33,
+      "sampledSelfMs": {
+        "template": 0,
+        "binding": 0,
+        "owner": 0,
+        "events": 0,
+        "dom": 1.26,
+        "disposal": 0,
+        "gc": 7.65,
+        "app": 1.9,
+        "unattributed": 123.31,
+        "idle": 5.69
+      }
+    },
+    "table-native-baseline-10000": {
+      "initialProfiledMs": {
+        "median": 189,
+        "min": 187.7,
+        "max": 194.1
+      },
+      "cpuSampleMsMedian": 240.3,
+      "sampledSelfMs": {
+        "template": 0,
+        "binding": 0,
+        "owner": 0,
+        "events": 0,
+        "dom": 1.26,
+        "disposal": 0,
+        "gc": 5.72,
+        "app": 4.08,
+        "unattributed": 223.23,
+        "idle": 6.96
+      }
+    },
+    "table-benos-baseline-5000": {
+      "initialProfiledMs": {
+        "median": 176,
+        "min": 174.7,
+        "max": 176.9
+      },
+      "cpuSampleMsMedian": 210.42,
+      "sampledSelfMs": {
+        "template": 20.7,
+        "binding": 24.13,
+        "owner": 1.28,
+        "events": 0,
+        "dom": 14.68,
+        "disposal": 1.25,
+        "gc": 15.97,
+        "app": 2.52,
+        "unattributed": 122.07,
+        "idle": 8.25
+      }
+    },
+    "table-benos-baseline-10000": {
+      "initialProfiledMs": {
+        "median": 323.6,
+        "min": 319.2,
+        "max": 327.2
+      },
+      "cpuSampleMsMedian": 370.56,
+      "sampledSelfMs": {
+        "template": 40.07,
+        "binding": 39.48,
+        "owner": 1.89,
+        "events": 0,
+        "dom": 29.74,
+        "disposal": 2.51,
+        "gc": 27.45,
+        "app": 4.48,
+        "unattributed": 216.38,
+        "idle": 7.51
+      }
+    },
+    "table-benos-5000": {
+      "initialProfiledMs": {
+        "median": 189.4,
+        "min": 183.3,
+        "max": 190.7
+      },
+      "cpuSampleMsMedian": 223.1,
+      "sampledSelfMs": {
+        "template": 21.51,
+        "binding": 37.92,
+        "owner": 1.26,
+        "events": 0.14,
+        "dom": 11.17,
+        "disposal": 0.63,
+        "gc": 15.69,
+        "app": 0.62,
+        "unattributed": 128.82,
+        "idle": 7.62
+      }
+    },
+    "table-benos-10000": {
+      "initialProfiledMs": {
+        "median": 332.4,
+        "min": 329,
+        "max": 340.5
+      },
+      "cpuSampleMsMedian": 385.58,
+      "sampledSelfMs": {
+        "template": 40.82,
+        "binding": 58.82,
+        "owner": 1.89,
+        "events": 0,
+        "dom": 21.38,
+        "disposal": 0,
+        "gc": 27.32,
+        "app": 1.26,
+        "unattributed": 221.03,
+        "idle": 8.8
+      }
+    },
+    "table-solid-5000": {
+      "initialProfiledMs": {
+        "median": 99.3,
+        "min": 98.9,
+        "max": 102.3
+      },
+      "cpuSampleMsMedian": 137.73,
+      "sampledSelfMs": {
+        "template": 0,
+        "binding": 6.82,
+        "owner": 0,
+        "events": 0,
+        "dom": 2.89,
+        "disposal": 0,
+        "gc": 9.89,
+        "app": 0.63,
+        "unattributed": 113.03,
+        "idle": 5.92
+      }
+    },
+    "table-solid-10000": {
+      "initialProfiledMs": {
+        "median": 185.4,
+        "min": 185,
+        "max": 185.5
+      },
+      "cpuSampleMsMedian": 235.58,
+      "sampledSelfMs": {
+        "template": 0,
+        "binding": 9.42,
+        "owner": 0,
+        "events": 0,
+        "dom": 4.96,
+        "disposal": 0,
+        "gc": 7.59,
+        "app": 3.76,
+        "unattributed": 203.61,
+        "idle": 5.69
+      }
+    }
+  },
+  "heap": {
+    "benos": {
+      "1k": {
+        "rows": 1000,
+        "perRow": {
+          "closure": {
+            "countPerRow": 33.94,
+            "bytesPerRow": 951.6
+          },
+          "object": {
+            "countPerRow": 100.4,
+            "bytesPerRow": 2873.4
+          },
+          "array": {
+            "countPerRow": 19.12,
+            "bytesPerRow": 823.2
+          },
+          "domElements": {
+            "countPerRow": 7,
+            "bytesPerRow": 856
+          },
+          "plainObject": {
+            "countPerRow": 47.09,
+            "bytesPerRow": 1598.1
+          },
+          "lexicalContext": {
+            "countPerRow": 36.08,
+            "bytesPerRow": 999.1
+          },
+          "frameworkJsObjectSubtotalBytesPerRow": 4648.2
+        }
+      },
+      "10k": {
+        "rows": 10000,
+        "perRow": {
+          "closure": {
+            "countPerRow": 33.09,
+            "bytesPerRow": 926.8
+          },
+          "object": {
+            "countPerRow": 100.04,
+            "bytesPerRow": 2865
+          },
+          "array": {
+            "countPerRow": 19.01,
+            "bytesPerRow": 810.8
+          },
+          "domElements": {
+            "countPerRow": 7,
+            "bytesPerRow": 856
+          },
+          "plainObject": {
+            "countPerRow": 47.01,
+            "bytesPerRow": 1596.2
+          },
+          "lexicalContext": {
+            "countPerRow": 36.01,
+            "bytesPerRow": 996.3
+          },
+          "frameworkJsObjectSubtotalBytesPerRow": 4602.6
+        }
+      }
+    },
+    "solid": {
+      "1k": {
+        "rows": 1000,
+        "perRow": {
+          "closure": {
+            "countPerRow": 8.96,
+            "bytesPerRow": 252.1
+          },
+          "object": {
+            "countPerRow": 14.4,
+            "bytesPerRow": 417.5
+          },
+          "array": {
+            "countPerRow": 3.13,
+            "bytesPerRow": 178.3
+          },
+          "domElements": {
+            "countPerRow": 7.01,
+            "bytesPerRow": 823.5
+          },
+          "plainObject": {
+            "countPerRow": 6.09,
+            "bytesPerRow": 238
+          },
+          "lexicalContext": {
+            "countPerRow": 5.08,
+            "bytesPerRow": 127.1
+          },
+          "frameworkJsObjectSubtotalBytesPerRow": 847.9
+        }
+      },
+      "10k": {
+        "rows": 10000,
+        "perRow": {
+          "closure": {
+            "countPerRow": 8.1,
+            "bytesPerRow": 226.8
+          },
+          "object": {
+            "countPerRow": 14.04,
+            "bytesPerRow": 409
+          },
+          "array": {
+            "countPerRow": 3.01,
+            "bytesPerRow": 140.7
+          },
+          "domElements": {
+            "countPerRow": 7,
+            "bytesPerRow": 819.5
+          },
+          "plainObject": {
+            "countPerRow": 6.01,
+            "bytesPerRow": 236.2
+          },
+          "lexicalContext": {
+            "countPerRow": 5.01,
+            "bytesPerRow": 124.3
+          },
+          "frameworkJsObjectSubtotalBytesPerRow": 776.5
+        }
+      }
+    }
+  }
+}

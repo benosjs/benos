@@ -1,0 +1,1573 @@
+{
+  "protocol": {
+    "build": "production define, minification disabled, source maps enabled",
+    "browser": "Chromium",
+    "warmups": 2,
+    "rounds": 7,
+    "marks": "performance.mark pairs around each instrumented category span",
+    "note": "Exclusive category times; child category spans are subtracted from parent spans.",
+    "workloads": "1k and 10k create, replace, and clear; 5k and 10k table mount",
+    "additionalBuildRoot": "/var/folders/wf/l_k2q0vd2hg99k1b0zpg7h9c0000gn/T/benos-p1-profile-BoMc1q"
+  },
+  "buildRoot": "/var/folders/wf/l_k2q0vd2hg99k1b0zpg7h9c0000gn/T/benos-p1-profile-qNfHjq",
+  "summary": {
+    "create-1k": {
+      "template instantiation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "binding setup": {
+        "medianMs": 22.600000500679016,
+        "minMs": 20.09999930858612,
+        "maxMs": 25.600000143051147,
+        "medianCalls": 29000
+      },
+      "owner creation": {
+        "medianMs": 0.7999999523162842,
+        "minMs": 0.5000000596046448,
+        "maxMs": 0.9000000953674316,
+        "medianCalls": 5000
+      },
+      "signal node creation": {
+        "medianMs": 0.49999988079071045,
+        "minMs": 0.2999999523162842,
+        "maxMs": 1.2000000476837158,
+        "medianCalls": 1000
+      },
+      "computed node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "effect node creation": {
+        "medianMs": 0.3999999165534973,
+        "minMs": 0.10000002384185791,
+        "maxMs": 0.7999998927116394,
+        "medianCalls": 2000
+      },
+      "event setup": {
+        "medianMs": 1.9000001549720764,
+        "minMs": 1.600000023841858,
+        "maxMs": 2.4000001549720764,
+        "medianCalls": 4000
+      },
+      "DOM insertion": {
+        "medianMs": 4.8999998569488525,
+        "minMs": 3.9999998211860657,
+        "maxMs": 6.6000001430511475,
+        "medianCalls": 12000
+      },
+      "disposal": {
+        "medianMs": 0.20000004768371582,
+        "minMs": 0.19999998807907104,
+        "maxMs": 0.40000003576278687,
+        "medianCalls": 1004
+      }
+    },
+    "replace-1k": {
+      "template instantiation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "binding setup": {
+        "medianMs": 21.89999955892563,
+        "minMs": 18.000000476837158,
+        "maxMs": 24.5,
+        "medianCalls": 29000
+      },
+      "owner creation": {
+        "medianMs": 0.7999998927116394,
+        "minMs": 0.5,
+        "maxMs": 1.0000001788139343,
+        "medianCalls": 5000
+      },
+      "signal node creation": {
+        "medianMs": 0.699999988079071,
+        "minMs": 0.2999998927116394,
+        "maxMs": 1,
+        "medianCalls": 1000
+      },
+      "computed node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "effect node creation": {
+        "medianMs": 0.5999999046325684,
+        "minMs": 0.19999998807907104,
+        "maxMs": 2.699999988079071,
+        "medianCalls": 2000
+      },
+      "event setup": {
+        "medianMs": 1.7000001072883606,
+        "minMs": 0.8999999165534973,
+        "maxMs": 3.0000001192092896,
+        "medianCalls": 4000
+      },
+      "DOM insertion": {
+        "medianMs": 4.700000166893005,
+        "minMs": 2.3000001907348633,
+        "maxMs": 6.999999821186066,
+        "medianCalls": 12000
+      },
+      "disposal": {
+        "medianMs": 19.600000083446503,
+        "minMs": 19.100000023841858,
+        "maxMs": 20.700000166893005,
+        "medianCalls": 30001
+      }
+    },
+    "clear-1k": {
+      "template instantiation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "binding setup": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0.10000002384185791,
+        "medianCalls": 2
+      },
+      "owner creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 1
+      },
+      "signal node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "computed node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "effect node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "event setup": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "DOM insertion": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0.10000002384185791,
+        "medianCalls": 2
+      },
+      "disposal": {
+        "medianMs": 15.100000083446503,
+        "minMs": 13.500000476837158,
+        "maxMs": 18.699999690055847,
+        "medianCalls": 28001
+      }
+    },
+    "table-mount-5000": {
+      "template instantiation": {
+        "medianMs": 49.39999997615814,
+        "minMs": 43.80000030994415,
+        "maxMs": 57.80000048875809,
+        "medianCalls": 40026
+      },
+      "binding setup": {
+        "medianMs": 47.10000044107437,
+        "minMs": 36.39999961853027,
+        "maxMs": 67.60000026226044,
+        "medianCalls": 60060
+      },
+      "owner creation": {
+        "medianMs": 11.499999940395355,
+        "minMs": 9.799999952316284,
+        "maxMs": 18.899999916553497,
+        "medianCalls": 75052
+      },
+      "signal node creation": {
+        "medianMs": 2.900000035762787,
+        "minMs": 2.2999998927116394,
+        "maxMs": 12.500000059604645,
+        "medianCalls": 5004
+      },
+      "computed node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0.10000002384185791,
+        "medianCalls": 1
+      },
+      "effect node creation": {
+        "medianMs": 11.299999952316284,
+        "minMs": 7.900000095367432,
+        "maxMs": 20.49999988079071,
+        "medianCalls": 50025
+      },
+      "event setup": {
+        "medianMs": 0.10000002384185791,
+        "minMs": 0.09999996423721313,
+        "maxMs": 0.3999999761581421,
+        "medianCalls": 6
+      },
+      "DOM insertion": {
+        "medianMs": 16.400000274181366,
+        "minMs": 15.199999749660492,
+        "maxMs": 21.499999821186066,
+        "medianCalls": 40047
+      },
+      "disposal": {
+        "medianMs": 2.599999964237213,
+        "minMs": 1.1999999284744263,
+        "maxMs": 3,
+        "medianCalls": 20027
+      }
+    },
+    "table-mount-10000": {
+      "template instantiation": {
+        "medianMs": 103.09999912977219,
+        "minMs": 91.19999980926514,
+        "maxMs": 114.59999948740005,
+        "medianCalls": 80026
+      },
+      "binding setup": {
+        "medianMs": 72.19999992847443,
+        "minMs": 63.39999985694885,
+        "maxMs": 76.50000035762787,
+        "medianCalls": 120060
+      },
+      "owner creation": {
+        "medianMs": 29.30000001192093,
+        "minMs": 21.200000047683716,
+        "maxMs": 35.10000079870224,
+        "medianCalls": 150052
+      },
+      "signal node creation": {
+        "medianMs": 4.899999976158142,
+        "minMs": 4.399999797344208,
+        "maxMs": 5.800000011920929,
+        "medianCalls": 10004
+      },
+      "computed node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0.09999996423721313,
+        "medianCalls": 1
+      },
+      "effect node creation": {
+        "medianMs": 25.500000298023224,
+        "minMs": 18.599999725818634,
+        "maxMs": 34.999999940395355,
+        "medianCalls": 100025
+      },
+      "event setup": {
+        "medianMs": 0.20000004768371582,
+        "minMs": 0.09999996423721313,
+        "maxMs": 1,
+        "medianCalls": 6
+      },
+      "DOM insertion": {
+        "medianMs": 32.100000619888306,
+        "minMs": 29.69999921321869,
+        "maxMs": 43.49999940395355,
+        "medianCalls": 80047
+      },
+      "disposal": {
+        "medianMs": 4.70000022649765,
+        "minMs": 4.199999928474426,
+        "maxMs": 5.500000298023224,
+        "medianCalls": 40027
+      }
+    },
+    "create-10k": {
+      "template instantiation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "binding setup": {
+        "medianMs": 200.00000166893005,
+        "minMs": 188.39999866485596,
+        "maxMs": 210.80000001192093,
+        "medianCalls": 290000
+      },
+      "owner creation": {
+        "medianMs": 7,
+        "minMs": 6.399999678134918,
+        "maxMs": 15.399999737739563,
+        "medianCalls": 50000
+      },
+      "signal node creation": {
+        "medianMs": 7.399999797344208,
+        "minMs": 6.700000464916229,
+        "maxMs": 8.800000011920929,
+        "medianCalls": 10000
+      },
+      "computed node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "effect node creation": {
+        "medianMs": 4.100000023841858,
+        "minMs": 3.399999678134918,
+        "maxMs": 13.20000022649765,
+        "medianCalls": 20000
+      },
+      "event setup": {
+        "medianMs": 20.80000013113022,
+        "minMs": 17.600000321865082,
+        "maxMs": 25.80000001192093,
+        "medianCalls": 40000
+      },
+      "DOM insertion": {
+        "medianMs": 44.70000046491623,
+        "minMs": 39.900000274181366,
+        "maxMs": 53.00000041723251,
+        "medianCalls": 120000
+      },
+      "disposal": {
+        "medianMs": 1.2999999523162842,
+        "minMs": 1.1000000834465027,
+        "maxMs": 7.800000071525574,
+        "medianCalls": 10004
+      }
+    },
+    "replace-10k": {
+      "template instantiation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "binding setup": {
+        "medianMs": 206.60000097751617,
+        "minMs": 187.20000326633453,
+        "maxMs": 217.0000006556511,
+        "medianCalls": 290000
+      },
+      "owner creation": {
+        "medianMs": 7.79999965429306,
+        "minMs": 6.800000071525574,
+        "maxMs": 30.400000154972076,
+        "medianCalls": 50000
+      },
+      "signal node creation": {
+        "medianMs": 7.5999995470047,
+        "minMs": 6.3999998569488525,
+        "maxMs": 9.199999630451202,
+        "medianCalls": 10000
+      },
+      "computed node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "effect node creation": {
+        "medianMs": 4.0000001192092896,
+        "minMs": 2.9999999403953552,
+        "maxMs": 6.000000059604645,
+        "medianCalls": 20000
+      },
+      "event setup": {
+        "medianMs": 17.00000023841858,
+        "minMs": 13.200000166893005,
+        "maxMs": 23.400000274181366,
+        "medianCalls": 40000
+      },
+      "DOM insertion": {
+        "medianMs": 51.10000020265579,
+        "minMs": 45.199999034404755,
+        "maxMs": 59.999999821186066,
+        "medianCalls": 120000
+      },
+      "disposal": {
+        "medianMs": 190.9000011086464,
+        "minMs": 184.99999952316284,
+        "maxMs": 215.99999833106995,
+        "medianCalls": 300001
+      }
+    },
+    "clear-10k": {
+      "template instantiation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "binding setup": {
+        "medianMs": 0.09999996423721313,
+        "minMs": 0,
+        "maxMs": 0.10000002384185791,
+        "medianCalls": 2
+      },
+      "owner creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 1
+      },
+      "signal node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "computed node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "effect node creation": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "event setup": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "medianCalls": 0
+      },
+      "DOM insertion": {
+        "medianMs": 0,
+        "minMs": 0,
+        "maxMs": 0.09999996423721313,
+        "medianCalls": 2
+      },
+      "disposal": {
+        "medianMs": 149.8000007867813,
+        "minMs": 138.5000005364418,
+        "maxMs": 156.19999879598618,
+        "medianCalls": 280001
+      }
+    }
+  },
+  "samples": {
+    "create-1k": [
+      {
+        "totals": {
+          "owner creation": 0.5000000596046448,
+          "signal node creation": 0.6000000238418579,
+          "DOM insertion": 4.300000309944153,
+          "effect node creation": 0.7999998927116394,
+          "binding setup": 25.600000143051147,
+          "event setup": 1.600000023841858,
+          "disposal": 0.30000001192092896
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 1004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.800000011920929,
+          "signal node creation": 0.2999999523162842,
+          "DOM insertion": 3.9999998211860657,
+          "effect node creation": 0.30000001192092896,
+          "binding setup": 22.600000500679016,
+          "event setup": 2.4000001549720764,
+          "disposal": 0.20000004768371582
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 1004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.6999999284744263,
+          "signal node creation": 0.49999988079071045,
+          "DOM insertion": 4.8999998569488525,
+          "effect node creation": 0.3999999165534973,
+          "binding setup": 20.300000309944153,
+          "event setup": 1.699999749660492,
+          "disposal": 0.19999998807907104
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 1004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.699999988079071,
+          "signal node creation": 1.2000000476837158,
+          "DOM insertion": 6.6000001430511475,
+          "effect node creation": 0.5,
+          "binding setup": 20.09999930858612,
+          "event setup": 1.9000001549720764,
+          "disposal": 0.19999998807907104
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 1004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.800000011920929,
+          "signal node creation": 0.5,
+          "DOM insertion": 6.300000190734863,
+          "effect node creation": 0.2999999523162842,
+          "binding setup": 24.199999272823334,
+          "event setup": 2.399999678134918,
+          "disposal": 0.20000004768371582
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 1004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.7999999523162842,
+          "signal node creation": 0.40000003576278687,
+          "DOM insertion": 4.999999821186066,
+          "effect node creation": 0.10000002384185791,
+          "binding setup": 22.299999952316284,
+          "event setup": 2,
+          "disposal": 0.40000003576278687
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 1004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.9000000953674316,
+          "signal node creation": 0.40000003576278687,
+          "DOM insertion": 4.70000034570694,
+          "effect node creation": 0.5000000596046448,
+          "binding setup": 23.90000009536743,
+          "event setup": 1.800000011920929,
+          "disposal": 0.2999999523162842
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 1004
+        }
+      }
+    ],
+    "replace-1k": [
+      {
+        "totals": {
+          "owner creation": 0.5,
+          "signal node creation": 1,
+          "DOM insertion": 4.300000071525574,
+          "effect node creation": 0.5999999046325684,
+          "binding setup": 19.800000369548798,
+          "event setup": 2.0999999046325684,
+          "disposal": 19.100000023841858
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 30001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.7999999523162842,
+          "signal node creation": 0.8999998569488525,
+          "DOM insertion": 6.999999821186066,
+          "effect node creation": 0.3999999761581421,
+          "binding setup": 19.500000596046448,
+          "event setup": 1.300000011920929,
+          "disposal": 20.700000166893005
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 30001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 1.0000001788139343,
+          "signal node creation": 0.2999998927116394,
+          "DOM insertion": 4.700000166893005,
+          "effect node creation": 0.2999998927116394,
+          "binding setup": 22.699999928474426,
+          "event setup": 1.7000001072883606,
+          "disposal": 19.600000083446503
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 30001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.5999999642372131,
+          "signal node creation": 0.4999999403953552,
+          "DOM insertion": 6.599999964237213,
+          "effect node creation": 2.699999988079071,
+          "binding setup": 21.89999955892563,
+          "event setup": 1.4000000357627869,
+          "disposal": 20.49999976158142
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 30001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.699999988079071,
+          "signal node creation": 0.6000000834465027,
+          "DOM insertion": 4.299999892711639,
+          "effect node creation": 0.5999999046325684,
+          "binding setup": 24.5,
+          "event setup": 0.8999999165534973,
+          "disposal": 19.599999964237213
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 30001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.7999998927116394,
+          "signal node creation": 0.8000000715255737,
+          "DOM insertion": 2.3000001907348633,
+          "effect node creation": 0.9000000953674316,
+          "binding setup": 22.800000429153442,
+          "event setup": 2.699999749660492,
+          "disposal": 19.59999990463257
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 30001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 0.9999999403953552,
+          "signal node creation": 0.699999988079071,
+          "DOM insertion": 4.899999976158142,
+          "effect node creation": 0.19999998807907104,
+          "binding setup": 18.000000476837158,
+          "event setup": 3.0000001192092896,
+          "disposal": 20.300000190734863
+        },
+        "counts": {
+          "owner creation": 5000,
+          "signal node creation": 1000,
+          "DOM insertion": 12000,
+          "effect node creation": 2000,
+          "binding setup": 29000,
+          "event setup": 4000,
+          "disposal": 30001
+        }
+      }
+    ],
+    "clear-1k": [
+      {
+        "totals": {
+          "disposal": 18.699999690055847,
+          "DOM insertion": 0.10000002384185791,
+          "owner creation": 0,
+          "binding setup": 0
+        },
+        "counts": {
+          "disposal": 28001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 14.599999606609344,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0
+        },
+        "counts": {
+          "disposal": 28001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 16.5,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0
+        },
+        "counts": {
+          "disposal": 28001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 15.300000131130219,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0
+        },
+        "counts": {
+          "disposal": 28001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 13.500000476837158,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0.10000002384185791
+        },
+        "counts": {
+          "disposal": 28001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 14.79999953508377,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0.10000002384185791
+        },
+        "counts": {
+          "disposal": 28001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 15.100000083446503,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0
+        },
+        "counts": {
+          "disposal": 28001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      }
+    ],
+    "table-mount-5000": [
+      {
+        "totals": {
+          "owner creation": 18.899999916553497,
+          "signal node creation": 2.5999999046325684,
+          "computed node creation": 0,
+          "DOM insertion": 16.900000631809235,
+          "effect node creation": 14.699999570846558,
+          "binding setup": 56.799999952316284,
+          "disposal": 2.299999952316284,
+          "template instantiation": 48.29999923706055,
+          "event setup": 0.3999999761581421
+        },
+        "counts": {
+          "owner creation": 75052,
+          "signal node creation": 5004,
+          "computed node creation": 1,
+          "DOM insertion": 40047,
+          "effect node creation": 50025,
+          "binding setup": 60060,
+          "disposal": 20027,
+          "template instantiation": 40026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 9.799999952316284,
+          "signal node creation": 2.900000035762787,
+          "computed node creation": 0,
+          "DOM insertion": 16.200000166893005,
+          "effect node creation": 8.99999988079071,
+          "binding setup": 38.10000032186508,
+          "disposal": 3,
+          "template instantiation": 57.80000048875809,
+          "event setup": 0.10000002384185791
+        },
+        "counts": {
+          "owner creation": 75052,
+          "signal node creation": 5004,
+          "computed node creation": 1,
+          "DOM insertion": 40047,
+          "effect node creation": 50025,
+          "binding setup": 60060,
+          "disposal": 20027,
+          "template instantiation": 40026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 16.400000393390656,
+          "signal node creation": 2.600000023841858,
+          "computed node creation": 0,
+          "DOM insertion": 18.70000010728836,
+          "effect node creation": 20.49999988079071,
+          "binding setup": 36.39999961853027,
+          "disposal": 2.6000000834465027,
+          "template instantiation": 46.2000008225441,
+          "event setup": 0.09999996423721313
+        },
+        "counts": {
+          "owner creation": 75052,
+          "signal node creation": 5004,
+          "computed node creation": 1,
+          "DOM insertion": 40047,
+          "effect node creation": 50025,
+          "binding setup": 60060,
+          "disposal": 20027,
+          "template instantiation": 40026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 14.899999856948853,
+          "signal node creation": 12.500000059604645,
+          "computed node creation": 0.10000002384185791,
+          "DOM insertion": 21.499999821186066,
+          "effect node creation": 19.000000536441803,
+          "binding setup": 39.80000102519989,
+          "disposal": 2.7999998331069946,
+          "template instantiation": 43.80000030994415,
+          "event setup": 0.19999998807907104
+        },
+        "counts": {
+          "owner creation": 75052,
+          "signal node creation": 5004,
+          "computed node creation": 1,
+          "DOM insertion": 40047,
+          "effect node creation": 50025,
+          "binding setup": 60060,
+          "disposal": 20027,
+          "template instantiation": 40026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 10.999999701976776,
+          "signal node creation": 2.2999998927116394,
+          "computed node creation": 0,
+          "DOM insertion": 16.400000274181366,
+          "effect node creation": 8.600000083446503,
+          "binding setup": 47.10000044107437,
+          "disposal": 1.699999988079071,
+          "template instantiation": 54.500000059604645,
+          "event setup": 0.09999996423721313
+        },
+        "counts": {
+          "owner creation": 75052,
+          "signal node creation": 5004,
+          "computed node creation": 1,
+          "DOM insertion": 40047,
+          "effect node creation": 50025,
+          "binding setup": 60060,
+          "disposal": 20027,
+          "template instantiation": 40026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 11.300000190734863,
+          "signal node creation": 3.1999998092651367,
+          "computed node creation": 0,
+          "DOM insertion": 16.299999594688416,
+          "effect node creation": 11.299999952316284,
+          "binding setup": 61.799999833106995,
+          "disposal": 1.1999999284744263,
+          "template instantiation": 49.39999997615814,
+          "event setup": 0.2999999523162842
+        },
+        "counts": {
+          "owner creation": 75052,
+          "signal node creation": 5004,
+          "computed node creation": 1,
+          "DOM insertion": 40047,
+          "effect node creation": 50025,
+          "binding setup": 60060,
+          "disposal": 20027,
+          "template instantiation": 40026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 11.499999940395355,
+          "signal node creation": 2.9000001549720764,
+          "computed node creation": 0.09999996423721313,
+          "DOM insertion": 15.199999749660492,
+          "effect node creation": 7.900000095367432,
+          "binding setup": 67.60000026226044,
+          "disposal": 2.599999964237213,
+          "template instantiation": 51.899999260902405,
+          "event setup": 0.10000002384185791
+        },
+        "counts": {
+          "owner creation": 75052,
+          "signal node creation": 5004,
+          "computed node creation": 1,
+          "DOM insertion": 40047,
+          "effect node creation": 50025,
+          "binding setup": 60060,
+          "disposal": 20027,
+          "template instantiation": 40026,
+          "event setup": 6
+        }
+      }
+    ],
+    "table-mount-10000": [
+      {
+        "totals": {
+          "owner creation": 24.79999965429306,
+          "signal node creation": 4.899999976158142,
+          "computed node creation": 0,
+          "DOM insertion": 32.3999999165535,
+          "effect node creation": 25.500000298023224,
+          "binding setup": 73.60000032186508,
+          "disposal": 4.199999928474426,
+          "template instantiation": 109.90000021457672,
+          "event setup": 0.19999998807907104
+        },
+        "counts": {
+          "owner creation": 150052,
+          "signal node creation": 10004,
+          "computed node creation": 1,
+          "DOM insertion": 80047,
+          "effect node creation": 100025,
+          "binding setup": 120060,
+          "disposal": 40027,
+          "template instantiation": 80026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 21.200000047683716,
+          "signal node creation": 5.599999785423279,
+          "computed node creation": 0.09999996423721313,
+          "DOM insertion": 32.100000619888306,
+          "effect node creation": 23.800000488758087,
+          "binding setup": 69.10000050067902,
+          "disposal": 5.399999678134918,
+          "template instantiation": 114.59999948740005,
+          "event setup": 0.20000004768371582
+        },
+        "counts": {
+          "owner creation": 150052,
+          "signal node creation": 10004,
+          "computed node creation": 1,
+          "DOM insertion": 80047,
+          "effect node creation": 100025,
+          "binding setup": 120060,
+          "disposal": 40027,
+          "template instantiation": 80026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 29.30000001192093,
+          "signal node creation": 4.800000369548798,
+          "computed node creation": 0,
+          "DOM insertion": 29.69999921321869,
+          "effect node creation": 22.699999570846558,
+          "binding setup": 72.19999992847443,
+          "disposal": 4.70000022649765,
+          "template instantiation": 103.09999912977219,
+          "event setup": 0.9000000357627869
+        },
+        "counts": {
+          "owner creation": 150052,
+          "signal node creation": 10004,
+          "computed node creation": 1,
+          "DOM insertion": 80047,
+          "effect node creation": 100025,
+          "binding setup": 120060,
+          "disposal": 40027,
+          "template instantiation": 80026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 35.10000079870224,
+          "signal node creation": 5.800000011920929,
+          "computed node creation": 0,
+          "DOM insertion": 43.49999940395355,
+          "effect node creation": 18.599999725818634,
+          "binding setup": 63.39999985694885,
+          "disposal": 4.7000004053115845,
+          "template instantiation": 102.99999976158142,
+          "event setup": 0.2999999523162842
+        },
+        "counts": {
+          "owner creation": 150052,
+          "signal node creation": 10004,
+          "computed node creation": 1,
+          "DOM insertion": 80047,
+          "effect node creation": 100025,
+          "binding setup": 120060,
+          "disposal": 40027,
+          "template instantiation": 80026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 21.30000013113022,
+          "signal node creation": 5.500000357627869,
+          "computed node creation": 0,
+          "DOM insertion": 30.500000417232513,
+          "effect node creation": 32.69999945163727,
+          "binding setup": 76.39999973773956,
+          "disposal": 5.500000298023224,
+          "template instantiation": 95.89999860525131,
+          "event setup": 0.19999998807907104
+        },
+        "counts": {
+          "owner creation": 150052,
+          "signal node creation": 10004,
+          "computed node creation": 1,
+          "DOM insertion": 80047,
+          "effect node creation": 100025,
+          "binding setup": 120060,
+          "disposal": 40027,
+          "template instantiation": 80026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 32.30000054836273,
+          "signal node creation": 4.800000011920929,
+          "computed node creation": 0,
+          "DOM insertion": 37.09999990463257,
+          "effect node creation": 34.999999940395355,
+          "binding setup": 76.50000035762787,
+          "disposal": 4.300000190734863,
+          "template instantiation": 91.19999980926514,
+          "event setup": 0.09999996423721313
+        },
+        "counts": {
+          "owner creation": 150052,
+          "signal node creation": 10004,
+          "computed node creation": 1,
+          "DOM insertion": 80047,
+          "effect node creation": 100025,
+          "binding setup": 120060,
+          "disposal": 40027,
+          "template instantiation": 80026,
+          "event setup": 6
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 31.20000022649765,
+          "signal node creation": 4.399999797344208,
+          "computed node creation": 0,
+          "DOM insertion": 30.399999618530273,
+          "effect node creation": 26.4000004529953,
+          "binding setup": 66.7999991774559,
+          "disposal": 4.300000071525574,
+          "template instantiation": 109.9999994635582,
+          "event setup": 1
+        },
+        "counts": {
+          "owner creation": 150052,
+          "signal node creation": 10004,
+          "computed node creation": 1,
+          "DOM insertion": 80047,
+          "effect node creation": 100025,
+          "binding setup": 120060,
+          "disposal": 40027,
+          "template instantiation": 80026,
+          "event setup": 6
+        }
+      }
+    ],
+    "create-10k": [
+      {
+        "totals": {
+          "owner creation": 6.4000003933906555,
+          "signal node creation": 6.700000464916229,
+          "DOM insertion": 42.89999967813492,
+          "effect node creation": 3.399999678134918,
+          "binding setup": 210.80000001192093,
+          "event setup": 19.09999966621399,
+          "disposal": 7.800000071525574
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 10004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 6.999999463558197,
+          "signal node creation": 7.799999713897705,
+          "DOM insertion": 44.70000046491623,
+          "effect node creation": 13.20000022649765,
+          "binding setup": 195.69999986886978,
+          "event setup": 20.80000013113022,
+          "disposal": 1.1000000834465027
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 10004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 15.399999737739563,
+          "signal node creation": 8.800000011920929,
+          "DOM insertion": 44.49999886751175,
+          "effect node creation": 4.8999998569488525,
+          "binding setup": 197.80000120401382,
+          "event setup": 25.300000190734863,
+          "disposal": 1.2999998927116394
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 10004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 6.399999678134918,
+          "signal node creation": 7.399999797344208,
+          "DOM insertion": 45.500000059604645,
+          "effect node creation": 4.100000083446503,
+          "binding setup": 200.00000166893005,
+          "event setup": 19.900000154972076,
+          "disposal": 1.399999976158142
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 10004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 10,
+          "signal node creation": 6.799999952316284,
+          "DOM insertion": 45.599999368190765,
+          "effect node creation": 3.8999997973442078,
+          "binding setup": 188.39999866485596,
+          "event setup": 25.80000001192093,
+          "disposal": 1.4000000953674316
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 10004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 7,
+          "signal node creation": 7.100000083446503,
+          "DOM insertion": 39.900000274181366,
+          "effect node creation": 3.499999463558197,
+          "binding setup": 202.89999866485596,
+          "event setup": 17.600000321865082,
+          "disposal": 1.2999999523162842
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 10004
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 8.20000022649765,
+          "signal node creation": 7.799999475479126,
+          "DOM insertion": 53.00000041723251,
+          "effect node creation": 4.100000023841858,
+          "binding setup": 203.9000016450882,
+          "event setup": 21.100000023841858,
+          "disposal": 1.2999998927116394
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 10004
+        }
+      }
+    ],
+    "replace-10k": [
+      {
+        "totals": {
+          "owner creation": 21.300000309944153,
+          "signal node creation": 7.5999995470047,
+          "DOM insertion": 47.40000009536743,
+          "effect node creation": 4.399999976158142,
+          "binding setup": 217.0000006556511,
+          "event setup": 13.200000166893005,
+          "disposal": 188.00000208616257
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 300001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 7.100000500679016,
+          "signal node creation": 7.0000001192092896,
+          "DOM insertion": 45.199999034404755,
+          "effect node creation": 6.000000059604645,
+          "binding setup": 187.20000326633453,
+          "event setup": 21.99999988079071,
+          "disposal": 184.99999952316284
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 300001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 7.79999965429306,
+          "signal node creation": 6.3999998569488525,
+          "DOM insertion": 52.40000003576279,
+          "effect node creation": 4.0000001192092896,
+          "binding setup": 214.0000006556511,
+          "event setup": 23.400000274181366,
+          "disposal": 197.10000157356262
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 300001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 9.500000298023224,
+          "signal node creation": 9.000000059604645,
+          "DOM insertion": 59.999999821186066,
+          "effect node creation": 5.099999904632568,
+          "binding setup": 193.19999986886978,
+          "event setup": 18.100000083446503,
+          "disposal": 189.6000024676323
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 300001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 30.400000154972076,
+          "signal node creation": 7.700000047683716,
+          "DOM insertion": 56.59999978542328,
+          "effect node creation": 3.900000035762787,
+          "binding setup": 215.8999999165535,
+          "event setup": 17.00000023841858,
+          "disposal": 215.99999833106995
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 300001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 6.800000071525574,
+          "signal node creation": 9.199999630451202,
+          "DOM insertion": 51.10000020265579,
+          "effect node creation": 3.9000001549720764,
+          "binding setup": 196.19999933242798,
+          "event setup": 13.499999821186066,
+          "disposal": 199.30000180006027
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 300001
+        }
+      },
+      {
+        "totals": {
+          "owner creation": 6.8999998569488525,
+          "signal node creation": 7.499999701976776,
+          "DOM insertion": 47.599999248981476,
+          "effect node creation": 2.9999999403953552,
+          "binding setup": 206.60000097751617,
+          "event setup": 15.5,
+          "disposal": 190.9000011086464
+        },
+        "counts": {
+          "owner creation": 50000,
+          "signal node creation": 10000,
+          "DOM insertion": 120000,
+          "effect node creation": 20000,
+          "binding setup": 290000,
+          "event setup": 40000,
+          "disposal": 300001
+        }
+      }
+    ],
+    "clear-10k": [
+      {
+        "totals": {
+          "disposal": 146.59999918937683,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0.09999996423721313
+        },
+        "counts": {
+          "disposal": 280001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 145.99999982118607,
+          "DOM insertion": 0.09999996423721313,
+          "owner creation": 0,
+          "binding setup": 0
+        },
+        "counts": {
+          "disposal": 280001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 138.5000005364418,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0.09999996423721313
+        },
+        "counts": {
+          "disposal": 280001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 155.40000134706497,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0.10000002384185791
+        },
+        "counts": {
+          "disposal": 280001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 156.19999879598618,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0
+        },
+        "counts": {
+          "disposal": 280001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 149.8000007867813,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0.10000002384185791
+        },
+        "counts": {
+          "disposal": 280001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      },
+      {
+        "totals": {
+          "disposal": 153.6999989748001,
+          "DOM insertion": 0,
+          "owner creation": 0,
+          "binding setup": 0.10000002384185791
+        },
+        "counts": {
+          "disposal": 280001,
+          "DOM insertion": 2,
+          "owner creation": 1,
+          "binding setup": 2
+        }
+      }
+    ]
+  }
+}

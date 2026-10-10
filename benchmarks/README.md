@@ -721,3 +721,88 @@ samples per run:
 Every row remains under the 2× CI guard. Local verification also passed the
 221 unit tests, all 405 Chromium/Firefox/WebKit browser tests, the packed
 create-benos consumer, and the pnpm UI CLI consumer matrix.
+
+## Initial-render performance track P1 checkpoint (2026-10-10)
+
+Core and DOM were rebuilt before this measurement; sizes remain within budget.
+The package build and the benchmark adapter use production output. The baseline
+is commit `e029073` (the 0.1.2 package release commit; no `v0.1.2` tag exists
+in local or remote refs). Both Benos versions used the same current benchmark
+adapter. Chromium trace timing was interleaved with two warmups and seven
+measured rounds. Values are median milliseconds [minimum–maximum].
+
+| Operation         |                    v0.1.2 |              Current HEAD |                     Solid | HEAD / v0.1.2 | HEAD / Solid |
+| ----------------- | ------------------------: | ------------------------: | ------------------------: | ------------: | -----------: |
+| Create 1,000      |    39.914 [38.963–48.959] |    39.171 [38.347–39.890] |    25.252 [24.740–28.102] |         0.98× |        1.55× |
+| Replace 1,000     |    43.665 [42.274–47.035] |    42.360 [41.996–47.304] |    25.524 [25.335–27.695] |         0.97× |        1.66× |
+| Update every 10th |    14.541 [13.106–15.060] |    15.389 [14.054–19.971] |    13.863 [13.640–14.081] |         1.06× |        1.11× |
+| Select row        |      6.138 [1.285–17.101] |      7.317 [1.216–15.231] |       0.901 [0.879–1.014] |         1.19× |        8.12× |
+| Swap rows         |      5.339 [3.966–17.697] |      5.840 [5.093–11.707] |      3.583 [2.871–24.145] |         1.09× |        1.63× |
+| Remove one row    |      8.792 [4.818–19.778] |     13.946 [5.213–18.305] |     10.143 [4.434–24.899] |         1.59× |        1.37× |
+| Create 10,000     | 430.204 [385.832–514.739] | 454.222 [402.521–599.993] | 276.428 [243.823–360.283] |         1.06× |        1.64× |
+| Append 1,000      |    65.829 [53.981–72.957] |    59.708 [56.751–94.454] |    43.742 [37.317–76.198] |         0.91× |        1.37× |
+| Clear 1,000       |      8.878 [7.017–13.931] |     11.717 [7.756–16.937] |       3.205 [1.731–6.367] |         1.32× |        3.66× |
+
+A second interleaved seven-round run focused on replace and clear. Replace
+medians were 48.395 ms [45.320–54.920] for v0.1.2 and 49.765 ms
+[45.380–61.751] for HEAD; clear medians were 9.502 ms [7.351–17.348] and
+8.144 ms [6.830–18.028]. The runs disagree on which version is faster, and
+the spreads overlap. This does not confirm a runtime regression. The prior
+1.96× replace report is close to the focused run's 1.89× HEAD/Solid ratio;
+the primary same-protocol run measured 1.66×. The earlier 9.59× clear ratio
+used a 1.30 ms Solid denominator; the paired reruns measured Solid clear at
+3.205 ms and 3.834 ms, producing HEAD/Solid ratios of 3.66× and 2.12×.
+Phase 6b recorded 2.43× clear and 1.64× replace. These differences are
+consistent with the broad trace spreads and unstable Solid clear denominator,
+not evidence of a source regression. No source fix or optimization was made.
+
+The P1 production size gate passed:
+
+| Artifact                         |         Size |       Budget |
+| -------------------------------- | -----------: | -----------: |
+| `@benosjs/core`                  |  4,049 bytes |  4,096 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,198 bytes | 10,240 bytes |
+
+The temporary source-mapped production profile, Chromium GC traces, and
+allocation sampling results are recorded in
+[`docs/checkpoints/perf-p1.md`](../docs/checkpoints/perf-p1.md), with raw
+results in `benchmarks/js-framework-benchmark/results/perf-p1-*.json`.
+
+## Initial-render P3: compiled-path baseline correction (2026-10-10)
+
+The original generic Benos adapter used JavaScript runtime `jsx` descriptors,
+so its TSX compiler path was skipped. That P1 comparison did not match a
+create-benos app. The generic adapter is now TSX and both the generic and table
+fixtures build through the built `@benosjs/vite` production entry with
+`optimization: 'safe'`, matching the starter's production transform. The
+historical P1 values above are retained as runtime-JSX history; use this
+compiled-path comparison for P3 decisions. Baseline commit `e029073` contains
+core and DOM version 0.1.2. The protocol is Chromium trace click-to-paint, two
+warmups, seven interleaved measured rounds. Times are milliseconds, median
+[minimum–maximum].
+
+| Operation         |                    v0.1.2 |                   Current |                     Solid | Current / Solid |
+| ----------------- | ------------------------: | ------------------------: | ------------------------: | --------------: |
+| Create 1,000      |    52.180 [51.013–62.091] |    52.907 [50.913–56.275] |    25.264 [24.713–27.305] |           2.09× |
+| Replace 1,000     |    57.604 [55.837–60.543] |    58.035 [56.098–89.638] |    25.723 [24.919–26.556] |           2.26× |
+| Update every 10th |    13.766 [13.127–15.863] |    14.413 [12.946–18.574] |    13.738 [13.572–14.220] |           1.05× |
+| Select one row    |      1.808 [1.162–11.014] |       1.248 [1.164–1.531] |       0.856 [0.806–0.893] |           1.46× |
+| Swap rows         |       3.782 [3.457–5.517] |       3.779 [3.611–9.192] |       2.958 [2.810–3.683] |           1.28× |
+| Remove one row    |       4.725 [4.495–5.605] |      4.566 [4.402–12.156] |       4.313 [4.215–5.086] |           1.06× |
+| Create 10,000     | 490.079 [482.844–498.807] | 492.144 [483.591–512.038] | 237.605 [234.933–249.741] |           2.07× |
+| Append 1,000      |    58.933 [58.448–59.235] |    59.130 [58.384–60.011] |    35.173 [35.058–35.483] |           1.68× |
+| Clear 1,000       |       9.315 [8.954–9.937] |       9.312 [9.126–9.853] |       2.549 [2.528–2.581] |           3.65× |
+
+The corrected path changes the measured Benos/Solid gap materially on create,
+replace, append, and clear. The current and v0.1.2 medians are close with
+overlapping spreads on all nine rows, so this is a harness correction, not a
+confirmed source regression.
+
+The compiled registry table measured 146.6 ms [138.2–149.5] to mount 5,000
+rows and 279.7 ms [262.0–291.6] to mount 10,000 rows; Solid measured 71.4
+[65.4–75.6] and 137.6 [131.1–149.5] ms. Sort medians were 92.7
+[81.8–173.8] vs 79.9 [73.4–81.9] ms at 5k, and 178.0 [156.4–226.7] vs
+156.7 [152.3–208.5] ms at 10k. Raw results and source-mapped attribution are
+in [`results/p3-compiled-release-comparison.json`](./js-framework-benchmark/results/p3-compiled-release-comparison.json),
+[`results/p3-compiled-table.json`](./js-framework-benchmark/results/p3-compiled-table.json),
+and the [P3 checkpoint](../docs/checkpoints/perf-p3-attribution.md).

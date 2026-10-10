@@ -14,7 +14,7 @@ const frameworks = [
   'table-solid',
 ]
 const sizes = [5_000, 10_000]
-const warmups = 1
+const warmups = 2
 const rounds = 7
 
 for (const framework of frameworks) {
@@ -196,7 +196,10 @@ const output = {
 const resultsDirectory = resolve(directory, 'results')
 await mkdir(resultsDirectory, { recursive: true })
 await writeFile(
-  resolve(resultsDirectory, 'u4-batch4-profile.json'),
+  resolve(
+    resultsDirectory,
+    process.env.JFB_TABLE_OUTPUT ?? 'p3-compiled-table.json',
+  ),
   `${JSON.stringify(output, null, 2)}\n`,
 )
 console.log(JSON.stringify(output, null, 2))

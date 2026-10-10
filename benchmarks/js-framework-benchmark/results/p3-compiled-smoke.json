@@ -1,0 +1,52 @@
+{
+  "protocol": "js-framework-benchmark CPU operations 01-09",
+  "browser": "153.0.8010.12",
+  "node": "v26.10.0",
+  "platform": "darwin arm64",
+  "measurement": "Chrome trace click-to-paint duration (commit/layout fallback)",
+  "traceCategories": [
+    "blink.user_timing",
+    "devtools.timeline",
+    "disabled-by-default-devtools.timeline"
+  ],
+  "rounds": 1,
+  "warmups": 0,
+  "operations": [
+    "01_run1k"
+  ],
+  "frameworks": {
+    "benos-v012": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 56.427,
+        "minMs": 56.427,
+        "maxMs": 56.427,
+        "samplesMs": [
+          56.427
+        ]
+      }
+    },
+    "benos-head": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 54.418,
+        "minMs": 54.418,
+        "maxMs": 54.418,
+        "samplesMs": [
+          54.418
+        ]
+      }
+    },
+    "solid": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 26.634,
+        "minMs": 26.634,
+        "maxMs": 26.634,
+        "samplesMs": [
+          26.634
+        ]
+      }
+    }
+  }
+}

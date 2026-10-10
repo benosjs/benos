@@ -3,7 +3,7 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import solid from 'vite-plugin-solid'
-import benos from '../../packages/vite/src/index.js'
+import benos from '../../packages/vite/dist/js/index.production.js'
 
 const framework = process.env.JFB_FRAMEWORK ?? 'benos'
 const root = fileURLToPath(new URL('.', import.meta.url))
@@ -11,9 +11,11 @@ const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
 const tableFramework = framework.startsWith('table-')
 const entryExtension = tableFramework
   ? 'tsx'
-  : framework === 'solid' || framework === 'react'
-    ? 'jsx'
-    : 'js'
+  : framework === 'benos'
+    ? 'tsx'
+    : framework === 'solid' || framework === 'react'
+      ? 'jsx'
+      : 'js'
 
 const plugins = [
   {
@@ -24,8 +26,10 @@ const plugins = [
         return html.replace(
           '/src/main-benos.js',
           tableFramework
-            ? `/src/${framework}.${entryExtension}`
-            : `/src/main-${framework}.${entryExtension}`,
+            ? '/src/' + framework + '.' + entryExtension
+            : framework === 'benos'
+              ? '/src/main-benos.tsx'
+              : '/src/main-' + framework + '.' + entryExtension,
         )
       },
     },
@@ -35,7 +39,7 @@ const plugins = [
 if (framework === 'vue') plugins.push(vue())
 if (framework === 'svelte') plugins.push(svelte())
 if (framework === 'solid' || framework === 'table-solid') plugins.push(solid())
-if (framework.startsWith('table-benos'))
+if (framework === 'benos' || framework.startsWith('table-benos'))
   plugins.push(benos({ optimization: 'safe' }))
 
 export default defineConfig({

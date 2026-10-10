@@ -1,0 +1,116 @@
+{
+  "protocol": "js-framework-benchmark CPU operations 01-09",
+  "browser": "153.0.8010.12",
+  "node": "v26.10.0",
+  "platform": "darwin arm64",
+  "measurement": "Chrome trace click-to-paint duration (commit/layout fallback)",
+  "traceCategories": [
+    "blink.user_timing",
+    "devtools.timeline",
+    "disabled-by-default-devtools.timeline"
+  ],
+  "rounds": 7,
+  "warmups": 2,
+  "operations": [
+    "02_replace1k",
+    "09_clear1k"
+  ],
+  "frameworks": {
+    "benos-v012": {
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 48.395,
+        "minMs": 45.32,
+        "maxMs": 54.92,
+        "samplesMs": [
+          48.001,
+          54.92,
+          50.569,
+          48.395,
+          45.32,
+          47.993,
+          49.417
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 9.502,
+        "minMs": 7.351,
+        "maxMs": 17.348,
+        "samplesMs": [
+          7.428,
+          17.348,
+          7.733,
+          7.351,
+          9.502,
+          17.143,
+          14.837
+        ]
+      }
+    },
+    "benos-head": {
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 49.765,
+        "minMs": 45.38,
+        "maxMs": 61.751,
+        "samplesMs": [
+          61.751,
+          49.765,
+          51.939,
+          46.349,
+          46.021,
+          50.563,
+          45.38
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 8.144,
+        "minMs": 6.83,
+        "maxMs": 18.028,
+        "samplesMs": [
+          7.749,
+          6.968,
+          6.83,
+          16.19,
+          18.028,
+          8.144,
+          13.199
+        ]
+      }
+    },
+    "solid": {
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 26.318,
+        "minMs": 25.151,
+        "maxMs": 34.534,
+        "samplesMs": [
+          34.534,
+          25.604,
+          28.04,
+          28.094,
+          25.151,
+          25.405,
+          26.318
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 3.834,
+        "minMs": 2.709,
+        "maxMs": 17.357,
+        "samplesMs": [
+          6.184,
+          3.032,
+          2.709,
+          3.147,
+          3.834,
+          17.357,
+          7.119
+        ]
+      }
+    }
+  }
+}
