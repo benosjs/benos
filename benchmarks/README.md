@@ -810,3 +810,7 @@ and the [P3 checkpoint](../docs/checkpoints/perf-p3-attribution.md).
 ### P3 property-key iteration trial
 
 The guarded `for...in` prop-key trial ran twice on the same compiled production path, with every one of the nine operations reported in [its checkpoint](../docs/checkpoints/perf-p3-property-keys.md). Create 1k improved in the first run and regressed in the confirmation run; retained allocations were unchanged and all timing spreads overlapped. The candidate added 10 B to core + DOM, so its implementation was reverted. The semantic test for enumerable own-key order remains. The next trial is delegated event slots.
+
+### P3 delegated event slots
+
+The getter-slot implementation removes the compiled-path event record, props wrapper, and extra getter closure while preserving untracked handler reads at dispatch. Its two allocation profiles show about 16 fewer retained JS objects and 545 fewer bytes per row; owner and effect call counts are unchanged. The nine click-to-paint rows and all table rows remain within overlapping spreads, so no timing improvement is claimed. Core is 4,049 B and core + DOM is 10,200 B. The full before/after tables and the direct-handler size experiment are in [the event-slot checkpoint](../docs/checkpoints/perf-p3-event-slots.md); raw results are `p3-event-slots*.json` under `js-framework-benchmark/results/`.

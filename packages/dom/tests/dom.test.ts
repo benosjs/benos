@@ -300,6 +300,50 @@ describe('@benosjs/dom', () => {
     expect(handler).toHaveBeenCalledOnce()
   })
 
+  it('keeps delegated getter handlers live without reading during setup', () => {
+    const first = vi.fn()
+    const second = vi.fn()
+    let current = first
+    let reads = 0
+    const props = Object.defineProperty({}, 'onClick', {
+      enumerable: true,
+      get() {
+        reads++
+        return current
+      },
+    })
+    roots.push(render(() => jsx('button', props), document.body))
+    const button = document.querySelector('button') as HTMLButtonElement
+
+    expect(reads).toBe(0)
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    current = second
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+
+    expect(first).toHaveBeenCalledOnce()
+    expect(second).toHaveBeenCalledOnce()
+    expect(reads).toBe(2)
+  })
+
+  it('preserves multiple delegated handlers installed on one element', () => {
+    const calls: string[] = []
+    roots.push(
+      render(
+        () =>
+          jsx('button', {
+            onClick: () => calls.push('property'),
+            'on:click': () => calls.push('explicit'),
+          }),
+        document.body,
+      ),
+    )
+    const button = document.querySelector('button') as HTMLButtonElement
+
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+
+    expect(calls).toEqual(['property', 'explicit'])
+  })
+
   it('native-before-delegated-order', () => {
     const order: string[] = []
     roots.push(

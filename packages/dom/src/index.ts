@@ -449,14 +449,11 @@ const delegatedEvents = new Set([
   'dblclick',
 ])
 
-interface EventRecord {
-  element: Element
-  name: string
-  getHandler: () => unknown
-}
+type EventHandlerGetter = () => unknown
+type EventSlot = EventHandlerGetter | EventHandlerGetter[]
 interface EventHub {
   root: Document | ShadowRoot
-  byType: Map<string, Map<Element, Set<EventRecord>>>
+  byType: Map<string, Map<Element, EventSlot>>
   listeners: Map<string, EventListener>
 }
 const hubs = new WeakMap<Document | ShadowRoot, EventHub>()
@@ -481,12 +478,16 @@ function rootFor(element: Element): Document | ShadowRoot {
   return element.ownerDocument
 }
 
-function invokeHandler(record: EventRecord, event: Event): void {
-  const handler = untrack(record.getHandler)
+function invokeHandler(
+  element: Element,
+  getHandler: EventHandlerGetter,
+  event: Event,
+): void {
+  const handler = untrack(getHandler)
   if (typeof handler !== 'function') return
   try {
     const result = batch(() =>
-      (handler as (event: Event) => unknown).call(record.element, event),
+      (handler as (event: Event) => unknown).call(element, event),
     )
     if (result && typeof (result as Promise<unknown>).then === 'function')
       void (result as Promise<unknown>).catch(reportInternalError)
@@ -503,30 +504,33 @@ function getHub(root: Document | ShadowRoot): EventHub {
   return hub
 }
 
-function installDelegated(record: EventRecord): () => void {
-  const root = rootFor(record.element)
+function installDelegated(
+  element: Element,
+  name: string,
+  getHandler: EventHandlerGetter,
+): () => void {
+  const root = rootFor(element)
   const hub = getHub(root)
-  let byElement = hub.byType.get(record.name)
+  let byElement = hub.byType.get(name)
   if (!byElement) {
     byElement = new Map()
-    hub.byType.set(record.name, byElement)
+    hub.byType.set(name, byElement)
   }
-  let records = byElement.get(record.element)
-  if (!records) {
-    records = new Set()
-    byElement.set(record.element, records)
-  }
-  records.add(record)
-  if (!hub.listeners.has(record.name)) {
+  const previous = byElement.get(element)
+  if (previous === undefined) byElement.set(element, getHandler)
+  else if (Array.isArray(previous)) previous.push(getHandler)
+  else byElement.set(element, [previous, getHandler])
+  if (!hub.listeners.has(name)) {
     const listener: EventListener = (event) => {
       for (const item of event.composedPath()) {
         if (item === root) break
         if (!(item instanceof Element)) continue
-        const group = hub.byType.get(record.name)?.get(item)
+        const group = hub.byType.get(name)?.get(item)
         if (group) {
-          for (const handler of [...group]) {
+          const handlers = Array.isArray(group) ? [...group] : [group]
+          for (const handler of handlers) {
             if (event.cancelBubble && item !== event.target) return
-            const previous = Object.getOwnPropertyDescriptor(
+            const previousCurrentTarget = Object.getOwnPropertyDescriptor(
               event,
               'currentTarget',
             )
@@ -538,9 +542,13 @@ function installDelegated(record: EventRecord): () => void {
             } catch {
               continue
             }
-            invokeHandler(handler, event)
-            if (previous)
-              Object.defineProperty(event, 'currentTarget', previous)
+            invokeHandler(item, handler, event)
+            if (previousCurrentTarget)
+              Object.defineProperty(
+                event,
+                'currentTarget',
+                previousCurrentTarget,
+              )
             else
               delete (event as unknown as { currentTarget?: unknown })
                 .currentTarget
@@ -549,47 +557,49 @@ function installDelegated(record: EventRecord): () => void {
         }
       }
     }
-    hub.listeners.set(record.name, listener)
-    root.addEventListener(record.name, listener)
+    hub.listeners.set(name, listener)
+    root.addEventListener(name, listener)
   }
   return () => {
-    const records = byElement?.get(record.element)
-    records?.delete(record)
-    if (records?.size === 0) byElement?.delete(record.element)
-    if (byElement?.size === 0) hub.byType.delete(record.name)
-    if (!hub.byType.has(record.name)) {
-      const listener = hub.listeners.get(record.name)
-      if (listener) root.removeEventListener(record.name, listener)
-      hub.listeners.delete(record.name)
+    const handlers = byElement?.get(element)
+    if (handlers === getHandler) byElement?.delete(element)
+    else if (Array.isArray(handlers)) {
+      const index = handlers.lastIndexOf(getHandler)
+      if (index !== -1) handlers.splice(index, 1)
+      if (handlers.length === 0) byElement?.delete(element)
+      else if (handlers.length === 1)
+        byElement?.set(element, handlers[0] as EventHandlerGetter)
+    }
+    if (byElement?.size === 0) hub.byType.delete(name)
+    if (!hub.byType.has(name)) {
+      const listener = hub.listeners.get(name)
+      if (listener) root.removeEventListener(name, listener)
+      hub.listeners.delete(name)
     }
   }
 }
 
-function installEvent(
+function installEventSlot(
   element: Element,
-  key: PropertyKey,
-  props: Props,
-  owner: InternalOwner,
+  name: string,
+  getHandler: EventHandlerGetter,
+  capture: boolean,
 ): void {
-  const parsed = eventName(key)
-  if (!parsed) return
-  const record: EventRecord = {
-    element,
-    name: parsed.name,
-    getHandler: () => props[key],
-  }
-  if (delegatedEvents.has(record.name) && !parsed.capture) {
-    const remove = installDelegated(record)
-    runWithOwner(owner, () => onCleanup(remove))
+  if (delegatedEvents.has(name) && !capture) {
+    const remove = installDelegated(element, name, getHandler)
+    onCleanup(remove)
     return
   }
-  const listener: EventListener = (event) => invokeHandler(record, event)
-  element.addEventListener(record.name, listener, parsed.capture)
-  runWithOwner(owner, () =>
-    onCleanup(() =>
-      element.removeEventListener(record.name, listener, parsed.capture),
-    ),
-  )
+  const listener: EventListener = (event) =>
+    invokeHandler(element, getHandler, event)
+  element.addEventListener(name, listener, capture)
+  onCleanup(() => element.removeEventListener(name, listener, capture))
+}
+
+function installEvent(element: Element, key: PropertyKey, props: Props): void {
+  const parsed = eventName(key)
+  if (!parsed) return
+  installEventSlot(element, parsed.name, () => props[key], parsed.capture)
 }
 
 function isDangerousUrl(value: string): boolean {
@@ -696,7 +706,7 @@ function applyProps(
       continue
     }
     if (eventName(key)) {
-      installEvent(element, key, props, owner)
+      installEvent(element, key, props)
       continue
     }
     const update = () => applyOneProp(element, key, props[key], namespace)
@@ -1431,15 +1441,8 @@ function mountTemplate(
       },
       event(slot, name, get) {
         const element = slots.get(slot)
-        if (element instanceof Element) {
-          const props = Object.create(null) as Props
-          Object.defineProperty(props, `on:${name}`, {
-            configurable: true,
-            enumerable: true,
-            get,
-          })
-          installEvent(element, `on:${name}`, props, owner)
-        }
+        if (element instanceof Element)
+          installEventSlot(element, name, get, false)
       },
     })
   })
