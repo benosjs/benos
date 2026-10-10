@@ -6,9 +6,10 @@ import { createServer } from 'node:http'
 import { extname, normalize, resolve } from 'node:path'
 import { chromium } from '@playwright/test'
 
-const result = await import('./results/perf-p3-compiled-cpu-attribution.json', {
-  with: { type: 'json' },
-})
+const buildResult =
+  process.env.P1_BUILD_RESULT ??
+  './results/perf-p3-compiled-allocation-sampling.json'
+const result = await import(buildResult, { with: { type: 'json' } })
 const buildRoot = result.default.buildRoot
 const browser = await chromium.launch({ headless: true })
 const mime = {
@@ -164,6 +165,9 @@ try {
     samples[workload.name] = []
     for (let round = -warmups; round < rounds; round++) {
       const page = await browser.newPage()
+      await page.addInitScript(
+        `globalThis.__p1AllocationCounts = { owners: 0, signals: 0, computeds: 0, effects: 0 };`,
+      )
       const suffix = workload.table ? `?rows=${workload.table}` : ''
       let measurement
       if (workload.table) {
@@ -239,7 +243,7 @@ const output = {
   summary,
 }
 const outputPath = new URL(
-  './results/perf-p3-compiled-garbage-collection.json',
+  `./results/${process.env.P1_GC_OUTPUT ?? 'perf-p3-compiled-garbage-collection.json'}`,
   import.meta.url,
 )
 await writeFile(outputPath, `${JSON.stringify(output, null, 2)}\n`)

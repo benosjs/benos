@@ -410,7 +410,8 @@ const output = {
 }
 const outPath = resolve(
   repoRoot,
-  'benchmarks/js-framework-benchmark/results/perf-p3-compiled-cpu-attribution.json',
+  'benchmarks/js-framework-benchmark/results',
+  process.env.P1_CPU_OUTPUT ?? 'perf-p3-compiled-cpu-attribution.json',
 )
 await writeFile(outPath, `${JSON.stringify(output, null, 2)}\n`)
 console.log(JSON.stringify(output, null, 2))

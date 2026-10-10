@@ -806,3 +806,7 @@ rows and 279.7 ms [262.0–291.6] to mount 10,000 rows; Solid measured 71.4
 in [`results/p3-compiled-release-comparison.json`](./js-framework-benchmark/results/p3-compiled-release-comparison.json),
 [`results/p3-compiled-table.json`](./js-framework-benchmark/results/p3-compiled-table.json),
 and the [P3 checkpoint](../docs/checkpoints/perf-p3-attribution.md).
+
+### P3 property-key iteration trial
+
+The guarded `for...in` prop-key trial ran twice on the same compiled production path, with every one of the nine operations reported in [its checkpoint](../docs/checkpoints/perf-p3-property-keys.md). Create 1k improved in the first run and regressed in the confirmation run; retained allocations were unchanged and all timing spreads overlapped. The candidate added 10 B to core + DOM, so its implementation was reverted. The semantic test for enumerable own-key order remains. The next trial is delegated event slots.

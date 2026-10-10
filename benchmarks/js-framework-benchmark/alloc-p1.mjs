@@ -157,12 +157,16 @@ const entryPlugin = (framework) => ({
     handler(html) {
       return html.replace(
         '/src/main-benos.js',
-        framework === 'benos' ? '/src/main-benos.tsx' : '/src/main-solid.jsx',
+        framework === 'benos'
+          ? '/src/main-benos.tsx'
+          : framework === 'table-benos'
+            ? '/src/table-benos.tsx'
+            : '/src/main-solid.jsx',
       )
     },
   },
 })
-for (const framework of ['benos', 'solid']) {
+for (const framework of ['benos', 'table-benos', 'solid']) {
   await build({
     configFile: false,
     root: benchRoot,
@@ -176,7 +180,7 @@ for (const framework of ['benos', 'solid']) {
             entryPlugin(framework),
             benos({ optimization: 'safe' }),
           ],
-    resolve: framework === 'benos' ? { alias: aliases } : {},
+    resolve: framework === 'solid' ? {} : { alias: aliases },
     build: {
       target: 'es2022',
       outDir: resolve(buildRoot, `app-${framework}`),
@@ -661,7 +665,9 @@ try {
 
 const outPath = resolve(
   repoRoot,
-  'benchmarks/js-framework-benchmark/results/perf-p3-compiled-allocation-sampling.json',
+  'benchmarks/js-framework-benchmark/results',
+  process.env.P1_ALLOCATION_OUTPUT ??
+    'perf-p3-compiled-allocation-sampling.json',
 )
 await writeFile(outPath, `${JSON.stringify(report, null, 2)}\n`)
 console.log(JSON.stringify(report, null, 2))

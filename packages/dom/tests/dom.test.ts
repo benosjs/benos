@@ -34,6 +34,39 @@ afterEach(() => {
 })
 
 describe('@benosjs/dom', () => {
+  it('iterates ordinary props without changing enumerable string-key order', () => {
+    const reads: string[] = []
+    const props: Record<string, unknown> = {}
+    Object.defineProperty(props, 'data-first', {
+      enumerable: true,
+      get() {
+        reads.push('first')
+        return '1'
+      },
+    })
+    Object.defineProperty(props, 'data-second', {
+      enumerable: true,
+      get() {
+        reads.push('second')
+        return '2'
+      },
+    })
+    Object.defineProperty(props, 'data-hidden', {
+      enumerable: false,
+      value: 'hidden',
+    })
+    Object.defineProperty(props, Symbol('ignored'), {
+      enumerable: true,
+      value: 'ignored',
+    })
+
+    roots.push(render(() => jsx('div', props), document.body))
+
+    const element = document.querySelector('div')
+    expect(element?.getAttributeNames()).toEqual(['data-first', 'data-second'])
+    expect(reads).toEqual(['first', 'second'])
+  })
+
   it('renders fine-grained text without rerunning the component', () => {
     const value = signal(0)
     let runs = 0

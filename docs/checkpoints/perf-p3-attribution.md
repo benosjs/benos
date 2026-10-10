@@ -56,7 +56,7 @@ Production defines were active; minification was disabled and source maps were e
 | Table mount 5k  |    50.0 [46.9–58.0] |    34.3 [30.0–39.6] |  10.3 [7.3–15.7] |  2.5 [1.9–7.8] |  11.6 [7.2–12.9] |    0.2 [0.1–0.4] | 17.0 [12.7–25.6] |       2.4 [1.5–9.0] |
 | Table mount 10k |   96.2 [82.4–106.1] |    62.5 [56.4–75.0] | 19.6 [17.4–25.7] |  4.3 [3.1–5.1] | 23.3 [17.2–28.4] |    0.2 [0.1–0.3] | 28.0 [24.9–41.6] |       4.8 [3.4–7.6] |
 
-The corrected 10k create GC median is 362.0 ms on the renderer main thread [317.3–394.7], with 682.6 ms total renderer-thread GC CPU [647.3–835.3]. Replace 10k records 1,059.4 ms main-thread GC [1,006.5–1,122.7] and 1,657.0 ms all-thread CPU [1,625.8–1,776.8]. Clear 10k has a highly variable GC spread (0–342.2 ms); its median is 6.2 ms, so that GC contribution is not repeatable in this sample. The compiled table mount caused no GC in the measured windows.
+The corrected 10k create GC median is 322.3 ms on the renderer main thread [298.3–409.3], with 636.4 ms total renderer-thread GC CPU [614.1–835.9]. Replace 10k records 1,004.4 ms main-thread GC [891.5–1,111.4] and 1,614.9 ms all-thread CPU [1,304.8–1,889.1]. Clear 10k has a 6.1 ms GC median [0–8.6]. Table startup records 110.7 ms main-thread GC at 5k and 268.6 ms at 10k; the table mount was not included in the GC interval in the first P1 run, so this is the corrected startup measurement.
 
 ## Allocation call-site attribution
 

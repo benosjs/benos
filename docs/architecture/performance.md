@@ -19,16 +19,16 @@ These are measured targets, not a promise that the candidates below explain or r
 
 The corrected compiled-path profile found:
 
-- Generic 10,000-row create spent 362 ms in renderer-main-thread GC, 167 ms in template instantiation, 114 ms in binding setup, 30 ms creating owners, 14 ms in event setup, and 65 ms inserting DOM. GC is measured separately and can overlap marked spans.
+- Generic 10,000-row create spent 322 ms in renderer-main-thread GC, 167 ms in template instantiation, 114 ms in binding setup, 30 ms creating owners, 14 ms in event setup, and 65 ms inserting DOM. GC is measured separately and can overlap marked spans.
 - A compiled 10,000-row table spent 96 ms in template instantiation, 63 ms in binding setup, and 20 ms creating owners.
-- Clearing 10,000 rows spent 230 ms in disposal; replacing 10,000 rows spent 254 ms disposing the old rows. The separate GC trace found a large, repeatable GC cost during 10k replace.
+- Clearing 10,000 rows spent 230 ms in disposal; replacing 10,000 rows spent 254 ms disposing the old rows. The separate GC trace found a large GC cost during 10k replace, with a broad spread.
 - Source-mapped retained-allocation sites put `mountTemplate` at about 49 objects / 1.5 KB per row, `child` at 34 / 937 B, `createOwner` at 14 / 1.0 KB, and `createEffect` plus `onCleanup` at about 27 / 1.3 KB. Event installation accounts for a smaller portion.
 
 See [the P1 historical checkpoint](../checkpoints/perf-p1.md), [the corrected P3 checkpoint](../checkpoints/perf-p3-attribution.md), [the performance track plan](../perf-plan.md), and the raw profiles under ../../benchmarks/js-framework-benchmark/results/perf-p3-compiled-*.
 
 ## Ranking
 
-The evidence-based ranking below reflects the corrected compiled-path call sites and expected gain per added gzip byte. Estimates remain directional; each candidate must earn its place in an A/B run. The first two controlled trials will still be ordinary-prop key iteration and delegated event slots, as requested for P3. After those, the measured call sites put compiler template work and owner/effect/cleanup setup ahead of the remaining candidates.
+The evidence-based ranking below reflects the corrected compiled-path call sites and expected gain per added gzip byte. Estimates remain directional; each candidate must earn its place in an A/B run. Ordinary-prop key iteration was the first controlled trial; it did not produce a repeatable benchmark or allocation benefit and its implementation was reverted. Delegated event slots are the next trial. After those, the measured call sites put compiler template work and owner/effect/cleanup setup ahead of the remaining candidates.
 
 | Rank | Candidate                                                            | Expected allocation change per row                                                                                                                                 | Expected time change                                                                                                                  | Estimated size delta: core / DOM / app                                    | Confidence                                                            |
 | ---: | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -46,13 +46,15 @@ The package estimates can overlap: a core-internal helper pulled into a DOM appl
 
 ### 1. Iterate ordinary props without allocating a key snapshot
 
-The current DOM path calls Object.keys for an ordinary props object and Reflect.ownKeys for other prototypes, then loops over the returned array. The ordinary path can preserve Object.keys semantics while enumerating own enumerable string keys directly, avoiding the temporary array. Custom-prototype props keep their existing Reflect.ownKeys behavior unless a separately tested iterator preserves that exact contract.
+The current DOM path calls Object.keys for an ordinary props object and Reflect.ownKeys for other prototypes, then loops over the returned array. The ordinary path could preserve Object.keys semantics while enumerating own enumerable string keys directly, avoiding the temporary array. Custom-prototype props would keep their existing Reflect.ownKeys behavior unless a separately tested iterator preserves that exact contract.
 
 The expected saving is one short-lived array for every mounted element whose props use the ordinary-object path. This is not a claim that one retained array per row disappears: key arrays are transient and therefore absent from the forced-GC snapshot. The compiled-path allocation profile did not rank these arrays among leading sampled sites; the expected effect is reduced transient setup allocation. P3 will compare create/append traces and GC without promising a fixed saving.
 
 Semantic risk is low to medium. Enumeration order, own-property filtering, symbols, non-enumerable properties, property getters, and the order in which props are applied must remain as before. In particular, this optimization must not read a getter twice. The SSR host will need the same property visibility and evaluation-order rules, but it does not need the DOM-specific loop.
 
-**Tests:** compare DOM output and evaluation order for string keys, numeric-like keys, inherited keys, symbols, non-enumerable keys, getter-backed props, and custom prototypes. Add an allocation counter asserting that the ordinary path creates no key snapshot. Run the complete compiler behavior fixture set and all nine interleaved benchmark rows; capture GC traces for create and append.
+**Trial result:** the guarded `for...in` prototype added 10 B to core + DOM and did not change retained allocations. Across two interleaved runs, create 1k moved from 52.9 ms to 51.0 ms then 57.3 ms; all ranges overlapped. Other rows were similarly noisy without a repeated gain. The implementation was reverted. The property-order semantic test remains. See [the P3 property-key checkpoint](../checkpoints/perf-p3-property-keys.md).
+
+**Tests:** compare DOM output and evaluation order for string keys, numeric-like keys, inherited keys, symbols, non-enumerable keys, getter-backed props, and custom prototypes. An allocation counter for a no-key-snapshot implementation is only relevant if this candidate is revisited. Run the complete compiler behavior fixture set and all nine interleaved benchmark rows; capture GC traces for create and append.
 
 ### 2. Store delegated handlers directly on elements
 
@@ -110,7 +112,7 @@ Semantic risk is medium: keyed reconciliation, duplicate-key diagnostics, LIS mo
 
 ### 7. Reduce per-row disposal and contiguous DOM removal work
 
-The corrected compiled-path profile measures 229.7 ms [219.6–308.8] to dispose 10,000 rows on clear and 254.4 ms [244.5–285.5] to dispose the old rows in replace. A separate trace records a 1,059 ms median renderer-main-thread GC cost during replace, with a 1,006–1,123 ms spread. Before changing disposal, split the span into owner traversal/cleanup and DOM removal. A candidate may batch removal of an already contiguous range after disposing each owner in the documented order, or reduce repeated range bookkeeping. It cannot skip any owner cleanup or reorder user-visible disposal.
+The corrected compiled-path profile measures 229.7 ms [219.6–308.8] to dispose 10,000 rows on clear and 254.4 ms [244.5–285.5] to dispose the old rows in replace. A separate trace records a 1,004 ms median renderer-main-thread GC cost during replace, with an 891–1,111 ms spread. Before changing disposal, split the span into owner traversal/cleanup and DOM removal. A candidate may batch removal of an already contiguous range after disposing each owner in the documented order, or reduce repeated range bookkeeping. It cannot skip any owner cleanup or reorder user-visible disposal.
 
 The scheduler continues to use intrusive O(1) queue links and identity deduplication. The DOM operation may be grouped only when all removed nodes are contiguous and the group does not cross a live node that must remain. SSR has no DOM removal; request abort and completion still dispose logical owners in the specified order.
 
@@ -135,7 +137,7 @@ No candidate may change:
 - Logical owner parentage, depth-first disposal, cleanup order, context behavior, error routing, mount eligibility, or detached roots in [ownership.md](./ownership.md).
 - The host-neutral compiler analysis and future server-render behavior in [ssr.md](./ssr.md).
 
-Implement and measure one candidate at a time. The first two trials are ordinary property-key iteration and delegated event slots, in that requested order. If they do not show repeatable gains, revert them. Then follow the corrected evidence ranking: direct compiled DOM emission, owner/effect/cleanup allocation, keyed record fusion, and disposal. Each later candidate is a separate change with its own trace and allocation profile. The dependency-array candidate is closed as already satisfied.
+Implement and measure one candidate at a time. Ordinary property-key iteration has been measured and reverted. Continue with delegated event slots. If that trial does not show repeatable gains, revert it. Then follow the corrected evidence ranking: direct compiled DOM emission, owner/effect/cleanup allocation, keyed record fusion, and disposal. Each later candidate is a separate change with its own trace and allocation profile. The dependency-array candidate is closed as already satisfied.
 
 At each step, rebuild production output, record exact gzip bytes, collect per-row allocations, and run the full interleaved nine-row benchmark with two warmups and seven rounds. Also run table mounts at 5,000 and 10,000 rows, the dashboard filter slice, heap allocation sampling, and GC traces when the candidate should affect them. A change stays only if its improvement repeats and no row regresses beyond measured noise.
 
