@@ -18,6 +18,9 @@ import { test } from 'node:test'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const cli = fileURLToPath(new URL('../src/index.mjs', import.meta.url))
+const packageVersion = JSON.parse(
+  readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+).version
 
 function createLocalRegistry() {
   const registryRoot = fileURLToPath(
@@ -97,7 +100,26 @@ test('CLI help shows optional UI flags and one curated template', () => {
   assert.match(result.stdout, /--start\s+start the dev server/)
   assert.match(result.stdout, /--no-start\s+do not start the dev server/)
   assert.match(result.stdout, /--verbose\s+show detailed Benos UI setup output/)
+  assert.match(result.stdout, /--version, -v\s+show the create-benos version/)
   assert.doesNotMatch(result.stdout, /--template/)
+})
+
+test('CLI version flags report the create-benos package version', () => {
+  for (const flag of ['--version', '-v']) {
+    const result = spawnSync(process.execPath, [cli, flag], {
+      encoding: 'utf8',
+    })
+    assert.equal(result.status, 0, result.stderr)
+    assert.equal(result.stdout.trim(), packageVersion)
+  }
+})
+
+test('CLI short help flag shows usage', () => {
+  const result = spawnSync(process.execPath, [cli, '-h'], {
+    encoding: 'utf8',
+  })
+  assert.equal(result.status, 0, result.stderr)
+  assert.match(result.stdout, /Usage: create-benos/)
 })
 
 test('CLI rejects the removed template option', () => {
