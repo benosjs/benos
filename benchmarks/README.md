@@ -1385,13 +1385,13 @@ of animation frames at each measurement boundary. Each value is median
 |       8 |   5k | 411.3 [369.2–459.1] / 247.7 [225.9–507.2] |  387.5 [373.4–469.1] / 258.8 [233.6–433.6] | 241.2 [221.7–277.6] / 252.0 [231.9–460.4] |
 |       8 |  10k | 878.6 [766.5–936.2] / 568.3 [494.6–632.0] | 834.5 [745.9–988.5] / 619.3 [488.7–1133.3] | 608.1 [538.7–712.5] / 516.6 [512.1–955.0] |
 
-After removing the three-column branch, registry and handwritten Benos medians
-are within 13% for all initial mounts. Their spreads overlap for every mount
-case, and no median difference is consistent across widths. Sort medians are
-similarly close with broad overlap. The generic mapped-cell implementation is
-therefore retained for all column counts. Keyed row identity, accessibility,
-sorting, and direction behavior remain covered by the browser suite. Raw
-samples are in
+After removing the three-column branch, registry mount medians range from about
+4% faster to 20% slower than handwritten Benos across the eight width and row
+combinations. Their spreads overlap in every mount case, and the median
+difference changes direction across widths. Sort medians are similarly close
+with broad overlap. The generic mapped-cell implementation is therefore
+retained for all column counts. Keyed row identity, accessibility, sorting,
+and direction behavior remain covered by the browser suite. Raw samples are in
 [`multicolumn-after-revert.json`](js-framework-benchmark/results/multicolumn-after-revert.json).
 
 The updated allocation-sampling profile retained 44.2 plain objects, 19.0
