@@ -722,7 +722,13 @@ Every row remains under the 2× CI guard. Local verification also passed the
 221 unit tests, all 405 Chromium/Firefox/WebKit browser tests, the packed
 create-benos consumer, and the pnpm UI CLI consumer matrix.
 
-## Initial-render performance track P1 checkpoint (2026-10-10)
+## Initial-render P1 runtime-JSX history (2026-10-10)
+
+This table is historical. The generic P1 adapter used hand-written runtime
+`jsx` descriptors, which bypassed the compiler and does not match a
+create-benos TSX application. The current published comparison is the compiled
+`safe` TSX record below. Earlier tables remain as history to show how the
+harness correction changed the measured gap.
 
 Core and DOM were rebuilt before this measurement; sizes remain within budget.
 The package build and the benchmark adapter use production output. The baseline
@@ -768,15 +774,16 @@ allocation sampling results are recorded in
 [`docs/checkpoints/perf-p1.md`](../docs/checkpoints/perf-p1.md), with raw
 results in `benchmarks/js-framework-benchmark/results/perf-p1-*.json`.
 
-## Initial-render P3: compiled-path baseline correction (2026-10-10)
+## Initial-render P3: first compiled-path baseline (2026-10-10, historical)
 
 The original generic Benos adapter used JavaScript runtime `jsx` descriptors,
 so its TSX compiler path was skipped. That P1 comparison did not match a
 create-benos app. The generic adapter is now TSX and both the generic and table
 fixtures build through the built `@benosjs/vite` production entry with
 `optimization: 'safe'`, matching the starter's production transform. The
-historical P1 values above are retained as runtime-JSX history; use this
-compiled-path comparison for P3 decisions. Baseline commit `e029073` contains
+P1 values above are retained as runtime-JSX history. This first compiled
+comparison is also kept as history; use the refreshed compiled comparison
+below for current release reporting. Baseline commit `e029073` contains
 core and DOM version 0.1.2. The protocol is Chromium trace click-to-paint, two
 warmups, seven interleaved measured rounds. Times are milliseconds, median
 [minimum–maximum].
@@ -813,4 +820,43 @@ The guarded `for...in` prop-key trial ran twice on the same compiled production 
 
 ### P3 delegated event slots
 
-The getter-slot implementation removes the compiled-path event record, props wrapper, and extra getter closure while preserving untracked handler reads at dispatch. Its two allocation profiles show about 16 fewer retained JS objects and 545 fewer bytes per row; owner and effect call counts are unchanged. The nine click-to-paint rows and all table rows remain within overlapping spreads, so no timing improvement is claimed. Core is 4,049 B and core + DOM is 10,200 B. The full before/after tables and the direct-handler size experiment are in [the event-slot checkpoint](../docs/checkpoints/perf-p3-event-slots.md); raw results are `p3-event-slots*.json` under `js-framework-benchmark/results/`.
+### P3 delegated event slots
+
+The getter-slot implementation removes the compiled-path event record, props
+wrapper, and extra getter closure while preserving untracked handler reads at
+dispatch. Its allocation profiles show about 16 fewer retained JS objects and
+545 fewer bytes per row; owner and effect call counts are unchanged. The nine
+click-to-paint rows and table rows remain within overlapping spreads, so no
+timing improvement is claimed. Core is 4,049 B and core + DOM is 10,200 B.
+The full before/after tables and direct-handler size experiment are in [the
+event-slot checkpoint](../docs/checkpoints/perf-p3-event-slots.md); raw results
+are `p3-event-slots*.json` under `js-framework-benchmark/results/`.
+
+## Current published comparison: compiled `safe` TSX (2026-10-11)
+
+The create-benos starter runs TSX through the production `@benosjs/vite`
+plugin with `optimization: 'safe'`. This comparison uses that same built plugin,
+production core and DOM entries, and TSX source. Chromium trace click-to-paint
+was interleaved across v0.1.2, current HEAD, and Solid with two warmups and
+seven measured rounds. Times are median milliseconds [minimum–maximum].
+
+| Operation         |                    v0.1.2 |          Current compiled |                     Solid | Current / Solid |
+| ----------------- | ------------------------: | ------------------------: | ------------------------: | --------------: |
+| Create 1,000      |    53.392 [51.851–54.015] |    51.294 [50.361–51.899] |    25.431 [25.236–27.323] |           2.02× |
+| Replace 1,000     |    57.682 [57.396–62.965] |    56.470 [55.773–60.204] |    26.067 [24.881–26.884] |           2.17× |
+| Update every 10th |    13.775 [13.313–19.756] |    13.823 [13.561–16.104] |    14.263 [14.011–15.895] |           0.97× |
+| Select one row    |      7.054 [1.323–10.851] |      1.278 [1.212–12.927] |       0.870 [0.849–0.938] |           1.47× |
+| Swap rows         |     10.688 [3.602–13.632] |       3.813 [3.611–4.022] |       3.045 [2.843–3.091] |           1.25× |
+| Remove one row    |      4.585 [4.432–10.978] |       4.549 [4.418–5.404] |       4.470 [4.395–4.773] |           1.02× |
+| Create 10,000     | 508.980 [500.780–530.606] | 498.929 [484.537–549.237] | 242.735 [241.177–255.059] |           2.06× |
+| Append 1,000      |    62.163 [60.550–63.683] |    57.350 [56.284–61.652] |    36.473 [35.518–36.758] |           1.57× |
+| Clear 1,000       |      9.820 [9.364–14.389] |       9.509 [9.077–9.996] |       2.621 [2.507–2.673] |           3.63× |
+
+The P1 runtime-JSX table showed create, replace, and create-10k at 1.55×,
+1.66×, and 1.64× Solid; the corresponding compiled-path medians are now
+2.02×, 2.17×, and 2.06×. Clear remains near 3.6× in this rerun; earlier
+release records with a faster Solid clear denominator were not stable. The
+compiler path's additional template and binding costs are detailed in the
+[P3 compiled comparison checkpoint](../docs/checkpoints/perf-p3-compiled-comparison.md).
+The raw seven-round samples are in
+[`results/p3-budget-baseline.json`](./js-framework-benchmark/results/p3-budget-baseline.json).

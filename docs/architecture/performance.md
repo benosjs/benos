@@ -1,19 +1,19 @@
 # Initial-render allocation design
 
-**Status:** P3 attribution checkpoint. The compiled benchmark path and allocation call sites are verified; runtime optimization trials are next. No public API or documented runtime semantics have changed.
+**Status:** P3. The compiled production benchmark path has been refreshed against the runtime-JSX history. The approved limits are 4,608 bytes for core and 11,264 bytes for core + DOM. Runtime optimization trials are in progress; no public API or documented runtime semantics have changed.
 
 ## Goal and measured baseline
 
-Initial rendering is allocation-heavy. The corrected compiled-TSX forced-GC snapshot retains about 60 function objects, 123 plain JavaScript objects, and 54 arrays per Benos row; exact owner creation counters record 20 owner creations per row on this adapter. Solid retains about 8 functions, 11 plain objects, and 6 arrays, with one root per row. DOM wrappers and native layout objects are much closer between frameworks than the JavaScript allocation totals.
+Initial rendering is allocation-heavy. The compiled-TSX forced-GC snapshot before event slots retained about 60 function objects, 123 plain JavaScript objects, and 54 arrays per Benos row. The current getter-slot build retains about 58 functions, 113 plain objects, and 50 arrays; exact owner creation counters still record 20 owner creations per row. Solid retains about 8 functions, 11 plain objects, and 6 arrays per row, with one root per row. DOM wrappers and native layout objects are much closer between frameworks than the JavaScript allocation totals.
 
 The per-row figures are independent categories: an owner is also a plain object. They are retained-object deltas after collection, not total allocation calls. The P1 allocation sampler also includes transient objects that do not survive the snapshot. Those distinctions matter when evaluating changes to garbage-collection time.
 
-| Metric per compiled keyed row | Benos P3 | Solid P3 | Target |
-| ----------------------------- | -------: | -------: | -----: |
-| Owner creation calls          |       20 |        1 |    ≤ 2 |
-| Retained closures/functions   |       60 |        8 |   ≤ 12 |
-| Retained plain objects        |      123 |       11 |   ≤ 20 |
-| Retained arrays               |       54 |        6 |   ≤ 10 |
+| Metric per keyed row        | P1 runtime JSX | Compiled safe before slots | Current compiled | Solid | Target |
+| --------------------------- | -------------: | -------------------------: | ---------------: | ----: | -----: |
+| Owner creation calls        |              5 |                         20 |               20 |     1 |    ≤ 2 |
+| Retained closures/functions |             34 |                         60 |               58 |     8 |   ≤ 12 |
+| Retained plain objects      |             86 |                        123 |              113 |    11 |   ≤ 20 |
+| Retained arrays             |             33 |                         54 |               50 |     6 |   ≤ 10 |
 
 These are measured targets, not a promise that the candidates below explain or remove every allocation. Counts from the P1 runtime-JSX adapter were not comparable to a create-benos app because that adapter bypassed the compiler. The corrected P3 TSX adapter compiles through the same built Vite plugin and production optimization path used by a starter app. The 90%-coverage call-site profiles in [the P3 attribution checkpoint](../checkpoints/perf-p3-attribution.md) show that template instantiation, child creation, ownership/effects, cleanup, and slot updates dominate retained allocations. The property-key iteration trial found no repeatable benefit and was reverted.
 
@@ -26,21 +26,69 @@ The corrected compiled-path profile found:
 
 See [the P1 historical checkpoint](../checkpoints/perf-p1.md), [the corrected P3 checkpoint](../checkpoints/perf-p3-attribution.md), [the performance track plan](../perf-plan.md), and the raw profiles under ../../benchmarks/js-framework-benchmark/results/perf-p3-compiled-*.
 
+## Runtime-JSX versus compiled `safe` output
+
+The runtime-JSX comparison is historical and hand-writes calls to the public
+`jsx` runtime. The compiled comparison uses the create-benos path: TSX goes
+through the production Vite plugin with `optimization: 'safe'`. On a 10,000-row
+create, the compiler path changes the marked CPU spans as follows. These
+function spans are sampled independently, so their medians are diagnostic and
+must not be summed as a wall-clock decomposition.
+
+| Marked category      | Runtime JSX, ms | Compiled safe, ms | Change, ms | Calls, runtime → compiled |
+| -------------------- | --------------: | ----------------: | ---------: | ------------------------: |
+| Template instantiate |             0.0 |             167.1 |     +167.1 |               0 → 140,000 |
+| Binding setup        |           200.0 |             114.1 |      −85.9 |         290,000 → 190,000 |
+| Owner creation       |             7.0 |              30.2 |      +23.2 |          50,000 → 200,000 |
+| Signal node creation |             7.4 |               5.3 |       −2.1 |           10,000 → 10,000 |
+| Effect node creation |             4.1 |              21.8 |      +17.7 |          20,000 → 100,000 |
+| Event setup          |            20.8 |              14.4 |       −6.4 |           40,000 → 40,000 |
+| DOM insertion        |            44.7 |              64.6 |      +19.9 |         120,000 → 100,016 |
+| Disposal             |             1.3 |              25.1 |      +23.8 |          10,004 → 140,004 |
+
+On clear-10k, disposal is 149.8 ms in the runtime-JSX profile and 229.7 ms
+in the compiled profile. This difference is not compiler-only: the compiled
+adapter has different generated scopes and owner cleanup registrations. The
+attribution isolates the added work; it does not claim the compiled syntax
+alone causes every difference.
+
+The forced-GC retained profile measures 153.5 JavaScript objects and 4.71 KB
+per runtime-JSX row (33.9 functions, 86.4 plain objects, 33.2 arrays), versus
+237.0 objects and 8.22 KB before the getter-slot event change on compiled
+`safe` TSX. The compiled path therefore retains about 83.5 more objects and
+3.51 KB per row in the paired adapters. The current getter-slot build retains
+221.0 objects and 7.68 KB, leaving a compiled-versus-runtime difference of
+67.5 objects and 2.96 KB per row. The safe compiler adds 14 template
+instantiations, 15 owner creations, and 8 effects per row while reducing
+binding calls by 10; those extra scopes and plan bindings account for the main
+measured allocation difference.
+
+The top runtime-JSX allocation stacks are `mountElement` (932.5 KB sampled
+per 1k rows), `applyProps` (623.9 KB), `jsx` (606.3 KB), and `mountValue`
+(355.7 KB). On compiled TSX, source-mapped retained sites identify
+`mountTemplate` (48.8 objects / 1,535 B per row), `child` (33.5 / 937 B),
+`createOwner` (14 / 1,008 B), `onCleanup` (14 / 644 B), `createEffect`
+(12.9 / 642 B), and `updateSlot` (18.6 / 538 B). The compiler opportunity is
+therefore concrete: the template path contributes up to 48.8 retained
+objects / 1,535 B per row at `mountTemplate`, and its marked span is 167.1 ms
+per 10k generic rows or 96.2 ms per 10k table rows. These are hotspot ceilings
+for a direct-output prototype, not claimed recoverable savings.
+
 ## Ranking
 
-The evidence-based ranking below reflects the corrected compiled-path call sites and expected gain per added gzip byte. Estimates remain directional; each candidate must earn its place in an A/B run. Ordinary-prop key iteration was measured first and reverted for lack of repeatable benefit. The event-slot trial removed retained records and reduced sampled allocation counts repeatably while staying within the byte cap. Directly storing stable raw handlers exceeded the cap and was reverted. The measured call sites still put compiler template work and owner/effect/cleanup setup ahead of the remaining candidates.
+The ranking reflects the refreshed compiled-path call sites and the approved size headroom. The raw-handler refinement has not been included in the compiled path because compiler output supplies a getter for every handler expression; it will be measured under the new cap and kept only if it produces a repeated benefit without changing handler read timing. Ordinary-prop iteration remains reverted. Getter-slot event storage is retained for its repeatable allocation reduction. The direct-output estimate below is based on measured `mountTemplate` and template-mark costs; it is an opportunity bound, not a claim that the full span will disappear.
 
-| Rank | Candidate                                                            | Expected allocation change per row                                                                                                                                 | Expected time change                                                                                                                  | Estimated size delta: core / DOM / app                                               | Confidence                                                            |
-| ---: | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-|    1 | Emit direct client DOM operations from compiler analysis             | Target the 49 objects / 1.5 KB in `mountTemplate`, 34 objects / 937 B in `child`, and 19 objects / 538 B in `updateSlot`; avoid the per-instance setup indirection | Highest measured target on the compiled path: 96 ms template instantiation at 10k table rows; expected improvement remains unmeasured | 0 B / −40 to +80 B / +16 to +64 B per distinct generated template                    | High allocation opportunity; low timing confidence                    |
-|    2 | Materialize physical owners and run scopes lazily                    | Target 14 owner calls / 1.0 KB and 14 cleanup calls / 644 B per row, plus source-free effect setup where safe                                                      | Owner creation marks are 30 ms / 10k generic rows; potential GC and cleanup savings are unmeasured                                    | +60 to +140 B core runtime / −20 to +30 B DOM / 0 B                                  | Medium allocation opportunity; high semantic risk                     |
-|    3 | Store delegated event slots on elements                              | Measured reduction: about 16 retained objects / 545 B per row across repeat profiles; owner/effect calls unchanged                                                 | All nine trace medians stayed within baseline spreads; no repeatable click-to-paint change measured                                   | 0 B / +2 B / 0 B for getter slots; raw stable-handler variant was +20 B over the cap | Repeatable allocation benefit; timing effect below trace noise        |
-|    4 | Fuse keyed For entry and range records                               | Remove the per-item `ForEntry`/range record duplication if the lifetime and state align; `createEntry` is about 4 objects / 120 B per row                          | Small row setup/disposal gain; not expected to close the main create gap alone                                                        | 0 B / −10 to +30 B / 0 B                                                             | Medium for one object; low for elapsed time                           |
-|    5 | Reduce per-row disposal and contiguous DOM removal work              | No retained allocation reduction promised                                                                                                                          | Clear and replace show 230 ms and 254 ms disposal spans at 10k; GC adds a variable 1,059 ms main-thread median during replace         | 0 B / −20 to +100 B / 0 B                                                            | High cost is measured; attribution within disposal remains incomplete |
-|    6 | Iterate ordinary props without a key snapshot (reverted)             | No measured retained-allocation change; a short-lived `Object.keys` array remains transient                                                                        | Two runs showed no repeatable trace or GC reduction                                                                                   | 0 B / +10 B / 0 B (reverted)                                                         | Tested; no repeatable benefit                                         |
-|    7 | Promote render bindings only when observation or ownership is needed | Potentially remove the effect/run-owner allocations for source-free render bindings; current generic row exact effect call count is 10 / row                       | 23 ms of effect-node creation / 10k and larger surrounding setup; no safe savings known until source-free bindings are isolated       | 0 to +20 B public core; +80 to +160 B core runtime / 0 to +20 B DOM / 0 B            | Low; semantic risk is high                                            |
+| Rank | Candidate                                                  | Measured opportunity per row                                                                                      | Measured time opportunity                                               | Estimated size delta: core / DOM / generated app                       | Risk and confidence                                         |
+| ---: | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------- |
+|    1 | Direct client DOM operations from shared compiler analysis | `mountTemplate`: 48.8 objects / 1,535 B; `child`: 33.5 / 937 B; `updateSlot`: 18.6 / 538 B; do not count overlaps | Template mark ceiling: 167.1 ms / 10k generic rows; 96.2 ms / 10k table | 0 B / estimated −40 to +80 B / estimated +16 to +64 B per emitted plan | Largest measured hotspot; prototype needed                  |
+|    2 | Materialize physical owners and run scopes lazily          | `createOwner`: 14 calls / 1,008 B; `onCleanup`: 14 calls / 644 B                                                  | Owner mark ceiling: 30.2 ms / 10k generic rows                          | estimated +60 to +140 B / −20 to +30 B / 0 B                           | Large object target; high ownership-semantic risk           |
+|    3 | Reduce disposal and contiguous DOM removal work            | No retained allocation saving is assumed                                                                          | Clear 229.7 ms and replace 254.4 ms disposal spans / 10k                | 0 B / estimated −20 to +100 B / 0 B                                    | High cost measured; traversal/removal split still needed    |
+|    4 | Fuse keyed For entry and range records                     | About 4 objects / 120 B per keyed row                                                                             | Small row setup/disposal effect; expected below main create candidates  | 0 B / estimated −10 to +30 B / 0 B                                     | Medium allocation confidence; timing uncertain              |
+|    5 | Stable raw handler values for runtime JSX data props       | Up to one wrapper closure per handler only on runtime JSX; compiled safe TSX already passes getter-backed slots   | No compiled-path gain expected unless compiler output changes           | prior prototype +60 B core + DOM versus getter-slot build              | Measure under expanded cap; preserve dispatch-time getters  |
+|    6 | Source-free render binding promotion                       | Could remove an effect and run owner only for bindings with no reads/resources; not included in the table targets | No isolated repeated timing gain measured                               | estimated +80 to +160 B core + DOM                                     | Highest semantic risk; defer until larger wins are measured |
+|    7 | Ordinary prop key iteration (reverted)                     | No retained allocation change; temporary key array only                                                           | Two trials had overlapping spreads and no repeatable gain               | +10 B in the failed prototype                                          | Closed; no benefit                                          |
 
-The package estimates can overlap: a core-internal helper pulled into a DOM application affects the application's combined runtime even when the public core entry point stays unchanged. Generated application size is reported separately. Do not sum the ranges as if they were measured independent deltas.
+The size estimates are hypotheses, not added bytes. Each candidate must report exact rebuilt core, core + DOM, and generated app sizes against the approved caps. Package estimates can overlap when shared helpers are bundled together, so do not sum the ranges as if they were independent deltas.
 
 ## Candidate designs
 
@@ -139,12 +187,12 @@ No candidate may change:
 - Logical owner parentage, depth-first disposal, cleanup order, context behavior, error routing, mount eligibility, or detached roots in [ownership.md](./ownership.md).
 - The host-neutral compiler analysis and future server-render behavior in [ssr.md](./ssr.md).
 
-Implement and measure one candidate at a time. Ordinary property-key iteration has been measured and reverted. The getter-slot event implementation is retained; the raw stable-handler refinement was reverted at the fixed size cap. The next unstarted candidates are direct compiled DOM emission, owner/effect/cleanup allocation, keyed record fusion, and disposal. Each candidate needs its own trace and allocation profile. The dependency-array candidate is closed as already satisfied.
+Implement and measure one candidate at a time. Property-key iteration has been measured and reverted. Getter-slot event storage is retained. Re-evaluate direct raw-handler storage under the expanded cap before the next compiled-output candidate. The remaining compiled-path candidates are direct DOM output, lazy owner/effect/cleanup allocation, keyed record fusion, and disposal. Each needs its own trace and allocation profile. The dependency-array candidate is closed as already satisfied.
 
 At each step, rebuild production output, record exact gzip bytes, collect per-row allocations, and run the full interleaved nine-row benchmark with two warmups and seven rounds. Also run table mounts at 5,000 and 10,000 rows, the dashboard filter slice, heap allocation sampling, and GC traces when the candidate should affect them. A change stays only if its improvement repeats and no row regresses beyond measured noise.
 
 ## Budget decision
 
-P1 measured core at 4,049 / 4,096 gzip bytes and core + DOM at 10,198 / 10,240, leaving 47 and 42 bytes. No budget increase is requested: the approved increase is **0 bytes**. The core and core+DOM caps remain 4,096 and 10,240 bytes.
+The user-approved caps are **4,608 bytes for core** and **11,264 bytes for core + DOM** (minified + gzip). The fresh pre-candidate production build measures core at **4,049 B** and core + DOM at **10,200 B**, leaving 559 B and 1,064 B. The cap increase is 512 B for core and 1,024 B for core + DOM. Spend it only on changes with repeatable measured gains, and record exact byte deltas beside the gain.
 
-Some gross candidate estimates exceed the 42-byte combined headroom. Those changes must replace existing code or be offset by measured size reductions while preserving semantics. If an approved prototype cannot fit, stop at that P3 checkpoint with its exact measured byte delta and benchmark result; do not raise a cap, cut a feature, or continue on an assumed allowance. The generated application size is a separate measurement and must be reported for both the gallery and dashboard.
+If a prototype exceeds either cap, stop and report the exact byte delta and measured result. Do not cut features or change semantics to fit. Generated application size is a separate measurement from package budgets and must be reported for both the gallery and dashboard when compiler output changes.

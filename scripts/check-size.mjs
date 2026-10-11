@@ -2,8 +2,6 @@ import process from 'node:process'
 import { gzipSync } from 'node:zlib'
 import { build } from 'esbuild'
 
-const kib = 1024
-
 async function bundledSize(packages) {
   const imports = packages
     .map(
@@ -33,12 +31,8 @@ async function bundledSize(packages) {
 }
 
 const checks = [
-  ['@benosjs/core', await bundledSize(['core']), 4 * kib],
-  [
-    '@benosjs/core + @benosjs/dom',
-    await bundledSize(['core', 'dom']),
-    10 * kib,
-  ],
+  ['@benosjs/core', await bundledSize(['core']), 4_608],
+  ['@benosjs/core + @benosjs/dom', await bundledSize(['core', 'dom']), 11_264],
 ]
 
 let failed = false
