@@ -1,0 +1,2490 @@
+{
+  "protocol": "production define; minification disabled; sourcemaps enabled; Chromium HeapProfiler allocation sampling plus forced-GC snapshots",
+  "browser": "153.0.8010.12",
+  "rows": 1000,
+  "buildRoot": "/var/folders/wf/l_k2q0vd2hg99k1b0zpg7h9c0000gn/T/benos-p1-alloc-jwmY4J",
+  "frameworks": {
+    "benos": {
+      "nodeCallsPerRow": {
+        "owners": 5,
+        "signals": 1,
+        "computeds": 0,
+        "effects": 2
+      },
+      "retainedDeltaPerRow": {
+        "object shape": {
+          "count": 0.69,
+          "bytes": 33.992
+        },
+        "code": {
+          "count": 4.138,
+          "bytes": 411.068
+        },
+        "browser native/layout objects": {
+          "count": 123.256,
+          "bytes": 8910.747
+        },
+        "arrays": {
+          "count": 33.17,
+          "bytes": 1114.388
+        },
+        "number": {
+          "count": 3.017,
+          "bytes": 0.048
+        },
+        "string": {
+          "count": 4.454,
+          "bytes": 395.192
+        },
+        "symbol": {
+          "count": 0.003,
+          "bytes": 0.048
+        },
+        "plain objects": {
+          "count": 86.363,
+          "bytes": 2648.996
+        },
+        "concatenated string": {
+          "count": 0.097,
+          "bytes": 1.94
+        },
+        "closures/functions": {
+          "count": 33.936,
+          "bytes": 951.432
+        },
+        "DOM wrappers": {
+          "count": 10.999,
+          "bytes": 1239.936
+        }
+      },
+      "largestNamedDeltas": [
+        {
+          "type": "object",
+          "name": "Object",
+          "countPerRow": 47.104,
+          "bytesPerRow": 1598.452
+        },
+        {
+          "type": "closure",
+          "name": "",
+          "countPerRow": 22,
+          "bytesPerRow": 616
+        },
+        {
+          "type": "object",
+          "name": "Array",
+          "countPerRow": 14.049,
+          "bytesPerRow": 224.784
+        },
+        {
+          "type": "array",
+          "name": "(object elements)",
+          "countPerRow": 14.047,
+          "bytesPerRow": 396.72
+        },
+        {
+          "type": "native",
+          "name": "blink::FragmentDataList",
+          "countPerRow": 10,
+          "bytesPerRow": 240
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutResult",
+          "countPerRow": 9,
+          "bytesPerRow": 720
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalBoxFragment",
+          "countPerRow": 9,
+          "bytesPerRow": 960
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalFragmentRareData",
+          "countPerRow": 8.001,
+          "bytesPerRow": 576.072
+        },
+        {
+          "type": "native",
+          "name": "blink::ConstraintSpace::RareData",
+          "countPerRow": 8,
+          "bytesPerRow": 960
+        },
+        {
+          "type": "native",
+          "name": "blink::ComputedStyle",
+          "countPerRow": 7.006,
+          "bytesPerRow": 504.432
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::PhysicalFragmentLink>",
+          "countPerRow": 7.001,
+          "bytesPerRow": 212.008
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @34725",
+          "countPerRow": 7,
+          "bytesPerRow": 252
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @34921",
+          "countPerRow": 6,
+          "bytesPerRow": 192
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @47569",
+          "countPerRow": 6,
+          "bytesPerRow": 120
+        },
+        {
+          "type": "native",
+          "name": "blink::InlineItem",
+          "countPerRow": 6,
+          "bytesPerRow": 240
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalLineBoxFragment",
+          "countPerRow": 6,
+          "bytesPerRow": 288
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::FragmentItem>",
+          "countPerRow": 6,
+          "bytesPerRow": 720
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @47575",
+          "countPerRow": 5,
+          "bytesPerRow": 100
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResultView",
+          "countPerRow": 5,
+          "bytesPerRow": 360
+        },
+        {
+          "type": "native",
+          "name": "blink::InlineNodeData",
+          "countPerRow": 4,
+          "bytesPerRow": 224
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::InlineItem, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+          "countPerRow": 4,
+          "bytesPerRow": 96
+        },
+        {
+          "type": "native",
+          "name": "blink::MeasureCache",
+          "countPerRow": 4,
+          "bytesPerRow": 128
+        },
+        {
+          "type": "native",
+          "name": "<td>",
+          "countPerRow": 4,
+          "bytesPerRow": 416
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutTableCell",
+          "countPerRow": 4,
+          "bytesPerRow": 704
+        },
+        {
+          "type": "array",
+          "name": "",
+          "countPerRow": 3.025,
+          "bytesPerRow": 303.908
+        },
+        {
+          "type": "object",
+          "name": "Set",
+          "countPerRow": 3.011,
+          "bytesPerRow": 48.176
+        },
+        {
+          "type": "native",
+          "name": "Text",
+          "countPerRow": 3,
+          "bytesPerRow": 288
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutText",
+          "countPerRow": 3,
+          "bytesPerRow": 312
+        },
+        {
+          "type": "number",
+          "name": "smi number",
+          "countPerRow": 2.916,
+          "bytesPerRow": 0
+        },
+        {
+          "type": "native",
+          "name": "system / AccessorPair",
+          "countPerRow": 2.798,
+          "bytesPerRow": 33.576
+        },
+        {
+          "type": "native",
+          "name": "system / PropertyArray",
+          "countPerRow": 2.11,
+          "bytesPerRow": 42.292
+        },
+        {
+          "type": "array",
+          "name": "(object properties)",
+          "countPerRow": 2.049,
+          "bytesPerRow": 188.976
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @34857",
+          "countPerRow": 2,
+          "bytesPerRow": 80
+        },
+        {
+          "type": "closure",
+          "name": "getHandler",
+          "countPerRow": 2,
+          "bytesPerRow": 56
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @34841",
+          "countPerRow": 2,
+          "bytesPerRow": 64
+        },
+        {
+          "type": "native",
+          "name": "blink::UniqueElementData",
+          "countPerRow": 2,
+          "bytesPerRow": 224
+        },
+        {
+          "type": "closure",
+          "name": "onClick",
+          "countPerRow": 2,
+          "bytesPerRow": 56
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResult",
+          "countPerRow": 1.858,
+          "bytesPerRow": 118.912
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResultRun",
+          "countPerRow": 1.858,
+          "bytesPerRow": 104.048
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::HarfBuzzRunGlyphData>",
+          "countPerRow": 1.858,
+          "bytesPerRow": 160.872
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::ShapeResultCharacterData>",
+          "countPerRow": 1.858,
+          "bytesPerRow": 160.568
+        },
+        {
+          "type": "native",
+          "name": "system / FunctionTemplateInfo",
+          "countPerRow": 1.209,
+          "bytesPerRow": 77.376
+        },
+        {
+          "type": "native",
+          "name": "system / ExternalStringData",
+          "countPerRow": 1.018,
+          "bytesPerRow": 30.507
+        },
+        {
+          "type": "native",
+          "name": "blink::ComputedStyleBase::StyleMiscData",
+          "countPerRow": 1.003,
+          "bytesPerRow": 88.264
+        },
+        {
+          "type": "closure",
+          "name": "read",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @34139",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "closure",
+          "name": "readonly",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @34947",
+          "countPerRow": 1,
+          "bytesPerRow": 36
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @34687",
+          "countPerRow": 1,
+          "bytesPerRow": 20
+        },
+        {
+          "type": "native",
+          "name": "DOMTokenList",
+          "countPerRow": 1,
+          "bytesPerRow": 56
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutBlockFlow",
+          "countPerRow": 1,
+          "bytesPerRow": 152
+        },
+        {
+          "type": "native",
+          "name": "<a>",
+          "countPerRow": 1,
+          "bytesPerRow": 160
+        },
+        {
+          "type": "closure",
+          "name": "update",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @54461",
+          "countPerRow": 1,
+          "bytesPerRow": 20
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @54451",
+          "countPerRow": 1,
+          "bytesPerRow": 20
+        },
+        {
+          "type": "native",
+          "name": "<tr class=\"\">",
+          "countPerRow": 1,
+          "bytesPerRow": 104
+        },
+        {
+          "type": "closure",
+          "name": "get class",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "closure",
+          "name": "get children",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "closure",
+          "name": "getItem",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @85063",
+          "countPerRow": 1,
+          "bytesPerRow": 20
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @97431",
+          "countPerRow": 1,
+          "bytesPerRow": 24
+        },
+        {
+          "type": "closure",
+          "name": "getIndex",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "native",
+          "name": "blink::SoftNavigationPaintAttributionTracker::NodeState",
+          "countPerRow": 1,
+          "bytesPerRow": 24
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutInline",
+          "countPerRow": 1,
+          "bytesPerRow": 80
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutTableRow",
+          "countPerRow": 1,
+          "bytesPerRow": 152
+        },
+        {
+          "type": "native",
+          "name": "Comment",
+          "countPerRow": 0.999,
+          "bytesPerRow": 95.904
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @34671",
+          "countPerRow": 0.999,
+          "bytesPerRow": 19.98
+        },
+        {
+          "type": "code",
+          "name": "system / FeedbackCell",
+          "countPerRow": 0.643,
+          "bytesPerRow": 10.288
+        },
+        {
+          "type": "code",
+          "name": "system / UncompiledDataWithoutPreparseData",
+          "countPerRow": 0.494,
+          "bytesPerRow": 9.88
+        },
+        {
+          "type": "object shape",
+          "name": "system / Map",
+          "countPerRow": 0.455,
+          "bytesPerRow": 19.016
+        },
+        {
+          "type": "code",
+          "name": "system / TrustedByteArray",
+          "countPerRow": 0.285,
+          "bytesPerRow": 34.508
+        },
+        {
+          "type": "code",
+          "name": "system / ScopeInfo",
+          "countPerRow": 0.21,
+          "bytesPerRow": 10.468
+        },
+        {
+          "type": "object shape",
+          "name": "system / DescriptorArray",
+          "countPerRow": 0.164,
+          "bytesPerRow": 12.944
+        },
+        {
+          "type": "native",
+          "name": "system / WeakArrayList",
+          "countPerRow": 0.161,
+          "bytesPerRow": 9.512
+        },
+        {
+          "type": "code",
+          "name": "system / BytecodeArray",
+          "countPerRow": 0.143,
+          "bytesPerRow": 25.964
+        },
+        {
+          "type": "code",
+          "name": "system / BytecodeWrapper",
+          "countPerRow": 0.143,
+          "bytesPerRow": 1.144
+        },
+        {
+          "type": "code",
+          "name": "system / FeedbackMetadata",
+          "countPerRow": 0.139,
+          "bytesPerRow": 4.656
+        },
+        {
+          "type": "code",
+          "name": "(constant pool)",
+          "countPerRow": 0.133,
+          "bytesPerRow": 5.996
+        },
+        {
+          "type": "code",
+          "name": "system / CodeWrapper",
+          "countPerRow": 0.121,
+          "bytesPerRow": 0.968
+        },
+        {
+          "type": "code",
+          "name": "system / Code",
+          "countPerRow": 0.121,
+          "bytesPerRow": 8.712
+        },
+        {
+          "type": "code",
+          "name": "system / InstructionStream",
+          "countPerRow": 0.121,
+          "bytesPerRow": 163.936
+        },
+        {
+          "type": "code",
+          "name": "system / ObjectBoilerplateDescription",
+          "countPerRow": 0.099,
+          "bytesPerRow": 3.112
+        },
+        {
+          "type": "number",
+          "name": "int",
+          "countPerRow": 0.097,
+          "bytesPerRow": 0
+        },
+        {
+          "type": "concatenated string",
+          "name": "(concatenated string)",
+          "countPerRow": 0.097,
+          "bytesPerRow": 1.94
+        },
+        {
+          "type": "native",
+          "name": "system / ObjectTemplateInfo",
+          "countPerRow": 0.084,
+          "bytesPerRow": 2.352
+        },
+        {
+          "type": "code",
+          "name": "system / LoadHandler",
+          "countPerRow": 0.079,
+          "bytesPerRow": 1.256
+        },
+        {
+          "type": "code",
+          "name": "system / FeedbackVector",
+          "countPerRow": 0.076,
+          "bytesPerRow": 11.372
+        },
+        {
+          "type": "code",
+          "name": "system / ArrayBoilerplateDescription",
+          "countPerRow": 0.064,
+          "bytesPerRow": 0.768
+        },
+        {
+          "type": "code",
+          "name": "(constant elements)",
+          "countPerRow": 0.062,
+          "bytesPerRow": 1.332
+        },
+        {
+          "type": "native",
+          "name": "system / ArrayList",
+          "countPerRow": 0.059,
+          "bytesPerRow": 15.824
+        },
+        {
+          "type": "native",
+          "name": "system / ClassPositions",
+          "countPerRow": 0.051,
+          "bytesPerRow": 0.612
+        },
+        {
+          "type": "code",
+          "name": "system / ClosureFeedbackCellArray",
+          "countPerRow": 0.047,
+          "bytesPerRow": 0.644
+        },
+        {
+          "type": "native",
+          "name": "system / ProtectedFixedArray",
+          "countPerRow": 0.046,
+          "bytesPerRow": 0.672
+        },
+        {
+          "type": "native",
+          "name": "system / SharedFunctionInfoWrapper",
+          "countPerRow": 0.046,
+          "bytesPerRow": 0.368
+        },
+        {
+          "type": "code",
+          "name": "system / ProtectedFixedArray",
+          "countPerRow": 0.046,
+          "bytesPerRow": 9.956
+        },
+        {
+          "type": "code",
+          "name": "system / TrustedWeakFixedArray",
+          "countPerRow": 0.046,
+          "bytesPerRow": 1.524
+        },
+        {
+          "type": "native",
+          "name": "system / FunctionTemplateRareData",
+          "countPerRow": 0.043,
+          "bytesPerRow": 1.72
+        },
+        {
+          "type": "code",
+          "name": "system / AllocationSite",
+          "countPerRow": 0.039,
+          "bytesPerRow": 1.084
+        },
+        {
+          "type": "code",
+          "name": "system / WeakArrayList",
+          "countPerRow": 0.036,
+          "bytesPerRow": 1.028
+        },
+        {
+          "type": "closure",
+          "name": "queryAll",
+          "countPerRow": 0.031,
+          "bytesPerRow": 0.868
+        }
+      ],
+      "allocationSamplingTopSites": [
+        {
+          "site": "mountElement @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:913:22",
+          "bytes": 932532,
+          "sampleCount": 11116,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountValue",
+            "mountElement"
+          ]
+        },
+        {
+          "site": "applyProps @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:1155:20",
+          "bytes": 623900,
+          "sampleCount": 7312,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountValue",
+            "mountElement",
+            "applyProps"
+          ]
+        },
+        {
+          "site": "jsx @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:756:13",
+          "bytes": 606324,
+          "sampleCount": 6159,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "untrack",
+            "(anonymous)",
+            "Row",
+            "jsx"
+          ]
+        },
+        {
+          "site": "(V8 API) @ :0:0",
+          "bytes": 379056,
+          "sampleCount": 373,
+          "stack": [
+            "(root)",
+            "(V8 API)"
+          ]
+        },
+        {
+          "site": "mountValue @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:872:20",
+          "bytes": 355700,
+          "sampleCount": 3330,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "mountValue"
+          ]
+        },
+        {
+          "site": "Set @ :0:0",
+          "bytes": 271620,
+          "sampleCount": 2493,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "installEvent",
+            "installDelegated",
+            "Set"
+          ]
+        },
+        {
+          "site": "signal @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:454:16",
+          "bytes": 255388,
+          "sampleCount": 2914,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "untrack",
+            "(anonymous)",
+            "Row",
+            "signal"
+          ]
+        },
+        {
+          "site": "Row @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:1798:13",
+          "bytes": 252776,
+          "sampleCount": 2989,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "untrack",
+            "(anonymous)",
+            "Row"
+          ]
+        },
+        {
+          "site": "createOwner @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:61:21",
+          "bytes": 250088,
+          "sampleCount": 3432,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "createInternalOwner$1",
+            "createOwner"
+          ]
+        },
+        {
+          "site": "create @ :0:0",
+          "bytes": 242508,
+          "sampleCount": 2887,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "untrack",
+            "(anonymous)",
+            "Row",
+            "jsx",
+            "create"
+          ]
+        },
+        {
+          "site": "installEvent @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:1075:22",
+          "bytes": 198560,
+          "sampleCount": 2426,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "installEvent"
+          ]
+        },
+        {
+          "site": "createSlot @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:849:20",
+          "bytes": 161992,
+          "sampleCount": 1923,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "createSlot"
+          ]
+        },
+        {
+          "site": "track @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:330:15",
+          "bytes": 160312,
+          "sampleCount": 1615,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "get children",
+            "track"
+          ]
+        },
+        {
+          "site": "createEffect @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:623:22",
+          "bytes": 154032,
+          "sampleCount": 1651,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "runWithOwner$1",
+            "(anonymous)",
+            "createEffect"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:1175:24",
+          "bytes": 148176,
+          "sampleCount": 1764,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "runWithOwner$1",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "updateSlot @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:823:20",
+          "bytes": 135356,
+          "sampleCount": 1646,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot"
+          ]
+        },
+        {
+          "site": "createEntry @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:1350:23",
+          "bytes": 135168,
+          "sampleCount": 1627,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry"
+          ]
+        },
+        {
+          "site": "installDelegated @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:1022:26",
+          "bytes": 133632,
+          "sampleCount": 1478,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "installEvent",
+            "installDelegated"
+          ]
+        },
+        {
+          "site": "next @ :0:0",
+          "bytes": 125416,
+          "sampleCount": 1054,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "_promiseAwareJsonValueNoThrow",
+            "safeJson",
+            "jsonValue",
+            "serializeAsCallArgument",
+            "serialize",
+            "innerSerialize",
+            "next"
+          ]
+        },
+        {
+          "site": "(BYTECODE_COMPILER) @ :0:0",
+          "bytes": 95256,
+          "sampleCount": 745,
+          "stack": [
+            "(root)",
+            "(BYTECODE_COMPILER)"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:1784:39",
+          "bytes": 91736,
+          "sampleCount": 1160,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "(anonymous)",
+            "(anonymous)",
+            "buildData",
+            "from",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "set @ :0:0",
+          "bytes": 89940,
+          "sampleCount": 34,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "installEvent",
+            "installDelegated",
+            "set"
+          ]
+        },
+        {
+          "site": "mountComponent @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:1239:24",
+          "bytes": 75148,
+          "sampleCount": 966,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent"
+          ]
+        },
+        {
+          "site": "onCleanup @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:255:19",
+          "bytes": 73348,
+          "sampleCount": 951,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "onCleanup"
+          ]
+        },
+        {
+          "site": "notifyMount$1 @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:703:23",
+          "bytes": 71276,
+          "sampleCount": 922,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "notifyMount$1"
+          ]
+        },
+        {
+          "site": "push @ :0:0",
+          "bytes": 60872,
+          "sampleCount": 734,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "_promiseAwareJsonValueNoThrow",
+            "safeJson",
+            "jsonValue",
+            "serializeAsCallArgument",
+            "serialize",
+            "innerSerialize",
+            "push"
+          ]
+        },
+        {
+          "site": "eventName @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:981:19",
+          "bytes": 57444,
+          "sampleCount": 707,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "mountValue",
+            "mountElement",
+            "applyProps",
+            "installEvent",
+            "eventName"
+          ]
+        },
+        {
+          "site": "(anonymous) @ :2:10",
+          "bytes": 56144,
+          "sampleCount": 559,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "setSlotRange @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:814:22",
+          "bytes": 52776,
+          "sampleCount": 645,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "setSlotRange"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4381/assets/index-Bhd45sSx.js:1179:48",
+          "bytes": 49928,
+          "sampleCount": 607,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)"
+          ]
+        }
+      ]
+    },
+    "solid": {
+      "nodeCallsPerRow": {
+        "owners": 1,
+        "signals": 0,
+        "computeds": 0,
+        "effects": 3
+      },
+      "retainedDeltaPerRow": {
+        "object shape": {
+          "count": 0.646,
+          "bytes": 32.096
+        },
+        "code": {
+          "count": 3.577,
+          "bytes": 288.936
+        },
+        "browser native/layout objects": {
+          "count": 120.09,
+          "bytes": 8767.7
+        },
+        "arrays": {
+          "count": 6.18,
+          "bytes": 290.968
+        },
+        "number": {
+          "count": 1.013,
+          "bytes": 0.036
+        },
+        "string": {
+          "count": 3.36,
+          "bytes": 381.34
+        },
+        "symbol": {
+          "count": 0.003,
+          "bytes": 0.048
+        },
+        "plain objects": {
+          "count": 11.351,
+          "bytes": 368.632
+        },
+        "concatenated string": {
+          "count": 1.899,
+          "bytes": 37.98
+        },
+        "closures/functions": {
+          "count": 8.941,
+          "bytes": 251.576
+        },
+        "DOM wrappers": {
+          "count": 10.01,
+          "bytes": 1062.736
+        }
+      },
+      "largestNamedDeltas": [
+        {
+          "type": "native",
+          "name": "blink::FragmentDataList",
+          "countPerRow": 10,
+          "bytesPerRow": 240
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutResult",
+          "countPerRow": 9,
+          "bytesPerRow": 720
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalBoxFragment",
+          "countPerRow": 9,
+          "bytesPerRow": 960
+        },
+        {
+          "type": "closure",
+          "name": "",
+          "countPerRow": 8.001,
+          "bytesPerRow": 224.028
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalFragmentRareData",
+          "countPerRow": 8.001,
+          "bytesPerRow": 576.072
+        },
+        {
+          "type": "native",
+          "name": "blink::ConstraintSpace::RareData",
+          "countPerRow": 8,
+          "bytesPerRow": 960
+        },
+        {
+          "type": "native",
+          "name": "blink::ComputedStyle",
+          "countPerRow": 7.006,
+          "bytesPerRow": 504.432
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::PhysicalFragmentLink>",
+          "countPerRow": 7.001,
+          "bytesPerRow": 212.008
+        },
+        {
+          "type": "object",
+          "name": "Object",
+          "countPerRow": 6.091,
+          "bytesPerRow": 238.04
+        },
+        {
+          "type": "native",
+          "name": "blink::InlineItem",
+          "countPerRow": 6,
+          "bytesPerRow": 240
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalLineBoxFragment",
+          "countPerRow": 6,
+          "bytesPerRow": 288
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::FragmentItem>",
+          "countPerRow": 6,
+          "bytesPerRow": 720
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResultView",
+          "countPerRow": 5,
+          "bytesPerRow": 360
+        },
+        {
+          "type": "native",
+          "name": "<td>",
+          "countPerRow": 4.004,
+          "bytesPerRow": 382.032
+        },
+        {
+          "type": "native",
+          "name": "blink::InlineNodeData",
+          "countPerRow": 4,
+          "bytesPerRow": 224
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::InlineItem, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+          "countPerRow": 4,
+          "bytesPerRow": 96
+        },
+        {
+          "type": "native",
+          "name": "blink::MeasureCache",
+          "countPerRow": 4,
+          "bytesPerRow": 128
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutTableCell",
+          "countPerRow": 4,
+          "bytesPerRow": 704
+        },
+        {
+          "type": "array",
+          "name": "(object elements)",
+          "countPerRow": 3.054,
+          "bytesPerRow": 143.764
+        },
+        {
+          "type": "object",
+          "name": "Array",
+          "countPerRow": 3.049,
+          "bytesPerRow": 48.784
+        },
+        {
+          "type": "native",
+          "name": "Text",
+          "countPerRow": 3.001,
+          "bytesPerRow": 240.08
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutText",
+          "countPerRow": 3,
+          "bytesPerRow": 312
+        },
+        {
+          "type": "native",
+          "name": "system / PropertyArray",
+          "countPerRow": 2.11,
+          "bytesPerRow": 42.272
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @43051",
+          "countPerRow": 2,
+          "bytesPerRow": 56
+        },
+        {
+          "type": "native",
+          "name": "blink::UniqueElementData",
+          "countPerRow": 2,
+          "bytesPerRow": 224
+        },
+        {
+          "type": "concatenated string",
+          "name": "(concatenated string)",
+          "countPerRow": 1.899,
+          "bytesPerRow": 37.98
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResult",
+          "countPerRow": 1.858,
+          "bytesPerRow": 118.912
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResultRun",
+          "countPerRow": 1.858,
+          "bytesPerRow": 104.048
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::HarfBuzzRunGlyphData>",
+          "countPerRow": 1.858,
+          "bytesPerRow": 160.872
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::ShapeResultCharacterData>",
+          "countPerRow": 1.858,
+          "bytesPerRow": 160.568
+        },
+        {
+          "type": "native",
+          "name": "system / FunctionTemplateInfo",
+          "countPerRow": 1.209,
+          "bytesPerRow": 77.376
+        },
+        {
+          "type": "native",
+          "name": "blink::ComputedStyleBase::StyleMiscData",
+          "countPerRow": 1.003,
+          "bytesPerRow": 88.264
+        },
+        {
+          "type": "native",
+          "name": "DOMTokenList",
+          "countPerRow": 1.001,
+          "bytesPerRow": 56.056
+        },
+        {
+          "type": "native",
+          "name": "<a>",
+          "countPerRow": 1.001,
+          "bytesPerRow": 160.144
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutBlockFlow",
+          "countPerRow": 1,
+          "bytesPerRow": 152
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @93817",
+          "countPerRow": 1,
+          "bytesPerRow": 24
+        },
+        {
+          "type": "native",
+          "name": "<tr class=\"\">",
+          "countPerRow": 1,
+          "bytesPerRow": 104
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @85589",
+          "countPerRow": 1,
+          "bytesPerRow": 20
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @51249",
+          "countPerRow": 1,
+          "bytesPerRow": 24
+        },
+        {
+          "type": "native",
+          "name": "blink::SoftNavigationPaintAttributionTracker::NodeState",
+          "countPerRow": 1,
+          "bytesPerRow": 24
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutInline",
+          "countPerRow": 1,
+          "bytesPerRow": 80
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutTableRow",
+          "countPerRow": 1,
+          "bytesPerRow": 152
+        },
+        {
+          "type": "number",
+          "name": "smi number",
+          "countPerRow": 0.913,
+          "bytesPerRow": 0
+        },
+        {
+          "type": "native",
+          "name": "system / AccessorPair",
+          "countPerRow": 0.799,
+          "bytesPerRow": 9.588
+        },
+        {
+          "type": "code",
+          "name": "system / FeedbackCell",
+          "countPerRow": 0.645,
+          "bytesPerRow": 10.32
+        },
+        {
+          "type": "code",
+          "name": "system / UncompiledDataWithoutPreparseData",
+          "countPerRow": 0.509,
+          "bytesPerRow": 10.18
+        },
+        {
+          "type": "object shape",
+          "name": "system / Map",
+          "countPerRow": 0.434,
+          "bytesPerRow": 18.224
+        },
+        {
+          "type": "code",
+          "name": "system / ScopeInfo",
+          "countPerRow": 0.195,
+          "bytesPerRow": 9.856
+        },
+        {
+          "type": "object shape",
+          "name": "system / DescriptorArray",
+          "countPerRow": 0.152,
+          "bytesPerRow": 12.2
+        },
+        {
+          "type": "code",
+          "name": "system / TrustedByteArray",
+          "countPerRow": 0.134,
+          "bytesPerRow": 14.936
+        },
+        {
+          "type": "code",
+          "name": "system / BytecodeArray",
+          "countPerRow": 0.13,
+          "bytesPerRow": 24.488
+        },
+        {
+          "type": "code",
+          "name": "system / BytecodeWrapper",
+          "countPerRow": 0.13,
+          "bytesPerRow": 1.04
+        },
+        {
+          "type": "code",
+          "name": "system / FeedbackMetadata",
+          "countPerRow": 0.125,
+          "bytesPerRow": 4.356
+        },
+        {
+          "type": "code",
+          "name": "(constant pool)",
+          "countPerRow": 0.123,
+          "bytesPerRow": 5.672
+        },
+        {
+          "type": "number",
+          "name": "int",
+          "countPerRow": 0.097,
+          "bytesPerRow": 0
+        },
+        {
+          "type": "code",
+          "name": "system / ObjectBoilerplateDescription",
+          "countPerRow": 0.09,
+          "bytesPerRow": 2.816
+        },
+        {
+          "type": "native",
+          "name": "system / ObjectTemplateInfo",
+          "countPerRow": 0.084,
+          "bytesPerRow": 2.352
+        },
+        {
+          "type": "code",
+          "name": "system / LoadHandler",
+          "countPerRow": 0.065,
+          "bytesPerRow": 1.064
+        },
+        {
+          "type": "code",
+          "name": "system / ArrayBoilerplateDescription",
+          "countPerRow": 0.062,
+          "bytesPerRow": 0.744
+        },
+        {
+          "type": "code",
+          "name": "(constant elements)",
+          "countPerRow": 0.061,
+          "bytesPerRow": 1.304
+        },
+        {
+          "type": "native",
+          "name": "system / ArrayList",
+          "countPerRow": 0.059,
+          "bytesPerRow": 15.62
+        },
+        {
+          "type": "array",
+          "name": "(object properties)",
+          "countPerRow": 0.054,
+          "bytesPerRow": 29.76
+        },
+        {
+          "type": "code",
+          "name": "system / CodeWrapper",
+          "countPerRow": 0.053,
+          "bytesPerRow": 0.424
+        },
+        {
+          "type": "code",
+          "name": "system / Code",
+          "countPerRow": 0.053,
+          "bytesPerRow": 3.816
+        },
+        {
+          "type": "code",
+          "name": "system / InstructionStream",
+          "countPerRow": 0.053,
+          "bytesPerRow": 86.688
+        },
+        {
+          "type": "native",
+          "name": "system / ClassPositions",
+          "countPerRow": 0.051,
+          "bytesPerRow": 0.612
+        },
+        {
+          "type": "string",
+          "name": "unsightly ",
+          "countPerRow": 0.048,
+          "bytesPerRow": 1.152
+        },
+        {
+          "type": "native",
+          "name": "system / WeakArrayList",
+          "countPerRow": 0.047,
+          "bytesPerRow": 2.38
+        },
+        {
+          "type": "code",
+          "name": "system / ClosureFeedbackCellArray",
+          "countPerRow": 0.047,
+          "bytesPerRow": 0.652
+        },
+        {
+          "type": "string",
+          "name": "expensive ",
+          "countPerRow": 0.045,
+          "bytesPerRow": 1.08
+        },
+        {
+          "type": "native",
+          "name": "system / FunctionTemplateRareData",
+          "countPerRow": 0.043,
+          "bytesPerRow": 1.72
+        },
+        {
+          "type": "string",
+          "name": "adorable ",
+          "countPerRow": 0.039,
+          "bytesPerRow": 0.936
+        },
+        {
+          "type": "code",
+          "name": "system / FeedbackVector",
+          "countPerRow": 0.038,
+          "bytesPerRow": 7.788
+        },
+        {
+          "type": "string",
+          "name": "inexpensive ",
+          "countPerRow": 0.038,
+          "bytesPerRow": 0.912
+        },
+        {
+          "type": "string",
+          "name": "handsome ",
+          "countPerRow": 0.038,
+          "bytesPerRow": 0.912
+        },
+        {
+          "type": "code",
+          "name": "system / SharedFunctionInfo",
+          "countPerRow": 0.033,
+          "bytesPerRow": 1.584
+        },
+        {
+          "type": "code",
+          "name": "system / WeakFixedArray",
+          "countPerRow": 0.033,
+          "bytesPerRow": 4.324
+        },
+        {
+          "type": "string",
+          "name": "important ",
+          "countPerRow": 0.033,
+          "bytesPerRow": 0.792
+        },
+        {
+          "type": "string",
+          "name": "helpful ",
+          "countPerRow": 0.033,
+          "bytesPerRow": 0.66
+        },
+        {
+          "type": "closure",
+          "name": "queryAll",
+          "countPerRow": 0.031,
+          "bytesPerRow": 0.868
+        },
+        {
+          "type": "array",
+          "name": "",
+          "countPerRow": 0.023,
+          "bytesPerRow": 68.66
+        },
+        {
+          "type": "object shape",
+          "name": "system / PrototypeInfo",
+          "countPerRow": 0.022,
+          "bytesPerRow": 0.88
+        },
+        {
+          "type": "string",
+          "name": "elegant ",
+          "countPerRow": 0.022,
+          "bytesPerRow": 0.44
+        },
+        {
+          "type": "object",
+          "name": "CSSParserToken",
+          "countPerRow": 0.021,
+          "bytesPerRow": 0.252
+        },
+        {
+          "type": "code",
+          "name": "system / SharedFunctionInfo / queryAll",
+          "countPerRow": 0.021,
+          "bytesPerRow": 1.008
+        },
+        {
+          "type": "code",
+          "name": "system / AllocationSite",
+          "countPerRow": 0.02,
+          "bytesPerRow": 0.56
+        },
+        {
+          "type": "object shape",
+          "name": "system / Cell",
+          "countPerRow": 0.018,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "closure",
+          "name": "matches",
+          "countPerRow": 0.018,
+          "bytesPerRow": 0.504
+        },
+        {
+          "type": "native",
+          "name": "system / ExternalStringData",
+          "countPerRow": 0.017,
+          "bytesPerRow": 0.62
+        },
+        {
+          "type": "native",
+          "name": "system / ProtectedFixedArray",
+          "countPerRow": 0.016,
+          "bytesPerRow": 0.216
+        },
+        {
+          "type": "closure",
+          "name": "native_bind",
+          "countPerRow": 0.016,
+          "bytesPerRow": 0.384
+        },
+        {
+          "type": "code",
+          "name": "system / ProtectedFixedArray",
+          "countPerRow": 0.016,
+          "bytesPerRow": 2.192
+        },
+        {
+          "type": "code",
+          "name": "system / TrustedWeakFixedArray",
+          "countPerRow": 0.016,
+          "bytesPerRow": 0.38
+        },
+        {
+          "type": "native",
+          "name": "system / SharedFunctionInfoWrapper",
+          "countPerRow": 0.016,
+          "bytesPerRow": 0.128
+        },
+        {
+          "type": "native",
+          "name": "PerformanceEventTiming",
+          "countPerRow": 0.015,
+          "bytesPerRow": 3.84
+        },
+        {
+          "type": "code",
+          "name": "system / SharedFunctionInfo / toString",
+          "countPerRow": 0.014,
+          "bytesPerRow": 0.672
+        },
+        {
+          "type": "code",
+          "name": "system / SharedFunctionInfo / matches",
+          "countPerRow": 0.014,
+          "bytesPerRow": 0.672
+        },
+        {
+          "type": "closure",
+          "name": "toString",
+          "countPerRow": 0.014,
+          "bytesPerRow": 0.392
+        },
+        {
+          "type": "closure",
+          "name": "toSource",
+          "countPerRow": 0.014,
+          "bytesPerRow": 0.392
+        },
+        {
+          "type": "code",
+          "name": "system / SharedFunctionInfo / toSource",
+          "countPerRow": 0.014,
+          "bytesPerRow": 0.672
+        }
+      ],
+      "allocationSamplingTopSites": [
+        {
+          "site": "(V8 API) @ :0:0",
+          "bytes": 380332,
+          "sampleCount": 386,
+          "stack": [
+            "(root)",
+            "(V8 API)"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:1014:24",
+          "bytes": 325560,
+          "sampleCount": 3957,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "mapper",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "createComputation @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:295:27",
+          "bytes": 275024,
+          "sampleCount": 2618,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "mapper",
+            "(anonymous)",
+            "createComputation"
+          ]
+        },
+        {
+          "site": "insert @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:738:16",
+          "bytes": 120888,
+          "sampleCount": 1439,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "mapper",
+            "(anonymous)",
+            "insert"
+          ]
+        },
+        {
+          "site": "next @ :0:0",
+          "bytes": 100944,
+          "sampleCount": 748,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "_promiseAwareJsonValueNoThrow",
+            "safeJson",
+            "jsonValue",
+            "serializeAsCallArgument",
+            "serialize",
+            "innerSerialize",
+            "next"
+          ]
+        },
+        {
+          "site": "(BYTECODE_COMPILER) @ :0:0",
+          "bytes": 94772,
+          "sampleCount": 740,
+          "stack": [
+            "(root)",
+            "(BYTECODE_COMPILER)"
+          ]
+        },
+        {
+          "site": "readSignal @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:181:20",
+          "bytes": 93504,
+          "sampleCount": 883,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "mapper",
+            "(anonymous)",
+            "updateComputation",
+            "runComputation",
+            "createRenderEffect.e",
+            "readSignal"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:977:39",
+          "bytes": 90136,
+          "sampleCount": 1146,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "buildData",
+            "from",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "toString @ :0:0",
+          "bytes": 82264,
+          "sampleCount": 210,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "mapper",
+            "(anonymous)",
+            "insert",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "insertExpression",
+            "toString"
+          ]
+        },
+        {
+          "site": "createRoot @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:80:20",
+          "bytes": 80636,
+          "sampleCount": 1039,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot"
+          ]
+        },
+        {
+          "site": "(anonymous) @ :2:10",
+          "bytes": 56760,
+          "sampleCount": 564,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "(IDLE_EXTERNAL) @ :0:0",
+          "bytes": 41316,
+          "sampleCount": 12,
+          "stack": [
+            "(root)",
+            "(IDLE_EXTERNAL)"
+          ]
+        },
+        {
+          "site": "insertExpression @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:794:26",
+          "bytes": 34424,
+          "sampleCount": 354,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runUpdates",
+            "(anonymous)",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "insertExpression"
+          ]
+        },
+        {
+          "site": "mapper @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:618:18",
+          "bytes": 34008,
+          "sampleCount": 304,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "mapper"
+          ]
+        },
+        {
+          "site": "InjectedScript @ :6810:14",
+          "bytes": 33764,
+          "sampleCount": 275,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "(anonymous)",
+            "InjectedScript"
+          ]
+        },
+        {
+          "site": "updateComputation @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:247:27",
+          "bytes": 29616,
+          "sampleCount": 410,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "mapper",
+            "(anonymous)",
+            "updateComputation"
+          ]
+        },
+        {
+          "site": "push @ :0:0",
+          "bytes": 29388,
+          "sampleCount": 136,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runUpdates",
+            "(anonymous)",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "insertExpression",
+            "normalizeIncomingArray",
+            "push"
+          ]
+        },
+        {
+          "site": "(anonymous) @ :1:1",
+          "bytes": 23740,
+          "sampleCount": 229,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "(PARSER) @ :0:0",
+          "bytes": 20156,
+          "sampleCount": 210,
+          "stack": [
+            "(root)",
+            "(PARSER)"
+          ]
+        },
+        {
+          "site": "updateFn @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:87:31",
+          "bytes": 16976,
+          "sampleCount": 200,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "runUpdates",
+            "updateFn"
+          ]
+        },
+        {
+          "site": "evaluate @ :305:11",
+          "bytes": 13560,
+          "sampleCount": 115,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:550:18",
+          "bytes": 13188,
+          "sampleCount": 4,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "children @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:1014:14",
+          "bytes": 11120,
+          "sampleCount": 139,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "runUpdates",
+            "updateFn",
+            "mapper",
+            "children"
+          ]
+        },
+        {
+          "site": "previewNode @ :7805:14",
+          "bytes": 10216,
+          "sampleCount": 95,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "(anonymous)",
+            "(anonymous)",
+            "previewNode"
+          ]
+        },
+        {
+          "site": "fn @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:714:104",
+          "bytes": 9040,
+          "sampleCount": 113,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "runUpdates",
+            "updateFn",
+            "mapper",
+            "children",
+            "(anonymous)",
+            "fn"
+          ]
+        },
+        {
+          "site": "eventHandler @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:746:22",
+          "bytes": 8212,
+          "sampleCount": 63,
+          "stack": [
+            "(root)",
+            "eventHandler"
+          ]
+        },
+        {
+          "site": "UtilityScript @ :6743:14",
+          "bytes": 7892,
+          "sampleCount": 74,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "(anonymous)",
+            "InjectedScript",
+            "UtilityScript"
+          ]
+        },
+        {
+          "site": "(anonymous) @ :1:2",
+          "bytes": 7044,
+          "sampleCount": 61,
+          "stack": [
+            "(root)",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "markTargetElements @ :7961:21",
+          "bytes": 6700,
+          "sampleCount": 56,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "(anonymous)",
+            "markTargetElements"
+          ]
+        },
+        {
+          "site": "innerSerialize @ :186:24",
+          "bytes": 4716,
+          "sampleCount": 33,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "_promiseAwareJsonValueNoThrow",
+            "safeJson",
+            "jsonValue",
+            "serializeAsCallArgument",
+            "serialize",
+            "innerSerialize"
+          ]
+        }
+      ]
+    }
+  }
+}

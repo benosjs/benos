@@ -4,30 +4,51 @@ import { SortableTable } from '../../registry/source/components/sortable-table.j
 import type { SortableTableColumn } from '../../registry/source/components/sortable-table.js'
 import '../../examples/ui-gallery/src/ui.css'
 
-type Row = { id: string; name: string; score: number }
+type Row = { id: string; name: string; score: number; region: string }
 
 const rows: readonly Row[] = [
-  { id: 'charlie', name: 'Charlie', score: 3 },
-  { id: 'alpha', name: 'Alpha', score: 10 },
+  { id: 'charlie', name: 'Charlie', score: 3, region: 'Beirut' },
+  { id: 'alpha', name: 'Alpha', score: 10, region: 'Tripoli' },
   {
     id: 'bravo',
     name: 'Bravo with a long display value that should truncate cleanly',
     score: 2,
+    region: 'Sidon',
   },
-  { id: 'delta', name: 'Delta', score: 21 },
+  { id: 'delta', name: 'Delta', score: 21, region: 'Byblos' },
 ]
 const arabicRow: Row = {
   id: 'arabic',
   name: 'مريم خوري مع اسم طويل للعرض',
   score: 5,
+  region: 'بيروت',
 }
-const columns: readonly SortableTableColumn<Row>[] = [
+let columnMapReads = 0
+function trackColumns(
+  value: readonly SortableTableColumn<Row>[],
+): readonly SortableTableColumn<Row>[] {
+  return new Proxy(value, {
+    get(target, property, receiver) {
+      if (property === 'map') columnMapReads++
+      return Reflect.get(target, property, receiver)
+    },
+  })
+}
+const columns = trackColumns([
   { key: 'name', label: 'Name', value: (row) => row.name },
   { key: 'score', label: 'Score', value: (row) => row.score, type: 'number' },
-]
+  { key: 'region', label: 'Region', value: (row) => row.region },
+])
+const fourColumns = trackColumns([
+  ...columns,
+  { key: 'status', label: 'Status', value: () => 'Active' },
+])
 declare global {
   interface Window {
-    __benosBatchFour: { dispose: () => void }
+    __benosBatchFour: {
+      dispose: () => void
+      columnMapReads: () => number
+    }
   }
 }
 
@@ -36,6 +57,7 @@ if (!host) throw new Error('Batch 4 fixture host is missing')
 const empty = new URLSearchParams(location.search).has('empty')
 const rtl = new URLSearchParams(location.search).has('rtl')
 const bidi = new URLSearchParams(location.search).has('bidi')
+const four = new URLSearchParams(location.search).has('four')
 document.documentElement.dir = rtl ? 'rtl' : 'ltr'
 
 function Fixture(): JSX.Element {
@@ -47,11 +69,14 @@ function Fixture(): JSX.Element {
         caption="Project members"
         rows={empty ? [] : bidi ? [...rows, arabicRow] : rows}
         rowKey={(row) => row.id}
-        columns={columns}
+        columns={four ? fourColumns : columns}
         emptyMessage="No members yet."
       />
     </div>
   )
 }
 
-window.__benosBatchFour = { dispose: render(() => <Fixture />, host) }
+window.__benosBatchFour = {
+  dispose: render(() => <Fixture />, host),
+  columnMapReads: () => columnMapReads,
+}

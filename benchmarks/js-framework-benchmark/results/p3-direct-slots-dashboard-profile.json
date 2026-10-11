@@ -1,0 +1,126 @@
+{
+  "benos-slice": {
+    "samples": 32,
+    "topSelfTime": [
+      {
+        "function": "(program)",
+        "url": "",
+        "line": -1,
+        "selfMs": 56.936
+      },
+      {
+        "function": "removeChild",
+        "url": "",
+        "line": -1,
+        "selfMs": 7.126
+      },
+      {
+        "function": "removeChild",
+        "url": "",
+        "line": -1,
+        "selfMs": 6.015
+      },
+      {
+        "function": "(garbage collector)",
+        "url": "",
+        "line": -1,
+        "selfMs": 4.515
+      },
+      {
+        "function": "i",
+        "url": "http://127.0.0.1:4392/assets/benos-slice-D0Og8RYh.js",
+        "line": 0,
+        "selfMs": 4.469
+      },
+      {
+        "function": "Ae",
+        "url": "http://127.0.0.1:4392/assets/benos-slice-D0Og8RYh.js",
+        "line": 0,
+        "selfMs": 3.166
+      },
+      {
+        "function": "removeChild",
+        "url": "",
+        "line": -1,
+        "selfMs": 3.019
+      },
+      {
+        "function": "ae",
+        "url": "http://127.0.0.1:4392/assets/benos-slice-D0Og8RYh.js",
+        "line": 0,
+        "selfMs": 2.984
+      },
+      {
+        "function": "Ce",
+        "url": "http://127.0.0.1:4392/assets/benos-slice-D0Og8RYh.js",
+        "line": 0,
+        "selfMs": 1.505
+      },
+      {
+        "function": "fn",
+        "url": "http://127.0.0.1:4392/assets/benos-slice-D0Og8RYh.js",
+        "line": 0,
+        "selfMs": 1.504
+      },
+      {
+        "function": "(anonymous)",
+        "url": "http://127.0.0.1:4392/assets/benos-slice-D0Og8RYh.js",
+        "line": 0,
+        "selfMs": 1.501
+      },
+      {
+        "function": "qe",
+        "url": "http://127.0.0.1:4392/assets/benos-slice-D0Og8RYh.js",
+        "line": 0,
+        "selfMs": 0.328
+      }
+    ]
+  },
+  "solid-slice": {
+    "samples": 17,
+    "topSelfTime": [
+      {
+        "function": "(program)",
+        "url": "",
+        "line": -1,
+        "selfMs": 27.152
+      },
+      {
+        "function": "remove",
+        "url": "",
+        "line": -1,
+        "selfMs": 5.303
+      },
+      {
+        "function": "Be",
+        "url": "http://127.0.0.1:4393/assets/solid-slice-P4ThZaWj.js",
+        "line": 0,
+        "selfMs": 2.029
+      },
+      {
+        "function": "(idle)",
+        "url": "",
+        "line": -1,
+        "selfMs": 1.04
+      },
+      {
+        "function": "R",
+        "url": "http://127.0.0.1:4393/assets/solid-slice-P4ThZaWj.js",
+        "line": 0,
+        "selfMs": 0.981
+      },
+      {
+        "function": "R",
+        "url": "http://127.0.0.1:4393/assets/solid-slice-P4ThZaWj.js",
+        "line": 0,
+        "selfMs": 0.696
+      },
+      {
+        "function": "(anonymous)",
+        "url": "http://127.0.0.1:4393/assets/solid-slice-P4ThZaWj.js",
+        "line": 0,
+        "selfMs": 0.652
+      }
+    ]
+  }
+}

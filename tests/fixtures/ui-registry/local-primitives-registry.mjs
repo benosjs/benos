@@ -31,7 +31,7 @@ async function bodyOf(request) {
 }
 
 export async function createLocalPackagesRegistry(tarballPaths) {
-  const servedTarballs = new Set()
+  const servedPackuments = new Set()
   const packages = await Promise.all(
     tarballPaths.map(async (tarballPath) => {
       const tarball = await readFile(tarballPath)
@@ -70,6 +70,7 @@ export async function createLocalPackagesRegistry(tarballPaths) {
         pathname === `/${manifest.name}` || pathname === packagePath,
     )
     if (localPackage && pathname === `/${localPackage.manifest.name}`) {
+      servedPackuments.add(localPackage.manifest.name)
       response.setHeader('content-type', 'application/json')
       response.end(
         JSON.stringify(
@@ -79,7 +80,6 @@ export async function createLocalPackagesRegistry(tarballPaths) {
       return
     }
     if (localPackage && pathname === localPackage.packagePath) {
-      servedTarballs.add(localPackage.manifest.name)
       response.setHeader('content-type', 'application/octet-stream')
       response.end(localPackage.tarball)
       return
@@ -130,7 +130,7 @@ export async function createLocalPackagesRegistry(tarballPaths) {
     throw new Error('Local npm registry did not bind to a TCP port.')
   return {
     url: `http://127.0.0.1:${address.port}/`,
-    servedTarballs,
+    servedPackuments,
     close: () =>
       new Promise((resolve, reject) => {
         server.close((error) => (error ? reject(error) : resolve()))

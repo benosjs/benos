@@ -34,6 +34,39 @@ afterEach(() => {
 })
 
 describe('@benosjs/dom', () => {
+  it('iterates ordinary props without changing enumerable string-key order', () => {
+    const reads: string[] = []
+    const props: Record<string, unknown> = {}
+    Object.defineProperty(props, 'data-first', {
+      enumerable: true,
+      get() {
+        reads.push('first')
+        return '1'
+      },
+    })
+    Object.defineProperty(props, 'data-second', {
+      enumerable: true,
+      get() {
+        reads.push('second')
+        return '2'
+      },
+    })
+    Object.defineProperty(props, 'data-hidden', {
+      enumerable: false,
+      value: 'hidden',
+    })
+    Object.defineProperty(props, Symbol('ignored'), {
+      enumerable: true,
+      value: 'ignored',
+    })
+
+    roots.push(render(() => jsx('div', props), document.body))
+
+    const element = document.querySelector('div')
+    expect(element?.getAttributeNames()).toEqual(['data-first', 'data-second'])
+    expect(reads).toEqual(['first', 'second'])
+  })
+
   it('renders fine-grained text without rerunning the component', () => {
     const value = signal(0)
     let runs = 0
@@ -267,6 +300,50 @@ describe('@benosjs/dom', () => {
     expect(handler).toHaveBeenCalledOnce()
   })
 
+  it('keeps delegated getter handlers live without reading during setup', () => {
+    const first = vi.fn()
+    const second = vi.fn()
+    let current = first
+    let reads = 0
+    const props = Object.defineProperty({}, 'onClick', {
+      enumerable: true,
+      get() {
+        reads++
+        return current
+      },
+    })
+    roots.push(render(() => jsx('button', props), document.body))
+    const button = document.querySelector('button') as HTMLButtonElement
+
+    expect(reads).toBe(0)
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    current = second
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+
+    expect(first).toHaveBeenCalledOnce()
+    expect(second).toHaveBeenCalledOnce()
+    expect(reads).toBe(2)
+  })
+
+  it('preserves multiple delegated handlers installed on one element', () => {
+    const calls: string[] = []
+    roots.push(
+      render(
+        () =>
+          jsx('button', {
+            onClick: () => calls.push('property'),
+            'on:click': () => calls.push('explicit'),
+          }),
+        document.body,
+      ),
+    )
+    const button = document.querySelector('button') as HTMLButtonElement
+
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+
+    expect(calls).toEqual(['property', 'explicit'])
+  })
+
   it('native-before-delegated-order', () => {
     const order: string[] = []
     roots.push(
@@ -359,6 +436,35 @@ describe('@benosjs/dom', () => {
     expect(
       createElement.mock.calls.filter(([tag]) => tag === 'span'),
     ).toHaveLength(1)
+  })
+
+  it('resolves sparse numeric template slots from the cloned prototype', () => {
+    const plan = {
+      id: 'sparse-template-slots',
+      nodes: [
+        {
+          op: 'element' as const,
+          tag: 'button',
+          ns: 'html' as const,
+          slot: 2,
+          children: [{ op: 'anchor' as const, slot: 9 }],
+        },
+      ],
+    }
+    roots.push(
+      render(
+        () =>
+          instantiate(plan, (scope) => {
+            scope.attr(2, 'aria-label', () => 'sparse slots')
+            scope.child(9, () => 'ready')
+          }),
+        document.body,
+      ),
+    )
+
+    const button = document.querySelector('button')
+    expect(button?.getAttribute('aria-label')).toBe('sparse slots')
+    expect(button?.textContent).toBe('ready')
   })
 
   it('reuses a text node for a fine-grained child update', () => {

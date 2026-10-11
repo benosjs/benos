@@ -1,0 +1,4622 @@
+{
+  "protocol": "production define; minification disabled; sourcemaps enabled; Chromium HeapProfiler allocation sampling plus forced-GC snapshots",
+  "browser": "153.0.8010.12",
+  "rows": 1000,
+  "buildRoot": "/var/folders/wf/l_k2q0vd2hg99k1b0zpg7h9c0000gn/T/benos-p1-alloc-EmpUTz",
+  "frameworks": {
+    "benos": {
+      "nodeCallsPerRow": {
+        "owners": 20,
+        "signals": 1,
+        "computeds": 0,
+        "effects": 10
+      },
+      "retainedDeltaPerRow": {
+        "browser native/layout objects": {
+          "count": 141.462,
+          "bytes": 9612.508
+        },
+        "arrays": {
+          "count": 53.991,
+          "bytes": 2538.592
+        },
+        "object shape": {
+          "count": 0.043,
+          "bytes": 2.5
+        },
+        "code": {
+          "count": 0.322,
+          "bytes": 118.54
+        },
+        "string": {
+          "count": 9.912,
+          "bytes": 92
+        },
+        "plain objects": {
+          "count": 123.001,
+          "bytes": 4003.984
+        },
+        "closures/functions": {
+          "count": 60,
+          "bytes": 1680
+        },
+        "number": {
+          "count": 6.91,
+          "bytes": 0
+        },
+        "DOM wrappers": {
+          "count": 17.999,
+          "bytes": 1895.904
+        }
+      },
+      "largestNamedDeltas": [
+        {
+          "type": "object",
+          "name": "Object",
+          "countPerRow": 73.999,
+          "bytesPerRow": 2859.944
+        },
+        {
+          "type": "closure",
+          "name": "",
+          "countPerRow": 53,
+          "bytesPerRow": 1484
+        },
+        {
+          "type": "array",
+          "name": "(object elements)",
+          "countPerRow": 18.001,
+          "bytesPerRow": 907.152
+        },
+        {
+          "type": "object",
+          "name": "Array",
+          "countPerRow": 17.999,
+          "bytesPerRow": 287.984
+        },
+        {
+          "type": "array",
+          "name": "",
+          "countPerRow": 15.002,
+          "bytesPerRow": 1106.784
+        },
+        {
+          "type": "native",
+          "name": "blink::FragmentDataList",
+          "countPerRow": 10,
+          "bytesPerRow": 240
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutResult",
+          "countPerRow": 9,
+          "bytesPerRow": 720
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalBoxFragment",
+          "countPerRow": 9,
+          "bytesPerRow": 960
+        },
+        {
+          "type": "object",
+          "name": "Set",
+          "countPerRow": 8.001,
+          "bytesPerRow": 128.016
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalFragmentRareData",
+          "countPerRow": 8.001,
+          "bytesPerRow": 576.072
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @38685",
+          "countPerRow": 8,
+          "bytesPerRow": 192
+        },
+        {
+          "type": "native",
+          "name": "blink::ConstraintSpace::RareData",
+          "countPerRow": 8,
+          "bytesPerRow": 960
+        },
+        {
+          "type": "native",
+          "name": "Comment",
+          "countPerRow": 7.999,
+          "bytesPerRow": 767.904
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @38963",
+          "countPerRow": 7.999,
+          "bytesPerRow": 159.98
+        },
+        {
+          "type": "object",
+          "name": "Map",
+          "countPerRow": 7.001,
+          "bytesPerRow": 112.016
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::PhysicalFragmentLink>",
+          "countPerRow": 7.001,
+          "bytesPerRow": 212.008
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @38265",
+          "countPerRow": 7,
+          "bytesPerRow": 224
+        },
+        {
+          "type": "native",
+          "name": "blink::ComputedStyle",
+          "countPerRow": 7,
+          "bytesPerRow": 504
+        },
+        {
+          "type": "number",
+          "name": "smi number",
+          "countPerRow": 6.91,
+          "bytesPerRow": 0
+        },
+        {
+          "type": "native",
+          "name": "blink::InlineItem",
+          "countPerRow": 6,
+          "bytesPerRow": 240
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalLineBoxFragment",
+          "countPerRow": 6,
+          "bytesPerRow": 288
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::FragmentItem>",
+          "countPerRow": 6,
+          "bytesPerRow": 720
+        },
+        {
+          "type": "native",
+          "name": "NodeList",
+          "countPerRow": 5,
+          "bytesPerRow": 280
+        },
+        {
+          "type": "native",
+          "name": "blink::NodeRareData::DataFieldWrapper<gfx::Vector2dF>",
+          "countPerRow": 5,
+          "bytesPerRow": 120
+        },
+        {
+          "type": "native",
+          "name": "blink::NodeRareData",
+          "countPerRow": 5,
+          "bytesPerRow": 160
+        },
+        {
+          "type": "native",
+          "name": "blink::NodeListsNodeData",
+          "countPerRow": 5,
+          "bytesPerRow": 360
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResultView",
+          "countPerRow": 5,
+          "bytesPerRow": 360
+        },
+        {
+          "type": "native",
+          "name": "<td>",
+          "countPerRow": 4,
+          "bytesPerRow": 416
+        },
+        {
+          "type": "native",
+          "name": "blink::InlineNodeData",
+          "countPerRow": 4,
+          "bytesPerRow": 224
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::InlineItem, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+          "countPerRow": 4,
+          "bytesPerRow": 96
+        },
+        {
+          "type": "native",
+          "name": "blink::MeasureCache",
+          "countPerRow": 4,
+          "bytesPerRow": 128
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutTableCell",
+          "countPerRow": 4,
+          "bytesPerRow": 704
+        },
+        {
+          "type": "native",
+          "name": "system / AccessorPair",
+          "countPerRow": 3,
+          "bytesPerRow": 36
+        },
+        {
+          "type": "native",
+          "name": "Text",
+          "countPerRow": 3,
+          "bytesPerRow": 272
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutText",
+          "countPerRow": 3,
+          "bytesPerRow": 312
+        },
+        {
+          "type": "array",
+          "name": "(object properties)",
+          "countPerRow": 2.989,
+          "bytesPerRow": 236.672
+        },
+        {
+          "type": "native",
+          "name": "system / PropertyArray",
+          "countPerRow": 2.002,
+          "bytesPerRow": 40.076
+        },
+        {
+          "type": "string",
+          "name": "on:click",
+          "countPerRow": 2,
+          "bytesPerRow": 40
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @39867",
+          "countPerRow": 2,
+          "bytesPerRow": 80
+        },
+        {
+          "type": "closure",
+          "name": "getHandler",
+          "countPerRow": 2,
+          "bytesPerRow": 56
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @39925",
+          "countPerRow": 2,
+          "bytesPerRow": 64
+        },
+        {
+          "type": "native",
+          "name": "blink::UniqueElementData",
+          "countPerRow": 2,
+          "bytesPerRow": 224
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @39841",
+          "countPerRow": 2,
+          "bytesPerRow": 56
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResult",
+          "countPerRow": 1.849,
+          "bytesPerRow": 118.336
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResultRun",
+          "countPerRow": 1.849,
+          "bytesPerRow": 103.544
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::HarfBuzzRunGlyphData>",
+          "countPerRow": 1.849,
+          "bytesPerRow": 168.672
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::ShapeResultCharacterData>",
+          "countPerRow": 1.849,
+          "bytesPerRow": 168.648
+        },
+        {
+          "type": "native",
+          "name": "system / ExternalStringData",
+          "countPerRow": 1,
+          "bytesPerRow": 29.956
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @37841",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "closure",
+          "name": "read",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "closure",
+          "name": "readonly",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @38153",
+          "countPerRow": 1,
+          "bytesPerRow": 36
+        },
+        {
+          "type": "native",
+          "name": "blink::SoftNavigationPaintAttributionTracker::NodeState",
+          "countPerRow": 1,
+          "bytesPerRow": 24
+        },
+        {
+          "type": "native",
+          "name": "DOMTokenList",
+          "countPerRow": 1,
+          "bytesPerRow": 56
+        },
+        {
+          "type": "native",
+          "name": "<a>",
+          "countPerRow": 1,
+          "bytesPerRow": 160
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutBlockFlow",
+          "countPerRow": 1,
+          "bytesPerRow": 152
+        },
+        {
+          "type": "native",
+          "name": "blink::ComputedStyleBase::StyleMiscData",
+          "countPerRow": 1,
+          "bytesPerRow": 88
+        },
+        {
+          "type": "closure",
+          "name": "get row",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @614569",
+          "countPerRow": 1,
+          "bytesPerRow": 20
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @618045",
+          "countPerRow": 1,
+          "bytesPerRow": 20
+        },
+        {
+          "type": "closure",
+          "name": "getItem",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "closure",
+          "name": "getIndex",
+          "countPerRow": 1,
+          "bytesPerRow": 28
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @618167",
+          "countPerRow": 1,
+          "bytesPerRow": 24
+        },
+        {
+          "type": "native",
+          "name": "<tr class=\"\">",
+          "countPerRow": 1,
+          "bytesPerRow": 104
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutInline",
+          "countPerRow": 1,
+          "bytesPerRow": 80
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutTableRow",
+          "countPerRow": 1,
+          "bytesPerRow": 152
+        },
+        {
+          "type": "code",
+          "name": "system / TrustedByteArray",
+          "countPerRow": 0.089,
+          "bytesPerRow": 12.356
+        },
+        {
+          "type": "code",
+          "name": "system / CodeWrapper",
+          "countPerRow": 0.039,
+          "bytesPerRow": 0.312
+        },
+        {
+          "type": "code",
+          "name": "system / Code",
+          "countPerRow": 0.039,
+          "bytesPerRow": 2.808
+        },
+        {
+          "type": "code",
+          "name": "system / InstructionStream",
+          "countPerRow": 0.039,
+          "bytesPerRow": 49.312
+        },
+        {
+          "type": "code",
+          "name": "system / LoadHandler",
+          "countPerRow": 0.036,
+          "bytesPerRow": 0.624
+        },
+        {
+          "type": "native",
+          "name": "system / ProtectedFixedArray",
+          "countPerRow": 0.021,
+          "bytesPerRow": 0.356
+        },
+        {
+          "type": "code",
+          "name": "system / ProtectedFixedArray",
+          "countPerRow": 0.021,
+          "bytesPerRow": 4.764
+        },
+        {
+          "type": "code",
+          "name": "system / TrustedWeakFixedArray",
+          "countPerRow": 0.021,
+          "bytesPerRow": 0.716
+        },
+        {
+          "type": "native",
+          "name": "system / SharedFunctionInfoWrapper",
+          "countPerRow": 0.021,
+          "bytesPerRow": 0.168
+        },
+        {
+          "type": "code",
+          "name": "system / FeedbackVector",
+          "countPerRow": 0.015,
+          "bytesPerRow": 2.18
+        },
+        {
+          "type": "object shape",
+          "name": "system / DescriptorArray",
+          "countPerRow": 0.013,
+          "bytesPerRow": 1.612
+        },
+        {
+          "type": "code",
+          "name": "system / WeakFixedArray",
+          "countPerRow": 0.012,
+          "bytesPerRow": 0.288
+        },
+        {
+          "type": "object shape",
+          "name": "system / PrototypeInfo",
+          "countPerRow": 0.01,
+          "bytesPerRow": 0.4
+        },
+        {
+          "type": "object shape",
+          "name": "system / Cell",
+          "countPerRow": 0.009,
+          "bytesPerRow": 0.072
+        },
+        {
+          "type": "object shape",
+          "name": "system / Map",
+          "countPerRow": 0.007,
+          "bytesPerRow": 0.28
+        },
+        {
+          "type": "code",
+          "name": "system / AllocationSite",
+          "countPerRow": 0.004,
+          "bytesPerRow": 0.112
+        },
+        {
+          "type": "object shape",
+          "name": "system / WeakArrayList",
+          "countPerRow": 0.004,
+          "bytesPerRow": 0.112
+        },
+        {
+          "type": "code",
+          "name": "(script line ends)",
+          "countPerRow": 0.004,
+          "bytesPerRow": 44.94
+        },
+        {
+          "type": "native",
+          "name": "system / WeakArrayList",
+          "countPerRow": 0.003,
+          "bytesPerRow": 2.456
+        },
+        {
+          "type": "string",
+          "name": "easy brown burger",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "large brown pizza",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "mushy green pony",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "quaint yellow desk",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "tall red chair",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "big brown mouse",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "quaint purple table",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "odd brown bbq",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "mushy pink keyboard",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "big red cookie",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "cheap brown desk",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "unsightly brown bbq",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "unsightly purple car",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "large white cookie",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        },
+        {
+          "type": "string",
+          "name": "clean purple house",
+          "countPerRow": 0.003,
+          "bytesPerRow": 0.156
+        }
+      ],
+      "retainedAllocationSites": {
+        "retainedJsObjectCountPerRow": 238.536,
+        "retainedJsBytesPerRow": 8381.928,
+        "accountedCountPercent": 90.4475634705034,
+        "accountedBytesPercent": 91.89336868558165,
+        "sitesPerRow": [
+          {
+            "site": "mountTemplate @ packages/dom/src/index.ts:1394:20",
+            "count": 46.94,
+            "bytes": 1478.644,
+            "types": {
+              "plain objects": {
+                "count": 20.185,
+                "bytes": 458.328
+              },
+              "arrays": {
+                "count": 20.178,
+                "bytes": 836.16
+              },
+              "closures/functions": {
+                "count": 6.577,
+                "bytes": 184.156
+              }
+            },
+            "stack": [
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              }
+            ]
+          },
+          {
+            "site": "child @ packages/dom/src/index.ts:1418:9",
+            "count": 33.049,
+            "bytes": 938.82,
+            "types": {
+              "plain objects": {
+                "count": 23.747,
+                "bytes": 673.76
+              },
+              "closures/functions": {
+                "count": 9.185,
+                "bytes": 257.18
+              },
+              "arrays": {
+                "count": 0.117,
+                "bytes": 7.88
+              }
+            },
+            "stack": [
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 20,
+                "column": 26
+              },
+              {
+                "functionName": "child",
+                "source": "packages/dom/src/index.ts",
+                "line": 1418,
+                "column": 9
+              }
+            ]
+          },
+          {
+            "site": "createOwner @ packages/core/src/runtime.ts:164:9",
+            "count": 11.878,
+            "bytes": 854.048,
+            "types": {
+              "plain objects": {
+                "count": 11.86,
+                "bytes": 853.384
+              },
+              "closures/functions": {
+                "count": 0.01,
+                "bytes": 0.28
+              },
+              "arrays": {
+                "count": 0.008,
+                "bytes": 0.384
+              }
+            },
+            "stack": [
+              {
+                "functionName": "(root)",
+                "source": "",
+                "line": 1,
+                "column": 1
+              },
+              {
+                "functionName": "listener",
+                "source": "packages/dom/src/index.ts",
+                "line": 524,
+                "column": 13
+              },
+              {
+                "functionName": "invokeHandler",
+                "source": "packages/dom/src/index.ts",
+                "line": 487,
+                "column": 14
+              },
+              {
+                "functionName": "batch",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1020,
+                "column": 3
+              },
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "createOwner",
+                "source": "packages/core/src/runtime.ts",
+                "line": 164,
+                "column": 9
+              }
+            ]
+          },
+          {
+            "site": "createEffect @ packages/core/src/runtime.ts:979:3",
+            "count": 13.189,
+            "bytes": 642.08,
+            "types": {
+              "plain objects": {
+                "count": 10.071,
+                "bytes": 464.956
+              },
+              "arrays": {
+                "count": 2.935,
+                "bytes": 172
+              },
+              "closures/functions": {
+                "count": 0.183,
+                "bytes": 5.124
+              }
+            },
+            "stack": [
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 20,
+                "column": 26
+              },
+              {
+                "functionName": "child",
+                "source": "packages/dom/src/index.ts",
+                "line": 1418,
+                "column": 9
+              },
+              {
+                "functionName": "createEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 979,
+                "column": 3
+              },
+              {
+                "functionName": "Set",
+                "source": "",
+                "line": 1,
+                "column": 1
+              }
+            ]
+          },
+          {
+            "site": "onCleanup @ packages/core/src/runtime.ts:403:3",
+            "count": 13.373,
+            "bytes": 615.128,
+            "types": {
+              "arrays": {
+                "count": 13.373,
+                "bytes": 615.128
+              }
+            },
+            "stack": [
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              },
+              {
+                "functionName": "onCleanup",
+                "source": "packages/core/src/runtime.ts",
+                "line": 403,
+                "column": 3
+              }
+            ]
+          },
+          {
+            "site": "(allocation trace unavailable)",
+            "count": 12.748,
+            "bytes": 512.772,
+            "types": {
+              "arrays": {
+                "count": 3.18,
+                "bytes": 163.12
+              },
+              "plain objects": {
+                "count": 6.959,
+                "bytes": 276.6
+              },
+              "closures/functions": {
+                "count": 2.609,
+                "bytes": 73.052
+              }
+            },
+            "stack": []
+          },
+          {
+            "site": "updateSlot @ packages/dom/src/index.ts:262:5",
+            "count": 15.399,
+            "bytes": 426.636,
+            "types": {
+              "plain objects": {
+                "count": 7.042,
+                "bytes": 141.024
+              },
+              "closures/functions": {
+                "count": 6.012,
+                "bytes": 168.336
+              },
+              "arrays": {
+                "count": 2.345,
+                "bytes": 117.276
+              }
+            },
+            "stack": [
+              {
+                "functionName": "listener",
+                "source": "packages/dom/src/index.ts",
+                "line": 524,
+                "column": 13
+              },
+              {
+                "functionName": "invokeHandler",
+                "source": "packages/dom/src/index.ts",
+                "line": 487,
+                "column": 14
+              },
+              {
+                "functionName": "batch",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1020,
+                "column": 3
+              },
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              }
+            ]
+          },
+          {
+            "site": "installDelegated @ packages/dom/src/index.ts:509:22",
+            "count": 6.869,
+            "bytes": 262.204,
+            "types": {
+              "plain objects": {
+                "count": 3.434,
+                "bytes": 82.416
+              },
+              "arrays": {
+                "count": 1.718,
+                "bytes": 131.712
+              },
+              "closures/functions": {
+                "count": 1.717,
+                "bytes": 48.076
+              }
+            },
+            "stack": [
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 22,
+                "column": 40
+              },
+              {
+                "functionName": "event",
+                "source": "packages/dom/src/index.ts",
+                "line": 1447,
+                "column": 9
+              },
+              {
+                "functionName": "installEvent",
+                "source": "packages/dom/src/index.ts",
+                "line": 576,
+                "column": 16
+              },
+              {
+                "functionName": "installDelegated",
+                "source": "packages/dom/src/index.ts",
+                "line": 509,
+                "column": 22
+              },
+              {
+                "functionName": "Set",
+                "source": "",
+                "line": 1,
+                "column": 1
+              }
+            ]
+          },
+          {
+            "site": "signal @ packages/core/src/runtime.ts:732:3",
+            "count": 7.002,
+            "bytes": 232.448,
+            "types": {
+              "arrays": {
+                "count": 0.001,
+                "bytes": 16.404
+              },
+              "closures/functions": {
+                "count": 5,
+                "bytes": 140
+              },
+              "plain objects": {
+                "count": 2.001,
+                "bytes": 76.044
+              }
+            },
+            "stack": [
+              {
+                "functionName": "invokeHandler",
+                "source": "packages/dom/src/index.ts",
+                "line": 487,
+                "column": 14
+              },
+              {
+                "functionName": "batch",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1020,
+                "column": 3
+              },
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1409,
+                "column": 7
+              },
+              {
+                "functionName": "signal",
+                "source": "packages/core/src/runtime.ts",
+                "line": 732,
+                "column": 3
+              },
+              {
+                "functionName": "set",
+                "source": "",
+                "line": 1,
+                "column": 1
+              }
+            ]
+          },
+          {
+            "site": "track @ packages/core/src/runtime.ts:572:8",
+            "count": 3.819,
+            "bytes": 183.312,
+            "types": {
+              "plain objects": {
+                "count": 3.819,
+                "bytes": 183.312
+              }
+            },
+            "stack": [
+              {
+                "functionName": "invokeHandler",
+                "source": "packages/dom/src/index.ts",
+                "line": 487,
+                "column": 14
+              },
+              {
+                "functionName": "batch",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1020,
+                "column": 3
+              },
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 20,
+                "column": 26
+              },
+              {
+                "functionName": "track",
+                "source": "packages/core/src/runtime.ts",
+                "line": 572,
+                "column": 8
+              }
+            ]
+          },
+          {
+            "site": "mountValue @ packages/dom/src/index.ts:333:7",
+            "count": 6.244,
+            "bytes": 170.468,
+            "types": {
+              "arrays": {
+                "count": 4.052,
+                "bytes": 123.48
+              },
+              "plain objects": {
+                "count": 2.159,
+                "bytes": 46.064
+              },
+              "closures/functions": {
+                "count": 0.033,
+                "bytes": 0.924
+              }
+            },
+            "stack": [
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "String",
+                "source": "",
+                "line": 1,
+                "column": 1
+              }
+            ]
+          },
+          {
+            "site": "(anonymous) @ benchmarks/js-framework-benchmark/src/main-benos.tsx:19:25",
+            "count": 5.971,
+            "bytes": 167.224,
+            "types": {
+              "closures/functions": {
+                "count": 5.482,
+                "bytes": 153.496
+              },
+              "plain objects": {
+                "count": 0.488,
+                "bytes": 13.652
+              },
+              "arrays": {
+                "count": 0.001,
+                "bytes": 0.076
+              }
+            },
+            "stack": [
+              {
+                "functionName": "mountComponent",
+                "source": "packages/dom/src/index.ts",
+                "line": 808,
+                "column": 7
+              },
+              {
+                "functionName": "runWithOwner$1",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1052,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 830,
+                "column": 5
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              },
+              {
+                "functionName": "runWithOwner$1",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1052,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1403,
+                "column": 16
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 19,
+                "column": 25
+              }
+            ]
+          },
+          {
+            "site": "installEvent @ packages/dom/src/index.ts:576:16",
+            "count": 5.435,
+            "bytes": 164.78,
+            "types": {
+              "plain objects": {
+                "count": 3.718,
+                "bytes": 116.704
+              },
+              "closures/functions": {
+                "count": 1.717,
+                "bytes": 48.076
+              }
+            },
+            "stack": [
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 22,
+                "column": 40
+              },
+              {
+                "functionName": "event",
+                "source": "packages/dom/src/index.ts",
+                "line": 1447,
+                "column": 9
+              },
+              {
+                "functionName": "installEvent",
+                "source": "packages/dom/src/index.ts",
+                "line": 576,
+                "column": 16
+              }
+            ]
+          },
+          {
+            "site": "event @ packages/dom/src/index.ts:1447:9",
+            "count": 3.439,
+            "bytes": 158.172,
+            "types": {
+              "plain objects": {
+                "count": 1.72,
+                "bytes": 20.652
+              },
+              "arrays": {
+                "count": 1.719,
+                "bytes": 137.52
+              }
+            },
+            "stack": [
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 22,
+                "column": 40
+              },
+              {
+                "functionName": "event",
+                "source": "packages/dom/src/index.ts",
+                "line": 1447,
+                "column": 9
+              }
+            ]
+          },
+          {
+            "site": "runEffect @ packages/core/src/runtime.ts:848:12",
+            "count": 2.615,
+            "bytes": 156.9,
+            "types": {
+              "arrays": {
+                "count": 2.615,
+                "bytes": 156.9
+              }
+            },
+            "stack": [
+              {
+                "functionName": "(root)",
+                "source": "",
+                "line": 1,
+                "column": 1
+              },
+              {
+                "functionName": "listener",
+                "source": "packages/dom/src/index.ts",
+                "line": 524,
+                "column": 13
+              },
+              {
+                "functionName": "invokeHandler",
+                "source": "packages/dom/src/index.ts",
+                "line": 487,
+                "column": 14
+              },
+              {
+                "functionName": "batch",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1020,
+                "column": 3
+              },
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "delete",
+                "source": "",
+                "line": 1,
+                "column": 1
+              }
+            ]
+          },
+          {
+            "site": "(anonymous) @ packages/dom/src/index.ts:1444:7",
+            "count": 6.558,
+            "bytes": 131.16,
+            "types": {
+              "plain objects": {
+                "count": 6.558,
+                "bytes": 131.16
+              }
+            },
+            "stack": [
+              {
+                "functionName": "invokeHandler",
+                "source": "packages/dom/src/index.ts",
+                "line": 487,
+                "column": 14
+              },
+              {
+                "functionName": "batch",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1020,
+                "column": 3
+              },
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              }
+            ]
+          },
+          {
+            "site": "createEntry @ packages/dom/src/index.ts:982:31",
+            "count": 4.001,
+            "bytes": 120.008,
+            "types": {
+              "closures/functions": {
+                "count": 1.999,
+                "bytes": 55.972
+              },
+              "plain objects": {
+                "count": 2.001,
+                "bytes": 64.02
+              },
+              "arrays": {
+                "count": 0.001,
+                "bytes": 0.016
+              }
+            },
+            "stack": [
+              {
+                "functionName": "listener",
+                "source": "packages/dom/src/index.ts",
+                "line": 524,
+                "column": 13
+              },
+              {
+                "functionName": "invokeHandler",
+                "source": "packages/dom/src/index.ts",
+                "line": 487,
+                "column": 14
+              },
+              {
+                "functionName": "batch",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1020,
+                "column": 3
+              },
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "reconcile",
+                "source": "packages/dom/src/index.ts",
+                "line": 941,
+                "column": 20
+              },
+              {
+                "functionName": "createEntry",
+                "source": "packages/dom/src/index.ts",
+                "line": 982,
+                "column": 31
+              }
+            ]
+          },
+          {
+            "site": "(anonymous) @ benchmarks/js-framework-benchmark/src/main-benos.tsx:20:26",
+            "count": 3.568,
+            "bytes": 97.568,
+            "types": {
+              "closures/functions": {
+                "count": 2.984,
+                "bytes": 83.552
+              },
+              "plain objects": {
+                "count": 0.584,
+                "bytes": 14.016
+              }
+            },
+            "stack": [
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 20,
+                "column": 26
+              }
+            ]
+          },
+          {
+            "site": "(anonymous) @ benchmarks/js-framework-benchmark/src/main-benos.tsx:22:75",
+            "count": 2.572,
+            "bytes": 69.672,
+            "types": {
+              "plain objects": {
+                "count": 0.586,
+                "bytes": 14.064
+              },
+              "closures/functions": {
+                "count": 1.986,
+                "bytes": 55.608
+              }
+            },
+            "stack": [
+              {
+                "functionName": "listener",
+                "source": "packages/dom/src/index.ts",
+                "line": 524,
+                "column": 13
+              },
+              {
+                "functionName": "invokeHandler",
+                "source": "packages/dom/src/index.ts",
+                "line": 487,
+                "column": 14
+              },
+              {
+                "functionName": "batch",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1020,
+                "column": 3
+              },
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 22,
+                "column": 75
+              }
+            ]
+          },
+          {
+            "site": "instantiate @ packages/dom/src/index.ts:1507:18",
+            "count": 2.891,
+            "bytes": 69.384,
+            "types": {
+              "plain objects": {
+                "count": 2.891,
+                "bytes": 69.384
+              }
+            },
+            "stack": [
+              {
+                "functionName": "invokeHandler",
+                "source": "packages/dom/src/index.ts",
+                "line": 487,
+                "column": 14
+              },
+              {
+                "functionName": "batch",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1020,
+                "column": 3
+              },
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 22,
+                "column": 21
+              },
+              {
+                "functionName": "instantiate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1507,
+                "column": 18
+              }
+            ]
+          },
+          {
+            "site": "jsx$1 @ packages/dom/src/index.ts:136:15",
+            "count": 1.981,
+            "bytes": 69.092,
+            "types": {
+              "plain objects": {
+                "count": 1.491,
+                "bytes": 29.892
+              },
+              "arrays": {
+                "count": 0.49,
+                "bytes": 39.2
+              }
+            },
+            "stack": [
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "reconcile",
+                "source": "packages/dom/src/index.ts",
+                "line": 941,
+                "column": 20
+              },
+              {
+                "functionName": "createEntry",
+                "source": "packages/dom/src/index.ts",
+                "line": 982,
+                "column": 31
+              },
+              {
+                "functionName": "runWithOwner$1",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1052,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1003,
+                "column": 8
+              },
+              {
+                "functionName": "children",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 81,
+                "column": 33
+              },
+              {
+                "functionName": "jsx$1",
+                "source": "packages/dom/src/index.ts",
+                "line": 136,
+                "column": 15
+              }
+            ]
+          },
+          {
+            "site": "(anonymous) @ benchmarks/js-framework-benchmark/src/main-benos.tsx:26:38",
+            "count": 2.42,
+            "bytes": 67.76,
+            "types": {
+              "closures/functions": {
+                "count": 2.071,
+                "bytes": 57.988
+              },
+              "plain objects": {
+                "count": 0.349,
+                "bytes": 9.772
+              }
+            },
+            "stack": [
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 26,
+                "column": 38
+              }
+            ]
+          },
+          {
+            "site": "attr @ packages/dom/src/index.ts:1406:9",
+            "count": 2.05,
+            "bytes": 57.492,
+            "types": {
+              "closures/functions": {
+                "count": 1.024,
+                "bytes": 28.672
+              },
+              "plain objects": {
+                "count": 1.025,
+                "bytes": 28.744
+              },
+              "arrays": {
+                "count": 0.001,
+                "bytes": 0.076
+              }
+            },
+            "stack": [
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1439,
+                "column": 24
+              },
+              {
+                "functionName": "updateSlot",
+                "source": "packages/dom/src/index.ts",
+                "line": 262,
+                "column": 5
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "packages/dom/src/index.ts",
+                "line": 1444,
+                "column": 7
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountTemplate",
+                "source": "packages/dom/src/index.ts",
+                "line": 1394,
+                "column": 20
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-benos.tsx",
+                "line": 26,
+                "column": 38
+              },
+              {
+                "functionName": "attr",
+                "source": "packages/dom/src/index.ts",
+                "line": 1406,
+                "column": 9
+              }
+            ]
+          },
+          {
+            "site": "mountComponent @ packages/dom/src/index.ts:808:7",
+            "count": 1.739,
+            "bytes": 56.664,
+            "types": {
+              "plain objects": {
+                "count": 1,
+                "bytes": 35.984
+              },
+              "closures/functions": {
+                "count": 0.738,
+                "bytes": 20.664
+              },
+              "arrays": {
+                "count": 0.001,
+                "bytes": 0.016
+              }
+            },
+            "stack": [
+              {
+                "functionName": "batch",
+                "source": "packages/core/src/runtime.ts",
+                "line": 1020,
+                "column": 3
+              },
+              {
+                "functionName": "maybeFlush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 976,
+                "column": 1
+              },
+              {
+                "functionName": "flush",
+                "source": "packages/core/src/runtime.ts",
+                "line": 954,
+                "column": 14
+              },
+              {
+                "functionName": "runEffect",
+                "source": "packages/core/src/runtime.ts",
+                "line": 848,
+                "column": 12
+              },
+              {
+                "functionName": "reconcile",
+                "source": "packages/dom/src/index.ts",
+                "line": 941,
+                "column": 20
+              },
+              {
+                "functionName": "createEntry",
+                "source": "packages/dom/src/index.ts",
+                "line": 982,
+                "column": 31
+              },
+              {
+                "functionName": "mountValue",
+                "source": "packages/dom/src/index.ts",
+                "line": 333,
+                "column": 7
+              },
+              {
+                "functionName": "mountComponent",
+                "source": "packages/dom/src/index.ts",
+                "line": 808,
+                "column": 7
+              }
+            ]
+          }
+        ]
+      },
+      "allocationSamplingTopSites": [
+        {
+          "site": "child @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:1738:9",
+          "bytes": 1336612,
+          "sampleCount": 15846,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)",
+            "child"
+          ]
+        },
+        {
+          "site": "mountTemplate @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:1714:23",
+          "bytes": 633888,
+          "sampleCount": 7242,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate"
+          ]
+        },
+        {
+          "site": "createOwner @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:61:21",
+          "bytes": 633528,
+          "sampleCount": 8799,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "createOwner"
+          ]
+        },
+        {
+          "site": "createEffect @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:623:22",
+          "bytes": 625380,
+          "sampleCount": 6797,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)",
+            "createEffect"
+          ]
+        },
+        {
+          "site": "updateSlot @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:925:20",
+          "bytes": 619604,
+          "sampleCount": 7518,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot"
+          ]
+        },
+        {
+          "site": "Set @ :0:0",
+          "bytes": 573120,
+          "sampleCount": 5378,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)",
+            "createEffect",
+            "Set"
+          ]
+        },
+        {
+          "site": "onCleanup @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:255:19",
+          "bytes": 501104,
+          "sampleCount": 6491,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "onCleanup"
+          ]
+        },
+        {
+          "site": "Map @ :0:0",
+          "bytes": 440628,
+          "sampleCount": 5716,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "(anonymous)",
+            "safeJson",
+            "jsonValue",
+            "serializeAsCallArgument",
+            "Map"
+          ]
+        },
+        {
+          "site": "from @ :0:0",
+          "bytes": 267224,
+          "sampleCount": 3291,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "from"
+          ]
+        },
+        {
+          "site": "track @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:330:15",
+          "bytes": 260312,
+          "sampleCount": 2670,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "(anonymous)",
+            "track"
+          ]
+        },
+        {
+          "site": "signal @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:454:16",
+          "bytes": 252732,
+          "sampleCount": 2949,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "(anonymous)",
+            "signal"
+          ]
+        },
+        {
+          "site": "delete @ :0:0",
+          "bytes": 223800,
+          "sampleCount": 1865,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "delete"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:2076:41",
+          "bytes": 210336,
+          "sampleCount": 2504,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:1761:39",
+          "bytes": 178160,
+          "sampleCount": 2227,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "installEvent @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:1177:22",
+          "bytes": 178056,
+          "sampleCount": 2248,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)",
+            "event",
+            "installEvent"
+          ]
+        },
+        {
+          "site": "set @ :0:0",
+          "bytes": 172272,
+          "sampleCount": 880,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)",
+            "event",
+            "installEvent",
+            "installDelegated",
+            "set"
+          ]
+        },
+        {
+          "site": "create @ :0:0",
+          "bytes": 172024,
+          "sampleCount": 2169,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)",
+            "event",
+            "create"
+          ]
+        },
+        {
+          "site": "mountValue @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:974:20",
+          "bytes": 151240,
+          "sampleCount": 1679,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue"
+          ]
+        },
+        {
+          "site": "nodeAtPath @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:1672:20",
+          "bytes": 142664,
+          "sampleCount": 1783,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "nodeAtPath"
+          ]
+        },
+        {
+          "site": "installDelegated @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:1124:26",
+          "bytes": 132276,
+          "sampleCount": 1464,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)",
+            "event",
+            "installEvent",
+            "installDelegated"
+          ]
+        },
+        {
+          "site": "next @ :0:0",
+          "bytes": 123896,
+          "sampleCount": 1548,
+          "stack": [
+            "(root)",
+            "listener",
+            "next"
+          ]
+        },
+        {
+          "site": "createEntry @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:1454:23",
+          "bytes": 119152,
+          "sampleCount": 1484,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:2088:57",
+          "bytes": 114156,
+          "sampleCount": 1359,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "jsx$1 @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:756:15",
+          "bytes": 92744,
+          "sampleCount": 1205,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "children",
+            "jsx$1"
+          ]
+        },
+        {
+          "site": "add @ :0:0",
+          "bytes": 89812,
+          "sampleCount": 797,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)",
+            "child",
+            "createEffect",
+            "add"
+          ]
+        },
+        {
+          "site": "mountComponent @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:1343:24",
+          "bytes": 89400,
+          "sampleCount": 1126,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:1888:39",
+          "bytes": 86024,
+          "sampleCount": 1104,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "(anonymous)",
+            "(anonymous)",
+            "buildData",
+            "from",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "Row @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:2075:13",
+          "bytes": 72320,
+          "sampleCount": 918,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "mountValue",
+            "mountComponent",
+            "untrack",
+            "(anonymous)",
+            "Row"
+          ]
+        },
+        {
+          "site": "children @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:2131:18",
+          "bytes": 72132,
+          "sampleCount": 943,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "reconcile",
+            "createEntry",
+            "children"
+          ]
+        },
+        {
+          "site": "event @ http://127.0.0.1:4381/assets/index-tFqCx6GC.js:1764:9",
+          "bytes": 68944,
+          "sampleCount": 897,
+          "stack": [
+            "(root)",
+            "listener",
+            "invokeHandler",
+            "batch",
+            "maybeFlush",
+            "flush",
+            "runEffect",
+            "(anonymous)",
+            "updateSlot",
+            "(anonymous)",
+            "mountValue",
+            "mountTemplate",
+            "(anonymous)",
+            "event"
+          ]
+        }
+      ]
+    },
+    "solid": {
+      "nodeCallsPerRow": {
+        "owners": 1,
+        "signals": 0,
+        "computeds": 0,
+        "effects": 3
+      },
+      "retainedDeltaPerRow": {
+        "browser native/layout objects": {
+          "count": 117.435,
+          "bytes": 8624.128
+        },
+        "object shape": {
+          "count": 0.034,
+          "bytes": 2.036
+        },
+        "arrays": {
+          "count": 6.007,
+          "bytes": 189.016
+        },
+        "code": {
+          "count": 0.19,
+          "bytes": 83.036
+        },
+        "plain objects": {
+          "count": 11.003,
+          "bytes": 360.076
+        },
+        "string": {
+          "count": 3.003,
+          "bytes": 39.644
+        },
+        "closures/functions": {
+          "count": 8.001,
+          "bytes": 224.032
+        },
+        "number": {
+          "count": 1,
+          "bytes": 0
+        },
+        "concatenated string": {
+          "count": 1.784,
+          "bytes": 35.68
+        },
+        "DOM wrappers": {
+          "count": 10,
+          "bytes": 1055.04
+        }
+      },
+      "largestNamedDeltas": [
+        {
+          "type": "native",
+          "name": "blink::FragmentDataList",
+          "countPerRow": 10,
+          "bytesPerRow": 240
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutResult",
+          "countPerRow": 9,
+          "bytesPerRow": 720
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalBoxFragment",
+          "countPerRow": 9,
+          "bytesPerRow": 960
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalFragmentRareData",
+          "countPerRow": 8.001,
+          "bytesPerRow": 576.072
+        },
+        {
+          "type": "closure",
+          "name": "",
+          "countPerRow": 8,
+          "bytesPerRow": 224
+        },
+        {
+          "type": "native",
+          "name": "blink::ConstraintSpace::RareData",
+          "countPerRow": 8,
+          "bytesPerRow": 960
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::PhysicalFragmentLink>",
+          "countPerRow": 7.001,
+          "bytesPerRow": 212.008
+        },
+        {
+          "type": "native",
+          "name": "blink::ComputedStyle",
+          "countPerRow": 7,
+          "bytesPerRow": 504
+        },
+        {
+          "type": "object",
+          "name": "Object",
+          "countPerRow": 6.002,
+          "bytesPerRow": 236.04
+        },
+        {
+          "type": "native",
+          "name": "blink::InlineItem",
+          "countPerRow": 6,
+          "bytesPerRow": 240
+        },
+        {
+          "type": "native",
+          "name": "blink::PhysicalLineBoxFragment",
+          "countPerRow": 6,
+          "bytesPerRow": 288
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::FragmentItem>",
+          "countPerRow": 6,
+          "bytesPerRow": 720
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResultView",
+          "countPerRow": 5,
+          "bytesPerRow": 360
+        },
+        {
+          "type": "native",
+          "name": "blink::InlineNodeData",
+          "countPerRow": 4,
+          "bytesPerRow": 224
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<cppgc::internal::BasicMember<blink::InlineItem, cppgc::internal::StrongMemberTag, cppgc::internal::DijkstraWriteBarrierPolicy>>",
+          "countPerRow": 4,
+          "bytesPerRow": 96
+        },
+        {
+          "type": "native",
+          "name": "blink::MeasureCache",
+          "countPerRow": 4,
+          "bytesPerRow": 128
+        },
+        {
+          "type": "native",
+          "name": "<td>",
+          "countPerRow": 4,
+          "bytesPerRow": 375.04
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutTableCell",
+          "countPerRow": 4,
+          "bytesPerRow": 704
+        },
+        {
+          "type": "array",
+          "name": "(object elements)",
+          "countPerRow": 3.006,
+          "bytesPerRow": 141
+        },
+        {
+          "type": "object",
+          "name": "Array",
+          "countPerRow": 3.001,
+          "bytesPerRow": 48.016
+        },
+        {
+          "type": "native",
+          "name": "Text",
+          "countPerRow": 3,
+          "bytesPerRow": 240
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutText",
+          "countPerRow": 3,
+          "bytesPerRow": 312
+        },
+        {
+          "type": "native",
+          "name": "system / PropertyArray",
+          "countPerRow": 2.001,
+          "bytesPerRow": 40.036
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @38837",
+          "countPerRow": 2,
+          "bytesPerRow": 56
+        },
+        {
+          "type": "native",
+          "name": "blink::UniqueElementData",
+          "countPerRow": 2,
+          "bytesPerRow": 224
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResult",
+          "countPerRow": 1.849,
+          "bytesPerRow": 118.336
+        },
+        {
+          "type": "native",
+          "name": "blink::ShapeResultRun",
+          "countPerRow": 1.849,
+          "bytesPerRow": 103.544
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::HarfBuzzRunGlyphData>",
+          "countPerRow": 1.849,
+          "bytesPerRow": 168.672
+        },
+        {
+          "type": "native",
+          "name": "blink::HeapVectorBacking<blink::ShapeResultCharacterData>",
+          "countPerRow": 1.849,
+          "bytesPerRow": 168.648
+        },
+        {
+          "type": "concatenated string",
+          "name": "(concatenated string)",
+          "countPerRow": 1.784,
+          "bytesPerRow": 35.68
+        },
+        {
+          "type": "number",
+          "name": "smi number",
+          "countPerRow": 1,
+          "bytesPerRow": 0
+        },
+        {
+          "type": "native",
+          "name": "DOMTokenList",
+          "countPerRow": 1,
+          "bytesPerRow": 56
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutBlockFlow",
+          "countPerRow": 1,
+          "bytesPerRow": 152
+        },
+        {
+          "type": "native",
+          "name": "<a>",
+          "countPerRow": 1,
+          "bytesPerRow": 160
+        },
+        {
+          "type": "native",
+          "name": "blink::ComputedStyleBase::StyleMiscData",
+          "countPerRow": 1,
+          "bytesPerRow": 88
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @89987",
+          "countPerRow": 1,
+          "bytesPerRow": 24
+        },
+        {
+          "type": "native",
+          "name": "<tr class=\"\">",
+          "countPerRow": 1,
+          "bytesPerRow": 104
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @89985",
+          "countPerRow": 1,
+          "bytesPerRow": 20
+        },
+        {
+          "type": "object",
+          "name": "system / Context / scope @37591",
+          "countPerRow": 1,
+          "bytesPerRow": 24
+        },
+        {
+          "type": "native",
+          "name": "blink::SoftNavigationPaintAttributionTracker::NodeState",
+          "countPerRow": 1,
+          "bytesPerRow": 24
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutInline",
+          "countPerRow": 1,
+          "bytesPerRow": 80
+        },
+        {
+          "type": "native",
+          "name": "blink::LayoutTableRow",
+          "countPerRow": 1,
+          "bytesPerRow": 152
+        },
+        {
+          "type": "code",
+          "name": "system / TrustedByteArray",
+          "countPerRow": 0.049,
+          "bytesPerRow": 6.296
+        },
+        {
+          "type": "string",
+          "name": "unsightly ",
+          "countPerRow": 0.044,
+          "bytesPerRow": 1.056
+        },
+        {
+          "type": "string",
+          "name": "inexpensive ",
+          "countPerRow": 0.039,
+          "bytesPerRow": 0.936
+        },
+        {
+          "type": "string",
+          "name": "expensive ",
+          "countPerRow": 0.037,
+          "bytesPerRow": 0.888
+        },
+        {
+          "type": "string",
+          "name": "adorable ",
+          "countPerRow": 0.036,
+          "bytesPerRow": 0.864
+        },
+        {
+          "type": "string",
+          "name": "helpful ",
+          "countPerRow": 0.034,
+          "bytesPerRow": 0.68
+        },
+        {
+          "type": "string",
+          "name": "important ",
+          "countPerRow": 0.034,
+          "bytesPerRow": 0.816
+        },
+        {
+          "type": "string",
+          "name": "handsome ",
+          "countPerRow": 0.032,
+          "bytesPerRow": 0.768
+        },
+        {
+          "type": "string",
+          "name": "elegant ",
+          "countPerRow": 0.029,
+          "bytesPerRow": 0.58
+        },
+        {
+          "type": "code",
+          "name": "system / CodeWrapper",
+          "countPerRow": 0.024,
+          "bytesPerRow": 0.192
+        },
+        {
+          "type": "code",
+          "name": "system / Code",
+          "countPerRow": 0.024,
+          "bytesPerRow": 1.728
+        },
+        {
+          "type": "code",
+          "name": "system / InstructionStream",
+          "countPerRow": 0.024,
+          "bytesPerRow": 29.088
+        },
+        {
+          "type": "code",
+          "name": "system / LoadHandler",
+          "countPerRow": 0.018,
+          "bytesPerRow": 0.308
+        },
+        {
+          "type": "code",
+          "name": "system / FeedbackVector",
+          "countPerRow": 0.015,
+          "bytesPerRow": 1.996
+        },
+        {
+          "type": "string",
+          "name": "quaint ",
+          "countPerRow": 0.014,
+          "bytesPerRow": 0.28
+        },
+        {
+          "type": "string",
+          "name": "crazy brown ",
+          "countPerRow": 0.014,
+          "bytesPerRow": 0.336
+        },
+        {
+          "type": "object shape",
+          "name": "system / DescriptorArray",
+          "countPerRow": 0.011,
+          "bytesPerRow": 1.316
+        },
+        {
+          "type": "string",
+          "name": "pretty brown",
+          "countPerRow": 0.011,
+          "bytesPerRow": 0.264
+        },
+        {
+          "type": "string",
+          "name": "big brown ",
+          "countPerRow": 0.01,
+          "bytesPerRow": 0.24
+        },
+        {
+          "type": "string",
+          "name": "cheap brown ",
+          "countPerRow": 0.01,
+          "bytesPerRow": 0.24
+        },
+        {
+          "type": "string",
+          "name": "odd brown ",
+          "countPerRow": 0.01,
+          "bytesPerRow": 0.24
+        },
+        {
+          "type": "string",
+          "name": "pretty ",
+          "countPerRow": 0.01,
+          "bytesPerRow": 0.2
+        },
+        {
+          "type": "string",
+          "name": "tall brown ",
+          "countPerRow": 0.009,
+          "bytesPerRow": 0.216
+        },
+        {
+          "type": "string",
+          "name": "short blue ",
+          "countPerRow": 0.009,
+          "bytesPerRow": 0.216
+        },
+        {
+          "type": "native",
+          "name": "system / ProtectedFixedArray",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.1
+        },
+        {
+          "type": "object shape",
+          "name": "system / PrototypeInfo",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.32
+        },
+        {
+          "type": "code",
+          "name": "system / ProtectedFixedArray",
+          "countPerRow": 0.008,
+          "bytesPerRow": 2.344
+        },
+        {
+          "type": "code",
+          "name": "system / TrustedWeakFixedArray",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.188
+        },
+        {
+          "type": "native",
+          "name": "system / SharedFunctionInfoWrapper",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.064
+        },
+        {
+          "type": "string",
+          "name": "large brown ",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.192
+        },
+        {
+          "type": "string",
+          "name": "large white ",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.192
+        },
+        {
+          "type": "string",
+          "name": "long yellow ",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.192
+        },
+        {
+          "type": "string",
+          "name": "short yellow",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.192
+        },
+        {
+          "type": "string",
+          "name": "angry brown ",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.192
+        },
+        {
+          "type": "string",
+          "name": "easy brown ",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.192
+        },
+        {
+          "type": "string",
+          "name": "elegant pink",
+          "countPerRow": 0.008,
+          "bytesPerRow": 0.192
+        },
+        {
+          "type": "object shape",
+          "name": "system / Cell",
+          "countPerRow": 0.007,
+          "bytesPerRow": 0.056
+        },
+        {
+          "type": "code",
+          "name": "system / WeakFixedArray",
+          "countPerRow": 0.007,
+          "bytesPerRow": 0.16
+        },
+        {
+          "type": "string",
+          "name": "easy pink ",
+          "countPerRow": 0.007,
+          "bytesPerRow": 0.168
+        },
+        {
+          "type": "string",
+          "name": "mushy pink ",
+          "countPerRow": 0.007,
+          "bytesPerRow": 0.168
+        },
+        {
+          "type": "string",
+          "name": "plain brown ",
+          "countPerRow": 0.007,
+          "bytesPerRow": 0.168
+        },
+        {
+          "type": "string",
+          "name": "clean purple",
+          "countPerRow": 0.007,
+          "bytesPerRow": 0.168
+        },
+        {
+          "type": "string",
+          "name": "crazy purple",
+          "countPerRow": 0.007,
+          "bytesPerRow": 0.168
+        },
+        {
+          "type": "string",
+          "name": "pretty white",
+          "countPerRow": 0.007,
+          "bytesPerRow": 0.168
+        },
+        {
+          "type": "string",
+          "name": "mushy yellow",
+          "countPerRow": 0.007,
+          "bytesPerRow": 0.168
+        },
+        {
+          "type": "code",
+          "name": "system / AllocationSite",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.168
+        },
+        {
+          "type": "string",
+          "name": "long black ",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "short brown ",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "angry red ",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "helpful blue",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "crazy orange",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "odd white ",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "clean brown ",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "tall blue ",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "quaint red ",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "easy orange ",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "mushy green ",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        },
+        {
+          "type": "string",
+          "name": "odd purple ",
+          "countPerRow": 0.006,
+          "bytesPerRow": 0.144
+        }
+      ],
+      "retainedAllocationSites": {
+        "retainedJsObjectCountPerRow": 26.502,
+        "retainedJsBytesPerRow": 912.992,
+        "accountedCountPercent": 94.06082559806806,
+        "accountedBytesPercent": 91.38700010514879,
+        "sitesPerRow": [
+          {
+            "site": "createComputation @ benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js:738:68",
+            "count": 5.003,
+            "bytes": 268.084,
+            "types": {
+              "arrays": {
+                "count": 2.002,
+                "bytes": 100.028
+              },
+              "plain objects": {
+                "count": 3.001,
+                "bytes": 168.056
+              }
+            },
+            "stack": [
+              {
+                "functionName": "runUpdates",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 821,
+                "column": 16
+              },
+              {
+                "functionName": "updateFn",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 190,
+                "column": 11
+              },
+              {
+                "functionName": "mapper",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1202,
+                "column": 22
+              },
+              {
+                "functionName": "children",
+                "source": "benchmarks/js-framework-benchmark/src/main-solid.jsx",
+                "line": 56,
+                "column": 18
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-solid.jsx",
+                "line": 56,
+                "column": 18
+              },
+              {
+                "functionName": "insert",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/web/dist/web.js",
+                "line": 329,
+                "column": 18
+              },
+              {
+                "functionName": "createRenderEffect",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 220,
+                "column": 13
+              },
+              {
+                "functionName": "createComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 738,
+                "column": 68
+              }
+            ]
+          },
+          {
+            "site": "(anonymous) @ benchmarks/js-framework-benchmark/src/main-solid.jsx:56:18",
+            "count": 7.012,
+            "bytes": 184.288,
+            "types": {
+              "closures/functions": {
+                "count": 5.005,
+                "bytes": 140.148
+              },
+              "plain objects": {
+                "count": 2.007,
+                "bytes": 44.14
+              }
+            },
+            "stack": [
+              {
+                "functionName": "runComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 703,
+                "column": 7
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1125,
+                "column": 9
+              },
+              {
+                "functionName": "untrack",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 457,
+                "column": 8
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1131,
+                "column": 11
+              },
+              {
+                "functionName": "createRoot",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 178,
+                "column": 40
+              },
+              {
+                "functionName": "mapper",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1202,
+                "column": 22
+              },
+              {
+                "functionName": "children",
+                "source": "benchmarks/js-framework-benchmark/src/main-solid.jsx",
+                "line": 56,
+                "column": 18
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-solid.jsx",
+                "line": 56,
+                "column": 18
+              }
+            ]
+          },
+          {
+            "site": "insert @ benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/web/dist/web.js:329:18",
+            "count": 4,
+            "bytes": 112,
+            "types": {
+              "closures/functions": {
+                "count": 2,
+                "bytes": 56
+              },
+              "plain objects": {
+                "count": 2,
+                "bytes": 56
+              }
+            },
+            "stack": [
+              {
+                "functionName": "runComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 703,
+                "column": 7
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1125,
+                "column": 9
+              },
+              {
+                "functionName": "untrack",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 457,
+                "column": 8
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1131,
+                "column": 11
+              },
+              {
+                "functionName": "createRoot",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 178,
+                "column": 40
+              },
+              {
+                "functionName": "mapper",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1202,
+                "column": 22
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-solid.jsx",
+                "line": 56,
+                "column": 18
+              },
+              {
+                "functionName": "insert",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/web/dist/web.js",
+                "line": 329,
+                "column": 18
+              }
+            ]
+          },
+          {
+            "site": "readSignal @ benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js:621:9",
+            "count": 4.008,
+            "bytes": 66.776,
+            "types": {
+              "arrays": {
+                "count": 4.008,
+                "bytes": 66.776
+              }
+            },
+            "stack": [
+              {
+                "functionName": "mapper",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1202,
+                "column": 22
+              },
+              {
+                "functionName": "children",
+                "source": "benchmarks/js-framework-benchmark/src/main-solid.jsx",
+                "line": 56,
+                "column": 18
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-solid.jsx",
+                "line": 56,
+                "column": 18
+              },
+              {
+                "functionName": "createRenderEffect",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 220,
+                "column": 13
+              },
+              {
+                "functionName": "updateComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 687,
+                "column": 17
+              },
+              {
+                "functionName": "runComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 703,
+                "column": 7
+              },
+              {
+                "functionName": "createRenderEffect.e",
+                "source": "benchmarks/js-framework-benchmark/src/main-solid.jsx",
+                "line": 57,
+                "column": 35
+              },
+              {
+                "functionName": "readSignal",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 621,
+                "column": 9
+              }
+            ]
+          },
+          {
+            "site": "createRoot @ benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js:178:40",
+            "count": 2.487,
+            "bytes": 65.636,
+            "types": {
+              "closures/functions": {
+                "count": 0.486,
+                "bytes": 13.608
+              },
+              "plain objects": {
+                "count": 2.001,
+                "bytes": 52.028
+              }
+            },
+            "stack": [
+              {
+                "functionName": "runQueue",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 882,
+                "column": 19
+              },
+              {
+                "functionName": "runTop",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 792,
+                "column": 9
+              },
+              {
+                "functionName": "updateComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 687,
+                "column": 17
+              },
+              {
+                "functionName": "runComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 703,
+                "column": 7
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1125,
+                "column": 9
+              },
+              {
+                "functionName": "untrack",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 457,
+                "column": 8
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1131,
+                "column": 11
+              },
+              {
+                "functionName": "createRoot",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 178,
+                "column": 40
+              }
+            ]
+          },
+          {
+            "site": "insertExpression @ benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/web/dist/web.js:531:21",
+            "count": 0.002,
+            "bytes": 65.56,
+            "types": {
+              "arrays": {
+                "count": 0.002,
+                "bytes": 65.56
+              }
+            },
+            "stack": [
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/main-solid.jsx",
+                "line": 56,
+                "column": 18
+              },
+              {
+                "functionName": "insert",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/web/dist/web.js",
+                "line": 329,
+                "column": 18
+              },
+              {
+                "functionName": "createRenderEffect",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 220,
+                "column": 13
+              },
+              {
+                "functionName": "updateComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 687,
+                "column": 17
+              },
+              {
+                "functionName": "runComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 703,
+                "column": 7
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/web/dist/web.js",
+                "line": 332,
+                "column": 1
+              },
+              {
+                "functionName": "insertExpression",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/web/dist/web.js",
+                "line": 531,
+                "column": 21
+              },
+              {
+                "functionName": "toString",
+                "source": "",
+                "line": 1,
+                "column": 1
+              }
+            ]
+          },
+          {
+            "site": "(anonymous) @ :3:11",
+            "count": 0.753,
+            "bytes": 22.02,
+            "types": {
+              "plain objects": {
+                "count": 0.126,
+                "bytes": 3.752
+              },
+              "closures/functions": {
+                "count": 0.56,
+                "bytes": 16.736
+              },
+              "arrays": {
+                "count": 0.067,
+                "bytes": 1.532
+              }
+            },
+            "stack": [
+              {
+                "functionName": "(root)",
+                "source": "",
+                "line": 1,
+                "column": 1
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "",
+                "line": 2,
+                "column": 2
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "",
+                "line": 3,
+                "column": 11
+              }
+            ]
+          },
+          {
+            "site": "(anonymous) @ benchmarks/js-framework-benchmark/src/data.js:71:12",
+            "count": 1.001,
+            "bytes": 20.02,
+            "types": {
+              "plain objects": {
+                "count": 1.001,
+                "bytes": 20.02
+              }
+            },
+            "stack": [
+              {
+                "functionName": "(root)",
+                "source": "",
+                "line": 1,
+                "column": 1
+              },
+              {
+                "functionName": "eventHandler",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/web/dist/web.js",
+                "line": 480,
+                "column": 20
+              },
+              {
+                "functionName": "handleNode",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/web/dist/web.js",
+                "line": 492,
+                "column": 21
+              },
+              {
+                "functionName": "App._el$4.$$click",
+                "source": "benchmarks/js-framework-benchmark/src/main-solid.jsx",
+                "line": 31,
+                "column": 65
+              },
+              {
+                "functionName": "buildData",
+                "source": "benchmarks/js-framework-benchmark/src/data.js",
+                "line": 69,
+                "column": 21
+              },
+              {
+                "functionName": "from",
+                "source": "",
+                "line": 1,
+                "column": 1
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/src/data.js",
+                "line": 71,
+                "column": 12
+              }
+            ]
+          },
+          {
+            "site": "next @ :1:1",
+            "count": 0.178,
+            "bytes": 15.148,
+            "types": {
+              "closures/functions": {
+                "count": 0.1,
+                "bytes": 2.856
+              },
+              "plain objects": {
+                "count": 0.061,
+                "bytes": 1.14
+              },
+              "arrays": {
+                "count": 0.017,
+                "bytes": 11.152
+              }
+            },
+            "stack": [
+              {
+                "functionName": "_cached",
+                "source": "",
+                "line": 5501,
+                "column": 11
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "",
+                "line": 5539,
+                "column": 118
+              },
+              {
+                "functionName": "_querySimple",
+                "source": "",
+                "line": 5596,
+                "column": 16
+              },
+              {
+                "functionName": "_queryCSS",
+                "source": "",
+                "line": 5717,
+                "column": 13
+              },
+              {
+                "functionName": "_cached",
+                "source": "",
+                "line": 5501,
+                "column": 11
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "",
+                "line": 5718,
+                "column": 114
+              },
+              {
+                "functionName": "query",
+                "source": "",
+                "line": 5720,
+                "column": 22
+              },
+              {
+                "functionName": "next",
+                "source": "",
+                "line": 1,
+                "column": 1
+              }
+            ]
+          },
+          {
+            "site": "mapper @ benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js:1202:22",
+            "count": 0.484,
+            "bytes": 14.824,
+            "types": {
+              "arrays": {
+                "count": 0.001,
+                "bytes": 5.164
+              },
+              "plain objects": {
+                "count": 0.483,
+                "bytes": 9.66
+              }
+            },
+            "stack": [
+              {
+                "functionName": "runTop",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 792,
+                "column": 9
+              },
+              {
+                "functionName": "updateComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 687,
+                "column": 17
+              },
+              {
+                "functionName": "runComputation",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 703,
+                "column": 7
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1125,
+                "column": 9
+              },
+              {
+                "functionName": "untrack",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 457,
+                "column": 8
+              },
+              {
+                "functionName": "(anonymous)",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1131,
+                "column": 11
+              },
+              {
+                "functionName": "createRoot",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 178,
+                "column": 40
+              },
+              {
+                "functionName": "mapper",
+                "source": "benchmarks/js-framework-benchmark/node_modules/.pnpm/solid-js@1.9.15/node_modules/solid-js/dist/solid.js",
+                "line": 1202,
+                "column": 22
+              }
+            ]
+          }
+        ]
+      },
+      "allocationSamplingTopSites": [
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:1014:24",
+          "bytes": 319864,
+          "sampleCount": 3938,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "updateFn",
+            "mapper",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "createComputation @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:295:27",
+          "bytes": 258420,
+          "sampleCount": 2506,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "updateFn",
+            "mapper",
+            "(anonymous)",
+            "insert",
+            "createComputation"
+          ]
+        },
+        {
+          "site": "insert @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:738:16",
+          "bytes": 122820,
+          "sampleCount": 1462,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "updateFn",
+            "mapper",
+            "(anonymous)",
+            "insert"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:977:39",
+          "bytes": 86908,
+          "sampleCount": 1114,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "buildData",
+            "from",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "readSignal @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:181:20",
+          "bytes": 75736,
+          "sampleCount": 1046,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "updateFn",
+            "mapper",
+            "(anonymous)",
+            "updateComputation",
+            "runComputation",
+            "createRenderEffect.e",
+            "readSignal"
+          ]
+        },
+        {
+          "site": "createRoot @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:80:20",
+          "bytes": 56988,
+          "sampleCount": 720,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot"
+          ]
+        },
+        {
+          "site": "(IDLE_EXTERNAL) @ :0:0",
+          "bytes": 41264,
+          "sampleCount": 12,
+          "stack": [
+            "(root)",
+            "(IDLE_EXTERNAL)"
+          ]
+        },
+        {
+          "site": "mapper @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:618:18",
+          "bytes": 35108,
+          "sampleCount": 330,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "updateFn",
+            "mapper"
+          ]
+        },
+        {
+          "site": "push @ :0:0",
+          "bytes": 30812,
+          "sampleCount": 20,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runUpdates",
+            "(anonymous)",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "insertExpression",
+            "normalizeIncomingArray",
+            "push"
+          ]
+        },
+        {
+          "site": "updateFn @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:87:31",
+          "bytes": 29988,
+          "sampleCount": 357,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "updateFn"
+          ]
+        },
+        {
+          "site": "(V8 API) @ :0:0",
+          "bytes": 18512,
+          "sampleCount": 141,
+          "stack": [
+            "(root)",
+            "(V8 API)"
+          ]
+        },
+        {
+          "site": "insertExpression @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:794:26",
+          "bytes": 17952,
+          "sampleCount": 187,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "updateFn",
+            "mapper",
+            "(anonymous)",
+            "insert",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "insertExpression"
+          ]
+        },
+        {
+          "site": "toString @ :0:0",
+          "bytes": 17680,
+          "sampleCount": 221,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "updateFn",
+            "mapper",
+            "(anonymous)",
+            "insert",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "insertExpression",
+            "toString"
+          ]
+        },
+        {
+          "site": "updateComputation @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:247:27",
+          "bytes": 14976,
+          "sampleCount": 208,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "updateFn",
+            "mapper",
+            "(anonymous)",
+            "insert",
+            "updateComputation"
+          ]
+        },
+        {
+          "site": "(anonymous) @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:550:18",
+          "bytes": 12596,
+          "sampleCount": 3,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "evaluate @ :305:11",
+          "bytes": 10988,
+          "sampleCount": 102,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate"
+          ]
+        },
+        {
+          "site": "(BYTECODE_COMPILER) @ :0:0",
+          "bytes": 5880,
+          "sampleCount": 67,
+          "stack": [
+            "(root)",
+            "(BYTECODE_COMPILER)"
+          ]
+        },
+        {
+          "site": "(PARSER) @ :0:0",
+          "bytes": 4760,
+          "sampleCount": 17,
+          "stack": [
+            "(root)",
+            "(PARSER)"
+          ]
+        },
+        {
+          "site": "from @ :0:0",
+          "bytes": 4024,
+          "sampleCount": 1,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "buildData",
+            "from"
+          ]
+        },
+        {
+          "site": "oneLine @ :8245:17",
+          "bytes": 3260,
+          "sampleCount": 4,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "(anonymous)",
+            "(anonymous)",
+            "previewNode",
+            "oneLine"
+          ]
+        },
+        {
+          "site": "(anonymous) @ :1:1",
+          "bytes": 2612,
+          "sampleCount": 30,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "(anonymous)"
+          ]
+        },
+        {
+          "site": "parseEvaluationResultValue @ :106:36",
+          "bytes": 2532,
+          "sampleCount": 30,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "parseEvaluationResultValue"
+          ]
+        },
+        {
+          "site": "handleNode @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:758:21",
+          "bytes": 2476,
+          "sampleCount": 22,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode"
+          ]
+        },
+        {
+          "site": "eval @ :6938:7",
+          "bytes": 1940,
+          "sampleCount": 14,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "(anonymous)",
+            "eval"
+          ]
+        },
+        {
+          "site": "predicate @ :3:31",
+          "bytes": 1072,
+          "sampleCount": 13,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "(anonymous)",
+            "next",
+            "predicate"
+          ]
+        },
+        {
+          "site": "serializeAsCallArgument @ :172:33",
+          "bytes": 976,
+          "sampleCount": 10,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "(anonymous)",
+            "safeJson",
+            "jsonValue",
+            "serializeAsCallArgument"
+          ]
+        },
+        {
+          "site": "children @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:1014:14",
+          "bytes": 960,
+          "sampleCount": 12,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "updateFn",
+            "mapper",
+            "children"
+          ]
+        },
+        {
+          "site": "query @ :5719:21",
+          "bytes": 900,
+          "sampleCount": 11,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "(anonymous)",
+            "querySelectorAll",
+            "_queryEngineAll",
+            "queryAll",
+            "query",
+            "_cached",
+            "(anonymous)",
+            "_queryEngine",
+            "_callQuery",
+            "_cached",
+            "(anonymous)",
+            "query",
+            "query",
+            "_cached",
+            "(anonymous)",
+            "_querySimple",
+            "_queryCSS",
+            "_cached",
+            "(anonymous)",
+            "query"
+          ]
+        },
+        {
+          "site": "end @ :5486:6",
+          "bytes": 800,
+          "sampleCount": 8,
+          "stack": [
+            "(root)",
+            "(anonymous)",
+            "evaluate",
+            "(anonymous)",
+            "querySelectorAll",
+            "end"
+          ]
+        },
+        {
+          "site": "fn @ http://127.0.0.1:4382/assets/index-BhOfskLt.js:714:104",
+          "bytes": 720,
+          "sampleCount": 9,
+          "stack": [
+            "(root)",
+            "eventHandler",
+            "handleNode",
+            "App._el$4.$$click",
+            "setter",
+            "writeSignal",
+            "runUpdates",
+            "completeUpdates",
+            "runQueue",
+            "runTop",
+            "updateComputation",
+            "runComputation",
+            "(anonymous)",
+            "untrack",
+            "(anonymous)",
+            "createRoot",
+            "runUpdates",
+            "updateFn",
+            "mapper",
+            "children",
+            "(anonymous)",
+            "fn"
+          ]
+        }
+      ]
+    }
+  }
+}

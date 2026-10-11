@@ -1,16 +1,18 @@
 # Benos roadmap
 
-Versions 0.2.0–0.2.2 are published. The phase plan and completed work live in
+Versions 0.2.0–0.2.3 are published; 0.3.0 is in release preparation. The phase plan and completed work live in
 [plan.md](./plan.md); this roadmap tracks shipped optional modules and upcoming
 framework work.
 
 ## Top framework performance item
 
-- Reduce sortable table initial-render cost. The production comparison with
-  Solid measured 2.72× at 5,000 rows and 2.46× at 10,000 rows (roughly 2× in
-  the current workload). Sorting is near parity. See
-  [benchmarks/README.md](../benchmarks/README.md) for the full protocol and
-  results.
+- Reduce per-row JavaScript allocations on initial render. The latest
+  production trace measures generic row creation at about 1.4× Solid. The
+  registry table now retains 44.2 plain objects, 19.0 arrays, and 19.0
+  closures per row versus Solid's 10.1, 2.0, and 7.0. Continue reducing
+  per-row allocations without regressing the nine-operation suite. See
+  [benchmarks/README.md](../benchmarks/README.md) for the protocol, spreads,
+  and allocation profile.
 
 ## Shipped in v0.2.x
 

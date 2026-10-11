@@ -1,0 +1,219 @@
+{
+  "protocol": {
+    "browser": "Chromium tracing",
+    "warmups": 2,
+    "rounds": 7,
+    "categories": "v8,disabled-by-default-v8.gc,disabled-by-default-v8.gc_stats",
+    "aggregation": "per-thread union of complete GC trace events; nested intervals counted once; main-thread time reported separately from total GC CPU across renderer threads"
+  },
+  "summary": {
+    "create-1k": {
+      "mainThreadMedianMs": 3.993,
+      "mainThreadMinMs": 3.725,
+      "mainThreadMaxMs": 6.421,
+      "allRendererThreadsCpuMedianMs": 13.306000000000001,
+      "allRendererThreadsCpuMinMs": 12.604000000000001,
+      "allRendererThreadsCpuMaxMs": 17.896,
+      "mainThreadSamplesMs": [
+        4.844,
+        3.987,
+        3.725,
+        5.411,
+        3.993,
+        3.93,
+        6.421
+      ],
+      "allRendererThreadsSamplesMs": [
+        16.487,
+        12.604000000000001,
+        13.306000000000001,
+        17.835,
+        12.722999999999999,
+        12.874,
+        17.896
+      ]
+    },
+    "replace-1k": {
+      "mainThreadMedianMs": 51.227,
+      "mainThreadMinMs": 3.465,
+      "mainThreadMaxMs": 53.148,
+      "allRendererThreadsCpuMedianMs": 87.884,
+      "allRendererThreadsCpuMinMs": 19.548000000000002,
+      "allRendererThreadsCpuMaxMs": 101.83899999999998,
+      "mainThreadSamplesMs": [
+        52.326,
+        3.465,
+        3.712,
+        53.148,
+        51.227,
+        4.883,
+        52.224
+      ],
+      "allRendererThreadsSamplesMs": [
+        93.89,
+        22.197,
+        19.548000000000002,
+        87.884,
+        93.419,
+        30.788,
+        101.83899999999998
+      ]
+    },
+    "clear-1k": {
+      "mainThreadMedianMs": 0,
+      "mainThreadMinMs": 0,
+      "mainThreadMaxMs": 0,
+      "allRendererThreadsCpuMedianMs": 0,
+      "allRendererThreadsCpuMinMs": 0,
+      "allRendererThreadsCpuMaxMs": 0,
+      "mainThreadSamplesMs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "allRendererThreadsSamplesMs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "create-10k": {
+      "mainThreadMedianMs": 374.648,
+      "mainThreadMinMs": 365.864,
+      "mainThreadMaxMs": 389.241,
+      "allRendererThreadsCpuMedianMs": 709.634,
+      "allRendererThreadsCpuMinMs": 693.086,
+      "allRendererThreadsCpuMaxMs": 776.7950000000001,
+      "mainThreadSamplesMs": [
+        368.807,
+        374.648,
+        389.241,
+        367.643,
+        365.864,
+        377.313,
+        382.102
+      ],
+      "allRendererThreadsSamplesMs": [
+        693.086,
+        694.3910000000001,
+        756.5849999999999,
+        709.634,
+        705.7460000000001,
+        712.343,
+        776.7950000000001
+      ]
+    },
+    "replace-10k": {
+      "mainThreadMedianMs": 67.423,
+      "mainThreadMinMs": 25.987,
+      "mainThreadMaxMs": 770.063,
+      "allRendererThreadsCpuMedianMs": 319.764,
+      "allRendererThreadsCpuMinMs": 157.711,
+      "allRendererThreadsCpuMaxMs": 1182.4400000000003,
+      "mainThreadSamplesMs": [
+        27.985,
+        29.052,
+        25.987,
+        67.423,
+        770.063,
+        678.878,
+        687.736
+      ],
+      "allRendererThreadsSamplesMs": [
+        188.89100000000002,
+        183.51500000000001,
+        157.711,
+        319.764,
+        1182.4400000000003,
+        1078.016,
+        1159.644
+      ]
+    },
+    "clear-10k": {
+      "mainThreadMedianMs": 0,
+      "mainThreadMinMs": 0,
+      "mainThreadMaxMs": 0,
+      "allRendererThreadsCpuMedianMs": 0,
+      "allRendererThreadsCpuMinMs": 0,
+      "allRendererThreadsCpuMaxMs": 0,
+      "mainThreadSamplesMs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "allRendererThreadsSamplesMs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "table-mount-5000": {
+      "mainThreadMedianMs": 0,
+      "mainThreadMinMs": 0,
+      "mainThreadMaxMs": 0,
+      "allRendererThreadsCpuMedianMs": 0,
+      "allRendererThreadsCpuMinMs": 0,
+      "allRendererThreadsCpuMaxMs": 0,
+      "mainThreadSamplesMs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "allRendererThreadsSamplesMs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "table-mount-10000": {
+      "mainThreadMedianMs": 0,
+      "mainThreadMinMs": 0,
+      "mainThreadMaxMs": 0,
+      "allRendererThreadsCpuMedianMs": 0,
+      "allRendererThreadsCpuMinMs": 0,
+      "allRendererThreadsCpuMaxMs": 0,
+      "mainThreadSamplesMs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "allRendererThreadsSamplesMs": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  }
+}

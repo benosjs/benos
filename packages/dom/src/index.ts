@@ -20,6 +20,10 @@ import {
 import type { InternalOwner } from '@benosjs/core/internal'
 import type { ReadonlySignal } from '@benosjs/core'
 import type {
+  DirectTemplateDefinition,
+  DirectTemplateDescriptor,
+} from './experimental-direct.js'
+import type {
   EventHandler as GeneratedEventHandler,
   GeneratedAttributes,
   GeneratedIntrinsicElements,
@@ -53,7 +57,11 @@ interface TemplateDescriptor {
   readonly setup: (scope: TemplateScope) => void
 }
 
-type Descriptor = ElementDescriptor | ComponentDescriptor | TemplateDescriptor
+type Descriptor =
+  | ElementDescriptor
+  | ComponentDescriptor
+  | TemplateDescriptor
+  | DirectTemplateDescriptor
 
 const fragment = Symbol('benos.fragment')
 export const Fragment = fragment
@@ -360,7 +368,9 @@ function mountValue(
     return mountElement(descriptor, parent, before, owner)
   if (descriptor.kind === 'component')
     return mountComponent(descriptor, parent, before, owner)
-  return mountTemplate(descriptor, parent, before, owner)
+  if (descriptor.kind === 'template')
+    return mountTemplate(descriptor, parent, before, owner)
+  return mountDirectTemplate(descriptor, parent, before, owner)
 }
 
 function mountElement(
@@ -449,14 +459,11 @@ const delegatedEvents = new Set([
   'dblclick',
 ])
 
-interface EventRecord {
-  element: Element
-  name: string
-  getHandler: () => unknown
-}
+type EventHandlerGetter = () => unknown
+type EventSlot = EventHandlerGetter | EventHandlerGetter[]
 interface EventHub {
   root: Document | ShadowRoot
-  byType: Map<string, Map<Element, Set<EventRecord>>>
+  byType: Map<string, Map<Element, EventSlot>>
   listeners: Map<string, EventListener>
 }
 const hubs = new WeakMap<Document | ShadowRoot, EventHub>()
@@ -481,12 +488,16 @@ function rootFor(element: Element): Document | ShadowRoot {
   return element.ownerDocument
 }
 
-function invokeHandler(record: EventRecord, event: Event): void {
-  const handler = untrack(record.getHandler)
+function invokeHandler(
+  element: Element,
+  getHandler: EventHandlerGetter,
+  event: Event,
+): void {
+  const handler = untrack(getHandler)
   if (typeof handler !== 'function') return
   try {
     const result = batch(() =>
-      (handler as (event: Event) => unknown).call(record.element, event),
+      (handler as (event: Event) => unknown).call(element, event),
     )
     if (result && typeof (result as Promise<unknown>).then === 'function')
       void (result as Promise<unknown>).catch(reportInternalError)
@@ -503,30 +514,33 @@ function getHub(root: Document | ShadowRoot): EventHub {
   return hub
 }
 
-function installDelegated(record: EventRecord): () => void {
-  const root = rootFor(record.element)
+function installDelegated(
+  element: Element,
+  name: string,
+  getHandler: EventHandlerGetter,
+): () => void {
+  const root = rootFor(element)
   const hub = getHub(root)
-  let byElement = hub.byType.get(record.name)
+  let byElement = hub.byType.get(name)
   if (!byElement) {
     byElement = new Map()
-    hub.byType.set(record.name, byElement)
+    hub.byType.set(name, byElement)
   }
-  let records = byElement.get(record.element)
-  if (!records) {
-    records = new Set()
-    byElement.set(record.element, records)
-  }
-  records.add(record)
-  if (!hub.listeners.has(record.name)) {
+  const previous = byElement.get(element)
+  if (previous === undefined) byElement.set(element, getHandler)
+  else if (Array.isArray(previous)) previous.push(getHandler)
+  else byElement.set(element, [previous, getHandler])
+  if (!hub.listeners.has(name)) {
     const listener: EventListener = (event) => {
       for (const item of event.composedPath()) {
         if (item === root) break
         if (!(item instanceof Element)) continue
-        const group = hub.byType.get(record.name)?.get(item)
+        const group = hub.byType.get(name)?.get(item)
         if (group) {
-          for (const handler of [...group]) {
+          const handlers = Array.isArray(group) ? [...group] : [group]
+          for (const handler of handlers) {
             if (event.cancelBubble && item !== event.target) return
-            const previous = Object.getOwnPropertyDescriptor(
+            const previousCurrentTarget = Object.getOwnPropertyDescriptor(
               event,
               'currentTarget',
             )
@@ -538,9 +552,13 @@ function installDelegated(record: EventRecord): () => void {
             } catch {
               continue
             }
-            invokeHandler(handler, event)
-            if (previous)
-              Object.defineProperty(event, 'currentTarget', previous)
+            invokeHandler(item, handler, event)
+            if (previousCurrentTarget)
+              Object.defineProperty(
+                event,
+                'currentTarget',
+                previousCurrentTarget,
+              )
             else
               delete (event as unknown as { currentTarget?: unknown })
                 .currentTarget
@@ -549,47 +567,49 @@ function installDelegated(record: EventRecord): () => void {
         }
       }
     }
-    hub.listeners.set(record.name, listener)
-    root.addEventListener(record.name, listener)
+    hub.listeners.set(name, listener)
+    root.addEventListener(name, listener)
   }
   return () => {
-    const records = byElement?.get(record.element)
-    records?.delete(record)
-    if (records?.size === 0) byElement?.delete(record.element)
-    if (byElement?.size === 0) hub.byType.delete(record.name)
-    if (!hub.byType.has(record.name)) {
-      const listener = hub.listeners.get(record.name)
-      if (listener) root.removeEventListener(record.name, listener)
-      hub.listeners.delete(record.name)
+    const handlers = byElement?.get(element)
+    if (handlers === getHandler) byElement?.delete(element)
+    else if (Array.isArray(handlers)) {
+      const index = handlers.lastIndexOf(getHandler)
+      if (index !== -1) handlers.splice(index, 1)
+      if (handlers.length === 0) byElement?.delete(element)
+      else if (handlers.length === 1)
+        byElement?.set(element, handlers[0] as EventHandlerGetter)
+    }
+    if (byElement?.size === 0) hub.byType.delete(name)
+    if (!hub.byType.has(name)) {
+      const listener = hub.listeners.get(name)
+      if (listener) root.removeEventListener(name, listener)
+      hub.listeners.delete(name)
     }
   }
 }
 
-function installEvent(
+function installEventSlot(
   element: Element,
-  key: PropertyKey,
-  props: Props,
-  owner: InternalOwner,
+  name: string,
+  getHandler: EventHandlerGetter,
+  capture: boolean,
 ): void {
-  const parsed = eventName(key)
-  if (!parsed) return
-  const record: EventRecord = {
-    element,
-    name: parsed.name,
-    getHandler: () => props[key],
-  }
-  if (delegatedEvents.has(record.name) && !parsed.capture) {
-    const remove = installDelegated(record)
-    runWithOwner(owner, () => onCleanup(remove))
+  if (delegatedEvents.has(name) && !capture) {
+    const remove = installDelegated(element, name, getHandler)
+    onCleanup(remove)
     return
   }
-  const listener: EventListener = (event) => invokeHandler(record, event)
-  element.addEventListener(record.name, listener, parsed.capture)
-  runWithOwner(owner, () =>
-    onCleanup(() =>
-      element.removeEventListener(record.name, listener, parsed.capture),
-    ),
-  )
+  const listener: EventListener = (event) =>
+    invokeHandler(element, getHandler, event)
+  element.addEventListener(name, listener, capture)
+  onCleanup(() => element.removeEventListener(name, listener, capture))
+}
+
+function installEvent(element: Element, key: PropertyKey, props: Props): void {
+  const parsed = eventName(key)
+  if (!parsed) return
+  installEventSlot(element, parsed.name, () => props[key], parsed.capture)
 }
 
 function isDangerousUrl(value: string): boolean {
@@ -696,7 +716,7 @@ function applyProps(
       continue
     }
     if (eventName(key)) {
-      installEvent(element, key, props, owner)
+      installEvent(element, key, props)
       continue
     }
     const update = () => applyOneProp(element, key, props[key], namespace)
@@ -1380,28 +1400,30 @@ function mountTemplate(
   const prototype = templatePrototype(document, descriptor.plan)
   const fragment = prototype.fragment.cloneNode(true) as DocumentFragment
   const nodes = Array.from(fragment.childNodes)
-  const slots = new Map<number, Node>()
+  // Compiler slot ids are numeric; a sparse array keeps per-instance lookup
+  // direct without allocating a Map for every template mount.
+  const slots: Node[] = []
   for (const [slot, path] of prototype.slots)
-    slots.set(slot, nodeAtPath(fragment, path))
+    slots[slot] = nodeAtPath(fragment, path)
   insert(parent, fragment, before)
   const range: DomRange = { nodes, owner }
   runWithOwner(owner, () => {
     onCleanup(() => removeRange(range))
     descriptor.setup({
       attr(slot, name, get) {
-        const element = slots.get(slot)
+        const element = slots[slot]
         if (element instanceof Element)
           createRenderEffect(() => applyOneProp(element, name, get(), 'html'))
       },
       text(slot, get) {
-        const node = slots.get(slot)
+        const node = slots[slot]
         if (node instanceof Text)
           createRenderEffect(() => {
             node.data = String(get())
           })
       },
       child(slot, get) {
-        const marker = slots.get(slot)
+        const marker = slots[slot]
         if (!(marker instanceof Comment) || !marker.parentNode) return
         const target: Slot = {
           parent: marker.parentNode,
@@ -1430,18 +1452,104 @@ function mountTemplate(
         )
       },
       event(slot, name, get) {
-        const element = slots.get(slot)
-        if (element instanceof Element) {
-          const props = Object.create(null) as Props
-          Object.defineProperty(props, `on:${name}`, {
-            configurable: true,
-            enumerable: true,
-            get,
-          })
-          installEvent(element, `on:${name}`, props, owner)
-        }
+        const element = slots[slot]
+        if (element instanceof Element)
+          installEventSlot(element, name, get, false)
       },
     })
+  })
+  return range
+}
+
+const directTemplatePrototypes = new WeakMap<
+  Document,
+  Map<string, HTMLTemplateElement>
+>()
+
+function directTemplatePrototype(
+  document: Document,
+  definition: DirectTemplateDefinition,
+): HTMLTemplateElement {
+  let byId = directTemplatePrototypes.get(document)
+  if (!byId) {
+    byId = new Map()
+    directTemplatePrototypes.set(document, byId)
+  }
+  const cached = byId.get(definition.id)
+  if (cached) return cached
+  const template = document.createElement('template')
+  template.innerHTML = definition.html
+  byId.set(definition.id, template)
+  return template
+}
+
+function mountDirectTemplate(
+  descriptor: DirectTemplateDescriptor,
+  parent: Node,
+  before: Node | null,
+  owner: InternalOwner,
+): DomRange {
+  const document = ownerDocumentOf(parent)
+  const prototype = directTemplatePrototype(document, descriptor.definition)
+  const fragment = prototype.content.cloneNode(true) as DocumentFragment
+  const nodes = Array.from(fragment.childNodes)
+  const root = nodes[0]
+  if (!(root instanceof Element) || nodes.length !== 1)
+    throw new Error(`Invalid direct template ${descriptor.definition.id}`)
+  for (const attribute of descriptor.definition.attributes) {
+    const target = nodeAtPath(root, attribute.path)
+    if (target instanceof Element)
+      applyOneProp(target, attribute.name, attribute.value, attribute.namespace)
+  }
+  insert(parent, fragment, before)
+  const range: DomRange = { nodes, owner }
+  runWithOwner(owner, () => {
+    onCleanup(() => removeRange(range))
+    for (const binding of descriptor.definition.bindings) {
+      const target = nodeAtPath(root, binding.path)
+      if (binding.kind === 'attribute') {
+        if (target instanceof Element)
+          createRenderEffect(() =>
+            applyOneProp(
+              target,
+              binding.name ?? '',
+              binding.get(descriptor.values),
+              binding.namespace,
+            ),
+          )
+      } else if (binding.kind === 'child') {
+        if (!(target instanceof Comment) || !target.parentNode) continue
+        const slot: Slot = {
+          parent: target.parentNode,
+          marker: target,
+          after: target.nextSibling,
+          current: null,
+          range: { nodes: [target], owner },
+          initialized: false,
+          value: undefined,
+        }
+        onCleanup(() => {
+          disposeMounted(slot.current)
+          slot.current = null
+          slot.marker.parentNode?.removeChild(slot.marker)
+          slot.range.nodes = []
+        })
+        createRenderEffect(() => {
+          const value = binding.get(descriptor.values) as Child
+          updateSlot(slot, value, owner, (branch, at) =>
+            createChildMount(value, slot.parent, at, branch),
+          )
+        })
+      } else if (binding.kind === 'event') {
+        if (target instanceof Element)
+          installEventSlot(
+            target,
+            binding.name ?? '',
+            () => binding.get(descriptor.values),
+            binding.capture ?? false,
+          )
+      }
+    }
   })
   return range
 }
@@ -1466,6 +1574,7 @@ export interface TemplateScope {
   child(slot: number, get: () => Child): void
   event(slot: number, name: string, get: () => unknown): void
 }
+
 function normalizePlan(plan: TemplatePlan | readonly unknown[]): TemplatePlan {
   if (Array.isArray(plan)) {
     const slots = plan[2] as readonly number[] | undefined

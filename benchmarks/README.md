@@ -721,3 +721,643 @@ samples per run:
 Every row remains under the 2× CI guard. Local verification also passed the
 221 unit tests, all 405 Chromium/Firefox/WebKit browser tests, the packed
 create-benos consumer, and the pnpm UI CLI consumer matrix.
+
+## Initial-render P1 runtime-JSX history (2026-10-10)
+
+This table is historical. The generic P1 adapter used hand-written runtime
+`jsx` descriptors, which bypassed the compiler and does not match a
+create-benos TSX application. The current published comparison is the compiled
+`safe` TSX record below. Earlier tables remain as history to show how the
+harness correction changed the measured gap.
+
+Core and DOM were rebuilt before this measurement; sizes remain within budget.
+The package build and the benchmark adapter use production output. The baseline
+is commit `e029073` (the 0.1.2 package release commit; no `v0.1.2` tag exists
+in local or remote refs). Both Benos versions used the same current benchmark
+adapter. Chromium trace timing was interleaved with two warmups and seven
+measured rounds. Values are median milliseconds [minimum–maximum].
+
+| Operation         |                    v0.1.2 |              Current HEAD |                     Solid | HEAD / v0.1.2 | HEAD / Solid |
+| ----------------- | ------------------------: | ------------------------: | ------------------------: | ------------: | -----------: |
+| Create 1,000      |    39.914 [38.963–48.959] |    39.171 [38.347–39.890] |    25.252 [24.740–28.102] |         0.98× |        1.55× |
+| Replace 1,000     |    43.665 [42.274–47.035] |    42.360 [41.996–47.304] |    25.524 [25.335–27.695] |         0.97× |        1.66× |
+| Update every 10th |    14.541 [13.106–15.060] |    15.389 [14.054–19.971] |    13.863 [13.640–14.081] |         1.06× |        1.11× |
+| Select row        |      6.138 [1.285–17.101] |      7.317 [1.216–15.231] |       0.901 [0.879–1.014] |         1.19× |        8.12× |
+| Swap rows         |      5.339 [3.966–17.697] |      5.840 [5.093–11.707] |      3.583 [2.871–24.145] |         1.09× |        1.63× |
+| Remove one row    |      8.792 [4.818–19.778] |     13.946 [5.213–18.305] |     10.143 [4.434–24.899] |         1.59× |        1.37× |
+| Create 10,000     | 430.204 [385.832–514.739] | 454.222 [402.521–599.993] | 276.428 [243.823–360.283] |         1.06× |        1.64× |
+| Append 1,000      |    65.829 [53.981–72.957] |    59.708 [56.751–94.454] |    43.742 [37.317–76.198] |         0.91× |        1.37× |
+| Clear 1,000       |      8.878 [7.017–13.931] |     11.717 [7.756–16.937] |       3.205 [1.731–6.367] |         1.32× |        3.66× |
+
+A second interleaved seven-round run focused on replace and clear. Replace
+medians were 48.395 ms [45.320–54.920] for v0.1.2 and 49.765 ms
+[45.380–61.751] for HEAD; clear medians were 9.502 ms [7.351–17.348] and
+8.144 ms [6.830–18.028]. The runs disagree on which version is faster, and
+the spreads overlap. This does not confirm a runtime regression. The prior
+1.96× replace report is close to the focused run's 1.89× HEAD/Solid ratio;
+the primary same-protocol run measured 1.66×. The earlier 9.59× clear ratio
+used a 1.30 ms Solid denominator; the paired reruns measured Solid clear at
+3.205 ms and 3.834 ms, producing HEAD/Solid ratios of 3.66× and 2.12×.
+Phase 6b recorded 2.43× clear and 1.64× replace. These differences are
+consistent with the broad trace spreads and unstable Solid clear denominator,
+not evidence of a source regression. No source fix or optimization was made.
+
+The P1 production size gate passed:
+
+| Artifact                         |         Size |       Budget |
+| -------------------------------- | -----------: | -----------: |
+| `@benosjs/core`                  |  4,049 bytes |  4,096 bytes |
+| `@benosjs/core` + `@benosjs/dom` | 10,198 bytes | 10,240 bytes |
+
+The temporary source-mapped production profile, Chromium GC traces, and
+allocation sampling results are recorded in
+[`docs/checkpoints/perf-p1.md`](../docs/checkpoints/perf-p1.md), with raw
+results in `benchmarks/js-framework-benchmark/results/perf-p1-*.json`.
+
+## Initial-render P3: first compiled-path baseline (2026-10-10, historical)
+
+The original generic Benos adapter used JavaScript runtime `jsx` descriptors,
+so its TSX compiler path was skipped. That P1 comparison did not match a
+create-benos app. The generic adapter is now TSX and both the generic and table
+fixtures build through the built `@benosjs/vite` production entry with
+`optimization: 'safe'`, matching the starter's production transform. The
+P1 values above are retained as runtime-JSX history. This first compiled
+comparison is also kept as history; use the refreshed compiled comparison
+below for current release reporting. Baseline commit `e029073` contains
+core and DOM version 0.1.2. The protocol is Chromium trace click-to-paint, two
+warmups, seven interleaved measured rounds. Times are milliseconds, median
+[minimum–maximum].
+
+| Operation         |                    v0.1.2 |                   Current |                     Solid | Current / Solid |
+| ----------------- | ------------------------: | ------------------------: | ------------------------: | --------------: |
+| Create 1,000      |    52.180 [51.013–62.091] |    52.907 [50.913–56.275] |    25.264 [24.713–27.305] |           2.09× |
+| Replace 1,000     |    57.604 [55.837–60.543] |    58.035 [56.098–89.638] |    25.723 [24.919–26.556] |           2.26× |
+| Update every 10th |    13.766 [13.127–15.863] |    14.413 [12.946–18.574] |    13.738 [13.572–14.220] |           1.05× |
+| Select one row    |      1.808 [1.162–11.014] |       1.248 [1.164–1.531] |       0.856 [0.806–0.893] |           1.46× |
+| Swap rows         |       3.782 [3.457–5.517] |       3.779 [3.611–9.192] |       2.958 [2.810–3.683] |           1.28× |
+| Remove one row    |       4.725 [4.495–5.605] |      4.566 [4.402–12.156] |       4.313 [4.215–5.086] |           1.06× |
+| Create 10,000     | 490.079 [482.844–498.807] | 492.144 [483.591–512.038] | 237.605 [234.933–249.741] |           2.07× |
+| Append 1,000      |    58.933 [58.448–59.235] |    59.130 [58.384–60.011] |    35.173 [35.058–35.483] |           1.68× |
+| Clear 1,000       |       9.315 [8.954–9.937] |       9.312 [9.126–9.853] |       2.549 [2.528–2.581] |           3.65× |
+
+The corrected path changes the measured Benos/Solid gap materially on create,
+replace, append, and clear. The current and v0.1.2 medians are close with
+overlapping spreads on all nine rows, so this is a harness correction, not a
+confirmed source regression.
+
+The compiled registry table measured 146.6 ms [138.2–149.5] to mount 5,000
+rows and 279.7 ms [262.0–291.6] to mount 10,000 rows; Solid measured 71.4
+[65.4–75.6] and 137.6 [131.1–149.5] ms. Sort medians were 92.7
+[81.8–173.8] vs 79.9 [73.4–81.9] ms at 5k, and 178.0 [156.4–226.7] vs
+156.7 [152.3–208.5] ms at 10k. Raw results and source-mapped attribution are
+in [`results/p3-compiled-release-comparison.json`](./js-framework-benchmark/results/p3-compiled-release-comparison.json),
+[`results/p3-compiled-table.json`](./js-framework-benchmark/results/p3-compiled-table.json),
+and the [P3 checkpoint](../docs/checkpoints/perf-p3-attribution.md).
+
+### P3 property-key iteration trial
+
+The guarded `for...in` prop-key trial ran twice on the same compiled production path, with every one of the nine operations reported in [its checkpoint](../docs/checkpoints/perf-p3-property-keys.md). Create 1k improved in the first run and regressed in the confirmation run; retained allocations were unchanged and all timing spreads overlapped. The candidate added 10 B to core + DOM, so its implementation was reverted. The semantic test for enumerable own-key order remains. The next trial is delegated event slots.
+
+### P3 delegated event slots
+
+The getter-slot implementation removes the compiled-path event record, props
+wrapper, and extra getter closure while preserving untracked handler reads at
+dispatch. Its allocation profiles show about 16 fewer retained JS objects and
+545 fewer bytes per row; owner and effect call counts are unchanged. The nine
+click-to-paint rows and table rows remain within overlapping spreads, so no
+timing improvement is claimed. Core is 4,049 B and core + DOM is 10,200 B.
+The full before/after tables and direct-handler size experiment are in [the
+event-slot checkpoint](../docs/checkpoints/perf-p3-event-slots.md); raw results
+are `p3-event-slots*.json` under `js-framework-benchmark/results/`.
+
+## Current compiled-path comparison: `safe` TSX (2026-10-11)
+
+The create-benos starter runs TSX through the production `@benosjs/vite`
+plugin with `optimization: 'safe'`. This comparison uses that same built plugin,
+production core and DOM entries, and TSX source. Chromium trace click-to-paint
+was interleaved across v0.1.2, current HEAD, and Solid with two warmups and
+seven measured rounds. Times are median milliseconds [minimum–maximum].
+
+| Operation         |                    v0.1.2 |          Current compiled |                     Solid | Current / Solid |
+| ----------------- | ------------------------: | ------------------------: | ------------------------: | --------------: |
+| Create 1,000      |    52.406 [52.019–52.828] |    51.121 [49.867–52.737] |    25.495 [25.367–26.681] |           2.01× |
+| Replace 1,000     |    57.502 [56.132–58.342] |    52.987 [52.575–59.255] |    25.423 [25.227–26.439] |           2.08× |
+| Update every 10th |    13.947 [13.587–17.075] |    15.458 [13.581–17.730] |    14.278 [14.141–15.781] |           1.08× |
+| Select one row    |       1.343 [1.193–1.568] |       1.307 [1.223–1.412] |       0.870 [0.829–0.952] |           1.50× |
+| Swap rows         |      4.027 [3.468–13.735] |      3.908 [3.519–12.752] |       3.129 [3.036–3.590] |           1.25× |
+| Remove one row    |       4.694 [4.489–4.803] |       4.636 [4.598–5.105] |       4.494 [4.379–4.921] |           1.03× |
+| Create 10,000     | 510.544 [507.571–512.365] | 486.265 [480.083–568.523] | 243.630 [241.184–248.700] |           2.00× |
+| Append 1,000      |    61.179 [57.565–65.227] |    56.207 [55.988–57.295] |    35.964 [35.372–37.671] |           1.56× |
+| Clear 1,000       |       9.667 [9.481–9.983] |       9.287 [9.015–9.527] |       2.622 [2.391–2.898] |           3.54× |
+
+The P1 runtime-JSX table showed create, replace, and create-10k at 1.55×,
+1.66×, and 1.64× Solid; the corresponding compiled-path medians are now
+2.02×, 2.17×, and 2.06×. Clear remains near 3.6× in this rerun; earlier
+release records with a faster Solid clear denominator were not stable. The
+compiler path's additional template and binding costs are detailed in the
+[P3 compiled comparison checkpoint](../docs/checkpoints/perf-p3-compiled-comparison.md).
+The raw seven-round samples for this latest compiled build are in
+[`results/p3-direct-slots-2.json`](./js-framework-benchmark/results/p3-direct-slots-2.json).
+
+### P3 stable raw-handler trial (reverted)
+
+The user-approved larger caps were applied before reevaluating direct storage
+for stable inline handler functions. Two interleaved runs did not show a
+repeatable timing gain on any operation, and the forced-GC profile retained the
+same 58 functions, 113 plain objects, and 49.993 arrays per row as the
+getter-slot baseline. The trial added 59 B to core + DOM (core stayed at
+4,049 B), and the generated generic app grew by about 120 B raw / 70 B gzip.
+It was reverted. The all-nine before/after medians and spreads are recorded in
+the [P3 follow-up checkpoint](../docs/checkpoints/perf-p3-direct-slots.md).
+
+### P3 direct numeric template slots (kept)
+
+Replacing each template mount's slot `Map` with a sparse numeric array removes
+seven retained plain objects and 132 retained bytes per row, at the cost of six
+additional arrays and no net increase in total retained JavaScript object
+count. The two compiled-path confirmation runs consistently improved create
+10k by 1.6–2.1% and append by about 2%, with no repeatable regression in the
+other seven rows. Core is 4,049 B; core + DOM is 10,199 B (−1 B from the
+10,200 B baseline). The generic compiled app is 33.66 kB raw / 10.88 kB gzip;
+the dashboard Benos slice is 11,450 B gzip and measured 34.0 ms [31.4–38.1]
+versus Solid at 12.2 ms [11.1–17.9]. Detailed traces, allocation profiles,
+and the 5k/10k table run are in the
+[P3 follow-up checkpoint](../docs/checkpoints/perf-p3-direct-slots.md).
+
+## P3 direct compiler-output ceiling experiment (prototype history, 2026-10-11)
+
+Before the direct-output experiment, the compiled `safe` path retained 219.994
+JavaScript objects and 7.547 KB per generic benchmark row after forced GC,
+versus 153.5 objects and 4.71 KB for the earlier runtime-JSX adapter. The
+compiled path adds 66.5 objects and 2.83 KB per row. Its marked 10k-row CPU
+spans move work as follows; marks are independently sampled and overlap, so
+their durations must not be summed as a wall-clock total.
+
+| Marked category        | Runtime JSX, ms / 10k | Compiled safe, ms / 10k | Change, ms / 10k | Calls, runtime → compiled |
+| ---------------------- | --------------------: | ----------------------: | ---------------: | ------------------------: |
+| Template instantiation |                   0.0 |                   167.1 |           +167.1 |               0 → 140,000 |
+| Binding setup          |                 200.0 |                   114.1 |            −85.9 |         290,000 → 190,000 |
+| Owner creation         |                   7.0 |                    30.2 |            +23.2 |          50,000 → 200,000 |
+| Signal node creation   |                   7.4 |                     5.3 |             −2.1 |           10,000 → 10,000 |
+| Effect node creation   |                   4.1 |                    21.8 |            +17.7 |          20,000 → 100,000 |
+| Event setup            |                  20.8 |                    14.4 |             −6.4 |           40,000 → 40,000 |
+| DOM insertion          |                  44.7 |                    64.6 |            +19.9 |         120,000 → 100,016 |
+| Disposal               |                   1.3 |                    25.1 |            +23.8 |          10,004 → 140,004 |
+
+That is +6.65 retained objects and +0.283 KB per row. The largest added
+retained categories were closures (33.9 → 58, +24.1), plain objects (86.4 →
+106, +19.6), and arrays (33.2 → 55.993, +22.793). Template plan creation,
+owner creation, and effects add work; compiled binding setup and event setup
+take less time in these marks.
+
+The experiment added a private build-time environment flag,
+`BENOS_EXPERIMENTAL_DIRECT_OUTPUT=1`. It only lowers dynamic `<tr>` and `<td>`
+subtrees whose bindings fit the direct prototype: one cached HTML template per
+Document, cloned per mount, generated child/sibling walks, and direct text,
+attribute, and event binding statements. The template definition and binder
+function are module-hoisted; there is no per-row template plan or setup closure.
+The renderer calls that shared binder once per clone and the descriptor still
+stores one environment array. The registry table's outer `<tr>` contains a
+dynamic JSX-producing `columns.map`, so it falls back to the normal template
+path; its `<td>` cells use direct output.
+
+The generic fixture was built through the production Benos Vite compiler path.
+The runner interleaved two warmups and seven measured Chromium trace rounds.
+Values are click-to-paint milliseconds, median [minimum–maximum]. The selected
+operations are create 1,000, replace 1,000, create 10,000, append 1,000, and
+clear 1,000.
+
+| Operation     |  Current compiled safe | Experimental direct output |                  Solid | Current / Solid | Direct gap closed |
+| ------------- | ---------------------: | -------------------------: | ---------------------: | --------------: | ----------------: |
+| Create 1,000  |    52.33 [51.00–52.94] |        32.79 [31.36–34.24] |    25.76 [25.11–26.76] |           2.03× |             73.6% |
+| Replace 1,000 |    53.02 [52.30–57.14] |        31.61 [30.20–32.58] |    26.09 [25.37–26.40] |           2.03× |             79.5% |
+| Create 10,000 | 483.58 [480.76–542.79] |     292.81 [289.20–294.88] | 243.88 [242.53–250.63] |           1.98× |             79.6% |
+| Append 1,000  |    56.89 [56.13–57.96] |        40.80 [39.55–49.71] |    36.48 [36.12–38.47] |           1.56× |             78.9% |
+| Clear 1,000   |      9.93 [9.10–10.65] |           4.43 [4.35–4.49] |       2.72 [2.62–2.74] |           3.65× |             76.3% |
+
+The direct prototype closes about 74–80% of the current compiled-path gap on
+these five medians. It remains 1.12–1.63× Solid. Allocation sampling on 1,000
+rows measured these per-row forced-GC retained deltas:
+
+| Allocation category             | Current compiled safe | Direct output |  Solid |
+| ------------------------------- | --------------------: | ------------: | -----: |
+| Closures / functions            |                    58 |            25 |  8.001 |
+| Plain JavaScript objects        |               106.001 |        35.002 | 11.003 |
+| Arrays                          |                55.993 |         7.993 |  6.007 |
+| DOM wrappers                    |                17.999 |            10 |     10 |
+| Owner creation calls            |                    20 |             6 |      1 |
+| Effect / computation node calls |                    10 |             4 |      3 |
+
+Compared with compiled `safe`, direct output cuts retained closures by 57%,
+plain objects by 67%, arrays by 86%, owner calls by 70%, and effect calls by
+60%. It still retains more of each JavaScript category than Solid.
+
+The whole minified generic application bundle measured 34,197 B / 10,929 B
+gzip for safe output and 33,633 B / 11,101 B gzip for direct output: −564 B
+raw but +172 B gzip. The sortable-table application measured 36,273 B /
+11,562 B gzip safe and 36,434 B / 11,763 B gzip direct: +161 B raw / +201 B
+gzip. The bundled runtime helpers outweigh template-plan savings in that entry.
+
+The same table page measured these medians after two warmups and seven rounds;
+brackets are observed spread. The registry table uses direct compiled cells
+only, because its mapped JSX children prevent whole-row template lowering.
+
+| Table workload       |  Current compiled safe |     Direct cell output |                  Solid |
+| -------------------- | ---------------------: | ---------------------: | ---------------------: |
+| Initial, 5,000 rows  | 152.8 [139.6–160.2] ms | 130.1 [111.7–137.2] ms |    74.7 [68.0–86.7] ms |
+| Sort, 5,000 rows     |   91.8 [86.4–179.3] ms |   95.3 [79.5–105.8] ms |   84.2 [78.2–180.5] ms |
+| Initial, 10,000 rows | 293.2 [279.0–336.2] ms | 245.1 [238.8–263.9] ms | 141.9 [140.5–150.6] ms |
+| Sort, 10,000 rows    | 183.6 [162.9–288.0] ms | 175.7 [168.0–313.7] ms | 168.4 [153.9–256.2] ms |
+
+The direct cell path closes about 29–32% of the initial-mount gap to Solid.
+Sorting is unchanged within the broad overlapping spreads. Current package
+sizes are core 4,049 B / 4,608 B and core + DOM 10,337 B / 11,264 B; this
+prototype adds 138 B to core + DOM and 0 B to core. All budgets still pass.
+
+At the time of this experiment the prototype was not enabled by default and
+had a narrow table-only shape. The next checkpoint integrated direct output
+into the standard `safe` optimization with delegated events and normal DOM
+property handling; see the implementation measurements below. This table is
+kept as the prototype's original ceiling result.
+
+Raw trace, allocation, smoke, and table samples are in
+[`direct-prototype-trace.json`](js-framework-benchmark/results/direct-prototype-trace.json),
+[`direct-prototype-allocation.json`](js-framework-benchmark/results/direct-prototype-allocation.json),
+[`direct-prototype-table.json`](js-framework-benchmark/results/direct-prototype-table.json),
+and [`direct-prototype-smoke.json`](js-framework-benchmark/results/direct-prototype-smoke.json).
+
+## P3 direct output in the standard `safe` path (2026-10-11)
+
+The compiler now uses direct output as its normal `optimization: 'safe'`
+implementation for eligible native JSX subtrees. It preserves the renderer's
+delegated event slots, native-before-delegated ordering, automatic event
+batching, handler error reporting, standard property/URL rules, owned child
+ranges, and mount timing. The no-optimization path remains the behavior oracle.
+Both `none` and `safe` pass the same development/production fixture matrix and
+source-map assertions; the full Chromium, Firefox, and WebKit browser suite
+passes 405/405 tests.
+
+This interleaved production trace used Chromium 153 on macOS arm64, two
+warmups, and seven rounds. “Runtime JSX” calls the public JSX runtime directly
+and is the prior runtime path; “Safe direct” is TSX compiled by the production
+Benos Vite plugin; Solid uses the equivalent JSX adapter. Values are
+click-to-paint milliseconds, median [minimum–maximum].
+
+| Operation      |            Runtime JSX |            Safe direct |                  Solid | Safe direct / Solid |
+| -------------- | ---------------------: | ---------------------: | ---------------------: | ------------------: |
+| Create 1,000   |    39.87 [39.20–40.11] |    34.84 [34.28–36.60] |    25.92 [25.36–27.13] |               1.34× |
+| Replace 1,000  |    41.66 [41.17–43.24] |    36.85 [36.48–37.19] |    26.36 [24.88–26.94] |               1.40× |
+| Partial update |    14.75 [14.04–15.41] |    13.92 [13.47–22.02] |    14.30 [14.04–16.88] |               0.97× |
+| Select row     |      7.82 [1.27–12.56] |       1.40 [1.26–1.65] |       0.93 [0.86–1.00] |               1.50× |
+| Swap rows      |      8.53 [7.52–10.10] |      4.15 [3.90–22.25] |       3.24 [2.86–3.57] |               1.28× |
+| Remove row     |       4.78 [4.68–8.34] |       4.96 [4.80–5.16] |       4.49 [4.25–4.59] |               1.10× |
+| Create 10,000  | 367.58 [361.74–369.19] | 325.86 [324.54–333.79] | 244.45 [243.08–246.10] |               1.33× |
+| Append 1,000   |    47.69 [47.29–48.53] |    45.02 [44.13–52.91] |    36.57 [36.22–37.36] |               1.23× |
+| Clear 1,000    |       6.21 [6.00–8.14] |       5.39 [5.31–6.27] |       2.63 [2.48–2.70] |               2.05× |
+
+Selection and swap have wide spreads from paint scheduling and GC outliers;
+their medians are shown with the full observed spread. The standard safe path
+is 1.34× Solid on create, 1.40× on replace, and 1.33× on 10k create. Clear is
+still just over the previous 2× target at 2.05×.
+
+Allocation sampling and forced-GC snapshots over 1,000 created rows produce
+the following retained per-row counts. Owner/signal/effect figures are calls
+counted at their core constructors; other categories are retained heap
+deltas. DOM wrappers are browser-side wrappers, not runtime JS objects.
+
+| Per-row category              | Runtime JSX | Safe direct | Solid |
+| ----------------------------- | ----------: | ----------: | ----: |
+| Retained closures / functions |       33.00 |       24.00 |  8.00 |
+| Retained plain objects        |       80.00 |       57.00 | 11.00 |
+| Retained arrays               |       31.00 |       15.99 |  6.01 |
+| Retained DOM wrappers         |       11.00 |       12.00 | 10.00 |
+| Owner constructor calls       |           5 |           8 |     1 |
+| Signal constructor calls      |           1 |           1 |     0 |
+| Effect constructor calls      |           2 |           4 |     3 |
+| Retained JS object count      |      145.47 |       98.49 | 26.48 |
+| Retained JS bytes             |       4,459 |       3,584 |   913 |
+
+Against the previous compiled-safe profile, direct output reduced retained
+closures from 58 to 24, objects from 106 to 57, arrays from 56 to 16, owners
+from 20 to 8, and effect nodes from 10 to 4 per row. In the direct comparison
+with runtime JSX, it retains about 47 fewer JS objects and 875 fewer JS bytes
+per row, while making more owner/effect constructor calls. Source-mapped
+allocation sites account for 91% of both object count and bytes on the safe
+path; the full profiles are linked below.
+
+The generic production app's JS asset is 33.73 kB raw / 11.29 kB gzip for safe
+direct output, compared with 30.23 kB / 10.56 kB for runtime JSX and
+15.58 kB / 6.45 kB for Solid. The direct compiler output adds about 3.50 kB
+raw / 0.73 kB gzip to this app versus runtime JSX. The table app measures
+36.33 kB / 11.90 kB gzip; the matched handwritten Benos table is 32.04 kB /
+10.71 kB and Solid is 15.27 kB / 6.25 kB.
+
+The sortable-table outer row already compiles directly: the compiler binds
+`columns.map(...)` to a child slot in a cloned `<tr>` skeleton, then lowers
+each mapped `<td>` as its own direct native template. The `map` expression
+does not force the row through a template plan. The compiler matrix includes
+a regression fixture that asserts direct `<tr>` and `<td>` templates for this
+mapped-child shape and compares its runtime DOM in both optimization modes.
+
+The table benchmark below uses the same production compiler path, with two
+warmups and seven rounds. It measures initial render through two animation
+frames; the registry and Solid cases also sort through two frames. This is the
+table baseline for the direct safe implementation:
+
+| Table operation      |             Native DOM |      Handwritten Benos | Registry `SortableTable` |                  Solid |
+| -------------------- | ---------------------: | ---------------------: | -----------------------: | ---------------------: |
+| Initial, 5,000 rows  |    72.0 [68.5–81.7] ms | 110.6 [100.1–129.0] ms |   148.7 [135.1–173.3] ms |    74.2 [71.8–76.7] ms |
+| Sort, 5,000 rows     |                      — |                      — |    135.4 [87.3–172.1] ms |    91.6 [73.1–97.6] ms |
+| Initial, 10,000 rows | 141.3 [136.9–151.4] ms | 232.8 [220.7–238.2] ms |   304.3 [280.3–350.0] ms | 142.4 [137.1–167.0] ms |
+| Sort, 10,000 rows    |                      — |                      — |   231.9 [173.6–247.7] ms | 165.4 [158.6–358.7] ms |
+
+Registry mount remains about 2.00× Solid at 5k and 2.14× at 10k; registry
+sorting is 1.48× and 1.40×. The mapped child no longer falls back to a
+template plan, but `columns.map` still creates its per-row mapped descriptor
+array. The component adds more sorting, columns, empty-state, direction, and
+accessibility behavior than the handwritten table baseline. The Solid 10k
+sort spread has a 358.7 ms outlier; the median and full spread are retained.
+
+The measured JavaScript assets are 2.14 kB / 1.04 kB gzip for native DOM,
+32.04 kB / 10.71 kB for handwritten Benos, 36.33 kB / 11.90 kB for the
+registry table, and 15.27 kB / 6.25 kB for Solid. Shared table CSS is 26.18
+kB / 4.08 kB gzip in each build. The exact samples are in
+[`safe-direct-baseline-table-2026-10-11.json`](js-framework-benchmark/results/safe-direct-baseline-table-2026-10-11.json).
+
+The dashboard table-plus-form filter slice measured 24.6 ms
+[22.7–34.4] for Benos and 13.0 ms [12.0–17.1] for Solid (1.89×), with app JS
+assets of 11,586 B and 6,590 B gzip. These dashboard samples were interleaved
+by round with two warmups and seven measured rounds.
+
+Current rebuilt package sizes are core 4,049 / 4,608 B gzip and core + DOM
+10,508 / 11,264 B gzip. Both budgets pass. The generic app's changed-output
+source maps are verified in development and production. The current fallback
+cases are documented in
+[`compiler.md`](../docs/architecture/compiler.md): spreads, refs, custom
+elements/customized built-ins, template contents, special void/raw-text/RCDATA
+child cases, and expressions with unsupported lexical constructs. Other
+native subtrees in a component/control-flow render may still use direct output.
+
+Raw results: [nine-operation trace](js-framework-benchmark/results/safe-direct-nine-2026-10-11.json),
+[table trace](js-framework-benchmark/results/safe-direct-baseline-table-2026-10-11.json),
+[allocation profile](js-framework-benchmark/results/safe-direct-allocation-2026-10-11.json),
+and the dashboard [comparison samples](../examples/dashboard/comparison-results.json).
+
+### Table sort regression check: `88f1bde` vs direct output (2026-10-11)
+
+To check the reported 135.4 ms / 231.9 ms sort times, I built commit
+`88f1bde` and the current direct-output branch from the same table fixture and
+interleaved both with handwritten Benos and Solid controls in Chromium. Each
+variant received two warmups and seven measured rounds; version and control
+order alternated forward and reverse each round. Timing ends after two
+animation frames. Brackets show the measured minimum–maximum spread.
+
+| Variant                        |             Initial 5k |              Sort 5k |            Initial 10k |               Sort 10k |
+| ------------------------------ | ---------------------: | -------------------: | ---------------------: | ---------------------: |
+| Benos at `88f1bde`             | 155.6 [149.2–175.1] ms | 98.3 [86.4–216.3] ms | 311.4 [284.9–343.2] ms | 194.6 [163.8–338.9] ms |
+| Current direct output          | 151.5 [141.0–172.6] ms | 98.0 [88.3–179.7] ms | 303.1 [286.6–310.2] ms | 208.7 [177.4–354.3] ms |
+| Handwritten Benos, direct path |  116.6 [98.5–143.8] ms |                    — | 249.3 [227.0–278.4] ms |                      — |
+| Solid                          |    73.1 [67.6–81.0] ms |  83.6 [75.8–97.3] ms | 153.1 [147.7–173.4] ms | 177.4 [159.3–273.9] ms |
+
+This A/B does not confirm a direct-output sorting regression. The 5k median
+is unchanged. The 10k median is 7.2% higher, but its spread overlaps the
+baseline broadly and includes a 354.3 ms sample; both runs are much noisier
+than the prior 88.5 / 178.2 ms record. That prior 135.4 / 231.9 ms report is
+consistent with measurement variance at this paint boundary, not a repeatable
+change isolated to direct output. The direct path remains about 1.17× Solid at
+5k and 1.18× at 10k in this A/B, with broad overlapping 10k spreads.
+
+The mapped `columns.map(...)` child is not rerun when keyed rows move: a
+browser regression check counts reads of the columns' `map` property before
+and after sorting, and confirms the count stays fixed while the same row DOM
+node survives. The sort gap therefore does not come from re-evaluating that
+dynamic child slot. The outer table still creates sortable data and reconciles
+keyed ranges; the direct compiler emitter removes template-plan setup, but it
+does not remove this work or the actual row moves.
+
+Direct output also did not materially improve this table's initial time versus
+`88f1bde`: both table fixture source and component source are unchanged, and
+the A/B difference is only 2.6–2.7%, within the observed spread. Compared
+with the handwritten table compiled on the same direct path, the registry
+component costs 34.9 ms more at 5k and 53.8 ms more at 10k in this run. That
+gap is in table-level behavior and per-row reactive/render work (sort state,
+empty-state and keyed-list scopes, descriptors, and column value bindings),
+which direct DOM emission does not eliminate. Initial table creation also
+includes 15,000 or 30,000 cell nodes; reducing template indirection alone does
+not remove those browser allocations and insertions.
+
+Raw interleaved samples: [88f1bde vs direct table comparison](js-framework-benchmark/results/table-sort-88f1bde-vs-direct-2026-10-11.json).
+
+For the same checkpoint, the full production js-framework-benchmark trace was
+rerun with two warmups and seven measured rounds, interleaving all five
+frameworks. This table includes every operation; brackets show the seven-run
+minimum–maximum spread.
+
+| Operation         |             Benos (ms) |             Solid (ms) | Benos / Solid |
+| ----------------- | ---------------------: | ---------------------: | ------------: |
+| Create 1,000      |    35.06 [33.96–35.97] |    25.33 [24.92–26.38] |         1.38× |
+| Replace 1,000     |    36.34 [35.80–37.52] |    25.38 [24.89–25.95] |         1.43× |
+| Update every 10th |    13.47 [13.08–17.05] |    14.01 [13.74–15.53] |         0.96× |
+| Select one row    |       1.28 [1.21–1.34] |       0.90 [0.84–0.92] |         1.43× |
+| Swap rows         |      4.16 [3.88–10.71] |       2.95 [2.84–3.04] |         1.41× |
+| Remove one row    |       5.18 [4.95–5.28] |       4.96 [4.59–5.64] |         1.05× |
+| Create 10,000     | 359.40 [353.34–364.35] | 271.02 [262.19–273.34] |         1.33× |
+| Append 1,000      |    48.50 [47.92–49.65] |    38.53 [37.67–48.96] |         1.26× |
+| Clear             |       5.41 [2.84–5.66] |       2.60 [2.56–2.65] |         2.08× |
+
+Raw samples: [full interleaved trace](js-framework-benchmark/direct-output-table-check-nine-2026-10-11.json).
+
+## Lazy effect-run owners (2026-10-11)
+
+The runtime now allocates a physical effect-run owner only when the callback
+creates a child computation or owner, registers cleanup, or provides context.
+The owner is disposed before a dependent effect reruns. Resource-free reads
+and writes remain under the effect's stable owner. The owner tests cover
+cleanup order, computed and nested-effect disposal, Provider context, error
+routing, and subscriber/queue removal.
+
+The production compiled generic-row allocation comparison was captured with
+minification disabled, source maps, allocation sampling, and forced-GC heap
+snapshots. Benos creates half as many physical owner objects per row as the
+direct-output checkpoint. Retained plain objects also fall by four per row;
+closure and array counts are unchanged.
+
+| Generic row metric per row     | Direct safe before lazy owners | Direct safe with lazy owners |
+| ------------------------------ | -----------------------------: | ---------------------------: |
+| Owner creation calls           |                              8 |                            4 |
+| Signal / effect creation calls |                          1 / 4 |                        1 / 4 |
+| Retained closures / functions  |                             24 |                           24 |
+| Retained plain objects         |                             57 |                           53 |
+| Retained arrays                |                         15.993 |                       15.993 |
+| Retained plain-object bytes    |                        2,148 B |                      1,860 B |
+
+For the sortable table at 1,000 rows, the allocation profile compares the
+compiled registry component against the handwritten Solid table. Counts are
+retained per row after forced garbage collection; native browser/layout
+objects are excluded from the JavaScript categories below.
+
+| Table metric per row           |   Benos registry | Solid handwritten |
+| ------------------------------ | ---------------: | ----------------: |
+| Owner creation calls           |                5 |                 1 |
+| Signal / effect creation calls |        1 / 9.999 |             0 / 3 |
+| Retained closures / functions  |           30.002 |             7.001 |
+| Retained plain objects         |           67.190 |            10.101 |
+| Retained arrays                |           40.007 |             2.008 |
+| Retained JS objects / bytes    | 139.55 / 4,450 B |     20.39 / 823 B |
+
+The registry table still exceeds the allocation target of two owners per row.
+The first lazy-owner slice targets empty effect-run scopes in the general
+compiled path; it does not remove keyed row lifetime scopes or fold the table's
+sort, empty-state, and per-column bindings. Its allocation profile attributes
+92.3% of retained objects and 91.8% of retained bytes to the listed call
+sites.
+
+The full js-framework-benchmark run below uses production builds, Chrome trace
+click-to-paint timing, two warmups, seven rounds, and interleaved frameworks.
+The ranges show the minimum and maximum across the seven measured rounds.
+
+| Operation         |             Benos (ms) |             Solid (ms) | Benos / Solid |
+| ----------------- | ---------------------: | ---------------------: | ------------: |
+| Create 1,000      |    35.50 [34.39–37.00] |    25.34 [25.07–27.02] |         1.40× |
+| Replace 1,000     |    36.74 [36.06–39.28] |    25.84 [24.94–27.79] |         1.42× |
+| Update every 10th |    13.54 [13.17–16.43] |    14.45 [13.93–26.34] |         0.94× |
+| Select one row    |      1.27 [1.23–21.95] |       0.87 [0.84–1.31] |         1.45× |
+| Swap rows         |      3.99 [3.80–13.72] |       2.90 [2.84–3.06] |         1.38× |
+| Remove one row    |       5.04 [4.72–6.69] |       4.42 [4.19–4.74] |         1.14× |
+| Create 10,000     | 328.71 [324.28–373.04] | 242.17 [239.60–245.86] |         1.36× |
+| Append 1,000      |    47.81 [43.66–53.01] |    36.48 [35.47–42.65] |         1.31× |
+| Clear             |       5.35 [2.65–6.18] |       2.70 [2.57–2.89] |         1.98× |
+
+The 10,000-row create median is 30.69 ms lower than the preceding direct safe
+run (359.40 ms), but the old and new spreads overlap. We therefore record the
+allocation reduction as repeatable and the timing change as inconclusive, not
+as a confirmed speedup. Select, swap, and clear have wide Benos spreads due to
+isolated long samples.
+
+The dedicated sortable-table trace records initial render and sort timings:
+
+| Table workload | Variant           |        Initial (ms) |           Sort (ms) |
+| -------------- | ----------------- | ------------------: | ------------------: |
+| 5,000 rows     | Benos registry    | 162.0 [144.0–170.5] |  106.7 [88.6–174.7] |
+| 5,000 rows     | Handwritten Benos | 117.4 [100.0–146.0] |                   — |
+| 5,000 rows     | Solid             |    76.2 [67.4–86.3] |    87.9 [76.4–90.6] |
+| 10,000 rows    | Benos registry    | 286.3 [274.6–355.2] | 194.5 [186.5–275.1] |
+| 10,000 rows    | Handwritten Benos | 234.3 [203.5–290.0] |                   — |
+| 10,000 rows    | Solid             | 140.5 [136.3–158.8] | 160.6 [154.2–174.2] |
+
+The registry table is 44.6 ms slower than the handwritten Benos fixture at
+5k and 52.0 ms slower at 10k. Its direct-compiled rows still carry sorting,
+empty-state, keyed-range, and column-binding work, so direct DOM emission
+does not bring its mount down to the handwritten fixture's work. Sort medians
+are 1.21× Solid at both sizes; the ranges include occasional slow samples.
+
+Current production bundle measurements after the change:
+
+| Bundle                           | Measured |      Cap | Headroom |
+| -------------------------------- | -------: | -------: | -------: |
+| `@benosjs/core`                  |  4,108 B |  4,608 B |    500 B |
+| `@benosjs/core` + `@benosjs/dom` | 10,580 B | 11,264 B |    684 B |
+
+The lazy-owner change adds 59 B to core and 72 B to core + DOM versus the
+direct-output checkpoint. The added bytes buy a 50% decrease in owner creation
+calls and four fewer retained plain objects per generic row. The 10k-create
+time improvement is promising but overlaps the prior spread.
+
+Raw artifacts: [all nine interleaved rows](js-framework-benchmark/lazy-owner-nine-2026-10-11.json),
+[5k and 10k table trace](js-framework-benchmark/results/lazy-owner-table-2026-10-11.json),
+[allocation and owner profile](js-framework-benchmark/results/lazy-owner-allocation-2026-10-11.json).
+
+## 0.3.0 release-candidate comparison (2026-10-11)
+
+This is the current compiled production path after direct compiler output,
+lazy effect-run owners, and the registry table specialization. It supersedes
+the earlier release comparison for the next release; older tables above remain
+historical records. The full framework run used Node 26.10.0, Chromium
+153.0.8010.12, macOS arm64, two warmups, seven measured rounds, interleaved
+framework order, and the shared Chrome trace click-to-paint boundary. Times
+are milliseconds; brackets show the measured minimum–maximum spread.
+
+| Workload           |          Benos (ms) |          Solid (ms) |         Svelte (ms) |            Vue (ms) |          React (ms) | Benos / Solid |
+| ------------------ | ------------------: | ------------------: | ------------------: | ------------------: | ------------------: | ------------: |
+| Create 1,000 rows  |    34.8 [33.5–37.3] |    25.0 [24.3–26.4] |    27.6 [27.2–31.0] |    29.3 [28.8–31.1] |    29.6 [29.2–30.5] |         1.39× |
+| Replace 1,000 rows |    35.4 [35.0–36.6] |    25.3 [24.9–25.7] |    27.1 [26.8–32.1] |    26.5 [26.4–32.4] |    30.8 [30.5–31.8] |         1.40× |
+| Update every 10th  |    12.7 [12.6–12.8] |    13.4 [13.3–13.6] |    13.2 [13.0–23.3] |    21.1 [20.6–24.2] |    17.4 [17.1–18.7] |         0.94× |
+| Select one row     |      1.2 [1.1–10.7] |       0.8 [0.8–0.9] |      1.2 [1.2–22.2] |     18.4 [3.4–23.7] |       5.9 [5.1–7.9] |         1.44× |
+| Swap rows          |       3.8 [3.7–3.9] |       2.8 [2.8–2.9] |      4.2 [4.2–23.3] |    24.3 [16.9–24.8] |    27.4 [26.3–27.7] |         1.35× |
+| Remove one row     |       4.6 [4.6–4.7] |       4.2 [4.1–5.1] |       5.8 [5.7–6.2] |    21.5 [19.4–24.6] |      9.8 [9.1–11.1] |         1.11× |
+| Create 10,000 rows | 320.9 [315.3–375.9] | 236.7 [232.9–250.2] | 243.8 [242.3–267.0] | 263.4 [261.3–271.9] | 498.8 [490.9–575.4] |         1.36× |
+| Append 1,000 rows  |    42.7 [42.5–43.5] |    35.1 [34.9–35.4] |    36.6 [36.3–45.7] |    40.8 [40.6–46.8] |    42.3 [40.2–44.2] |         1.22× |
+| Clear rows         |       5.2 [5.0–5.6] |       2.5 [2.5–3.4] |       3.4 [3.3–4.0] |       3.5 [3.4–5.7] |       5.1 [4.4–5.3] |         2.07× |
+
+Benos is faster than Solid on the partial update. It remains slower on the
+other eight operations; create, replace, and 10,000-row create are about 1.4×,
+while clear remains 2.07×. Select has a long Benos outlier, and select, swap,
+and several reference-framework operations also have wide spreads. Raw data is
+in [`results/latest.json`](./js-framework-benchmark/results/latest.json).
+
+### Registry sortable table: static three-column row
+
+The registry component now captures its columns once and emits three cell
+descriptors directly for the common three-column case. This removes the
+per-row `columns.map` result and its dynamic child array. Other column counts
+retain the generic mapped path. A browser regression test counts map calls:
+three columns perform only the header iteration, while four columns exercise
+the generic path and map once per row. The same behavior tests pass in
+Chromium, Firefox, and WebKit.
+
+The before run used two warmups and seven measured rounds. The after summary
+pools two independent interleaved runs (each with two warmups and seven rounds)
+for 14 measured samples. Each cell reports median and full min–max spread.
+“Handwritten” is the equivalent Benos table using keyed `<For>` rows; Solid is
+the matching handwritten Solid table. The initial-render overhead column is
+the difference between the registry and handwritten Benos medians.
+
+| Rows | Variant / measure                |         Before (ms) |          After (ms) |
+| ---: | -------------------------------- | ------------------: | ------------------: |
+|   5k | Benos registry initial           | 141.6 [131.1–167.3] | 129.4 [118.5–160.5] |
+|   5k | Handwritten Benos initial        |  109.9 [95.9–122.7] |  118.3 [99.9–149.9] |
+|   5k | Solid initial                    |    65.5 [64.4–83.7] |    74.3 [67.2–98.5] |
+|   5k | Registry vs handwritten overhead |                31.7 |                11.1 |
+|   5k | Benos registry sort              |   92.4 [78.2–137.4] |   90.7 [82.6–176.1] |
+|   5k | Solid sort                       |    77.9 [73.2–93.2] |   80.9 [71.9–153.7] |
+|  10k | Benos registry initial           | 296.6 [257.5–432.1] | 248.3 [228.0–354.7] |
+|  10k | Handwritten Benos initial        | 225.2 [202.9–356.0] | 245.7 [210.6–288.0] |
+|  10k | Solid initial                    | 152.0 [130.6–177.9] | 151.7 [133.4–215.0] |
+|  10k | Registry vs handwritten overhead |                71.4 |                 2.6 |
+|  10k | Benos registry sort              | 251.7 [162.8–485.2] | 200.2 [164.8–329.3] |
+|  10k | Solid sort                       | 164.3 [147.9–247.5] | 185.6 [159.4–299.9] |
+
+The measured registry overhead fell by about 65% at 5k and 96% at 10k using
+the within-run median differences. The post-change registry table remains
+about 1.74× Solid at 5k and 1.64× at 10k for initial render. Sorting medians
+are near Solid, though the 10k spreads overlap broadly. These measurements
+support keeping the specialized row path; they do not establish that the table
+matches Solid's mount time.
+
+The updated allocation-sampling profile retained 44.2 plain objects, 19.0
+arrays, and 19.0 closures/functions per registry row, versus Solid's 10.1,
+2.0, and 7.0. Owner creation calls were 4.0 vs 1.0 per row, and effect
+creation calls were 9.0 vs 3.0. Compared with the earlier registry profile,
+the new path retained about 23 fewer plain objects, 21 fewer arrays, and 11
+fewer closures per row. The remaining object and closure gap is the next
+performance target. The table-specific production JS chunk is 37.94 kB raw /
+12.18 kB gzip; shared table CSS is 26.18 kB / 4.08 kB gzip.
+
+The production kernel guard passed on the same rebuilt package set (median of
+seven harness runs, each with five timed samples):
+
+| Workload                            | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       5.95 |        4.68 | 1.27× |
+| 20-deep computed chain write + read |       6.19 |        3.96 | 1.57× |
+| 200-effect fanout write             |       1.97 |        1.13 | 1.74× |
+| Dynamic dependency switch           |       3.41 |        2.03 | 1.68× |
+| Repeated equal write                |       0.69 |        0.65 | 1.07× |
+
+The kernel remains under the 2× Preact guard on all five workloads. The
+current release-candidate package sizes are 4,108 / 4,608 bytes for core and
+10,580 / 11,264 bytes for core plus DOM, minified and gzipped. Raw table runs
+and allocation data are in [`sortable-table-before-optimization-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-before-optimization-2026-10-11.json),
+[`sortable-table-after-optimization-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-after-optimization-2026-10-11.json),
+[`sortable-table-after-optimization-repeat-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-after-optimization-repeat-2026-10-11.json),
+and [`sortable-table-optimized-allocation-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-optimized-allocation-2026-10-11.json).

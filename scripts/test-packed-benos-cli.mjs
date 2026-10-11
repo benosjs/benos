@@ -21,9 +21,16 @@ import { createLocalPackagesRegistry } from '../tests/fixtures/ui-registry/local
 const root = resolve(fileURLToPath(new globalThis.URL('../', import.meta.url)))
 const manager = process.env.BENOS_PACKAGE_MANAGER
 const packageNames = ['benos']
-const fixtureCoreVersion = '0.2.1'
-const fixtureDomVersion = '0.2.1'
-const fixturePrimitivesVersion = '0.2.1'
+async function packageVersion(packageName) {
+  const manifest = JSON.parse(
+    await readFile(join(root, 'packages', packageName, 'package.json'), 'utf8'),
+  )
+  return manifest.version
+}
+
+const fixtureCoreVersion = await packageVersion('core')
+const fixtureDomVersion = await packageVersion('dom')
+const fixturePrimitivesVersion = await packageVersion('primitives')
 const fixtureDialogVersion = '1.44.0'
 const pnpmExecutable = process.env.PNPM_HOME
   ? join(
@@ -215,7 +222,7 @@ try {
         private: true,
         type: 'module',
         dependencies: {
-          '@benosjs/dom': '^0.2.1',
+          '@benosjs/dom': `^${fixtureDomVersion}`,
           benos: `^${manifests.get('benos').version}`,
         },
       },

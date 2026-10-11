@@ -1,14 +1,117 @@
 import { describe, expect, it, vi } from 'vitest'
-import { batch, computed, createRoot, effect, signal } from '../src/index.js'
+import {
+  batch,
+  computed,
+  createContext,
+  createRoot,
+  effect,
+  getContext,
+  onCleanup,
+  signal,
+} from '../src/index.js'
 import {
   createInternalOwner,
   inspectInternalComputed,
+  inspectInternalOwnerCreations,
   inspectInternalQueues,
   inspectInternalSignal,
   runWithOwner,
 } from '../src/runtime.js'
 
 describe('deterministic graph lifetime', () => {
+  it('creates effect-run owners only when a run registers owned work', () => {
+    const value = signal(0)
+    const cleanups: number[] = []
+    const ownersBeforeRoot = inspectInternalOwnerCreations()
+    const dispose = createRoot((disposeRoot) => {
+      effect(() => {
+        value()
+      })
+      effect(() => {
+        const current = value()
+        onCleanup(() => cleanups.push(current))
+      })
+      return disposeRoot
+    })
+
+    expect(inspectInternalOwnerCreations() - ownersBeforeRoot).toBe(2)
+    value.set(1)
+    expect(inspectInternalOwnerCreations() - ownersBeforeRoot).toBe(3)
+    expect(cleanups).toEqual([0])
+    dispose()
+    expect(cleanups).toEqual([0, 1])
+  })
+
+  it('keeps nested effect lifetime inside the lazily materialized run owner', () => {
+    const parent = signal(0)
+    const child = signal(0)
+    const childRuns: number[] = []
+    const ownersBeforeRoot = inspectInternalOwnerCreations()
+    const dispose = createRoot((disposeRoot) => {
+      effect(() => {
+        parent()
+        effect(() => childRuns.push(child()))
+      })
+      return disposeRoot
+    })
+
+    expect(childRuns).toEqual([0])
+    expect(inspectInternalOwnerCreations() - ownersBeforeRoot).toBe(2)
+    expect(inspectInternalSignal(child).subscribers).toBe(1)
+    parent.set(1)
+    expect(childRuns).toEqual([0, 0])
+    expect(inspectInternalOwnerCreations() - ownersBeforeRoot).toBe(3)
+    expect(inspectInternalSignal(child).subscribers).toBe(1)
+    dispose()
+    expect(inspectInternalSignal(child).subscribers).toBe(0)
+  })
+
+  it('owns computeds created by a run and disposes them before its next run', () => {
+    const source = signal(0)
+    const values: Array<() => number> = []
+    const ownersBeforeRoot = inspectInternalOwnerCreations()
+    const dispose = createRoot((disposeRoot) => {
+      effect(() => {
+        source()
+        values.push(computed(() => source() + 1))
+      })
+      return disposeRoot
+    })
+
+    expect(values).toHaveLength(1)
+    expect(inspectInternalOwnerCreations() - ownersBeforeRoot).toBe(2)
+    source.set(1)
+    expect(values).toHaveLength(2)
+    expect(inspectInternalComputed(values[0])).toMatchObject({ disposed: true })
+    expect(inspectInternalOwnerCreations() - ownersBeforeRoot).toBe(3)
+    dispose()
+    expect(inspectInternalComputed(values[1])).toMatchObject({ disposed: true })
+  })
+
+  it('materializes a run owner before a Provider creates its context child', () => {
+    const value = signal(1)
+    const context = createContext(0)
+    const seen: number[] = []
+    const ownersBeforeRoot = inspectInternalOwnerCreations()
+    const dispose = createRoot((disposeRoot) => {
+      effect(() => {
+        context.Provider({
+          value: value(),
+          children: () => seen.push(getContext(context)),
+        })
+      })
+      return disposeRoot
+    })
+
+    expect(seen).toEqual([1])
+    expect(inspectInternalOwnerCreations() - ownersBeforeRoot).toBe(3)
+    value.set(2)
+    expect(seen).toEqual([1, 2])
+    expect(inspectInternalSignal(value).subscribers).toBe(1)
+    dispose()
+    expect(inspectInternalSignal(value).subscribers).toBe(0)
+  })
+
   it('removes disposed effects and computeds from subscriber sets and queues immediately', () => {
     const source = signal(0)
     let derived!: () => number

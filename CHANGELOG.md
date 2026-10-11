@@ -2,6 +2,37 @@
 
 All notable changes to Benos are documented here.
 
+## [0.3.0] — Unreleased
+
+### Added
+
+- Add `benos --version` / `-v`, root and command-specific `--help` / `-h`, and
+  `benos info` for runtime, package-manager, operating-system, and installed
+  Benos package details. Add `create-benos --version` / `-v` and `--help` / `-h`.
+
+### Improved
+
+- Make direct DOM output the compiler's standard `safe` output for supported
+  JSX shapes, with the existing runtime-plan path retained as a fallback.
+- Create effect-run owners only when an effect run needs a cleanup, child owner,
+  or context, reducing generic-row owner creation calls from 8 to 4 and retained
+  plain objects from 57 to 53 per row.
+- Specialize the registry sortable table's common three-column row so it avoids
+  a mapped cell array per row. The interleaved table trace reduced the registry
+  table's 5,000-row initial-render gap over handwritten Benos from 31.7 ms to
+  11.1 ms and its 10,000-row gap from 71.4 ms to 2.6 ms; see the full medians
+  and spreads in `benchmarks/README.md`.
+- The latest full production trace measured Benos at 1.39× Solid for 1,000-row
+  creation, 1.40× for replacement, and 1.36× for 10,000-row creation. The full
+  nine-operation comparison and spreads are in `benchmarks/README.md`.
+- Raise UI registry minimum Benos versions to `0.3.0`, so fresh projects
+  install the matching package release.
+
+### Changed
+
+- Bump all eight publishable packages and the starter's Benos dependency ranges
+  to `0.3.0`.
+
 ## [0.2.3] — 2026-10-09
 
 ### Improved
