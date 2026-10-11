@@ -76,9 +76,16 @@ matrix only had packed `0.3.0` Benos packages, while `benos add` requested
 from the per-run local registry and installed at the expected version; npm may
 reuse an identical cached tarball without making a second tarball request.
 
-After the registry correction, local verification on macOS arm64 with Node
-26.10.0 passed: `pnpm test` (22 files, 271 tests), the packed npm create-benos
-consumer flow (type-check, build, test, and lint), `pnpm lint`,
-`pnpm registry:check`, `pnpm check:packed`, and `pnpm size`. The CI rerun on
-Ubuntu, Windows, and macOS with all four package managers is the remaining
-release gate. No release tag or package publication is part of this checkpoint.
+The next CI run exposed a separate packed-CLI fixture that still installed
+`@benosjs/dom@0.2.1`. It now reads core, DOM, and primitives versions from their
+package manifests. `BENOS_PACKAGE_MANAGER=npm node
+scripts/test-packed-benos-cli.mjs` passes locally with the packed 0.3.0
+packages.
+
+After these corrections, local verification on macOS arm64 with Node 26.10.0
+passed: `pnpm test` (22 files, 271 tests), the packed npm create-benos consumer
+flow (type-check, build, test, and lint), the packed npm benos CLI test,
+`pnpm lint`, `pnpm registry:check`, `pnpm check:packed`, and `pnpm size`. The
+CI rerun on Ubuntu, Windows, and macOS with all four package managers is the
+remaining release gate. No release tag or package publication is part of this
+checkpoint.
