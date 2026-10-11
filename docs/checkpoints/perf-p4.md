@@ -14,8 +14,8 @@
   identity through sorting.
 - Bumped all eight publishable packages and the create-benos template ranges
   to `0.3.0`. Regenerated the registry payload and immutable item URLs for
-  release `0.3.0`; minimum runtime requirements remain at `0.2.1` because the
-  components need no newer API.
+  release `0.3.0`, with each registry minimum set to `0.3.0` so fresh projects
+  install the matching release line.
 - Updated the changelog, roadmap, performance plan version, and benchmark
   record for the 0.3.0 release candidate.
 
@@ -69,7 +69,16 @@ The current retained per-row profile is 44.2 plain objects, 19.0 arrays, and
 | `pnpm size`                                            | Passed; core 4,108 / 4,608 B, core + DOM 10,580 / 11,264 B |
 | `BENOS_PACKAGE_MANAGER=npm pnpm test:packed-benos-cli` | Passed                                                     |
 
-Local verification ran on macOS arm64 with Node 26.10.0. The PR workflow still
-needs to confirm its Ubuntu, Windows, and macOS jobs, including the package
-manager matrix. No release tag or package publication is part of this
-checkpoint.
+The first pushed CI run exposed stale `0.2.1` registry minimums: the consumer
+matrix only had packed `0.3.0` Benos packages, while `benos add` requested
+`@benosjs/dom@^0.2.1`. The registry source and generated payload now require
+`0.3.0`. The packed consumer assertion checks that each package was resolved
+from the per-run local registry and installed at the expected version; npm may
+reuse an identical cached tarball without making a second tarball request.
+
+After the registry correction, local verification on macOS arm64 with Node
+26.10.0 passed: `pnpm test` (22 files, 271 tests), the packed npm create-benos
+consumer flow (type-check, build, test, and lint), `pnpm lint`,
+`pnpm registry:check`, `pnpm check:packed`, and `pnpm size`. The CI rerun on
+Ubuntu, Windows, and macOS with all four package managers is the remaining
+release gate. No release tag or package publication is part of this checkpoint.

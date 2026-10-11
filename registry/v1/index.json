@@ -11,7 +11,7 @@
       "dependencies": [
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/accordion",
@@ -19,7 +19,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:f4d6a7b3b493ea31e06ed76a65c5ba3f69dfb3d1366f89fcaa6371b4eaa3bd31"
+      "checksum": "sha256:3adb0e8a76c05a2ea24d86b011c27eb5fe4d82357497eddfafdadc3eff0807a2"
     },
     {
       "name": "badge",
@@ -29,7 +29,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/badge.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:4fcb4627e62e1c2ab805f2098748ad1c52ac0f0d445670c8b78f08d41cc43ffa"
+      "checksum": "sha256:aeb640d3f0f5e507cfb519004aa229a588a913148f767524fd085446ba914a2b"
     },
     {
       "name": "button",
@@ -39,7 +39,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/button.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:944efa5d9fc63f303ee7e44a0690fac56e523c11e929c7e3ec032a646b02fd28"
+      "checksum": "sha256:b1d2f7122994f2bd1c255fcb47213c42acd8ab2d092cecb6d43a0b447fa2d5d3"
     },
     {
       "name": "card",
@@ -49,7 +49,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/card.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:61c8705af4325c2e3a84969ec651c2f868f1d75b2357dfae439cdfb28e30e03f"
+      "checksum": "sha256:b334a5549e4699ee7c8b248e19617ce23bc74ef16a4edf743717addd37442166"
     },
     {
       "name": "checkbox",
@@ -60,7 +60,7 @@
       "dependencies": [
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/checkbox",
@@ -68,7 +68,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:b4ab88a101337dc83a2eef1fbd9711859d456128a6cd60345837d543ba3d8cc0"
+      "checksum": "sha256:8d1b7be93275b11b6cc7f93adea2dda2eccff4d40ad4bb70977211c87ee5531b"
     },
     {
       "name": "dialog",
@@ -79,15 +79,15 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/dom",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/dialog",
@@ -98,7 +98,7 @@
         "overlay-host",
         "button"
       ],
-      "checksum": "sha256:25ba13500d35e907dc365893ee65d5dde4097ba29f420d9afd419088844f3c93"
+      "checksum": "sha256:16f0f1be6865538e189d80a30279382dba13549af8eba9a66bffb5b828b0f02a"
     },
     {
       "name": "dropdown-menu",
@@ -109,15 +109,15 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/dom",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/menu",
@@ -128,7 +128,7 @@
         "overlay-host",
         "button"
       ],
-      "checksum": "sha256:7db2800fa019e446faba3e6d7805ce87da8c6d84d096211419e6efb2d1d22d10"
+      "checksum": "sha256:d8061014ad1fdd41c77b663f9913624741b1c8f026269acd9f239a08892010c8"
     },
     {
       "name": "input",
@@ -138,7 +138,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/input.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:e2521093d907b35e4b4b5c822006d867b41009299cfff4d571cfdd1e590c65b7"
+      "checksum": "sha256:1cebfdb7218f03423366c1e4a6e28146562a827fe183ecfc49731e8812689f2f"
     },
     {
       "name": "label",
@@ -148,7 +148,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/label.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:6ef11ba8354255ca7ef801e58ed4d67880154648e0e161fca98f955fe2233157"
+      "checksum": "sha256:69e68ae7b2e1c4f07a72b9ae1503b01c527ea83fdec48c93888fd844c6c73fd6"
     },
     {
       "name": "overlay-host",
@@ -158,7 +158,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/overlay-host.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:26a1490e3514eb942fe40c7a2a78aa57bda1a40237e6a1cd8a3b68e06af3ba38"
+      "checksum": "sha256:cd235ade3b3593922e71eec2a956d51cea16af785b3ef83cebd757026571ad09"
     },
     {
       "name": "popover",
@@ -169,15 +169,15 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/dom",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/popover",
@@ -188,7 +188,7 @@
         "overlay-host",
         "button"
       ],
-      "checksum": "sha256:00045b98cb24b87ae188a548bd42c9e6932007264c0386d4e484a23931f6f5a9"
+      "checksum": "sha256:548e71366e32a4429e40e1542917ec635b4698c7fa835e27b424d68643691f3a"
     },
     {
       "name": "radio-group",
@@ -199,7 +199,7 @@
       "dependencies": [
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/radio-group",
@@ -207,7 +207,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:23d11a498d0f99ddecb13c2b512b57668d4e8998cee152e43feaec6231e48a39"
+      "checksum": "sha256:e1db9548f3e6e8d7f17a7c08da724ea64fd54bee9cd3447ac70b4018da4c4c72"
     },
     {
       "name": "select",
@@ -218,7 +218,7 @@
       "dependencies": [
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/select",
@@ -226,7 +226,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:8eda1b6d9612be9d191deefd19e8dd4ffad5c2d36d1d8f0c8a08af6a9946d237"
+      "checksum": "sha256:7c4c34f37c51d557d981b5ca75437c2d069c4940323bf5eb6f8927d7b6b99323"
     },
     {
       "name": "separator",
@@ -236,7 +236,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/separator.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:a19e878a7cc75aafe07878d2bc0d89b9fe4551d2c3e90a720109930e809d6c85"
+      "checksum": "sha256:93b0f5ff493df6b1ba4c804b64898f3dca126daf11840df10943f3b63378293b"
     },
     {
       "name": "sortable-table",
@@ -247,15 +247,15 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/dom",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:707595a4905d318bb23fe3516c628c286c5e872dd994a922203577ee78bbec9c"
+      "checksum": "sha256:4a53a70e82357fd76660b9e4e9780399f747656a5f80f1eac7526557095b05d4"
     },
     {
       "name": "switch",
@@ -266,7 +266,7 @@
       "dependencies": [
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/switch",
@@ -274,7 +274,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:20dbfab60ad93a8d6c8adc8634a8e4b00a26ee8d14008ac70f9d90cf273ee41e"
+      "checksum": "sha256:052c49080b7a4d3bac31f547af605db117854b1c66df0774628ffac45b5f80d0"
     },
     {
       "name": "tabs",
@@ -285,7 +285,7 @@
       "dependencies": [
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/tabs",
@@ -293,7 +293,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:f5662e24898ef5fb975e3ad8da4cec16629ff8d29c8f65593f8f6210123085d3"
+      "checksum": "sha256:d0ac38b471a53388ccc383eaf7e7c808bfb85e2289118350373daccba354e5cd"
     },
     {
       "name": "textarea",
@@ -303,7 +303,7 @@
       "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/textarea.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:5e3b1f45f1a7d46f9800876bed0a8a3501fff575541fdc060493e1da5e6e1e40"
+      "checksum": "sha256:b0671b278a15c6a142b2e06b879c11a42bff2dacaa408937615bea53a8de74fb"
     },
     {
       "name": "toast",
@@ -314,15 +314,15 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/dom",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/toast",
@@ -336,7 +336,7 @@
       "registryDependencies": [
         "overlay-host"
       ],
-      "checksum": "sha256:a0e2932c8fbb1a66dfbb0b52771445a969edacf2862ff03c296b8335a46af3d8"
+      "checksum": "sha256:03ed2495481d6713c8d1569ffbf69ab25f458f2a619c47505fca01144aaab15c"
     },
     {
       "name": "tooltip",
@@ -347,15 +347,15 @@
       "dependencies": [
         {
           "name": "@benosjs/core",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/dom",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@benosjs/primitives",
-          "version": "^0.2.1"
+          "version": "^0.3.0"
         },
         {
           "name": "@zag-js/tooltip",
@@ -366,7 +366,7 @@
         "overlay-host",
         "button"
       ],
-      "checksum": "sha256:bb4228a297a1cfda012290e014b346b41cfc55284b3289ad02e31e8520264949"
+      "checksum": "sha256:f16fdd7ce0eb113e3eb4f864feace195569c7dddcc329cb3d21a2d7b7cac15c9"
     }
   ]
 }

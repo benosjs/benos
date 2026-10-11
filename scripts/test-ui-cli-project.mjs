@@ -335,10 +335,12 @@ try {
     { cwd: uiApp, env: scaffoldEnv },
   )
   await runCommand(manager, ['install'], { cwd: uiApp, env: scaffoldEnv })
+  // Managers can reuse a tarball by its integrity, so require the per-run local
+  // packument and verify the installed version and exports below.
   for (const packageName of ['@benosjs/core', '@benosjs/dom']) {
-    if (!localRegistry.servedTarballs.has(packageName)) {
+    if (!localRegistry.servedPackuments.has(packageName)) {
       throw new Error(
-        `${manager} did not install the packed ${packageName} tarball from the local registry.`,
+        `${manager} did not resolve ${packageName} from the local package registry.`,
       )
     }
     const packageRoot = join(uiApp, 'node_modules', ...packageName.split('/'))

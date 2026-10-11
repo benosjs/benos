@@ -25,6 +25,8 @@ All notable changes to Benos are documented here.
 - The latest full production trace measured Benos at 1.39× Solid for 1,000-row
   creation, 1.40× for replacement, and 1.36× for 10,000-row creation. The full
   nine-operation comparison and spreads are in `benchmarks/README.md`.
+- Raise UI registry minimum Benos versions to `0.3.0`, so fresh projects
+  install the matching package release.
 
 ### Changed
 

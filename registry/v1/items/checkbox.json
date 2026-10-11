@@ -8,7 +8,7 @@
   "dependencies": [
     {
       "name": "@benosjs/primitives",
-      "version": "^0.2.1"
+      "version": "^0.3.0"
     },
     {
       "name": "@zag-js/checkbox",
@@ -18,15 +18,15 @@
   "minimumBenosVersions": [
     {
       "name": "@benosjs/core",
-      "version": "0.2.1"
+      "version": "0.3.0"
     },
     {
       "name": "@benosjs/dom",
-      "version": "0.2.1"
+      "version": "0.3.0"
     },
     {
       "name": "@benosjs/primitives",
-      "version": "0.2.1"
+      "version": "0.3.0"
     }
   ],
   "registryDependencies": [],
