@@ -1390,28 +1390,30 @@ function mountTemplate(
   const prototype = templatePrototype(document, descriptor.plan)
   const fragment = prototype.fragment.cloneNode(true) as DocumentFragment
   const nodes = Array.from(fragment.childNodes)
-  const slots = new Map<number, Node>()
+  // Compiler slot ids are numeric; a sparse array keeps per-instance lookup
+  // direct without allocating a Map for every template mount.
+  const slots: Node[] = []
   for (const [slot, path] of prototype.slots)
-    slots.set(slot, nodeAtPath(fragment, path))
+    slots[slot] = nodeAtPath(fragment, path)
   insert(parent, fragment, before)
   const range: DomRange = { nodes, owner }
   runWithOwner(owner, () => {
     onCleanup(() => removeRange(range))
     descriptor.setup({
       attr(slot, name, get) {
-        const element = slots.get(slot)
+        const element = slots[slot]
         if (element instanceof Element)
           createRenderEffect(() => applyOneProp(element, name, get(), 'html'))
       },
       text(slot, get) {
-        const node = slots.get(slot)
+        const node = slots[slot]
         if (node instanceof Text)
           createRenderEffect(() => {
             node.data = String(get())
           })
       },
       child(slot, get) {
-        const marker = slots.get(slot)
+        const marker = slots[slot]
         if (!(marker instanceof Comment) || !marker.parentNode) return
         const target: Slot = {
           parent: marker.parentNode,
@@ -1440,7 +1442,7 @@ function mountTemplate(
         )
       },
       event(slot, name, get) {
-        const element = slots.get(slot)
+        const element = slots[slot]
         if (element instanceof Element)
           installEventSlot(element, name, get, false)
       },

@@ -438,6 +438,35 @@ describe('@benosjs/dom', () => {
     ).toHaveLength(1)
   })
 
+  it('resolves sparse numeric template slots from the cloned prototype', () => {
+    const plan = {
+      id: 'sparse-template-slots',
+      nodes: [
+        {
+          op: 'element' as const,
+          tag: 'button',
+          ns: 'html' as const,
+          slot: 2,
+          children: [{ op: 'anchor' as const, slot: 9 }],
+        },
+      ],
+    }
+    roots.push(
+      render(
+        () =>
+          instantiate(plan, (scope) => {
+            scope.attr(2, 'aria-label', () => 'sparse slots')
+            scope.child(9, () => 'ready')
+          }),
+        document.body,
+      ),
+    )
+
+    const button = document.querySelector('button')
+    expect(button?.getAttribute('aria-label')).toBe('sparse slots')
+    expect(button?.textContent).toBe('ready')
+  })
+
   it('reuses a text node for a fine-grained child update', () => {
     const value = signal('a')
     roots.push(

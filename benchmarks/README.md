@@ -820,8 +820,6 @@ The guarded `for...in` prop-key trial ran twice on the same compiled production 
 
 ### P3 delegated event slots
 
-### P3 delegated event slots
-
 The getter-slot implementation removes the compiled-path event record, props
 wrapper, and extra getter closure while preserving untracked handler reads at
 dispatch. Its allocation profiles show about 16 fewer retained JS objects and
@@ -832,7 +830,7 @@ The full before/after tables and direct-handler size experiment are in [the
 event-slot checkpoint](../docs/checkpoints/perf-p3-event-slots.md); raw results
 are `p3-event-slots*.json` under `js-framework-benchmark/results/`.
 
-## Current published comparison: compiled `safe` TSX (2026-10-11)
+## Current compiled-path comparison: `safe` TSX (2026-10-11)
 
 The create-benos starter runs TSX through the production `@benosjs/vite`
 plugin with `optimization: 'safe'`. This comparison uses that same built plugin,
@@ -842,15 +840,15 @@ seven measured rounds. Times are median milliseconds [minimum–maximum].
 
 | Operation         |                    v0.1.2 |          Current compiled |                     Solid | Current / Solid |
 | ----------------- | ------------------------: | ------------------------: | ------------------------: | --------------: |
-| Create 1,000      |    53.392 [51.851–54.015] |    51.294 [50.361–51.899] |    25.431 [25.236–27.323] |           2.02× |
-| Replace 1,000     |    57.682 [57.396–62.965] |    56.470 [55.773–60.204] |    26.067 [24.881–26.884] |           2.17× |
-| Update every 10th |    13.775 [13.313–19.756] |    13.823 [13.561–16.104] |    14.263 [14.011–15.895] |           0.97× |
-| Select one row    |      7.054 [1.323–10.851] |      1.278 [1.212–12.927] |       0.870 [0.849–0.938] |           1.47× |
-| Swap rows         |     10.688 [3.602–13.632] |       3.813 [3.611–4.022] |       3.045 [2.843–3.091] |           1.25× |
-| Remove one row    |      4.585 [4.432–10.978] |       4.549 [4.418–5.404] |       4.470 [4.395–4.773] |           1.02× |
-| Create 10,000     | 508.980 [500.780–530.606] | 498.929 [484.537–549.237] | 242.735 [241.177–255.059] |           2.06× |
-| Append 1,000      |    62.163 [60.550–63.683] |    57.350 [56.284–61.652] |    36.473 [35.518–36.758] |           1.57× |
-| Clear 1,000       |      9.820 [9.364–14.389] |       9.509 [9.077–9.996] |       2.621 [2.507–2.673] |           3.63× |
+| Create 1,000      |    52.406 [52.019–52.828] |    51.121 [49.867–52.737] |    25.495 [25.367–26.681] |           2.01× |
+| Replace 1,000     |    57.502 [56.132–58.342] |    52.987 [52.575–59.255] |    25.423 [25.227–26.439] |           2.08× |
+| Update every 10th |    13.947 [13.587–17.075] |    15.458 [13.581–17.730] |    14.278 [14.141–15.781] |           1.08× |
+| Select one row    |       1.343 [1.193–1.568] |       1.307 [1.223–1.412] |       0.870 [0.829–0.952] |           1.50× |
+| Swap rows         |      4.027 [3.468–13.735] |      3.908 [3.519–12.752] |       3.129 [3.036–3.590] |           1.25× |
+| Remove one row    |       4.694 [4.489–4.803] |       4.636 [4.598–5.105] |       4.494 [4.379–4.921] |           1.03× |
+| Create 10,000     | 510.544 [507.571–512.365] | 486.265 [480.083–568.523] | 243.630 [241.184–248.700] |           2.00× |
+| Append 1,000      |    61.179 [57.565–65.227] |    56.207 [55.988–57.295] |    35.964 [35.372–37.671] |           1.56× |
+| Clear 1,000       |       9.667 [9.481–9.983] |       9.287 [9.015–9.527] |       2.622 [2.391–2.898] |           3.54× |
 
 The P1 runtime-JSX table showed create, replace, and create-10k at 1.55×,
 1.66×, and 1.64× Solid; the corresponding compiled-path medians are now
@@ -858,5 +856,30 @@ The P1 runtime-JSX table showed create, replace, and create-10k at 1.55×,
 release records with a faster Solid clear denominator were not stable. The
 compiler path's additional template and binding costs are detailed in the
 [P3 compiled comparison checkpoint](../docs/checkpoints/perf-p3-compiled-comparison.md).
-The raw seven-round samples are in
-[`results/p3-budget-baseline.json`](./js-framework-benchmark/results/p3-budget-baseline.json).
+The raw seven-round samples for this latest compiled build are in
+[`results/p3-direct-slots-2.json`](./js-framework-benchmark/results/p3-direct-slots-2.json).
+
+### P3 stable raw-handler trial (reverted)
+
+The user-approved larger caps were applied before reevaluating direct storage
+for stable inline handler functions. Two interleaved runs did not show a
+repeatable timing gain on any operation, and the forced-GC profile retained the
+same 58 functions, 113 plain objects, and 49.993 arrays per row as the
+getter-slot baseline. The trial added 59 B to core + DOM (core stayed at
+4,049 B), and the generated generic app grew by about 120 B raw / 70 B gzip.
+It was reverted. The all-nine before/after medians and spreads are recorded in
+the [P3 follow-up checkpoint](../docs/checkpoints/perf-p3-direct-slots.md).
+
+### P3 direct numeric template slots (kept)
+
+Replacing each template mount's slot `Map` with a sparse numeric array removes
+seven retained plain objects and 132 retained bytes per row, at the cost of six
+additional arrays and no net increase in total retained JavaScript object
+count. The two compiled-path confirmation runs consistently improved create
+10k by 1.6–2.1% and append by about 2%, with no repeatable regression in the
+other seven rows. Core is 4,049 B; core + DOM is 10,199 B (−1 B from the
+10,200 B baseline). The generic compiled app is 33.66 kB raw / 10.88 kB gzip;
+the dashboard Benos slice is 11,450 B gzip and measured 34.0 ms [31.4–38.1]
+versus Solid at 12.2 ms [11.1–17.9]. Detailed traces, allocation profiles,
+and the 5k/10k table run are in the
+[P3 follow-up checkpoint](../docs/checkpoints/perf-p3-direct-slots.md).
