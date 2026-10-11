@@ -21,13 +21,25 @@ const arabicRow: Row = {
   name: 'مريم خوري مع اسم طويل للعرض',
   score: 5,
 }
-const columns: readonly SortableTableColumn<Row>[] = [
-  { key: 'name', label: 'Name', value: (row) => row.name },
-  { key: 'score', label: 'Score', value: (row) => row.score, type: 'number' },
-]
+let columnMapReads = 0
+const columns: readonly SortableTableColumn<Row>[] = new Proxy(
+  [
+    { key: 'name', label: 'Name', value: (row) => row.name },
+    { key: 'score', label: 'Score', value: (row) => row.score, type: 'number' },
+  ],
+  {
+    get(target, property, receiver) {
+      if (property === 'map') columnMapReads++
+      return Reflect.get(target, property, receiver)
+    },
+  },
+)
 declare global {
   interface Window {
-    __benosBatchFour: { dispose: () => void }
+    __benosBatchFour: {
+      dispose: () => void
+      columnMapReads: () => number
+    }
   }
 }
 
@@ -54,4 +66,7 @@ function Fixture(): JSX.Element {
   )
 }
 
-window.__benosBatchFour = { dispose: render(() => <Fixture />, host) }
+window.__benosBatchFour = {
+  dispose: render(() => <Fixture />, host),
+  columnMapReads: () => columnMapReads,
+}

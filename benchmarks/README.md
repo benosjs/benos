@@ -1102,3 +1102,67 @@ Raw results: [nine-operation trace](js-framework-benchmark/results/safe-direct-n
 [table trace](js-framework-benchmark/results/safe-direct-baseline-table-2026-10-11.json),
 [allocation profile](js-framework-benchmark/results/safe-direct-allocation-2026-10-11.json),
 and the dashboard [comparison samples](../examples/dashboard/comparison-results.json).
+
+### Table sort regression check: `88f1bde` vs direct output (2026-10-11)
+
+To check the reported 135.4 ms / 231.9 ms sort times, I built commit
+`88f1bde` and the current direct-output branch from the same table fixture and
+interleaved both with handwritten Benos and Solid controls in Chromium. Each
+variant received two warmups and seven measured rounds; version and control
+order alternated forward and reverse each round. Timing ends after two
+animation frames. Brackets show the measured minimum–maximum spread.
+
+| Variant                        |             Initial 5k |              Sort 5k |            Initial 10k |               Sort 10k |
+| ------------------------------ | ---------------------: | -------------------: | ---------------------: | ---------------------: |
+| Benos at `88f1bde`             | 155.6 [149.2–175.1] ms | 98.3 [86.4–216.3] ms | 311.4 [284.9–343.2] ms | 194.6 [163.8–338.9] ms |
+| Current direct output          | 151.5 [141.0–172.6] ms | 98.0 [88.3–179.7] ms | 303.1 [286.6–310.2] ms | 208.7 [177.4–354.3] ms |
+| Handwritten Benos, direct path |  116.6 [98.5–143.8] ms |                    — | 249.3 [227.0–278.4] ms |                      — |
+| Solid                          |    73.1 [67.6–81.0] ms |  83.6 [75.8–97.3] ms | 153.1 [147.7–173.4] ms | 177.4 [159.3–273.9] ms |
+
+This A/B does not confirm a direct-output sorting regression. The 5k median
+is unchanged. The 10k median is 7.2% higher, but its spread overlaps the
+baseline broadly and includes a 354.3 ms sample; both runs are much noisier
+than the prior 88.5 / 178.2 ms record. That prior 135.4 / 231.9 ms report is
+consistent with measurement variance at this paint boundary, not a repeatable
+change isolated to direct output. The direct path remains about 1.17× Solid at
+5k and 1.18× at 10k in this A/B, with broad overlapping 10k spreads.
+
+The mapped `columns.map(...)` child is not rerun when keyed rows move: a
+browser regression check counts reads of the columns' `map` property before
+and after sorting, and confirms the count stays fixed while the same row DOM
+node survives. The sort gap therefore does not come from re-evaluating that
+dynamic child slot. The outer table still creates sortable data and reconciles
+keyed ranges; the direct compiler emitter removes template-plan setup, but it
+does not remove this work or the actual row moves.
+
+Direct output also did not materially improve this table's initial time versus
+`88f1bde`: both table fixture source and component source are unchanged, and
+the A/B difference is only 2.6–2.7%, within the observed spread. Compared
+with the handwritten table compiled on the same direct path, the registry
+component costs 34.9 ms more at 5k and 53.8 ms more at 10k in this run. That
+gap is in table-level behavior and per-row reactive/render work (sort state,
+empty-state and keyed-list scopes, descriptors, and column value bindings),
+which direct DOM emission does not eliminate. Initial table creation also
+includes 15,000 or 30,000 cell nodes; reducing template indirection alone does
+not remove those browser allocations and insertions.
+
+Raw interleaved samples: [88f1bde vs direct table comparison](js-framework-benchmark/results/table-sort-88f1bde-vs-direct-2026-10-11.json).
+
+For the same checkpoint, the full production js-framework-benchmark trace was
+rerun with two warmups and seven measured rounds, interleaving all five
+frameworks. This table includes every operation; brackets show the seven-run
+minimum–maximum spread.
+
+| Operation         |             Benos (ms) |             Solid (ms) | Benos / Solid |
+| ----------------- | ---------------------: | ---------------------: | ------------: |
+| Create 1,000      |    35.06 [33.96–35.97] |    25.33 [24.92–26.38] |         1.38× |
+| Replace 1,000     |    36.34 [35.80–37.52] |    25.38 [24.89–25.95] |         1.43× |
+| Update every 10th |    13.47 [13.08–17.05] |    14.01 [13.74–15.53] |         0.96× |
+| Select one row    |       1.28 [1.21–1.34] |       0.90 [0.84–0.92] |         1.43× |
+| Swap rows         |      4.16 [3.88–10.71] |       2.95 [2.84–3.04] |         1.41× |
+| Remove one row    |       5.18 [4.95–5.28] |       4.96 [4.59–5.64] |         1.05× |
+| Create 10,000     | 359.40 [353.34–364.35] | 271.02 [262.19–273.34] |         1.33× |
+| Append 1,000      |    48.50 [47.92–49.65] |    38.53 [37.67–48.96] |         1.26× |
+| Clear             |       5.41 [2.84–5.66] |       2.60 [2.56–2.65] |         2.08× |
+
+Raw samples: [full interleaved trace](js-framework-benchmark/direct-output-table-check-nine-2026-10-11.json).

@@ -49,6 +49,10 @@ test('renders a named semantic table and cycles sort state in place', async ({
     .filter({ hasText: 'Bravo with a long display value' })
   await expect(table).toBeVisible()
   await expect(header).toHaveAttribute('aria-sort', 'none')
+  const mappedCellsBeforeSort = await page.evaluate(() =>
+    window.__benosBatchFour.columnMapReads(),
+  )
+  expect(mappedCellsBeforeSort).toBeGreaterThan(0)
   await row.evaluate((element) => {
     ;(element as HTMLElement & { retainedMarker?: string }).retainedMarker =
       'same-node'
@@ -56,6 +60,9 @@ test('renders a named semantic table and cycles sort state in place', async ({
 
   await page.getByRole('button', { name: 'Name' }).click()
   await expect(header).toHaveAttribute('aria-sort', 'ascending')
+  await expect
+    .poll(() => page.evaluate(() => window.__benosBatchFour.columnMapReads()))
+    .toBe(mappedCellsBeforeSort)
   await expect(page.locator('tbody tr').first()).toContainText('Alpha')
   await expect(row).toHaveJSProperty('retainedMarker', 'same-node')
   await expect(
