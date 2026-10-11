@@ -11,6 +11,7 @@ const frameworks = [
   'table-native-baseline',
   'table-benos-baseline',
   'table-benos',
+  'table-benos-direct',
   'table-solid',
 ]
 const sizes = [5_000, 10_000]
@@ -24,7 +25,12 @@ for (const framework of frameworks) {
     {
       cwd: directory,
       encoding: 'utf8',
-      env: { ...process.env, JFB_FRAMEWORK: framework },
+      env: {
+        ...process.env,
+        JFB_FRAMEWORK: framework,
+        BENOS_EXPERIMENTAL_DIRECT_OUTPUT:
+          framework === 'table-benos-direct' ? '1' : undefined,
+      },
     },
   )
   if (result.status !== 0) {
@@ -107,7 +113,11 @@ try {
             `${framework} rendered ${initialRows} of ${size} initial rows.`,
           )
         let sort
-        if (framework === 'table-benos' || framework === 'table-solid') {
+        if (
+          framework === 'table-benos' ||
+          framework === 'table-benos-direct' ||
+          framework === 'table-solid'
+        ) {
           const sorted = await page.evaluate(async () => {
             const start = performance.now()
             const button = document.querySelector('.benos-sortable-table__sort')
@@ -161,7 +171,9 @@ for (const framework of frameworks) {
   for (const size of sizes) {
     summary[framework][size] = {}
     const metrics =
-      framework === 'table-benos' || framework === 'table-solid'
+      framework === 'table-benos' ||
+      framework === 'table-benos-direct' ||
+      framework === 'table-solid'
         ? ['initial', 'sort']
         : ['initial']
     for (const metric of metrics) {
@@ -188,6 +200,8 @@ const output = {
       'table-benos-baseline':
         'handwritten Benos JSX with keyed For rows and static columns',
       'table-benos': 'SortableTable registry component',
+      'table-benos-direct':
+        'SortableTable registry component with experimental direct row cells',
       'table-solid': 'handwritten equivalent Solid table',
     },
   },

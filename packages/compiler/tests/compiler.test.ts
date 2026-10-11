@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { signal } from '../../dom/node_modules/@benosjs/core'
 import { For, Show, render, type Child } from '../../dom/src/index.js'
 import * as domRuntime from '../../dom/src/index.js'
+import * as domInternalRuntime from '../../dom/src/internal.js'
 import { jsx as untransformedJsx } from '../../dom/src/jsx-runtime.js'
 import { jsxDEV as untransformedJsxDEV } from '../../dom/src/jsx-dev-runtime.js'
 import { transformJsx } from '../src/index.js'
@@ -330,6 +331,57 @@ function runMatrixFixture(
 }
 
 describe('@benosjs/compiler', () => {
+  it('supports the internal direct DOM experiment for a row with live bindings', () => {
+    const previous = process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT
+    process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT = '1'
+    let result: ReturnType<typeof transformJsx>
+    try {
+      result = transformJsx(
+        `export function App(props) {
+          return <tr class={props.row().active ? 'selected' : ''}>
+            <td>{props.row().id}</td>
+            <td><button onClick={() => props.onSelect(props.row().id)}>{props.row().label}</button></td>
+          </tr>
+        }`,
+        { filename: 'direct-row.tsx', optimization: 'safe' },
+      )
+    } finally {
+      if (previous === undefined)
+        delete process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT
+      else process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT = previous
+    }
+    expect(result.code).toContain('directTemplateDefinition')
+    expect(result.code).toContain('__benos_direct_template(')
+    expect(result.code).not.toContain('__benos_template_')
+
+    document.body.replaceChildren()
+    const module = evaluate(result.code, {
+      ...domRuntime,
+      ...domInternalRuntime,
+    })
+    const row = signal({ id: 1, label: 'first', active: false })
+    const selected: number[] = []
+    const host = document.createElement('tbody')
+    document.body.append(host)
+    const dispose = render(
+      () =>
+        (module.App as (props: object) => Child)({
+          row,
+          onSelect: (id: number) => selected.push(id),
+        }),
+      host,
+    )
+    expect(host.innerHTML).toContain('<td>1</td>')
+    expect(host.querySelector('tr')?.className).toBe('')
+    row.set({ id: 2, label: 'second', active: true })
+    expect(host.textContent).toContain('2second')
+    expect(host.querySelector('tr')?.className).toBe('selected')
+    host.querySelector('button')?.click()
+    expect(selected).toEqual([2])
+    dispose()
+    expect(host.innerHTML).toBe('')
+  })
+
   it('emits readable development plans and tuple production plans', () => {
     const development = transformJsx(
       'export const App = () => <div>Hello</div>',

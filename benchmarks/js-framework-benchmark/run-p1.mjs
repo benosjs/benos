@@ -14,7 +14,7 @@ import { chromium } from '@playwright/test'
 const benchmarkRoot = fileURLToPath(new URL('.', import.meta.url))
 const repoRoot = resolve(benchmarkRoot, '../..')
 const config = resolve(benchmarkRoot, 'vite.config.p1.mjs')
-const frameworks = ['benos-v012', 'benos-head', 'solid']
+const frameworks = ['benos-v012', 'benos-head', 'benos-direct', 'solid']
 const rounds = Number(process.env.JFB_ROUNDS ?? 3)
 const warmups = Number(process.env.JFB_WARMUPS ?? 2)
 const port = Number(process.env.JFB_PORT ?? 4310)
@@ -99,6 +99,8 @@ function build(framework) {
       JFB_FRAMEWORK: implementation,
       JFB_IMPL: implementation,
       JFB_FRAMEWORK_ID: framework,
+      BENOS_EXPERIMENTAL_DIRECT_OUTPUT:
+        framework === 'benos-direct' ? '1' : undefined,
       JFB_CORE_DIST: isRelease
         ? '/tmp/benos-p1-release-e029073/packages/core/dist/js'
         : `${repoRoot}/packages/core/dist/js`,

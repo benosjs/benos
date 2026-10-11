@@ -6,6 +6,8 @@ import solid from 'vite-plugin-solid'
 import benos from '../../packages/vite/dist/js/index.production.js'
 
 const framework = process.env.JFB_FRAMEWORK ?? 'benos'
+const sourceFramework =
+  framework === 'table-benos-direct' ? 'table-benos' : framework
 const root = fileURLToPath(new URL('.', import.meta.url))
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
 const tableFramework = framework.startsWith('table-')
@@ -26,7 +28,7 @@ const plugins = [
         return html.replace(
           '/src/main-benos.js',
           tableFramework
-            ? '/src/' + framework + '.' + entryExtension
+            ? '/src/' + sourceFramework + '.' + entryExtension
             : framework === 'benos'
               ? '/src/main-benos.tsx'
               : '/src/main-' + framework + '.' + entryExtension,

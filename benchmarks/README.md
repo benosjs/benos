@@ -883,3 +883,110 @@ the dashboard Benos slice is 11,450 B gzip and measured 34.0 ms [31.4–38.1]
 versus Solid at 12.2 ms [11.1–17.9]. Detailed traces, allocation profiles,
 and the 5k/10k table run are in the
 [P3 follow-up checkpoint](../docs/checkpoints/perf-p3-direct-slots.md).
+
+## P3 direct compiler-output ceiling experiment (internal, 2026-10-11)
+
+Before the direct-output experiment, the compiled `safe` path retained 219.994
+JavaScript objects and 7.547 KB per generic benchmark row after forced GC,
+versus 153.5 objects and 4.71 KB for the earlier runtime-JSX adapter. The
+compiled path adds 66.5 objects and 2.83 KB per row. Its marked 10k-row CPU
+spans move work as follows; marks are independently sampled and overlap, so
+their durations must not be summed as a wall-clock total.
+
+| Marked category        | Runtime JSX, ms / 10k | Compiled safe, ms / 10k | Change, ms / 10k | Calls, runtime → compiled |
+| ---------------------- | --------------------: | ----------------------: | ---------------: | ------------------------: |
+| Template instantiation |                   0.0 |                   167.1 |           +167.1 |               0 → 140,000 |
+| Binding setup          |                 200.0 |                   114.1 |            −85.9 |         290,000 → 190,000 |
+| Owner creation         |                   7.0 |                    30.2 |            +23.2 |          50,000 → 200,000 |
+| Signal node creation   |                   7.4 |                     5.3 |             −2.1 |           10,000 → 10,000 |
+| Effect node creation   |                   4.1 |                    21.8 |            +17.7 |          20,000 → 100,000 |
+| Event setup            |                  20.8 |                    14.4 |             −6.4 |           40,000 → 40,000 |
+| DOM insertion          |                  44.7 |                    64.6 |            +19.9 |         120,000 → 100,016 |
+| Disposal               |                   1.3 |                    25.1 |            +23.8 |          10,004 → 140,004 |
+
+That is +6.65 retained objects and +0.283 KB per row. The largest added
+retained categories were closures (33.9 → 58, +24.1), plain objects (86.4 →
+106, +19.6), and arrays (33.2 → 55.993, +22.793). Template plan creation,
+owner creation, and effects add work; compiled binding setup and event setup
+take less time in these marks.
+
+The experiment added a private build-time environment flag,
+`BENOS_EXPERIMENTAL_DIRECT_OUTPUT=1`. It only lowers dynamic `<tr>` and `<td>`
+subtrees whose bindings fit the direct prototype: one cached HTML template per
+Document, cloned per mount, generated child/sibling walks, and direct text,
+attribute, and event binding statements. The template definition and binder
+function are module-hoisted; there is no per-row template plan or setup closure.
+The renderer calls that shared binder once per clone and the descriptor still
+stores one environment array. The registry table's outer `<tr>` contains a
+dynamic JSX-producing `columns.map`, so it falls back to the normal template
+path; its `<td>` cells use direct output.
+
+The generic fixture was built through the production Benos Vite compiler path.
+The runner interleaved two warmups and seven measured Chromium trace rounds.
+Values are click-to-paint milliseconds, median [minimum–maximum]. The selected
+operations are create 1,000, replace 1,000, create 10,000, append 1,000, and
+clear 1,000.
+
+| Operation     |  Current compiled safe | Experimental direct output |                  Solid | Current / Solid | Direct gap closed |
+| ------------- | ---------------------: | -------------------------: | ---------------------: | --------------: | ----------------: |
+| Create 1,000  |    52.33 [51.00–52.94] |        32.79 [31.36–34.24] |    25.76 [25.11–26.76] |           2.03× |             73.6% |
+| Replace 1,000 |    53.02 [52.30–57.14] |        31.61 [30.20–32.58] |    26.09 [25.37–26.40] |           2.03× |             79.5% |
+| Create 10,000 | 483.58 [480.76–542.79] |     292.81 [289.20–294.88] | 243.88 [242.53–250.63] |           1.98× |             79.6% |
+| Append 1,000  |    56.89 [56.13–57.96] |        40.80 [39.55–49.71] |    36.48 [36.12–38.47] |           1.56× |             78.9% |
+| Clear 1,000   |      9.93 [9.10–10.65] |           4.43 [4.35–4.49] |       2.72 [2.62–2.74] |           3.65× |             76.3% |
+
+The direct prototype closes about 74–80% of the current compiled-path gap on
+these five medians. It remains 1.12–1.63× Solid. Allocation sampling on 1,000
+rows measured these per-row forced-GC retained deltas:
+
+| Allocation category             | Current compiled safe | Direct output |  Solid |
+| ------------------------------- | --------------------: | ------------: | -----: |
+| Closures / functions            |                    58 |            25 |  8.001 |
+| Plain JavaScript objects        |               106.001 |        35.002 | 11.003 |
+| Arrays                          |                55.993 |         7.993 |  6.007 |
+| DOM wrappers                    |                17.999 |            10 |     10 |
+| Owner creation calls            |                    20 |             6 |      1 |
+| Effect / computation node calls |                    10 |             4 |      3 |
+
+Compared with compiled `safe`, direct output cuts retained closures by 57%,
+plain objects by 67%, arrays by 86%, owner calls by 70%, and effect calls by
+60%. It still retains more of each JavaScript category than Solid.
+
+The whole minified generic application bundle measured 34,197 B / 10,929 B
+gzip for safe output and 33,633 B / 11,101 B gzip for direct output: −564 B
+raw but +172 B gzip. The sortable-table application measured 36,273 B /
+11,562 B gzip safe and 36,434 B / 11,763 B gzip direct: +161 B raw / +201 B
+gzip. The bundled runtime helpers outweigh template-plan savings in that entry.
+
+The same table page measured these medians after two warmups and seven rounds;
+brackets are observed spread. The registry table uses direct compiled cells
+only, because its mapped JSX children prevent whole-row template lowering.
+
+| Table workload       |  Current compiled safe |     Direct cell output |                  Solid |
+| -------------------- | ---------------------: | ---------------------: | ---------------------: |
+| Initial, 5,000 rows  | 152.8 [139.6–160.2] ms | 130.1 [111.7–137.2] ms |    74.7 [68.0–86.7] ms |
+| Sort, 5,000 rows     |   91.8 [86.4–179.3] ms |   95.3 [79.5–105.8] ms |   84.2 [78.2–180.5] ms |
+| Initial, 10,000 rows | 293.2 [279.0–336.2] ms | 245.1 [238.8–263.9] ms | 141.9 [140.5–150.6] ms |
+| Sort, 10,000 rows    | 183.6 [162.9–288.0] ms | 175.7 [168.0–313.7] ms | 168.4 [153.9–256.2] ms |
+
+The direct cell path closes about 29–32% of the initial-mount gap to Solid.
+Sorting is unchanged within the broad overlapping spreads. Current package
+sizes are core 4,049 B / 4,608 B and core + DOM 10,337 B / 11,264 B; this
+prototype adds 138 B to core + DOM and 0 B to core. All budgets still pass.
+
+The prototype is not enabled by default. Its scope is deliberately narrow:
+HTML table rows/cells, primitive text expressions, and class/dir/ARIA/data
+attributes. Direct event bindings use native listeners, which changes the
+delegated-event implementation and still needs a semantic-equivalence design
+before production. Dynamic JSX children, arbitrary property/style semantics,
+namespace changes, refs, and server rendering fall back or are unsupported.
+SSR can remain possible by keeping the shared JSX analysis host-neutral and
+emitting a separate server renderer; template parsing stays lazy and keyed by
+Document, and the direct DOM binder remains a client backend. A future SSR
+target should not evaluate this HTML template or touch `document`.
+
+Raw trace, allocation, smoke, and table samples are in
+[`direct-prototype-trace.json`](js-framework-benchmark/results/direct-prototype-trace.json),
+[`direct-prototype-allocation.json`](js-framework-benchmark/results/direct-prototype-allocation.json),
+[`direct-prototype-table.json`](js-framework-benchmark/results/direct-prototype-table.json),
+and [`direct-prototype-smoke.json`](js-framework-benchmark/results/direct-prototype-smoke.json).

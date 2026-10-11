@@ -20,6 +20,10 @@ import {
 import type { InternalOwner } from '@benosjs/core/internal'
 import type { ReadonlySignal } from '@benosjs/core'
 import type {
+  DirectTemplateDefinition,
+  DirectTemplateDescriptor,
+} from './experimental-direct.js'
+import type {
   EventHandler as GeneratedEventHandler,
   GeneratedAttributes,
   GeneratedIntrinsicElements,
@@ -53,7 +57,11 @@ interface TemplateDescriptor {
   readonly setup: (scope: TemplateScope) => void
 }
 
-type Descriptor = ElementDescriptor | ComponentDescriptor | TemplateDescriptor
+type Descriptor =
+  | ElementDescriptor
+  | ComponentDescriptor
+  | TemplateDescriptor
+  | DirectTemplateDescriptor
 
 const fragment = Symbol('benos.fragment')
 export const Fragment = fragment
@@ -360,7 +368,9 @@ function mountValue(
     return mountElement(descriptor, parent, before, owner)
   if (descriptor.kind === 'component')
     return mountComponent(descriptor, parent, before, owner)
-  return mountTemplate(descriptor, parent, before, owner)
+  if (descriptor.kind === 'template')
+    return mountTemplate(descriptor, parent, before, owner)
+  return mountDirectTemplate(descriptor, parent, before, owner)
 }
 
 function mountElement(
@@ -1451,6 +1461,50 @@ function mountTemplate(
   return range
 }
 
+const directTemplatePrototypes = new WeakMap<
+  Document,
+  Map<string, HTMLTemplateElement>
+>()
+
+function directTemplatePrototype(
+  document: Document,
+  definition: DirectTemplateDefinition,
+): HTMLTemplateElement {
+  let byId = directTemplatePrototypes.get(document)
+  if (!byId) {
+    byId = new Map()
+    directTemplatePrototypes.set(document, byId)
+  }
+  const cached = byId.get(definition.id)
+  if (cached) return cached
+  const template = document.createElement('template')
+  template.innerHTML = definition.html
+  byId.set(definition.id, template)
+  return template
+}
+
+function mountDirectTemplate(
+  descriptor: DirectTemplateDescriptor,
+  parent: Node,
+  before: Node | null,
+  owner: InternalOwner,
+): DomRange {
+  const document = ownerDocumentOf(parent)
+  const prototype = directTemplatePrototype(document, descriptor.definition)
+  const fragment = prototype.content.cloneNode(true) as DocumentFragment
+  const nodes = Array.from(fragment.childNodes)
+  const root = nodes[0]
+  if (!(root instanceof Element) || nodes.length !== 1)
+    throw new Error(`Invalid direct template ${descriptor.definition.id}`)
+  insert(parent, fragment, before)
+  const range: DomRange = { nodes, owner }
+  runWithOwner(owner, () => {
+    onCleanup(() => removeRange(range))
+    descriptor.definition.setup(root, descriptor.values)
+  })
+  return range
+}
+
 export interface TemplatePlan {
   readonly id: string
   readonly nodes: readonly StaticInstruction[]
@@ -1471,6 +1525,7 @@ export interface TemplateScope {
   child(slot: number, get: () => Child): void
   event(slot: number, name: string, get: () => unknown): void
 }
+
 function normalizePlan(plan: TemplatePlan | readonly unknown[]): TemplatePlan {
   if (Array.isArray(plan)) {
     const slots = plan[2] as readonly number[] | undefined

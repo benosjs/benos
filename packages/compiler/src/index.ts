@@ -55,6 +55,11 @@ const helperExports = {
   mergeProps: '__benos_merge_props',
   template: '__benos_template',
   instantiate: '__benos_instantiate',
+  directDefinition: '__benos_direct_definition',
+  directTemplate: '__benos_direct_template',
+  directAttr: '__benos_direct_attr',
+  directText: '__benos_direct_text',
+  directEvent: '__benos_direct_event',
 } as const
 
 function record(node: t.Node): AstRecord {
@@ -615,12 +620,301 @@ function templateId(filename: string, node: t.Node): string {
   return `${filename.replace(/[^a-zA-Z0-9_]+/g, '_')}:${node.start ?? 0}`
 }
 
+interface DirectBinding {
+  kind: 'attr' | 'text' | 'event'
+  path: number[]
+  expression: t.Expression
+  name?: string
+}
+
+interface DirectTemplate {
+  html: string
+  bindings: DirectBinding[]
+  captures: string[]
+}
+
+function escapeHtmlText(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+}
+
+function escapeHtmlAttribute(value: string): string {
+  return escapeHtmlText(value).replaceAll('"', '&quot;')
+}
+
+function isReferenceIdentifier(node: t.Identifier, parent?: t.Node): boolean {
+  if (!parent) return true
+  if (
+    (t.isMemberExpression(parent) || t.isOptionalMemberExpression(parent)) &&
+    parent.property === node &&
+    !parent.computed
+  )
+    return false
+  if (
+    (t.isObjectProperty(parent) || t.isObjectMethod(parent)) &&
+    parent.key === node &&
+    !parent.computed &&
+    (!t.isObjectProperty(parent) || !parent.shorthand)
+  )
+    return false
+  if (
+    (t.isFunction(parent) && parent.params.includes(node)) ||
+    (t.isVariableDeclarator(parent) && parent.id === node) ||
+    ((t.isFunctionDeclaration(parent) || t.isFunctionExpression(parent)) &&
+      parent.id === node) ||
+    ((t.isClassDeclaration(parent) || t.isClassExpression(parent)) &&
+      parent.id === node)
+  )
+    return false
+  return true
+}
+
+function collectLocalReferences(
+  expression: t.Expression,
+  locals: ReadonlySet<string>,
+  result: Set<string>,
+): void {
+  const visit = (node: t.Node, parent?: t.Node): void => {
+    if (
+      t.isIdentifier(node) &&
+      locals.has(node.name) &&
+      isReferenceIdentifier(node, parent)
+    )
+      result.add(node.name)
+    for (const key of t.VISITOR_KEYS[node.type] ?? []) {
+      const child = record(node)[key]
+      if (Array.isArray(child)) {
+        for (const item of child)
+          if (item && typeof item === 'object' && 'type' in item)
+            visit(item as t.Node, node)
+      } else if (child && typeof child === 'object' && 'type' in child) {
+        visit(child as t.Node, node)
+      }
+    }
+  }
+  visit(expression)
+}
+
+function replaceLocalReferences(
+  expression: t.Expression,
+  captures: ReadonlyMap<string, number>,
+): t.Expression {
+  const rewriteExpression = (node: t.Node, parent?: t.Node): t.Node => {
+    if (t.isIdentifier(node) && isReferenceIdentifier(node, parent)) {
+      const index = captures.get(node.name)
+      if (index !== undefined)
+        return t.memberExpression(
+          t.identifier('__benos_values'),
+          t.numericLiteral(index),
+          true,
+        )
+    }
+    const keys = t.VISITOR_KEYS[node.type] ?? []
+    const value = record(node)
+    for (const key of keys) {
+      const child = value[key]
+      if (Array.isArray(child))
+        value[key] = child.map((item) =>
+          item && typeof item === 'object' && 'type' in item
+            ? rewriteExpression(item as t.Node, node)
+            : item,
+        )
+      else if (child && typeof child === 'object' && 'type' in child)
+        value[key] = rewriteExpression(child as t.Node, node)
+    }
+    return node
+  }
+  return rewriteExpression(expression) as t.Expression
+}
+
+function buildDirectTemplate(
+  node: t.JSXElement,
+  locals: ReadonlySet<string>,
+): DirectTemplate | null {
+  if (
+    !t.isJSXIdentifier(node.openingElement.name) ||
+    !['tr', 'td'].includes(node.openingElement.name.name)
+  )
+    return null
+  const bindings: DirectBinding[] = []
+  const referenced = new Set<string>()
+  let nextTextSlot = 0
+
+  const renderElement = (
+    element: t.JSXElement,
+    path: number[],
+  ): string | null => {
+    if (
+      !t.isJSXIdentifier(element.openingElement.name) ||
+      /^[A-Z]/.test(element.openingElement.name.name)
+    )
+      return null
+    const attrs: string[] = []
+    for (const attribute of element.openingElement.attributes) {
+      if (!t.isJSXAttribute(attribute)) return null
+      const name = attributeName(attribute.name)
+      if (name === 'key') continue
+      if (name === 'ref' || name.endsWith('Capture')) return null
+      const value = attribute.value
+      if (!value) {
+        attrs.push(`${name}=""`)
+        continue
+      }
+      if (t.isStringLiteral(value)) {
+        attrs.push(`${name}="${escapeHtmlAttribute(value.value)}"`)
+        continue
+      }
+      const expression = expressionContainer(value)
+      if (!expression) continue
+      const literal = literalValue(expression)
+      if (literal !== undefined) {
+        if (literal !== false && literal !== null)
+          attrs.push(`${name}="${escapeHtmlAttribute(String(literal))}"`)
+        continue
+      }
+      collectLocalReferences(expression, locals, referenced)
+      const event = eventName(name)
+      if (event) bindings.push({ kind: 'event', path, expression, name: event })
+      else if (
+        name === 'class' ||
+        name === 'dir' ||
+        name.startsWith('aria-') ||
+        name.startsWith('data-')
+      )
+        bindings.push({ kind: 'attr', path, expression, name })
+      else return null
+    }
+    const tag = (element.openingElement.name as t.JSXIdentifier).name
+    let html = `<${tag}${attrs.length ? ` ${attrs.join(' ')}` : ''}>`
+    let childIndex = 0
+    for (const child of element.children) {
+      if (t.isJSXText(child)) {
+        const text = textValue(child.value)
+        if (text) {
+          html += escapeHtmlText(text)
+          childIndex++
+        }
+      } else if (t.isJSXExpressionContainer(child)) {
+        const expression = expressionContainer(
+          child as unknown as t.JSXAttribute['value'],
+        )
+        if (!expression) continue
+        const literal = literalValue(expression)
+        if (literal !== undefined) {
+          if (literal !== null && literal !== false && literal !== true) {
+            html += escapeHtmlText(String(literal))
+            childIndex++
+          }
+          continue
+        }
+        if (
+          t.isArrowFunctionExpression(expression) ||
+          t.isFunctionExpression(expression)
+        )
+          return null
+        let containsJsx = false
+        walk(expression, (nested) => {
+          containsJsx ||= t.isJSXElement(nested) || t.isJSXFragment(nested)
+        })
+        if (containsJsx) return null
+        collectLocalReferences(expression, locals, referenced)
+        const marker = `__BENOS_DIRECT_TEXT_${nextTextSlot++}__`
+        bindings.push({ kind: 'text', path: [...path, childIndex], expression })
+        html += marker
+        childIndex++
+      } else if (t.isJSXElement(child)) {
+        const nested = renderElement(child, [...path, childIndex])
+        if (nested === null) return null
+        html += nested
+        childIndex++
+      } else return null
+    }
+    return html + `</${tag}>`
+  }
+
+  const html = renderElement(node, [])
+  if (html === null || bindings.length === 0) return null
+  return { html, bindings, captures: [...referenced] }
+}
+
+function directNodeExpression(path: readonly number[]): t.Expression {
+  let node: t.Expression = t.identifier('__benos_root')
+  for (const index of path) {
+    node = t.memberExpression(node, t.identifier('firstChild'))
+    for (let sibling = 0; sibling < index; sibling++)
+      node = t.memberExpression(node, t.identifier('nextSibling'))
+  }
+  return node
+}
+
+function addDirectTemplate(
+  id: string,
+  direct: DirectTemplate,
+  helpers: Set<keyof typeof helperExports>,
+  declarations: t.Statement[],
+): t.CallExpression {
+  helpers.add('directDefinition')
+  helpers.add('directTemplate')
+  helpers.add('directAttr')
+  helpers.add('directText')
+  helpers.add('directEvent')
+  const index = declarations.filter(
+    (item) =>
+      t.isVariableDeclaration(item) &&
+      item.declarations.some(
+        (declaration) =>
+          t.isIdentifier(declaration.id) &&
+          declaration.id.name.startsWith('__benos_direct_definition_'),
+      ),
+  ).length
+  const name = `__benos_direct_definition_${index}`
+  const captures = new Map(
+    direct.captures.map((capture, position) => [capture, position]),
+  )
+  const statements = direct.bindings.map((binding) => {
+    const expression = replaceLocalReferences(binding.expression, captures)
+    const helper =
+      binding.kind === 'attr'
+        ? helperExports.directAttr
+        : binding.kind === 'text'
+          ? helperExports.directText
+          : helperExports.directEvent
+    const args: t.Expression[] = [directNodeExpression(binding.path)]
+    if (binding.name) args.push(t.stringLiteral(binding.name))
+    args.push(t.arrowFunctionExpression([], expression))
+    return t.expressionStatement(t.callExpression(t.identifier(helper), args))
+  })
+  declarations.push(
+    t.functionDeclaration(
+      t.identifier(`${name}_setup`),
+      [t.identifier('__benos_root'), t.identifier('__benos_values')],
+      t.blockStatement(statements),
+    ),
+    t.variableDeclaration('const', [
+      t.variableDeclarator(
+        t.identifier(name),
+        t.callExpression(t.identifier(helperExports.directDefinition), [
+          t.stringLiteral(id),
+          t.stringLiteral(direct.html),
+          t.identifier(`${name}_setup`),
+        ]),
+      ),
+    ]),
+  )
+  return t.callExpression(t.identifier(helperExports.directTemplate), [
+    t.identifier(name),
+    t.arrayExpression(direct.captures.map((capture) => t.identifier(capture))),
+  ])
+}
+
 function addTemplatePlan(
   plan: { id: string; nodes: t.ObjectExpression[] },
   setup: t.Statement[],
   development: boolean,
   helpers: Set<keyof typeof helperExports>,
-  plans: t.VariableDeclaration[],
+  plans: t.Statement[],
 ): t.CallExpression {
   helpers.add('template')
   helpers.add('instantiate')
@@ -668,10 +962,22 @@ function rewrite(
   node: t.Node,
   filename: string,
   helpers: Set<keyof typeof helperExports>,
-  plans: t.VariableDeclaration[],
+  plans: t.Statement[],
   development: boolean,
+  locals: ReadonlySet<string>,
+  experimentalDirect: boolean,
 ): t.Node {
   if (t.isJSXElement(node) || t.isJSXFragment(node)) {
+    if (experimentalDirect && t.isJSXElement(node)) {
+      const direct = buildDirectTemplate(node, locals)
+      if (direct)
+        return addDirectTemplate(
+          templateId(filename, node),
+          direct,
+          helpers,
+          plans,
+        )
+    }
     const plan = staticPlan(node, filename)
     if (plan) return addTemplatePlan(plan, [], development, helpers, plans)
     const keys = t.VISITOR_KEYS[node.type] ?? []
@@ -681,7 +987,15 @@ function rewrite(
       if (Array.isArray(child))
         value[key] = child.map((item) =>
           item && typeof item === 'object' && 'type' in item
-            ? rewrite(item as t.Node, filename, helpers, plans, development)
+            ? rewrite(
+                item as t.Node,
+                filename,
+                helpers,
+                plans,
+                development,
+                locals,
+                experimentalDirect,
+              )
             : item,
         )
       else if (child && typeof child === 'object' && 'type' in child)
@@ -691,6 +1005,8 @@ function rewrite(
           helpers,
           plans,
           development,
+          locals,
+          experimentalDirect,
         )
     }
     if (t.isJSXElement(node)) {
@@ -706,6 +1022,15 @@ function rewrite(
     }
     return buildDynamicJsx(node, helpers)
   }
+  let scopedLocals = locals
+  if (t.isFunction(node)) {
+    const next = new Set(locals)
+    for (const parameter of node.params)
+      walk(parameter, (item) => {
+        if (t.isIdentifier(item)) next.add(item.name)
+      })
+    scopedLocals = next
+  }
   const keys = t.VISITOR_KEYS[node.type] ?? []
   const value = record(node)
   for (const key of keys) {
@@ -713,7 +1038,15 @@ function rewrite(
     if (Array.isArray(child))
       value[key] = child.map((item) =>
         item && typeof item === 'object' && 'type' in item
-          ? rewrite(item as t.Node, filename, helpers, plans, development)
+          ? rewrite(
+              item as t.Node,
+              filename,
+              helpers,
+              plans,
+              development,
+              scopedLocals,
+              experimentalDirect,
+            )
           : item,
       )
     else if (child && typeof child === 'object' && 'type' in child)
@@ -723,6 +1056,8 @@ function rewrite(
         helpers,
         plans,
         development,
+        scopedLocals,
+        experimentalDirect,
       )
   }
   return node
@@ -807,6 +1142,11 @@ function addRuntimeImport(
     mergeProps: 'mergeProps',
     template: 'template',
     instantiate: 'instantiate',
+    directDefinition: 'directTemplateDefinition',
+    directTemplate: 'directTemplate',
+    directAttr: 'directAttr',
+    directText: 'directText',
+    directEvent: 'directEvent',
   }
   const specifiers = [...helpers].map((helper) =>
     t.importSpecifier(
@@ -844,13 +1184,21 @@ export function transformJsx(
     )
   const diagnostics = diagnosticsFor(ast as unknown as t.File, development)
   const helpers = new Set<keyof typeof helperExports>()
-  const plans: t.VariableDeclaration[] = []
+  const plans: t.Statement[] = []
+  const experimentalDirect =
+    (
+      globalThis as typeof globalThis & {
+        process?: { env?: Record<string, string | undefined> }
+      }
+    ).process?.env?.BENOS_EXPERIMENTAL_DIRECT_OUTPUT === '1'
   const rewritten = rewrite(
     ast.program as unknown as t.Program,
     options.filename,
     helpers,
     plans,
     development,
+    new Set(),
+    experimentalDirect,
   ) as t.Program
   rewritten.body.unshift(...plans)
   addRuntimeImport(rewritten, helpers)
