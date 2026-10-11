@@ -255,7 +255,7 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:4a53a70e82357fd76660b9e4e9780399f747656a5f80f1eac7526557095b05d4"
+      "checksum": "sha256:f7124ec30c72022a970e3466369f003b4aec234ad896895bdd025c386e467c98"
     },
     {
       "name": "switch",

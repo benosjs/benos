@@ -1269,10 +1269,11 @@ Raw artifacts: [all nine interleaved rows](js-framework-benchmark/lazy-owner-nin
 
 ## 0.3.0 release-candidate comparison (2026-10-11)
 
-This is the current compiled production path after direct compiler output,
-lazy effect-run owners, and the registry table specialization. It supersedes
-the earlier release comparison for the next release; older tables above remain
-historical records. The full framework run used Node 26.10.0, Chromium
+This is the current compiled production path after direct compiler output and
+lazy effect-run owners, using the registry table's general mapped-cell path.
+The fixed three-column specialization described below was measured and
+reverted. This comparison supersedes the earlier release comparison for the
+next release; older tables above remain historical records. The full framework run used Node 26.10.0, Chromium
 153.0.8010.12, macOS arm64, two warmups, seven measured rounds, interleaved
 framework order, and the shared Chrome trace click-to-paint boundary. Times
 are milliseconds; brackets show the measured minimum–maximum spread.
@@ -1295,15 +1296,14 @@ while clear remains 2.07×. Select has a long Benos outlier, and select, swap,
 and several reference-framework operations also have wide spreads. Raw data is
 in [`results/latest.json`](./js-framework-benchmark/results/latest.json).
 
-### Registry sortable table: static three-column row
+### Registry sortable table: historical fixed three-column experiment
 
-The registry component now captures its columns once and emits three cell
-descriptors directly for the common three-column case. This removes the
-per-row `columns.map` result and its dynamic child array. Other column counts
-retain the generic mapped path. A browser regression test counts map calls:
-three columns perform only the header iteration, while four columns exercise
-the generic path and map once per row. The same behavior tests pass in
-Chromium, Firefox, and WebKit.
+The 0.3.0 implementation captures its columns once and emits three cell
+descriptors directly only when `columns.length === 3`. That branch removes the
+per-row `columns.map` result and dynamic child array. Exactly three columns use
+it; 0, 1, 2, and 4 or more columns use the generic mapped path. This experiment
+is not representative of tables with other widths, so the multi-column matrix
+below is the current comparison.
 
 The before run used two warmups and seven measured rounds. The after summary
 pools two independent interleaved runs (each with two warmups and seven rounds)
@@ -1327,12 +1327,72 @@ the difference between the registry and handwritten Benos medians.
 |  10k | Benos registry sort              | 251.7 [162.8–485.2] | 200.2 [164.8–329.3] |
 |  10k | Solid sort                       | 164.3 [147.9–247.5] | 185.6 [159.4–299.9] |
 
-The measured registry overhead fell by about 65% at 5k and 96% at 10k using
-the within-run median differences. The post-change registry table remains
-about 1.74× Solid at 5k and 1.64× at 10k for initial render. Sorting medians
-are near Solid, though the 10k spreads overlap broadly. These measurements
-support keeping the specialized row path; they do not establish that the table
-matches Solid's mount time.
+These historical three-column measurements showed the registry overhead fell
+by about 65% at 5k and 96% at 10k using the within-run median differences. The
+registry table remained about 1.74× Solid at 5k and 1.64× at 10k for initial
+render. The results describe the fixed three-column case only.
+
+#### Interleaved multi-column baseline (2026-10-11)
+
+To check whether that fixed-width path represents tables generally, the
+production fixtures were expanded to 2, 3, 5, and 8 columns at both 5,000 and
+10,000 rows. The three implementations render the same column values and
+sortable header, and all sort the first column. Row data and column descriptors
+are prepared before the initial timer. Each implementation was built once and
+interleaved in Chromium; framework order reverses by round. The protocol uses
+two warmups, seven measured rounds, and two animation frames after mount and
+sort as the paint opportunity boundary. Each value is median [minimum–maximum]
+in milliseconds. The spreads are wide on some large cases, so small median
+differences are not treated as repeatable gains.
+
+| Columns | Rows |                       Registry mount / sort |              Handwritten Benos mount / sort |                        Solid mount / sort |
+| ------: | ---: | ------------------------------------------: | ------------------------------------------: | ----------------------------------------: |
+|       2 |   5k |      121.0 [106.5–206.9] / 73.0 [65.6–99.6] |     120.3 [112.3–200.3] / 75.6 [66.9–100.2] |      68.5 [57.9–121.0] / 67.0 [59.7–87.7] |
+|       2 |  10k |  245.4 [220.0–1053.6] / 145.1 [135.2–412.5] |   252.3 [210.6–392.5] / 149.8 [128.9–250.1] | 137.1 [113.6–569.0] / 122.3 [119.5–376.8] |
+|       3 |   5k |     133.3 [127.2–231.8] / 96.2 [84.3–240.9] |     152.2 [146.7–228.8] / 93.4 [83.2–108.7] |    107.0 [79.6–130.3] / 94.1 [75.4–106.8] |
+|       3 |  10k |   265.7 [251.2–320.1] / 198.4 [179.3–215.8] |   329.0 [289.6–467.6] / 211.2 [168.8–609.2] | 189.4 [153.3–478.3] / 190.0 [162.4–265.7] |
+|       5 |   5k |   235.7 [213.5–360.2] / 151.2 [138.8–192.0] |   251.1 [246.9–307.7] / 151.5 [147.1–249.3] | 152.3 [127.4–178.4] / 138.7 [133.5–295.8] |
+|       5 |  10k |   524.5 [461.6–673.1] / 350.0 [304.6–452.9] |   515.2 [444.6–944.6] / 338.3 [301.4–595.8] | 330.3 [253.6–395.5] / 314.5 [277.1–961.6] |
+|       8 |   5k |   401.6 [380.5–799.4] / 244.9 [233.3–340.5] |   413.7 [365.7–483.8] / 265.5 [216.2–676.3] | 245.3 [234.0–346.8] / 259.5 [212.3–314.0] |
+|       8 |  10k | 870.2 [792.8–1079.2] / 658.3 [503.7–1765.6] | 797.4 [732.7–1327.8] / 647.6 [515.4–1132.8] | 546.1 [501.6–977.6] / 627.3 [495.1–781.4] |
+
+Across 2, 5, and 8 columns, registry and handwritten Benos mount medians are
+close, with their spreads overlapping. The exact-three direct branch is the
+only structural advantage identified here: its mount medians are 12.4% lower
+than handwritten at 5k and 19.2% lower at 10k. It does not improve sort time.
+The current evidence therefore shows a benefit isolated to exactly three
+columns. The registry's multi-width measurements, rather than the old fixed
+three-column numbers, are the representative table record. Raw measured
+samples are in
+[`multicolumn-before-specialization.json`](js-framework-benchmark/results/multicolumn-before-specialization.json).
+
+#### Current generic-path matrix after reverting the fixed-width branch
+
+The implementation now uses the same mapped cell path at every column count.
+This repeat used the same fixtures and protocol as the baseline above: compiled
+production builds, two warmups, seven interleaved Chromium rounds, and a pair
+of animation frames at each measurement boundary. Each value is median
+[minimum–maximum] in milliseconds.
+
+| Columns | Rows |                     Registry mount / sort |             Handwritten Benos mount / sort |                        Solid mount / sort |
+| ------: | ---: | ----------------------------------------: | -----------------------------------------: | ----------------------------------------: |
+|       2 |   5k |    128.1 [100.9–288.8] / 77.1 [64.2–89.6] |     113.4 [107.3–176.7] / 68.8 [61.1–83.2] |       63.1 [58.2–74.9] / 66.1 [57.8–86.6] |
+|       2 |  10k | 224.4 [195.3–279.5] / 144.1 [124.2–162.3] |  233.9 [207.6–277.7] / 142.9 [130.5–164.0] | 131.2 [108.4–151.7] / 138.1 [111.8–146.0] |
+|       3 |   5k |   146.7 [126.3–186.0] / 94.6 [80.4–112.4] |   146.7 [131.6–181.4] / 102.8 [78.9–135.3] |     82.8 [72.5–126.1] / 92.9 [74.1–330.8] |
+|       3 |  10k | 331.0 [277.5–636.7] / 212.5 [171.7–286.9] |  275.1 [264.6–375.7] / 249.6 [161.0–608.1] | 179.2 [151.0–196.4] / 223.6 [152.3–729.1] |
+|       5 |   5k | 229.9 [211.0–451.6] / 160.5 [140.1–551.8] |  226.6 [213.3–265.3] / 150.2 [132.9–187.2] | 146.6 [123.7–158.9] / 143.9 [132.9–218.3] |
+|       5 |  10k | 513.3 [453.7–634.4] / 416.2 [282.9–680.4] |  536.7 [448.9–745.7] / 410.8 [276.8–548.0] | 298.5 [278.8–316.1] / 297.1 [273.7–674.3] |
+|       8 |   5k | 411.3 [369.2–459.1] / 247.7 [225.9–507.2] |  387.5 [373.4–469.1] / 258.8 [233.6–433.6] | 241.2 [221.7–277.6] / 252.0 [231.9–460.4] |
+|       8 |  10k | 878.6 [766.5–936.2] / 568.3 [494.6–632.0] | 834.5 [745.9–988.5] / 619.3 [488.7–1133.3] | 608.1 [538.7–712.5] / 516.6 [512.1–955.0] |
+
+After removing the three-column branch, registry and handwritten Benos medians
+are within 13% for all initial mounts. Their spreads overlap for every mount
+case, and no median difference is consistent across widths. Sort medians are
+similarly close with broad overlap. The generic mapped-cell implementation is
+therefore retained for all column counts. Keyed row identity, accessibility,
+sorting, and direction behavior remain covered by the browser suite. Raw
+samples are in
+[`multicolumn-after-revert.json`](js-framework-benchmark/results/multicolumn-after-revert.json).
 
 The updated allocation-sampling profile retained 44.2 plain objects, 19.0
 arrays, and 19.0 closures/functions per registry row, versus Solid's 10.1,

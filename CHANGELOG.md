@@ -17,11 +17,10 @@ All notable changes to Benos are documented here.
 - Create effect-run owners only when an effect run needs a cleanup, child owner,
   or context, reducing generic-row owner creation calls from 8 to 4 and retained
   plain objects from 57 to 53 per row.
-- Specialize the registry sortable table's common three-column row so it avoids
-  a mapped cell array per row. The interleaved table trace reduced the registry
-  table's 5,000-row initial-render gap over handwritten Benos from 31.7 ms to
-  11.1 ms and its 10,000-row gap from 71.4 ms to 2.6 ms; see the full medians
-  and spreads in `benchmarks/README.md`.
+- Measure the registry sortable table at 2, 3, 5, and 8 columns against
+  handwritten Benos and Solid, then remove the fixed three-column optimization
+  because its gain did not generalize across widths. The interleaved medians
+  and spreads are in `benchmarks/README.md`.
 - The latest full production trace measured Benos at 1.39× Solid for 1,000-row
   creation, 1.40× for replacement, and 1.36× for 10,000-row creation. The full
   nine-operation comparison and spreads are in `benchmarks/README.md`.

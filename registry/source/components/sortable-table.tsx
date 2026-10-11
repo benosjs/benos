@@ -69,52 +69,7 @@ export function SortableTable<Row>(props: SortableTableProps<Row>): JSX.Element 
     )
   }
 
-  const fixedColumns =
-    columns.length === 3
-      ? (columns as readonly [
-          SortableTableColumn<Row>,
-          SortableTableColumn<Row>,
-          SortableTableColumn<Row>,
-        ])
-      : null
-  const renderedRows = fixedColumns ? (
-    <For each={rows()} by={(row) => local.rowKey(row)}>
-      {(row) => (
-        <tr>
-          <td
-            dir={fixedColumns[0].type === 'number' ? undefined : 'auto'}
-            class={
-              fixedColumns[0].type === 'number'
-                ? 'benos-sortable-table__number'
-                : 'benos-sortable-table__text'
-            }
-          >
-            {fixedColumns[0].value(row()) ?? '—'}
-          </td>
-          <td
-            dir={fixedColumns[1].type === 'number' ? undefined : 'auto'}
-            class={
-              fixedColumns[1].type === 'number'
-                ? 'benos-sortable-table__number'
-                : 'benos-sortable-table__text'
-            }
-          >
-            {fixedColumns[1].value(row()) ?? '—'}
-          </td>
-          <td
-            dir={fixedColumns[2].type === 'number' ? undefined : 'auto'}
-            class={
-              fixedColumns[2].type === 'number'
-                ? 'benos-sortable-table__number'
-                : 'benos-sortable-table__text'
-            }
-          >
-            {fixedColumns[2].value(row()) ?? '—'}
-          </td>
-        </tr>
-      )}
-    </For>
-  ) : (
+  const renderedRows = (
     <For each={rows()} by={(row) => local.rowKey(row)}>
       {(row) => (
         <tr>

@@ -1,20 +1,32 @@
 import { For, createMemo, createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
-import { makeTableRows, sortedTableRows, type TableRow } from './table-data'
+import { makeTableRows } from './table-data'
+import { makeColumns, orderRows } from './table-model'
 import './table-bench.css'
 
 declare global {
   interface Window {
-    __benosTableBench: { initial: Promise<number> }
+    __benosTableBench: {
+      initial: Promise<number>
+      sort: () => Promise<{
+        elapsed: number
+        count: number
+        firstName?: string
+      }>
+    }
   }
 }
 
 const size = Number(new URLSearchParams(location.search).get('rows') ?? 5_000)
+const columnCount = Number(
+  new URLSearchParams(location.search).get('columns') ?? 3,
+)
 const rows = makeTableRows(size)
+const columns = makeColumns(columnCount)
 const [direction, setDirection] = createSignal<
   'ascending' | 'descending' | null
 >(null)
-const ordered = createMemo(() => sortedTableRows(rows, direction()))
+const ordered = createMemo(() => orderRows(rows, direction()))
 const started = performance.now()
 
 function App() {
@@ -31,37 +43,53 @@ function App() {
       <caption class="benos-sortable-table__caption">Benchmark rows</caption>
       <thead>
         <tr>
-          <th scope="col" aria-sort={direction() ?? 'none'}>
-            <button
-              class="benos-sortable-table__sort"
-              type="button"
-              onClick={activate}
+          {columns.map((column) => (
+            <th
+              scope="col"
+              aria-sort={
+                column.key === 'column-0' ? (direction() ?? 'none') : 'none'
+              }
+              dir="auto"
             >
-              Name
-              <span aria-hidden="true" class="benos-sortable-table__indicator">
-                {direction() === 'ascending'
-                  ? '↑'
-                  : direction() === 'descending'
-                    ? '↓'
+              <button
+                class="benos-sortable-table__sort"
+                type="button"
+                onClick={activate}
+              >
+                {column.label}
+                <span
+                  aria-hidden="true"
+                  class="benos-sortable-table__indicator"
+                >
+                  {column.key === 'column-0'
+                    ? direction() === 'ascending'
+                      ? '↑'
+                      : direction() === 'descending'
+                        ? '↓'
+                        : '↕'
                     : '↕'}
-              </span>
-            </button>
-          </th>
-          <th scope="col" aria-sort="none">
-            Region
-          </th>
-          <th scope="col" aria-sort="none">
-            Requests
-          </th>
+                </span>
+              </button>
+            </th>
+          ))}
         </tr>
       </thead>
       <tbody>
         <For each={ordered()}>
           {(row: TableRow) => (
             <tr>
-              <td class="benos-sortable-table__text">{row.name}</td>
-              <td class="benos-sortable-table__text">{row.region}</td>
-              <td class="benos-sortable-table__number">{row.requests}</td>
+              {columns.map((column) => (
+                <td
+                  dir={column.type === 'number' ? undefined : 'auto'}
+                  class={
+                    column.type === 'number'
+                      ? 'benos-sortable-table__number'
+                      : 'benos-sortable-table__text'
+                  }
+                >
+                  {column.value(row)}
+                </td>
+              ))}
             </tr>
           )}
         </For>
@@ -79,4 +107,19 @@ window.__benosTableBench = {
       requestAnimationFrame(() => resolve(performance.now() - started)),
     )
   }),
+  sort: async () => {
+    const button = document.querySelector<HTMLButtonElement>(
+      '.benos-sortable-table__sort',
+    )
+    if (!button) throw new Error('Sortable Name header was not rendered.')
+    const start = performance.now()
+    button.click()
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    await new Promise((resolve) => requestAnimationFrame(resolve))
+    return {
+      elapsed: performance.now() - start,
+      count: document.querySelectorAll('tbody tr').length,
+      firstName: document.querySelector('tbody tr td')?.textContent,
+    }
+  },
 }
