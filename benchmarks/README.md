@@ -1266,3 +1266,98 @@ time improvement is promising but overlaps the prior spread.
 Raw artifacts: [all nine interleaved rows](js-framework-benchmark/lazy-owner-nine-2026-10-11.json),
 [5k and 10k table trace](js-framework-benchmark/results/lazy-owner-table-2026-10-11.json),
 [allocation and owner profile](js-framework-benchmark/results/lazy-owner-allocation-2026-10-11.json).
+
+## 0.3.0 release-candidate comparison (2026-10-11)
+
+This is the current compiled production path after direct compiler output,
+lazy effect-run owners, and the registry table specialization. It supersedes
+the earlier release comparison for the next release; older tables above remain
+historical records. The full framework run used Node 26.10.0, Chromium
+153.0.8010.12, macOS arm64, two warmups, seven measured rounds, interleaved
+framework order, and the shared Chrome trace click-to-paint boundary. Times
+are milliseconds; brackets show the measured minimum–maximum spread.
+
+| Workload           |          Benos (ms) |          Solid (ms) |         Svelte (ms) |            Vue (ms) |          React (ms) | Benos / Solid |
+| ------------------ | ------------------: | ------------------: | ------------------: | ------------------: | ------------------: | ------------: |
+| Create 1,000 rows  |    34.8 [33.5–37.3] |    25.0 [24.3–26.4] |    27.6 [27.2–31.0] |    29.3 [28.8–31.1] |    29.6 [29.2–30.5] |         1.39× |
+| Replace 1,000 rows |    35.4 [35.0–36.6] |    25.3 [24.9–25.7] |    27.1 [26.8–32.1] |    26.5 [26.4–32.4] |    30.8 [30.5–31.8] |         1.40× |
+| Update every 10th  |    12.7 [12.6–12.8] |    13.4 [13.3–13.6] |    13.2 [13.0–23.3] |    21.1 [20.6–24.2] |    17.4 [17.1–18.7] |         0.94× |
+| Select one row     |      1.2 [1.1–10.7] |       0.8 [0.8–0.9] |      1.2 [1.2–22.2] |     18.4 [3.4–23.7] |       5.9 [5.1–7.9] |         1.44× |
+| Swap rows          |       3.8 [3.7–3.9] |       2.8 [2.8–2.9] |      4.2 [4.2–23.3] |    24.3 [16.9–24.8] |    27.4 [26.3–27.7] |         1.35× |
+| Remove one row     |       4.6 [4.6–4.7] |       4.2 [4.1–5.1] |       5.8 [5.7–6.2] |    21.5 [19.4–24.6] |      9.8 [9.1–11.1] |         1.11× |
+| Create 10,000 rows | 320.9 [315.3–375.9] | 236.7 [232.9–250.2] | 243.8 [242.3–267.0] | 263.4 [261.3–271.9] | 498.8 [490.9–575.4] |         1.36× |
+| Append 1,000 rows  |    42.7 [42.5–43.5] |    35.1 [34.9–35.4] |    36.6 [36.3–45.7] |    40.8 [40.6–46.8] |    42.3 [40.2–44.2] |         1.22× |
+| Clear rows         |       5.2 [5.0–5.6] |       2.5 [2.5–3.4] |       3.4 [3.3–4.0] |       3.5 [3.4–5.7] |       5.1 [4.4–5.3] |         2.07× |
+
+Benos is faster than Solid on the partial update. It remains slower on the
+other eight operations; create, replace, and 10,000-row create are about 1.4×,
+while clear remains 2.07×. Select has a long Benos outlier, and select, swap,
+and several reference-framework operations also have wide spreads. Raw data is
+in [`results/latest.json`](./js-framework-benchmark/results/latest.json).
+
+### Registry sortable table: static three-column row
+
+The registry component now captures its columns once and emits three cell
+descriptors directly for the common three-column case. This removes the
+per-row `columns.map` result and its dynamic child array. Other column counts
+retain the generic mapped path. A browser regression test counts map calls:
+three columns perform only the header iteration, while four columns exercise
+the generic path and map once per row. The same behavior tests pass in
+Chromium, Firefox, and WebKit.
+
+The before run used two warmups and seven measured rounds. The after summary
+pools two independent interleaved runs (each with two warmups and seven rounds)
+for 14 measured samples. Each cell reports median and full min–max spread.
+“Handwritten” is the equivalent Benos table using keyed `<For>` rows; Solid is
+the matching handwritten Solid table. The initial-render overhead column is
+the difference between the registry and handwritten Benos medians.
+
+| Rows | Variant / measure                |         Before (ms) |          After (ms) |
+| ---: | -------------------------------- | ------------------: | ------------------: |
+|   5k | Benos registry initial           | 141.6 [131.1–167.3] | 129.4 [118.5–160.5] |
+|   5k | Handwritten Benos initial        |  109.9 [95.9–122.7] |  118.3 [99.9–149.9] |
+|   5k | Solid initial                    |    65.5 [64.4–83.7] |    74.3 [67.2–98.5] |
+|   5k | Registry vs handwritten overhead |                31.7 |                11.1 |
+|   5k | Benos registry sort              |   92.4 [78.2–137.4] |   90.7 [82.6–176.1] |
+|   5k | Solid sort                       |    77.9 [73.2–93.2] |   80.9 [71.9–153.7] |
+|  10k | Benos registry initial           | 296.6 [257.5–432.1] | 248.3 [228.0–354.7] |
+|  10k | Handwritten Benos initial        | 225.2 [202.9–356.0] | 245.7 [210.6–288.0] |
+|  10k | Solid initial                    | 152.0 [130.6–177.9] | 151.7 [133.4–215.0] |
+|  10k | Registry vs handwritten overhead |                71.4 |                 2.6 |
+|  10k | Benos registry sort              | 251.7 [162.8–485.2] | 200.2 [164.8–329.3] |
+|  10k | Solid sort                       | 164.3 [147.9–247.5] | 185.6 [159.4–299.9] |
+
+The measured registry overhead fell by about 65% at 5k and 96% at 10k using
+the within-run median differences. The post-change registry table remains
+about 1.74× Solid at 5k and 1.64× at 10k for initial render. Sorting medians
+are near Solid, though the 10k spreads overlap broadly. These measurements
+support keeping the specialized row path; they do not establish that the table
+matches Solid's mount time.
+
+The updated allocation-sampling profile retained 44.2 plain objects, 19.0
+arrays, and 19.0 closures/functions per registry row, versus Solid's 10.1,
+2.0, and 7.0. Owner creation calls were 4.0 vs 1.0 per row, and effect
+creation calls were 9.0 vs 3.0. Compared with the earlier registry profile,
+the new path retained about 23 fewer plain objects, 21 fewer arrays, and 11
+fewer closures per row. The remaining object and closure gap is the next
+performance target. The table-specific production JS chunk is 37.94 kB raw /
+12.18 kB gzip; shared table CSS is 26.18 kB / 4.08 kB gzip.
+
+The production kernel guard passed on the same rebuilt package set (median of
+seven harness runs, each with five timed samples):
+
+| Workload                            | Benos (ms) | Preact (ms) | Ratio |
+| ----------------------------------- | ---------: | ----------: | ----: |
+| Signal read                         |       5.95 |        4.68 | 1.27× |
+| 20-deep computed chain write + read |       6.19 |        3.96 | 1.57× |
+| 200-effect fanout write             |       1.97 |        1.13 | 1.74× |
+| Dynamic dependency switch           |       3.41 |        2.03 | 1.68× |
+| Repeated equal write                |       0.69 |        0.65 | 1.07× |
+
+The kernel remains under the 2× Preact guard on all five workloads. The
+current release-candidate package sizes are 4,108 / 4,608 bytes for core and
+10,580 / 11,264 bytes for core plus DOM, minified and gzipped. Raw table runs
+and allocation data are in [`sortable-table-before-optimization-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-before-optimization-2026-10-11.json),
+[`sortable-table-after-optimization-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-after-optimization-2026-10-11.json),
+[`sortable-table-after-optimization-repeat-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-after-optimization-repeat-2026-10-11.json),
+and [`sortable-table-optimized-allocation-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-optimized-allocation-2026-10-11.json).

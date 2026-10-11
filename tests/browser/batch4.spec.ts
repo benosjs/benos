@@ -52,7 +52,8 @@ test('renders a named semantic table and cycles sort state in place', async ({
   const mappedCellsBeforeSort = await page.evaluate(() =>
     window.__benosBatchFour.columnMapReads(),
   )
-  expect(mappedCellsBeforeSort).toBeGreaterThan(0)
+  // The column header list uses one map; row rendering must not map columns.
+  expect(mappedCellsBeforeSort).toBe(1)
   await row.evaluate((element) => {
     ;(element as HTMLElement & { retainedMarker?: string }).retainedMarker =
       'same-node'
@@ -83,6 +84,17 @@ test('renders a named semantic table and cycles sort state in place', async ({
   await expect(page.locator('tbody tr').first()).toContainText('Bravo')
 })
 
+test('uses the generic mapped-cell path for non-three-column tables', async ({
+  page,
+}) => {
+  await page.goto('/tests/browser/batch4-fixture.html?four')
+  await expect(page.getByRole('row')).toHaveCount(5)
+  await expect(page.locator('tbody tr').first().locator('td')).toHaveCount(4)
+  expect(
+    await page.evaluate(() => window.__benosBatchFour.columnMapReads()),
+  ).toBe(5)
+})
+
 test('shows a useful empty state and truncates long text', async ({ page }) => {
   await page.goto('/tests/browser/batch4-fixture.html?empty')
   await expect(page.getByText('No members yet.')).toBeVisible()
@@ -104,6 +116,7 @@ test('mixed-direction cell text follows its own direction in RTL and LTR tables'
     .getByRole('row')
     .filter({ hasText: 'Bravo with a long display value' })
     .locator('.benos-sortable-table__text')
+    .first()
   await expect(englishInRtl).toHaveAttribute('dir', 'auto')
   expect(
     await englishInRtl.evaluate((cell) => getComputedStyle(cell).direction),
@@ -115,6 +128,7 @@ test('mixed-direction cell text follows its own direction in RTL and LTR tables'
     .getByRole('row')
     .filter({ hasText: 'مريم خوري' })
     .locator('.benos-sortable-table__text')
+    .first()
   await expect(arabicInLtr).toHaveAttribute('dir', 'auto')
   expect(
     await arabicInLtr.evaluate((cell) => getComputedStyle(cell).direction),

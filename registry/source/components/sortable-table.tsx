@@ -38,11 +38,12 @@ export function SortableTable<Row>(props: SortableTableProps<Row>): JSX.Element 
     'emptyMessage',
   ] as const)
   const id = local.id ?? createUniqueId()
+  const columns = local.columns
   const sort = signal<{ key: string; direction: SortDirection } | null>(null)
   const rows = computed(() => {
     const current = sort()
     if (!current) return local.rows
-    const column = local.columns.find((candidate) => candidate.key === current.key)
+    const column = columns.find((candidate) => candidate.key === current.key)
     if (!column) return local.rows
     const collator = new Intl.Collator(undefined, {
       numeric: column.type !== 'text',
@@ -68,6 +69,72 @@ export function SortableTable<Row>(props: SortableTableProps<Row>): JSX.Element 
     )
   }
 
+  const fixedColumns =
+    columns.length === 3
+      ? (columns as readonly [
+          SortableTableColumn<Row>,
+          SortableTableColumn<Row>,
+          SortableTableColumn<Row>,
+        ])
+      : null
+  const renderedRows = fixedColumns ? (
+    <For each={rows()} by={(row) => local.rowKey(row)}>
+      {(row) => (
+        <tr>
+          <td
+            dir={fixedColumns[0].type === 'number' ? undefined : 'auto'}
+            class={
+              fixedColumns[0].type === 'number'
+                ? 'benos-sortable-table__number'
+                : 'benos-sortable-table__text'
+            }
+          >
+            {fixedColumns[0].value(row()) ?? '—'}
+          </td>
+          <td
+            dir={fixedColumns[1].type === 'number' ? undefined : 'auto'}
+            class={
+              fixedColumns[1].type === 'number'
+                ? 'benos-sortable-table__number'
+                : 'benos-sortable-table__text'
+            }
+          >
+            {fixedColumns[1].value(row()) ?? '—'}
+          </td>
+          <td
+            dir={fixedColumns[2].type === 'number' ? undefined : 'auto'}
+            class={
+              fixedColumns[2].type === 'number'
+                ? 'benos-sortable-table__number'
+                : 'benos-sortable-table__text'
+            }
+          >
+            {fixedColumns[2].value(row()) ?? '—'}
+          </td>
+        </tr>
+      )}
+    </For>
+  ) : (
+    <For each={rows()} by={(row) => local.rowKey(row)}>
+      {(row) => (
+        <tr>
+          {columns.map((column) => (
+            <td
+              dir={column.type === 'number' ? undefined : 'auto'}
+              class={
+                column.type === 'number'
+                  ? 'benos-sortable-table__number'
+                  : 'benos-sortable-table__text'
+              }
+            >
+              {column.value(row()) ?? '—'}
+            </td>
+          ))}
+        </tr>
+      )}
+    </For>
+  )
+
   return (
     <table
       {...native}
@@ -80,7 +147,7 @@ export function SortableTable<Row>(props: SortableTableProps<Row>): JSX.Element 
       </caption>
       <thead>
         <tr>
-          <For each={local.columns} by={(column) => column.key}>
+          <For each={columns} by={(column) => column.key}>
             {(column) => {
               const currentColumn = column()
               return (
@@ -116,30 +183,13 @@ export function SortableTable<Row>(props: SortableTableProps<Row>): JSX.Element 
           when={rows().length > 0}
           fallback={
             <tr>
-              <td colSpan={local.columns.length} class="benos-sortable-table__empty" dir="auto">
+              <td colSpan={columns.length} class="benos-sortable-table__empty" dir="auto">
                 {local.emptyMessage}
               </td>
             </tr>
           }
         >
-          <For each={rows()} by={(row) => local.rowKey(row)}>
-            {(row) => (
-              <tr>
-                {local.columns.map((column) => (
-                  <td
-                    dir={column.type === 'number' ? undefined : 'auto'}
-                    class={
-                      column.type === 'number'
-                        ? 'benos-sortable-table__number'
-                        : 'benos-sortable-table__text'
-                    }
-                  >
-                    {column.value(row()) ?? '—'}
-                  </td>
-                ))}
-              </tr>
-            )}
-          </For>
+          {renderedRows}
         </Show>
       </tbody>
     </table>

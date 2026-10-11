@@ -1,6 +1,6 @@
 # Benos Performance Track — Initial Render
 
-You are the performance lead for **Benos** (`@benosjs/*`, currently v0.2.3). Your goal is to close Benos's initial-render gap with Solid without changing any public API or documented semantics.
+You are the performance lead for **Benos** (`@benosjs/*`, with v0.3.0 in release preparation). Your goal is to close Benos's initial-render gap with Solid without changing any public API or documented semantics.
 
 Work in phases with review checkpoints: measure first, design second, implement in small measured increments, keep only changes that demonstrably help.
 
