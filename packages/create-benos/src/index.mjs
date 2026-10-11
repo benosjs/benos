@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* global console, process */
 import { cp, readFile, readdir, writeFile, mkdir } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import spawn from 'cross-spawn'
@@ -9,6 +9,9 @@ import * as prompts from '@clack/prompts'
 
 const packageRoot = dirname(fileURLToPath(import.meta.url))
 const templateRoot = resolve(packageRoot, '../template')
+const packageVersion = JSON.parse(
+  readFileSync(resolve(packageRoot, '../package.json'), 'utf8'),
+).version
 
 function runCommand(command, args, options = {}) {
   return new Promise((resolvePromise, reject) => {
@@ -85,7 +88,8 @@ Options:
   --verbose              show detailed Benos UI setup output
   --registry <url>       use this registry when --ui is enabled
   --git                  run git init after scaffolding
-  --help                 show this message
+  --version, -v           show the create-benos version
+  --help, -h              show this message
 
 Without a terminal, create-benos uses prompt defaults and never starts the
 dev server unless --start is passed. --yes accepts defaults; pass --no-start
@@ -111,6 +115,10 @@ function parseArgs(args) {
   let verbose = false
   for (let index = 0; index < args.length; index++) {
     const arg = args[index]
+    if (arg === '--version' || arg === '-v') {
+      console.log(packageVersion)
+      process.exit(0)
+    }
     if (arg === '--help' || arg === '-h') {
       console.log(usage())
       process.exit(0)
