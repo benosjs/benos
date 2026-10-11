@@ -22,6 +22,7 @@ const root = resolve(fileURLToPath(new globalThis.URL('../', import.meta.url)))
 const manager = process.env.BENOS_PACKAGE_MANAGER
 const packageNames = ['benos']
 const fixtureCoreVersion = '0.2.1'
+const fixtureDomVersion = '0.2.1'
 const fixturePrimitivesVersion = '0.2.1'
 const fixtureDialogVersion = '1.44.0'
 const pnpmExecutable = process.env.PNPM_HOME
@@ -69,6 +70,45 @@ function runNpx(args) {
     'npx-cli.js',
   )
   return runCommand(process.execPath, [npxCli, ...args], { cwd: app })
+}
+
+function runCaptured(command, args, cwd) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, {
+      cwd,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: false,
+    })
+    let stdout = ''
+    let stderr = ''
+    child.stdout.setEncoding('utf8')
+    child.stderr.setEncoding('utf8')
+    child.stdout.on('data', (chunk) => (stdout += chunk))
+    child.stderr.on('data', (chunk) => (stderr += chunk))
+    child.once('error', reject)
+    child.once('close', (code, signal) => {
+      if (code === 0) resolve({ stdout, stderr })
+      else {
+        reject(
+          new Error(
+            `${command} ${args.join(' ')} failed with ${signal ? `signal ${signal}` : `exit code ${code}`}.\n${stdout}${stderr}`,
+          ),
+        )
+      }
+    })
+  })
+}
+
+function runNpxCaptured(args) {
+  if (process.platform !== 'win32') return runCaptured('npx', args, app)
+  const npxCli = join(
+    dirname(process.execPath),
+    'node_modules',
+    'npm',
+    'bin',
+    'npx-cli.js',
+  )
+  return runCaptured(process.execPath, [npxCli, ...args], app)
 }
 
 const temporary = await mkdtemp(
@@ -132,7 +172,7 @@ try {
   }
   const fixtureArchives = await Promise.all([
     packFixtureDependency('@benosjs/core', fixtureCoreVersion),
-    packFixtureDependency('@benosjs/dom', '0.2.1'),
+    packFixtureDependency('@benosjs/dom', fixtureDomVersion),
     packFixtureDependency('@benosjs/primitives', fixturePrimitivesVersion),
     packFixtureDependency('@zag-js/dialog', fixtureDialogVersion),
   ])
@@ -237,6 +277,33 @@ try {
     installedPackage.bin?.benos !== 'bin/benos.cjs'
   ) {
     throw new Error('The fresh project did not install the packed benos CLI.')
+  }
+
+  const version = await runNpxCaptured(['benos', '--version'])
+  if (version.stdout.trim() !== manifests.get('benos').version) {
+    throw new Error('npx benos --version did not report the installed version.')
+  }
+  const shortVersion = await runNpxCaptured(['benos', '-v'])
+  if (shortVersion.stdout.trim() !== manifests.get('benos').version) {
+    throw new Error('npx benos -v did not report the installed version.')
+  }
+  const help = await runNpxCaptured(['benos', '--help'])
+  if (!help.stdout.includes('Usage: benos <command>')) {
+    throw new Error('npx benos --help did not show CLI usage.')
+  }
+  const commandHelp = await runNpxCaptured(['benos', 'init', '--help'])
+  if (!commandHelp.stdout.includes('Usage: benos init')) {
+    throw new Error('npx benos init --help did not show command usage.')
+  }
+  const info = await runNpxCaptured(['benos', 'info'])
+  if (
+    !info.stdout.includes(`Benos CLI: ${manifests.get('benos').version}`) ||
+    !info.stdout.includes(`@benosjs/dom: ${fixtureDomVersion}`) ||
+    !/Package manager: (npm|pnpm|yarn|bun)/.test(info.stdout)
+  ) {
+    throw new Error(
+      `npx benos info did not report the project environment:\n${info.stdout}`,
+    )
   }
 
   await runNpx(['benos', 'init', '--yes', '--registry', registryUrl])

@@ -212,3 +212,30 @@ service changes, track getter-backed controlled props, and stop/unsubscribe on
 owner cleanup. `createToast` additionally requires the public Zag toast-group
 `parent` service in its options. Zag's public connected API and option types
 are preserved; factories do not expose Benos-internal imports.
+
+## CLI packages
+
+### `benos`
+
+The `benos` executable supports `--version`/`-v` and `--help`/`-h` at the
+top level. Each command also accepts `--help`/`-h` (for example,
+`benos add --help`). `benos info` reports the CLI version, Node version,
+package manager, and operating system. Inside a Benos project it also lists
+the installed `@benosjs/*` package versions and warns when those versions do
+not match. Outside a project it prints the CLI and environment details only.
+
+```sh
+npx benos --version
+npx benos add --help
+npx benos info
+```
+
+### `create-benos`
+
+The `create-benos` executable supports `--version`/`-v` and `--help`/`-h`.
+The version is the installed scaffolder package version.
+
+```sh
+npm create benos@latest -- --help
+npm create benos@latest -- --version
+```

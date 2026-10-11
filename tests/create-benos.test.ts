@@ -154,6 +154,42 @@ describe('create-benos packed scaffold', () => {
       await expect(run('node', [cli, '--template', app])).rejects.toThrow(
         'Unknown option: --template',
       )
+
+      const binConsumer = join(temporary, 'create-benos-bin-consumer')
+      await mkdir(binConsumer)
+      await writeFile(
+        join(binConsumer, 'package.json'),
+        `${JSON.stringify(
+          {
+            name: 'create-benos-bin-consumer',
+            private: true,
+            dependencies: {
+              'create-benos': fileDependency(binConsumer, createArchive),
+            },
+            pnpm: {
+              overrides: {
+                benos: fileDependency(binConsumer, benos),
+              },
+            },
+          },
+          null,
+          2,
+        )}\n`,
+      )
+      await runPnpm(['install', '--ignore-scripts'], { cwd: binConsumer })
+      const createBinVersion = await runPnpm(
+        ['exec', 'create-benos', '--version'],
+        { cwd: binConsumer },
+      )
+      const createArchiveManifest = JSON.parse(
+        await readFile(join(createPackage, 'package.json'), 'utf8'),
+      ) as { version: string }
+      expect(createBinVersion.stdout.trim()).toBe(createArchiveManifest.version)
+      const createBinHelp = await runPnpm(['exec', 'create-benos', '-h'], {
+        cwd: binConsumer,
+      })
+      expect(createBinHelp.stdout).toContain('Usage: create-benos')
+
       for (const logo of ['benos-mark-light.png', 'benos-mark-navy.png']) {
         expect(
           (await readFile(join(app, 'public', logo))).byteLength,
