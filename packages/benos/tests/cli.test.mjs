@@ -81,6 +81,7 @@ test('info lists installed @benosjs versions and warns about mismatches', (conte
   const dependencies = {
     '@benosjs/core': '^0.2.3',
     '@benosjs/dom': '^0.2.2',
+    '@benosjs/primitives': '^0.2.1',
   }
   writeFileSync(
     join(temporary, 'package.json'),
@@ -99,6 +100,21 @@ test('info lists installed @benosjs versions and warns about mismatches', (conte
     )
     writeFileSync(join(packageDirectory, 'index.js'), 'module.exports = {}\n')
   }
+  const primitivesDirectory = join(
+    temporary,
+    'node_modules/@benosjs/primitives',
+  )
+  mkdirSync(primitivesDirectory, { recursive: true })
+  writeFileSync(
+    join(primitivesDirectory, 'package.json'),
+    JSON.stringify({
+      name: '@benosjs/primitives',
+      version: '0.2.1',
+      types: './index.d.ts',
+      exports: { '.': { types: './index.d.ts' } },
+    }),
+  )
+  writeFileSync(join(primitivesDirectory, 'index.d.ts'), 'export {}\n')
 
   const result = runCli(['info'], temporary, {
     ...process.env,
@@ -107,8 +123,33 @@ test('info lists installed @benosjs versions and warns about mismatches', (conte
   assert.equal(result.status, 0, result.stderr)
   assert.match(result.stdout, /@benosjs\/core: 0\.2\.3/)
   assert.match(result.stdout, /@benosjs\/dom: 0\.2\.2/)
+  assert.match(result.stdout, /@benosjs\/primitives: 0\.2\.1/)
   assert.match(result.stdout, /Package manager: pnpm 10\.17\.0/)
   assert.match(result.stdout, /Warning: @benosjs package versions do not match/)
+})
+
+test('info lists declared packages with a warning when package.json cannot be read', (context) => {
+  const temporary = mkdtempSync(join(tmpdir(), 'benos-info-unreadable-'))
+  context.after(() => rmSync(temporary, { recursive: true, force: true }))
+  writeFileSync(
+    join(temporary, 'package.json'),
+    JSON.stringify({
+      name: 'info-unreadable-fixture',
+      dependencies: { '@benosjs/primitives': '^0.3.1' },
+    }),
+  )
+  writeFileSync(join(temporary, 'package-lock.json'), '{}')
+  const packageDirectory = join(temporary, 'node_modules/@benosjs/primitives')
+  mkdirSync(packageDirectory, { recursive: true })
+  writeFileSync(join(packageDirectory, 'package.json'), '{ invalid json')
+
+  const result = runCli(['info'], temporary)
+  assert.equal(result.status, 0, result.stderr)
+  assert.match(result.stdout, /@benosjs\/primitives: unavailable/)
+  assert.match(
+    result.stdout,
+    /Warning: Could not read @benosjs\/primitives\/package\.json/,
+  )
 })
 
 test('package manager user-agent parsing recognizes the supported managers', () => {

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "release": "0.3.0",
+  "release": "0.3.1",
   "name": "radio-group",
   "type": "registry:component",
   "title": "Radio Group",

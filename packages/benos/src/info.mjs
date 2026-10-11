@@ -1,6 +1,6 @@
 /* global console */
 
-import { readFile } from 'node:fs/promises'
+import { access, readFile } from 'node:fs/promises'
 import { createRequire } from 'node:module'
 import { arch, platform, release } from 'node:os'
 import { dirname, resolve } from 'node:path'
@@ -50,28 +50,67 @@ function managerVersionFromEnvironment(manager) {
   return match?.[1]
 }
 
-async function installedVersion(root, name) {
+async function installedVersion(root, name, declared) {
   const requireFromProject = createRequire(resolve(root, 'package.json'))
-  let entry
+  const manifestPaths = []
+  let packageResolutionError
   try {
-    entry = requireFromProject.resolve(name)
-  } catch {
-    return undefined
+    manifestPaths.push(requireFromProject.resolve(`${name}/package.json`))
+  } catch (error) {
+    packageResolutionError = error
   }
 
-  let directory = dirname(entry)
-  for (;;) {
+  for (const modulesPath of requireFromProject.resolve.paths(name) ?? []) {
+    manifestPaths.push(resolve(modulesPath, name, 'package.json'))
+  }
+
+  let packageFound = false
+  let readError = packageResolutionError
+  for (const manifestPath of new Set(manifestPaths)) {
     try {
-      const manifest = JSON.parse(
-        await readFile(resolve(directory, 'package.json'), 'utf8'),
-      )
-      if (manifest.name === name) return manifest.version
-    } catch {
-      // Keep walking from an exported entrypoint to its package root.
+      await access(dirname(manifestPath))
+      packageFound = true
+    } catch (error) {
+      if (error.code !== 'ENOENT') readError = error
+      continue
     }
-    const parent = dirname(directory)
-    if (parent === directory) return undefined
-    directory = parent
+
+    try {
+      const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
+      if (manifest.name !== name || typeof manifest.version !== 'string') {
+        return {
+          version: 'unavailable',
+          warning: `${name}/package.json has no matching package name and version.`,
+        }
+      }
+      return { version: manifest.version }
+    } catch (error) {
+      readError = error
+    }
+  }
+
+  if (!declared && !packageFound) return undefined
+  const reason = readError?.message ?? 'the package manifest was not found'
+  return {
+    version: 'unavailable',
+    warning: `Could not read ${name}/package.json (${reason}).`,
+  }
+}
+
+async function declaredBenosPackages(root) {
+  try {
+    const manifest = await readJson(resolve(root, 'package.json'))
+    const dependencies = {
+      ...manifest.dependencies,
+      ...manifest.devDependencies,
+      ...manifest.optionalDependencies,
+      ...manifest.peerDependencies,
+    }
+    return new Set(
+      BENOS_PACKAGES.filter((name) => Object.hasOwn(dependencies, name)),
+    )
+  } catch {
+    return new Set()
   }
 }
 
@@ -82,18 +121,7 @@ async function hasBenosProject(root) {
   } catch {
     // A Benos package dependency is also enough to identify the project.
   }
-  try {
-    const manifest = await readJson(resolve(root, 'package.json'))
-    const dependencies = {
-      ...manifest.dependencies,
-      ...manifest.devDependencies,
-      ...manifest.optionalDependencies,
-      ...manifest.peerDependencies,
-    }
-    return BENOS_PACKAGES.some((name) => Object.hasOwn(dependencies, name))
-  } catch {
-    return false
-  }
+  return (await declaredBenosPackages(root)).size > 0
 }
 
 export async function printInfo(cliVersion, cwd = process.cwd()) {
@@ -132,9 +160,10 @@ export async function printInfo(cliVersion, cwd = process.cwd()) {
   }
 
   const versions = []
+  const declared = await declaredBenosPackages(root)
   for (const name of BENOS_PACKAGES) {
-    const version = await installedVersion(root, name)
-    if (version) versions.push({ name, version })
+    const installed = await installedVersion(root, name, declared.has(name))
+    if (installed) versions.push({ name, ...installed })
   }
   const rootLabel = root === resolve(cwd) ? '.' : root
   lines.splice(0, 0, `Benos project: ${rootLabel}`)
@@ -149,10 +178,15 @@ export async function printInfo(cliVersion, cwd = process.cwd()) {
       0,
       ...versions.map(({ name, version }) => `  ${name}: ${version}`),
     )
+    const readableVersions = versions.filter(
+      ({ version }) => version !== 'unavailable',
+    )
     const baseline =
-      versions.find(({ name }) => name === '@benosjs/core')?.version ??
-      versions[0].version
-    const mismatched = versions.filter(({ version }) => version !== baseline)
+      readableVersions.find(({ name }) => name === '@benosjs/core')?.version ??
+      readableVersions[0]?.version
+    const mismatched = baseline
+      ? readableVersions.filter(({ version }) => version !== baseline)
+      : []
     if (mismatched.length) {
       lines.push(
         `Warning: @benosjs package versions do not match ${baseline}: ${mismatched
@@ -160,6 +194,9 @@ export async function printInfo(cliVersion, cwd = process.cwd()) {
           .join(', ')}.`,
       )
     }
+  }
+  for (const { warning } of versions) {
+    if (warning) lines.push(`Warning: ${warning}`)
   }
   console.log(lines.join('\n'))
 }
