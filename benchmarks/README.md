@@ -1296,14 +1296,16 @@ while clear remains 2.07×. Select has a long Benos outlier, and select, swap,
 and several reference-framework operations also have wide spreads. Raw data is
 in [`results/latest.json`](./js-framework-benchmark/results/latest.json).
 
-### Registry sortable table: historical fixed three-column experiment
+### Registry sortable table: reverted fixed three-column experiment
 
-The 0.3.0 implementation captures its columns once and emits three cell
-descriptors directly only when `columns.length === 3`. That branch removes the
-per-row `columns.map` result and dynamic child array. Exactly three columns use
-it; 0, 1, 2, and 4 or more columns use the generic mapped path. This experiment
-is not representative of tables with other widths, so the multi-column matrix
-below is the current comparison.
+At an intermediate 0.3.0 release-candidate checkpoint, the component captured
+its columns once and emitted three cell descriptors directly only when
+`columns.length === 3`. That branch removed the per-row `columns.map` result and
+dynamic child array. Exactly three columns used it; 0, 1, 2, and 4 or more
+columns used the generic mapped path. The branch was reverted after this
+experiment because its gain did not generalize across widths. The current
+implementation uses the generic mapped path at every width; its matrix is
+below.
 
 The before run used two warmups and seven measured rounds. The after summary
 pools two independent interleaved runs (each with two warmups and seven rounds)
@@ -1332,17 +1334,18 @@ by about 65% at 5k and 96% at 10k using the within-run median differences. The
 registry table remained about 1.74× Solid at 5k and 1.64× at 10k for initial
 render. The results describe the fixed three-column case only.
 
-#### Interleaved multi-column baseline (2026-10-11)
+#### Interleaved multi-column baseline before reverting the branch (2026-10-11)
 
-To check whether that fixed-width path represents tables generally, the
-production fixtures were expanded to 2, 3, 5, and 8 columns at both 5,000 and
-10,000 rows. The three implementations render the same column values and
-sortable header, and all sort the first column. Row data and column descriptors
-are prepared before the initial timer. Each implementation was built once and
-interleaved in Chromium; framework order reverses by round. The protocol uses
-two warmups, seven measured rounds, and two animation frames after mount and
-sort as the paint opportunity boundary. Each value is median [minimum–maximum]
-in milliseconds. The spreads are wide on some large cases, so small median
+To check whether that exact-three-column path represented tables generally,
+the production fixtures were expanded to 2, 3, 5, and 8 columns at both 5,000
+and 10,000 rows. This baseline was measured while the branch was present. The
+three implementations render the same column values and sortable header, and
+all sort the first column. Row data and column descriptors are prepared before
+the initial timer. Each implementation was built once and interleaved in
+Chromium; framework order reverses by round. The protocol uses two warmups,
+seven measured rounds, and two animation frames after mount and sort as the
+paint opportunity boundary. Each value is median [minimum–maximum] in
+milliseconds. The spreads are wide on some large cases, so small median
 differences are not treated as repeatable gains.
 
 | Columns | Rows |                       Registry mount / sort |              Handwritten Benos mount / sort |                        Solid mount / sort |
@@ -1356,17 +1359,14 @@ differences are not treated as repeatable gains.
 |       8 |   5k |   401.6 [380.5–799.4] / 244.9 [233.3–340.5] |   413.7 [365.7–483.8] / 265.5 [216.2–676.3] | 245.3 [234.0–346.8] / 259.5 [212.3–314.0] |
 |       8 |  10k | 870.2 [792.8–1079.2] / 658.3 [503.7–1765.6] | 797.4 [732.7–1327.8] / 647.6 [515.4–1132.8] | 546.1 [501.6–977.6] / 627.3 [495.1–781.4] |
 
-Across 2, 5, and 8 columns, registry and handwritten Benos mount medians are
-close, with their spreads overlapping. The exact-three direct branch is the
-only structural advantage identified here: its mount medians are 12.4% lower
-than handwritten at 5k and 19.2% lower at 10k. It does not improve sort time.
-The current evidence therefore shows a benefit isolated to exactly three
-columns. The registry's multi-width measurements, rather than the old fixed
-three-column numbers, are the representative table record. Raw measured
-samples are in
+In this intermediate baseline, the direct branch showed a structural
+advantage only at exactly three columns: its mount medians were 12.4% lower
+than handwritten at 5k and 19.2% lower at 10k. It did not improve sort time.
+The post-revert matrix below records the current generic implementation. Raw
+baseline samples are in
 [`multicolumn-before-specialization.json`](js-framework-benchmark/results/multicolumn-before-specialization.json).
 
-#### Current generic-path matrix after reverting the fixed-width branch
+#### Current generic-path matrix (branch reverted)
 
 The implementation now uses the same mapped cell path at every column count.
 This repeat used the same fixtures and protocol as the baseline above: compiled
