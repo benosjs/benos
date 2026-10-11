@@ -157,20 +157,18 @@ const entryPlugin = (framework) => ({
     handler(html) {
       return html.replace(
         '/src/main-benos.js',
-        framework === 'benos' || framework === 'benos-direct'
-          ? '/src/main-benos.tsx'
-          : framework === 'table-benos'
-            ? '/src/table-benos.tsx'
-            : '/src/main-solid.jsx',
+        framework === 'benos-runtime'
+          ? '/src/main-benos.js'
+          : framework === 'benos-safe'
+            ? '/src/main-benos.tsx'
+            : framework === 'table-benos'
+              ? '/src/table-benos.tsx'
+              : '/src/main-solid.jsx',
       )
     },
   },
 })
-for (const framework of ['benos', 'benos-direct', 'table-benos', 'solid']) {
-  const previousDirectFlag = process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT
-  if (framework.endsWith('-direct'))
-    process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT = '1'
-  else delete process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT
+for (const framework of ['benos-runtime', 'benos-safe', 'solid']) {
   await build({
     configFile: false,
     root: benchRoot,
@@ -193,9 +191,6 @@ for (const framework of ['benos', 'benos-direct', 'table-benos', 'solid']) {
       sourcemap: true,
     },
   })
-  if (previousDirectFlag === undefined)
-    delete process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT
-  else process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT = previousDirectFlag
 }
 
 const contentTypes = {
@@ -531,8 +526,8 @@ function sampleSummary(profile) {
 }
 
 const servers = [
-  await serve(resolve(buildRoot, 'app-benos'), 4381),
-  await serve(resolve(buildRoot, 'app-benos-direct'), 4382),
+  await serve(resolve(buildRoot, 'app-benos-runtime'), 4381),
+  await serve(resolve(buildRoot, 'app-benos-safe'), 4382),
   await serve(resolve(buildRoot, 'app-solid'), 4383),
 ]
 const browser = await chromium.launch({ headless: true })
@@ -548,8 +543,8 @@ const counterBootstrap = `globalThis.__p1AllocationCounts = { owners: 0, signals
 
 try {
   for (const [index, framework] of [
-    'benos',
-    'benos-direct',
+    'benos-runtime',
+    'benos-safe',
     'solid',
   ].entries()) {
     const page = await browser.newPage()

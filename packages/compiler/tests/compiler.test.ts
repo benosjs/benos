@@ -1,7 +1,11 @@
 // @vitest-environment happy-dom
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping'
 import { describe, expect, it } from 'vitest'
-import { signal } from '../../dom/node_modules/@benosjs/core'
+import {
+  createRoot,
+  effect,
+  signal,
+} from '../../dom/node_modules/@benosjs/core'
 import { For, Show, render, type Child } from '../../dom/src/index.js'
 import * as domRuntime from '../../dom/src/index.js'
 import * as domInternalRuntime from '../../dom/src/internal.js'
@@ -95,6 +99,22 @@ const fixtureMatrix = [
     'export const App = () => <><svg><circle cx="2" /></svg><math><mi>x</mi></math></>',
   ],
   [
+    'URL guard on direct bindings',
+    'export const App = (props) => <a href={props.href()}>safe link</a>',
+  ],
+  [
+    'SVG namespaces on direct bindings',
+    'export const App = (props) => <svg><use href={props.href()} xlink:href={props.xlink()} /></svg>',
+  ],
+  [
+    'boolean attributes on direct bindings',
+    'export const App = (props) => <input disabled={props.disabled()} checked={props.checked()} required={true} multiple={false} title={props.title()} />',
+  ],
+  [
+    'class, style, and form properties on direct bindings',
+    'export const App = (props) => <input class={props.className()} style={props.style()} value={props.value()} />',
+  ],
+  [
     'errors',
     'export const App = (props) => <ErrorBoundary fallback={(error) => <p>{error.message}</p>}><div>{props.fail()}</div></ErrorBoundary>',
   ],
@@ -112,7 +132,10 @@ interface FixtureSnapshot {
 
 function runBehaviorFixture(code: string): FixtureSnapshot {
   document.body.replaceChildren()
-  const module = evaluate(code, domRuntime as Record<string, unknown>)
+  const module = evaluate(code, {
+    ...domRuntime,
+    ...domInternalRuntime,
+  } as Record<string, unknown>)
   const label = signal('A')
   const show = signal(true)
   const items = signal([{ id: 1, name: 'one' }])
@@ -173,6 +196,7 @@ interface MatrixSnapshot {
   refs: number
   spreadOrder: string[]
   namespaces: string[]
+  formProperties: string[]
 }
 
 function runMatrixFixture(
@@ -182,9 +206,16 @@ function runMatrixFixture(
 ): MatrixSnapshot {
   void optimization
   document.body.replaceChildren()
-  const module = evaluate(code, domRuntime as Record<string, unknown>, {
-    ErrorBoundary: domRuntime.ErrorBoundary,
-  })
+  const module = evaluate(
+    code,
+    {
+      ...domRuntime,
+      ...domInternalRuntime,
+    } as Record<string, unknown>,
+    {
+      ErrorBoundary: domRuntime.ErrorBoundary,
+    },
+  )
   let update = (): void => undefined
   let reads = 0
   let events = 0
@@ -290,6 +321,35 @@ function runMatrixFixture(
     }
   } else if (name === 'SVG and MathML namespaces') {
     // Namespace creation is observed from the rendered DOM below.
+  } else if (name === 'URL guard on direct bindings') {
+    const href = signal('javascript:alert(1)')
+    props = { href }
+    update = () => href.set('https://benosjs.github.io')
+  } else if (name === 'SVG namespaces on direct bindings') {
+    const href = signal('https://example.test/plain.svg')
+    const xlink = signal('javascript:alert(1)')
+    props = { href, xlink }
+    update = () => xlink.set('https://example.test/safe.svg')
+  } else if (name === 'boolean attributes on direct bindings') {
+    const disabled = signal(true)
+    const checked = signal(false)
+    const title = signal('first')
+    props = { disabled, checked, title }
+    update = () => {
+      disabled.set(false)
+      checked.set(true)
+      title.set('second')
+    }
+  } else if (name === 'class, style, and form properties on direct bindings') {
+    const className = signal('first')
+    const style = signal({ color: 'red' })
+    const value = signal('before')
+    props = { className, style, value }
+    update = () => {
+      className.set('second')
+      style.set({ color: 'blue', 'font-weight': 'bold' })
+      value.set('after')
+    }
   } else if (name === 'errors') {
     props = {
       fail: () => {
@@ -315,6 +375,16 @@ function runMatrixFixture(
     document.querySelector('svg')?.namespaceURI ?? '',
     document.querySelector('math')?.namespaceURI ?? '',
   ]
+  const input = document.querySelector('input')
+  const formProperties = input
+    ? [
+        String((input as HTMLInputElement).disabled),
+        String((input as HTMLInputElement).checked),
+        String((input as HTMLInputElement).value),
+        String((input as HTMLInputElement).required),
+        String((input as HTMLInputElement).multiple),
+      ]
+    : []
   dispose()
   return {
     initial,
@@ -327,29 +397,21 @@ function runMatrixFixture(
     refs,
     spreadOrder,
     namespaces,
+    formProperties,
   }
 }
 
 describe('@benosjs/compiler', () => {
-  it('supports the internal direct DOM experiment for a row with live bindings', () => {
-    const previous = process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT
-    process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT = '1'
-    let result: ReturnType<typeof transformJsx>
-    try {
-      result = transformJsx(
-        `export function App(props) {
+  it('emits direct DOM bindings for eligible safe templates', () => {
+    const result = transformJsx(
+      `export function App(props) {
           return <tr class={props.row().active ? 'selected' : ''}>
             <td>{props.row().id}</td>
             <td><button onClick={() => props.onSelect(props.row().id)}>{props.row().label}</button></td>
           </tr>
         }`,
-        { filename: 'direct-row.tsx', optimization: 'safe' },
-      )
-    } finally {
-      if (previous === undefined)
-        delete process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT
-      else process.env.BENOS_EXPERIMENTAL_DIRECT_OUTPUT = previous
-    }
+      { filename: 'direct-row.tsx', optimization: 'safe' },
+    )
     expect(result.code).toContain('directTemplateDefinition')
     expect(result.code).toContain('__benos_direct_template(')
     expect(result.code).not.toContain('__benos_template_')
@@ -371,7 +433,7 @@ describe('@benosjs/compiler', () => {
         }),
       host,
     )
-    expect(host.innerHTML).toContain('<td>1</td>')
+    expect(host.querySelectorAll('td')[0]?.textContent).toBe('1')
     expect(host.querySelector('tr')?.className).toBe('')
     row.set({ id: 2, label: 'second', active: true })
     expect(host.textContent).toContain('2second')
@@ -421,6 +483,8 @@ describe('@benosjs/compiler', () => {
       expect(none.diagnostics).toEqual(safe.diagnostics)
       expect(none.code).toContain('__benos_')
       expect(safe.code).toContain('__benos_')
+      if (_name.includes('direct bindings'))
+        expect(safe.code).toContain('__benos_direct_template(')
     },
   )
 
@@ -453,8 +517,52 @@ describe('@benosjs/compiler', () => {
         expect(noneSnapshot.updatedText).toContain('beforeupdatedafter')
         expect(noneSnapshot.updatedText).toContain('Clicks: 7')
       }
+      if (name === 'URL guard on direct bindings') {
+        expect(noneSnapshot.initial).not.toContain('javascript:')
+        expect(noneSnapshot.updated).toContain('https://benosjs.github.io')
+      }
+      if (name === 'SVG namespaces on direct bindings') {
+        expect(noneSnapshot.namespaces[0]).toBe('http://www.w3.org/2000/svg')
+        expect(noneSnapshot.initial).not.toContain('javascript:')
+        expect(noneSnapshot.updated).toContain('xlink:href')
+      }
+      if (name === 'boolean attributes on direct bindings') {
+        expect(noneSnapshot.formProperties).toEqual([
+          'false',
+          'true',
+          '',
+          'true',
+          'false',
+        ])
+        expect(safeSnapshot.formProperties).toEqual(noneSnapshot.formProperties)
+        expect(noneSnapshot.updated).toContain('title="second"')
+      }
+      if (name === 'class, style, and form properties on direct bindings') {
+        expect(noneSnapshot.updated).toContain('class="second"')
+        expect(noneSnapshot.updated).toContain('color: blue')
+        expect(noneSnapshot.formProperties[2]).toBe('after')
+      }
       if (name === 'errors')
         expect(noneSnapshot.initial).toContain('fixture failure')
+    },
+  )
+
+  it.each(fixtureMatrix)(
+    'keeps %s behavior identical in development and production output',
+    (name, source) => {
+      const snapshots = (development: boolean) =>
+        (['none', 'safe'] as const).map((optimization) => {
+          const result = transformJsx(source, {
+            filename: `fixtures/${name}.tsx`,
+            development,
+            optimization,
+          })
+          expect(result.map.sources).toEqual([`fixtures/${name}.tsx`])
+          expect(result.map.mappings).not.toBe('')
+          return runMatrixFixture(name, result.code, optimization)
+        })
+      expect(snapshots(false)[0]).toEqual(snapshots(true)[0])
+      expect(snapshots(false)[1]).toEqual(snapshots(true)[1])
     },
   )
 
@@ -488,6 +596,113 @@ describe('@benosjs/compiler', () => {
     })
   })
 
+  it('maps direct bindings back to their original TSX expressions', () => {
+    const source = `function App(props) {
+  return <div title={props.title()}>{props.value()}</div>
+}`
+    for (const development of [true, false]) {
+      const result = transformJsx(source, {
+        filename: 'src/Direct.tsx',
+        development,
+        optimization: 'safe',
+      })
+      expect(result.code).toContain('__benos_direct_template(')
+      const trace = new TraceMap(result.map)
+      const positionOf = (token: string) => {
+        const lines = result.code.split('\n')
+        const line = lines.findIndex((value) => value.includes(token))
+        expect(line).toBeGreaterThanOrEqual(0)
+        return originalPositionFor(trace, {
+          line: line + 1,
+          column: (lines[line] ?? '').indexOf(token),
+        })
+      }
+      expect(positionOf('title()')).toMatchObject({
+        source: 'src/Direct.tsx',
+        line: 2,
+        column: 27,
+      })
+      expect(positionOf('value()')).toMatchObject({
+        source: 'src/Direct.tsx',
+        line: 2,
+        column: 43,
+      })
+    }
+  })
+
+  it('preserves delegated event ordering, batching, and error reporting on direct output', () => {
+    const result = transformJsx(
+      `export function App(props) {
+  return <button onClick={props.onClick}>run</button>
+}`,
+      {
+        filename: 'src/direct-events.tsx',
+        development: true,
+        optimization: 'safe',
+      },
+    )
+    expect(result.code).toContain('__benos_direct_template(')
+    const module = evaluate(result.code, {
+      ...domRuntime,
+      ...domInternalRuntime,
+    } as Record<string, unknown>)
+    document.body.replaceChildren()
+    const first = signal(0)
+    const second = signal(0)
+    const shouldThrow = signal(false)
+    const order: string[] = []
+    const reported: unknown[] = []
+    const originalReportError = globalThis.reportError
+    let effectRuns = 0
+    let disposeEffect = (): void => undefined
+    createRoot((dispose) => {
+      disposeEffect = dispose
+      effect(() => {
+        first()
+        second()
+        effectRuns++
+      })
+    })
+    globalThis.reportError = (error: unknown) => reported.push(error)
+    const dispose = render(
+      () =>
+        (module.App as (props: object) => Child)({
+          onClick: () => {
+            first.set(first() + 1)
+            second.set(second() + 1)
+            if (shouldThrow()) throw new Error('direct handler failure')
+            order.push('delegated')
+          },
+        }),
+      document.body,
+    )
+    const button = document.querySelector('button')
+    expect(button).not.toBeNull()
+    button?.addEventListener('click', () => order.push('native'))
+    button?.dispatchEvent(new Event('click', { bubbles: true }))
+    expect(order).toEqual(['native', 'delegated'])
+    expect(first()).toBe(1)
+    expect(second()).toBe(1)
+    expect(effectRuns).toBe(2)
+
+    shouldThrow.set(true)
+    expect(() =>
+      button?.dispatchEvent(new Event('click', { bubbles: true })),
+    ).not.toThrow()
+    expect(reported).toHaveLength(1)
+    expect((reported[0] as Error).message).toBe('direct handler failure')
+    expect(first()).toBe(2)
+    expect(second()).toBe(2)
+
+    button?.addEventListener('click', (event) => event.stopPropagation())
+    button?.dispatchEvent(new Event('click', { bubbles: true }))
+    expect(first()).toBe(2)
+
+    dispose()
+    disposeEffect()
+    globalThis.reportError = originalReportError
+  })
+
   it('keeps none and safe behavior identical on a real TSX fixture', () => {
     const none = transformJsx(behaviorFixture, {
       filename: 'fixtures/App.tsx',
@@ -503,7 +718,7 @@ describe('@benosjs/compiler', () => {
     expect(none.map.sources).toEqual(['fixtures/App.tsx'])
     expect(safe.map.sources).toEqual(['fixtures/App.tsx'])
     expect(none.code).toContain('__benos_dynamic_child')
-    expect(safe.code).toContain('__benos_dynamic_child')
+    expect(safe.code).toContain('__benos_direct_template')
     expect(runBehaviorFixture(none.code)).toEqual(runBehaviorFixture(safe.code))
   })
 
@@ -513,7 +728,10 @@ describe('@benosjs/compiler', () => {
       development: true,
       optimization: 'none',
     })
-    const module = evaluate(result.code, domRuntime as Record<string, unknown>)
+    const module = evaluate(result.code, {
+      ...domRuntime,
+      ...domInternalRuntime,
+    } as Record<string, unknown>)
     const label = signal('A')
     const show = signal(true)
     const items = signal([{ id: 1, name: 'one' }])

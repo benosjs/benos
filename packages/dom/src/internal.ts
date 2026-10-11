@@ -9,11 +9,14 @@ export {
   template,
 } from './index.js'
 export {
-  directAttr,
-  directEvent,
   directTemplate,
   directTemplateDefinition,
-  directText,
 } from './experimental-direct.js'
-export type { DirectTemplateDefinition } from './experimental-direct.js'
+export type {
+  DirectAttributeDefinition,
+  DirectBindingDefinition,
+  DirectNamespace,
+  DirectTemplateDefinition,
+  DirectTemplateDescriptor,
+} from './experimental-direct.js'
 export type { TemplatePlan, TemplateScope } from './index.js'

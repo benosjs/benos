@@ -1,10 +1,26 @@
-import { batch, onCleanup } from '@benosjs/core'
-import { createRenderEffect } from '@benosjs/core/internal'
+export type DirectNamespace = 'html' | 'svg' | 'mathml'
+
+export interface DirectAttributeDefinition {
+  readonly path: readonly number[]
+  readonly name: string
+  readonly namespace: DirectNamespace
+  readonly value: unknown
+}
+
+export interface DirectBindingDefinition {
+  readonly kind: 'attribute' | 'child' | 'event'
+  readonly path: readonly number[]
+  readonly namespace: DirectNamespace
+  readonly name?: string
+  readonly capture?: boolean
+  readonly get: (values: readonly unknown[]) => unknown
+}
 
 export interface DirectTemplateDefinition {
   readonly id: string
   readonly html: string
-  readonly setup: (root: Element, values: readonly unknown[]) => void
+  readonly attributes: readonly DirectAttributeDefinition[]
+  readonly bindings: readonly DirectBindingDefinition[]
 }
 
 export interface DirectTemplateDescriptor {
@@ -13,12 +29,44 @@ export interface DirectTemplateDescriptor {
   readonly values: readonly unknown[]
 }
 
+type CompactDirectTemplateDefinition = readonly [
+  string,
+  string,
+  readonly (readonly [readonly number[], string, DirectNamespace, unknown])[],
+  readonly (readonly [
+    DirectBindingDefinition['kind'],
+    readonly number[],
+    DirectNamespace,
+    string | null,
+    boolean,
+    DirectBindingDefinition['get'],
+  ])[],
+]
+
 export function directTemplateDefinition(
-  id: string,
-  html: string,
-  setup: DirectTemplateDefinition['setup'],
+  value: DirectTemplateDefinition | CompactDirectTemplateDefinition,
 ): DirectTemplateDefinition {
-  return { id, html, setup }
+  if (!Array.isArray(value)) return value as DirectTemplateDefinition
+  const [id, html, attributes, bindings] =
+    value as CompactDirectTemplateDefinition
+  return {
+    id,
+    html,
+    attributes: attributes.map(([path, name, namespace, attributeValue]) => ({
+      path,
+      name,
+      namespace,
+      value: attributeValue,
+    })),
+    bindings: bindings.map(([kind, path, namespace, name, capture, get]) => ({
+      kind,
+      path,
+      namespace,
+      ...(name === null ? {} : { name }),
+      ...(capture ? { capture } : {}),
+      get,
+    })),
+  }
 }
 
 export function directTemplate(
@@ -26,47 +74,4 @@ export function directTemplate(
   values: readonly unknown[],
 ): DirectTemplateDescriptor {
   return { kind: 'direct-template', definition, values }
-}
-
-export function directAttr(
-  element: Element,
-  name: string,
-  get: () => unknown,
-): void {
-  createRenderEffect(() => {
-    const value = get()
-    if (value === null || value === undefined || value === false)
-      element.removeAttribute(name)
-    else if (value === true) element.setAttribute(name, '')
-    else element.setAttribute(name, String(value))
-  })
-}
-
-export function directText(node: Node, get: () => unknown): void {
-  if (!(node instanceof Text))
-    throw new Error('Direct text binding did not point to a text node')
-  createRenderEffect(() => {
-    node.data = String(get())
-  })
-}
-
-export function directEvent(
-  element: Element,
-  name: string,
-  get: () => unknown,
-): void {
-  const listener: EventListener = (event) =>
-    batch(() => {
-      const handler = get()
-      if (typeof handler === 'function') handler.call(element, event)
-      else if (
-        handler &&
-        typeof handler === 'object' &&
-        'handleEvent' in handler &&
-        typeof handler.handleEvent === 'function'
-      )
-        handler.handleEvent(event)
-    })
-  element.addEventListener(name, listener)
-  onCleanup(() => element.removeEventListener(name, listener))
 }

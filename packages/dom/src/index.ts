@@ -1496,11 +1496,60 @@ function mountDirectTemplate(
   const root = nodes[0]
   if (!(root instanceof Element) || nodes.length !== 1)
     throw new Error(`Invalid direct template ${descriptor.definition.id}`)
+  for (const attribute of descriptor.definition.attributes) {
+    const target = nodeAtPath(root, attribute.path)
+    if (target instanceof Element)
+      applyOneProp(target, attribute.name, attribute.value, attribute.namespace)
+  }
   insert(parent, fragment, before)
   const range: DomRange = { nodes, owner }
   runWithOwner(owner, () => {
     onCleanup(() => removeRange(range))
-    descriptor.definition.setup(root, descriptor.values)
+    for (const binding of descriptor.definition.bindings) {
+      const target = nodeAtPath(root, binding.path)
+      if (binding.kind === 'attribute') {
+        if (target instanceof Element)
+          createRenderEffect(() =>
+            applyOneProp(
+              target,
+              binding.name ?? '',
+              binding.get(descriptor.values),
+              binding.namespace,
+            ),
+          )
+      } else if (binding.kind === 'child') {
+        if (!(target instanceof Comment) || !target.parentNode) continue
+        const slot: Slot = {
+          parent: target.parentNode,
+          marker: target,
+          after: target.nextSibling,
+          current: null,
+          range: { nodes: [target], owner },
+          initialized: false,
+          value: undefined,
+        }
+        onCleanup(() => {
+          disposeMounted(slot.current)
+          slot.current = null
+          slot.marker.parentNode?.removeChild(slot.marker)
+          slot.range.nodes = []
+        })
+        createRenderEffect(() => {
+          const value = binding.get(descriptor.values) as Child
+          updateSlot(slot, value, owner, (branch, at) =>
+            createChildMount(value, slot.parent, at, branch),
+          )
+        })
+      } else if (binding.kind === 'event') {
+        if (target instanceof Element)
+          installEventSlot(
+            target,
+            binding.name ?? '',
+            () => binding.get(descriptor.values),
+            binding.capture ?? false,
+          )
+      }
+    }
   })
   return range
 }

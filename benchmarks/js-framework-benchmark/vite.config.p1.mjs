@@ -7,6 +7,8 @@ import benos from '../../packages/vite/dist/js/index.production.js'
 
 const frameworkId = process.env.JFB_FRAMEWORK_ID ?? 'benos'
 const framework = process.env.JFB_IMPL ?? frameworkId
+const benosEntry =
+  frameworkId === 'benos-runtime' ? '/src/main-benos.js' : '/src/main-benos.tsx'
 const root = fileURLToPath(new URL('.', import.meta.url))
 const repoRoot = fileURLToPath(new URL('../../', import.meta.url))
 const coreDist =
@@ -33,7 +35,7 @@ const plugins = [
           tableFramework
             ? '/src/' + framework + '.' + entryExtension
             : framework === 'benos'
-              ? '/src/main-benos.tsx'
+              ? benosEntry
               : '/src/main-' + framework + '.' + entryExtension,
         )
       },

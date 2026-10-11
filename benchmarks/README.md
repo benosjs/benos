@@ -884,7 +884,7 @@ versus Solid at 12.2 ms [11.1–17.9]. Detailed traces, allocation profiles,
 and the 5k/10k table run are in the
 [P3 follow-up checkpoint](../docs/checkpoints/perf-p3-direct-slots.md).
 
-## P3 direct compiler-output ceiling experiment (internal, 2026-10-11)
+## P3 direct compiler-output ceiling experiment (prototype history, 2026-10-11)
 
 Before the direct-output experiment, the compiled `safe` path retained 219.994
 JavaScript objects and 7.547 KB per generic benchmark row after forced GC,
@@ -974,19 +974,105 @@ Sorting is unchanged within the broad overlapping spreads. Current package
 sizes are core 4,049 B / 4,608 B and core + DOM 10,337 B / 11,264 B; this
 prototype adds 138 B to core + DOM and 0 B to core. All budgets still pass.
 
-The prototype is not enabled by default. Its scope is deliberately narrow:
-HTML table rows/cells, primitive text expressions, and class/dir/ARIA/data
-attributes. Direct event bindings use native listeners, which changes the
-delegated-event implementation and still needs a semantic-equivalence design
-before production. Dynamic JSX children, arbitrary property/style semantics,
-namespace changes, refs, and server rendering fall back or are unsupported.
-SSR can remain possible by keeping the shared JSX analysis host-neutral and
-emitting a separate server renderer; template parsing stays lazy and keyed by
-Document, and the direct DOM binder remains a client backend. A future SSR
-target should not evaluate this HTML template or touch `document`.
+At the time of this experiment the prototype was not enabled by default and
+had a narrow table-only shape. The next checkpoint integrated direct output
+into the standard `safe` optimization with delegated events and normal DOM
+property handling; see the implementation measurements below. This table is
+kept as the prototype's original ceiling result.
 
 Raw trace, allocation, smoke, and table samples are in
 [`direct-prototype-trace.json`](js-framework-benchmark/results/direct-prototype-trace.json),
 [`direct-prototype-allocation.json`](js-framework-benchmark/results/direct-prototype-allocation.json),
 [`direct-prototype-table.json`](js-framework-benchmark/results/direct-prototype-table.json),
 and [`direct-prototype-smoke.json`](js-framework-benchmark/results/direct-prototype-smoke.json).
+
+## P3 direct output in the standard `safe` path (2026-10-11)
+
+The compiler now uses direct output as its normal `optimization: 'safe'`
+implementation for eligible native JSX subtrees. It preserves the renderer's
+delegated event slots, native-before-delegated ordering, automatic event
+batching, handler error reporting, standard property/URL rules, owned child
+ranges, and mount timing. The no-optimization path remains the behavior oracle.
+Both `none` and `safe` pass the same development/production fixture matrix and
+source-map assertions; the full Chromium, Firefox, and WebKit browser suite
+passes 405/405 tests.
+
+This interleaved production trace used Chromium 153 on macOS arm64, two
+warmups, and seven rounds. “Runtime JSX” calls the public JSX runtime directly
+and is the prior runtime path; “Safe direct” is TSX compiled by the production
+Benos Vite plugin; Solid uses the equivalent JSX adapter. Values are
+click-to-paint milliseconds, median [minimum–maximum].
+
+| Operation      |            Runtime JSX |            Safe direct |                  Solid | Safe direct / Solid |
+| -------------- | ---------------------: | ---------------------: | ---------------------: | ------------------: |
+| Create 1,000   |    39.87 [39.20–40.11] |    34.84 [34.28–36.60] |    25.92 [25.36–27.13] |               1.34× |
+| Replace 1,000  |    41.66 [41.17–43.24] |    36.85 [36.48–37.19] |    26.36 [24.88–26.94] |               1.40× |
+| Partial update |    14.75 [14.04–15.41] |    13.92 [13.47–22.02] |    14.30 [14.04–16.88] |               0.97× |
+| Select row     |      7.82 [1.27–12.56] |       1.40 [1.26–1.65] |       0.93 [0.86–1.00] |               1.50× |
+| Swap rows      |      8.53 [7.52–10.10] |      4.15 [3.90–22.25] |       3.24 [2.86–3.57] |               1.28× |
+| Remove row     |       4.78 [4.68–8.34] |       4.96 [4.80–5.16] |       4.49 [4.25–4.59] |               1.10× |
+| Create 10,000  | 367.58 [361.74–369.19] | 325.86 [324.54–333.79] | 244.45 [243.08–246.10] |               1.33× |
+| Append 1,000   |    47.69 [47.29–48.53] |    45.02 [44.13–52.91] |    36.57 [36.22–37.36] |               1.23× |
+| Clear 1,000    |       6.21 [6.00–8.14] |       5.39 [5.31–6.27] |       2.63 [2.48–2.70] |               2.05× |
+
+Selection and swap have wide spreads from paint scheduling and GC outliers;
+their medians are shown with the full observed spread. The standard safe path
+is 1.34× Solid on create, 1.40× on replace, and 1.33× on 10k create. Clear is
+still just over the previous 2× target at 2.05×.
+
+Allocation sampling and forced-GC snapshots over 1,000 created rows produce
+the following retained per-row counts. Owner/signal/effect figures are calls
+counted at their core constructors; other categories are retained heap
+deltas. DOM wrappers are browser-side wrappers, not runtime JS objects.
+
+| Per-row category              | Runtime JSX | Safe direct | Solid |
+| ----------------------------- | ----------: | ----------: | ----: |
+| Retained closures / functions |       33.00 |       24.00 |  8.00 |
+| Retained plain objects        |       80.00 |       57.00 | 11.00 |
+| Retained arrays               |       31.00 |       15.99 |  6.01 |
+| Retained DOM wrappers         |       11.00 |       12.00 | 10.00 |
+| Owner constructor calls       |           5 |           8 |     1 |
+| Signal constructor calls      |           1 |           1 |     0 |
+| Effect constructor calls      |           2 |           4 |     3 |
+| Retained JS object count      |      145.47 |       98.49 | 26.48 |
+| Retained JS bytes             |       4,459 |       3,584 |   913 |
+
+Against the previous compiled-safe profile, direct output reduced retained
+closures from 58 to 24, objects from 106 to 57, arrays from 56 to 16, owners
+from 20 to 8, and effect nodes from 10 to 4 per row. In the direct comparison
+with runtime JSX, it retains about 47 fewer JS objects and 875 fewer JS bytes
+per row, while making more owner/effect constructor calls. Source-mapped
+allocation sites account for 91% of both object count and bytes on the safe
+path; the full profiles are linked below.
+
+The generic production app's JS asset is 33.73 kB raw / 11.29 kB gzip for safe
+direct output, compared with 30.23 kB / 10.56 kB for runtime JSX and
+15.58 kB / 6.45 kB for Solid. The direct compiler output adds about 3.50 kB
+raw / 0.73 kB gzip to this app versus runtime JSX. The table app measures
+36.33 kB / 11.90 kB gzip; the matched handwritten Benos table is 32.04 kB /
+10.71 kB and Solid is 15.27 kB / 6.25 kB.
+
+The sortable-table outer row already compiles directly: the compiler binds
+`columns.map(...)` to a child slot in a cloned `<tr>` skeleton, then lowers
+each mapped `<td>` as its own direct native template. The `map` expression
+does not force the row through a template plan. An explicit regression fixture
+for this shape is part of the table checkpoint.
+
+The dashboard table-plus-form filter slice measured 24.6 ms
+[22.7–34.4] for Benos and 13.0 ms [12.0–17.1] for Solid (1.89×), with app JS
+assets of 11,586 B and 6,590 B gzip. These dashboard samples were interleaved
+by round with two warmups and seven measured rounds.
+
+Current rebuilt package sizes are core 4,049 / 4,608 B gzip and core + DOM
+10,508 / 11,264 B gzip. Both budgets pass. The generic app's changed-output
+source maps are verified in development and production. The current fallback
+cases are documented in
+[`compiler.md`](../docs/architecture/compiler.md): spreads, refs, custom
+elements/customized built-ins, template contents, special void/raw-text/RCDATA
+child cases, and expressions with unsupported lexical constructs. Other
+native subtrees in a component/control-flow render may still use direct output.
+
+Raw results: [nine-operation trace](js-framework-benchmark/results/safe-direct-nine-2026-10-11.json),
+[table trace](js-framework-benchmark/results/safe-direct-baseline-table-2026-10-11.json),
+[allocation profile](js-framework-benchmark/results/safe-direct-allocation-2026-10-11.json),
+and the dashboard [comparison samples](../examples/dashboard/comparison-results.json).

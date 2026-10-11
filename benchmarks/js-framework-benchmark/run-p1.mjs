@@ -14,7 +14,7 @@ import { chromium } from '@playwright/test'
 const benchmarkRoot = fileURLToPath(new URL('.', import.meta.url))
 const repoRoot = resolve(benchmarkRoot, '../..')
 const config = resolve(benchmarkRoot, 'vite.config.p1.mjs')
-const frameworks = ['benos-v012', 'benos-head', 'benos-direct', 'solid']
+const frameworks = ['benos-runtime', 'benos-safe', 'solid']
 const rounds = Number(process.env.JFB_ROUNDS ?? 3)
 const warmups = Number(process.env.JFB_WARMUPS ?? 2)
 const port = Number(process.env.JFB_PORT ?? 4310)
@@ -91,7 +91,6 @@ function median(values) {
 
 function build(framework) {
   const implementation = framework.startsWith('benos-') ? 'benos' : framework
-  const isRelease = framework === 'benos-v012'
   execFileSync('pnpm', ['exec', 'vite', 'build', '--config', config], {
     cwd: repoRoot,
     env: {
@@ -99,14 +98,8 @@ function build(framework) {
       JFB_FRAMEWORK: implementation,
       JFB_IMPL: implementation,
       JFB_FRAMEWORK_ID: framework,
-      BENOS_EXPERIMENTAL_DIRECT_OUTPUT:
-        framework === 'benos-direct' ? '1' : undefined,
-      JFB_CORE_DIST: isRelease
-        ? '/tmp/benos-p1-release-e029073/packages/core/dist/js'
-        : `${repoRoot}/packages/core/dist/js`,
-      JFB_DOM_DIST: isRelease
-        ? '/tmp/benos-p1-release-e029073/packages/dom/dist/js'
-        : `${repoRoot}/packages/dom/dist/js`,
+      JFB_CORE_DIST: `${repoRoot}/packages/core/dist/js`,
+      JFB_DOM_DIST: `${repoRoot}/packages/dom/dist/js`,
     },
     stdio: 'inherit',
   })

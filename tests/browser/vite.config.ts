@@ -16,8 +16,9 @@ export default defineConfig({
   },
   optimizeDeps: {
     noDiscovery: true,
+    force: true,
   },
-  plugins: [benos({ optimization: 'none' })],
+  plugins: [benos({ optimization: 'safe' })],
   resolve: {
     alias: [
       {

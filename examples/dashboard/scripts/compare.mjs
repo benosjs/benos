@@ -71,34 +71,42 @@ const servers = {
 }
 const browser = await chromium.launch({ headless: true })
 const results = {}
+const pages = {}
+const rounds = 7
+const warmups = 2
 try {
   for (const name of Object.keys(servers)) {
     const page = await browser.newPage()
     await page.goto(`http://127.0.0.1:${ports[name]}/`, { waitUntil: 'load' })
     await page.waitForFunction(() => window.__dashboardReady === true)
     await page.waitForSelector('input[aria-label="Filter records"]')
-    const samples = []
-    for (let round = 0; round < 7; round++) {
-      samples.push(
-        await page.evaluate(async () => {
-          const input = document.querySelector(
-            'input[aria-label="Filter records"]',
-          )
-          if (!(input instanceof HTMLInputElement))
-            throw new Error('Filter input missing')
-          const start = performance.now()
-          input.value = 'DOM'
-          input.dispatchEvent(
-            new InputEvent('input', { bubbles: true, inputType: 'insertText' }),
-          )
-          await Promise.resolve()
-          await new Promise((resolve) => requestAnimationFrame(() => resolve()))
-          void document.body.offsetHeight
-          if (document.querySelectorAll('tbody tr').length === 0)
-            throw new Error('Filtered table is empty')
-          return performance.now() - start
-        }),
-      )
+    pages[name] = page
+    results[name] = { bundleBytes: gzipBytes(name), samples: [] }
+  }
+  for (let round = -warmups; round < rounds; round++) {
+    const order =
+      round % 2 === 0 ? Object.keys(pages) : Object.keys(pages).reverse()
+    for (const name of order) {
+      const page = pages[name]
+      const elapsed = await page.evaluate(async () => {
+        const input = document.querySelector(
+          'input[aria-label="Filter records"]',
+        )
+        if (!(input instanceof HTMLInputElement))
+          throw new Error('Filter input missing')
+        const start = performance.now()
+        input.value = 'DOM'
+        input.dispatchEvent(
+          new InputEvent('input', { bubbles: true, inputType: 'insertText' }),
+        )
+        await Promise.resolve()
+        await new Promise((resolve) => requestAnimationFrame(() => resolve()))
+        void document.body.offsetHeight
+        if (document.querySelectorAll('tbody tr').length === 0)
+          throw new Error('Filtered table is empty')
+        return performance.now() - start
+      })
+      if (round >= 0) results[name].samples.push(elapsed)
       await page.evaluate(() => {
         const input = document.querySelector(
           'input[aria-label="Filter records"]',
@@ -115,8 +123,11 @@ try {
       })
       await page.waitForTimeout(0)
     }
+  }
+  for (const name of Object.keys(pages)) {
+    const samples = results[name].samples
     results[name] = {
-      bundleBytes: gzipBytes(name),
+      bundleBytes: results[name].bundleBytes,
       updateMs: {
         median: median(samples),
         min: Math.min(...samples),
@@ -124,7 +135,7 @@ try {
         samples,
       },
     }
-    await page.close()
+    await pages[name].close()
   }
 } finally {
   await browser.close()
