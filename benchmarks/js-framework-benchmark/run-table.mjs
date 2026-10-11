@@ -1,4 +1,4 @@
-/* global console, fetch, HTMLButtonElement, requestAnimationFrame, setTimeout */
+/* global console, fetch, setTimeout */
 
 import { spawn, spawnSync } from 'node:child_process'
 import { once } from 'node:events'
@@ -7,13 +7,9 @@ import { resolve } from 'node:path'
 import { chromium } from '@playwright/test'
 
 const directory = resolve(import.meta.dirname)
-const frameworks = [
-  'table-native-baseline',
-  'table-benos-baseline',
-  'table-benos',
-  'table-solid',
-]
+const frameworks = ['table-benos-baseline', 'table-solid', 'table-benos']
 const sizes = [5_000, 10_000]
+const columnCounts = [2, 3, 5, 8]
 const warmups = 2
 const rounds = 7
 
@@ -89,7 +85,14 @@ const page = await context.newPage()
 const samples = Object.fromEntries(
   frameworks.map((framework) => [
     framework,
-    Object.fromEntries(sizes.map((size) => [size, { initial: [], sort: [] }])),
+    Object.fromEntries(
+      columnCounts.map((columns) => [
+        columns,
+        Object.fromEntries(
+          sizes.map((size) => [size, { initial: [], sort: [] }]),
+        ),
+      ]),
+    ),
   ]),
 )
 
@@ -97,51 +100,37 @@ try {
   await waitForServers()
   for (let round = -warmups; round < rounds; round++) {
     const order = round % 2 === 0 ? frameworks : [...frameworks].reverse()
-    for (const size of sizes) {
-      for (const framework of order) {
-        const server = servers.find((entry) => entry.framework === framework)
-        await page.goto(`http://127.0.0.1:${server.port}/?rows=${size}`)
-        const initial = await page.evaluate(async () => {
-          return await window.__benosTableBench.initial
-        })
-        const initialRows = await page.locator('tbody tr').count()
-        if (initialRows !== size)
-          throw new Error(
-            `${framework} rendered ${initialRows} of ${size} initial rows.`,
+    for (const columns of columnCounts) {
+      for (const size of sizes) {
+        for (const framework of order) {
+          const server = servers.find((entry) => entry.framework === framework)
+          await page.goto(
+            `http://127.0.0.1:${server.port}/?rows=${size}&columns=${columns}`,
           )
-        let sort
-        if (framework === 'table-benos' || framework === 'table-solid') {
-          const sorted = await page.evaluate(async () => {
-            const start = performance.now()
-            const button = document.querySelector('.benos-sortable-table__sort')
-            if (!(button instanceof HTMLButtonElement))
-              throw new Error('Sortable Name header was not rendered.')
-            button.click()
-            await new Promise((resolveFrame) =>
-              requestAnimationFrame(resolveFrame),
-            )
-            await new Promise((resolveFrame) =>
-              requestAnimationFrame(resolveFrame),
-            )
-            return {
-              elapsed: performance.now() - start,
-              count: document.querySelectorAll('tbody tr').length,
-              firstName: document.querySelector('tbody tr td')?.textContent,
-            }
+          const initial = await page.evaluate(async () => {
+            return await window.__benosTableBench.initial
           })
+          const initialRows = await page.locator('tbody tr').count()
+          const headerCount = await page.locator('thead th').count()
+          if (initialRows !== size || headerCount !== columns)
+            throw new Error(
+              `${framework} rendered ${initialRows}/${size} rows and ${headerCount}/${columns} columns.`,
+            )
+          const sorted = await page.evaluate(async () =>
+            window.__benosTableBench.sort(),
+          )
           if (sorted.count !== size || sorted.firstName !== 'Member 1')
             throw new Error(
               `${framework} sort produced ${sorted.count} rows, first value ${sorted.firstName}.`,
             )
-          sort = sorted.elapsed
+          if (round >= 0) {
+            samples[framework][columns][size].initial.push(initial)
+            samples[framework][columns][size].sort.push(sorted.elapsed)
+          }
+          process.stdout.write(
+            `round ${round + warmups + 1}/${rounds + warmups}: ${framework} ${columns} columns ${size} rows initial ${initial.toFixed(2)} ms, sort ${sorted.elapsed.toFixed(2)} ms\n`,
+          )
         }
-        if (round >= 0) {
-          samples[framework][size].initial.push(initial)
-          if (sort !== undefined) samples[framework][size].sort.push(sort)
-        }
-        process.stdout.write(
-          `round ${round + warmups + 1}/${rounds + warmups}: ${framework} ${size} rows initial ${initial.toFixed(2)} ms${sort === undefined ? '' : `, sort ${sort.toFixed(2)} ms`}\n`,
-        )
       }
     }
   }
@@ -161,19 +150,18 @@ function median(values) {
 const summary = {}
 for (const framework of frameworks) {
   summary[framework] = {}
-  for (const size of sizes) {
-    summary[framework][size] = {}
-    const metrics =
-      framework === 'table-benos' || framework === 'table-solid'
-        ? ['initial', 'sort']
-        : ['initial']
-    for (const metric of metrics) {
-      const values = samples[framework][size][metric]
-      summary[framework][size][metric] = {
-        medianMs: median(values),
-        minMs: Math.min(...values),
-        maxMs: Math.max(...values),
-        samplesMs: values,
+  for (const columns of columnCounts) {
+    summary[framework][columns] = {}
+    for (const size of sizes) {
+      summary[framework][columns][size] = {}
+      for (const metric of ['initial', 'sort']) {
+        const values = samples[framework][columns][size][metric]
+        summary[framework][columns][size][metric] = {
+          medianMs: median(values),
+          minMs: Math.min(...values),
+          maxMs: Math.max(...values),
+          samplesMs: values,
+        }
       }
     }
   }
@@ -185,13 +173,15 @@ const output = {
     warmups,
     rounds,
     boundary: 'two requestAnimationFrame callbacks after render or mutation',
+    interleaving:
+      'framework order reverses every round; each workload repeats in every framework per round',
+    columns: columnCounts,
+    rowCounts: sizes,
     variants: {
-      'table-native-baseline':
-        'direct DOM construction with equivalent table markup',
       'table-benos-baseline':
-        'handwritten Benos JSX with keyed For rows and static columns',
-      'table-benos': 'SortableTable registry component',
+        'handwritten Benos JSX with keyed For rows and static column descriptors',
       'table-solid': 'handwritten equivalent Solid table',
+      'table-benos': 'SortableTable registry component',
     },
   },
   summary,
@@ -201,7 +191,7 @@ await mkdir(resultsDirectory, { recursive: true })
 await writeFile(
   resolve(
     resultsDirectory,
-    process.env.JFB_TABLE_OUTPUT ?? 'p3-compiled-table.json',
+    process.env.JFB_TABLE_OUTPUT ?? 'multicolumn-sortable-table.json',
   ),
   `${JSON.stringify(output, null, 2)}\n`,
 )

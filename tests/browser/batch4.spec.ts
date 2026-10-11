@@ -52,8 +52,8 @@ test('renders a named semantic table and cycles sort state in place', async ({
   const mappedCellsBeforeSort = await page.evaluate(() =>
     window.__benosBatchFour.columnMapReads(),
   )
-  // The column header list uses one map; row rendering must not map columns.
-  expect(mappedCellsBeforeSort).toBe(1)
+  // Columns map once for the header and once per keyed row at any width.
+  expect(mappedCellsBeforeSort).toBe(5)
   await row.evaluate((element) => {
     ;(element as HTMLElement & { retainedMarker?: string }).retainedMarker =
       'same-node'
