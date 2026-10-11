@@ -1055,8 +1055,34 @@ raw / 0.73 kB gzip to this app versus runtime JSX. The table app measures
 The sortable-table outer row already compiles directly: the compiler binds
 `columns.map(...)` to a child slot in a cloned `<tr>` skeleton, then lowers
 each mapped `<td>` as its own direct native template. The `map` expression
-does not force the row through a template plan. An explicit regression fixture
-for this shape is part of the table checkpoint.
+does not force the row through a template plan. The compiler matrix includes
+a regression fixture that asserts direct `<tr>` and `<td>` templates for this
+mapped-child shape and compares its runtime DOM in both optimization modes.
+
+The table benchmark below uses the same production compiler path, with two
+warmups and seven rounds. It measures initial render through two animation
+frames; the registry and Solid cases also sort through two frames. This is the
+table baseline for the direct safe implementation:
+
+| Table operation      |             Native DOM |      Handwritten Benos | Registry `SortableTable` |                  Solid |
+| -------------------- | ---------------------: | ---------------------: | -----------------------: | ---------------------: |
+| Initial, 5,000 rows  |    72.0 [68.5–81.7] ms | 110.6 [100.1–129.0] ms |   148.7 [135.1–173.3] ms |    74.2 [71.8–76.7] ms |
+| Sort, 5,000 rows     |                      — |                      — |    135.4 [87.3–172.1] ms |    91.6 [73.1–97.6] ms |
+| Initial, 10,000 rows | 141.3 [136.9–151.4] ms | 232.8 [220.7–238.2] ms |   304.3 [280.3–350.0] ms | 142.4 [137.1–167.0] ms |
+| Sort, 10,000 rows    |                      — |                      — |   231.9 [173.6–247.7] ms | 165.4 [158.6–358.7] ms |
+
+Registry mount remains about 2.00× Solid at 5k and 2.14× at 10k; registry
+sorting is 1.48× and 1.40×. The mapped child no longer falls back to a
+template plan, but `columns.map` still creates its per-row mapped descriptor
+array. The component adds more sorting, columns, empty-state, direction, and
+accessibility behavior than the handwritten table baseline. The Solid 10k
+sort spread has a 358.7 ms outlier; the median and full spread are retained.
+
+The measured JavaScript assets are 2.14 kB / 1.04 kB gzip for native DOM,
+32.04 kB / 10.71 kB for handwritten Benos, 36.33 kB / 11.90 kB for the
+registry table, and 15.27 kB / 6.25 kB for Solid. Shared table CSS is 26.18
+kB / 4.08 kB gzip in each build. The exact samples are in
+[`safe-direct-baseline-table-2026-10-11.json`](js-framework-benchmark/results/safe-direct-baseline-table-2026-10-11.json).
 
 The dashboard table-plus-form filter slice measured 24.6 ms
 [22.7–34.4] for Benos and 13.0 ms [12.0–17.1] for Solid (1.89×), with app JS

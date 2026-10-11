@@ -34,7 +34,7 @@ as `3e93e17`; that same record commit is present on this branch as `919f2a1`.
 | Core gzip size                             | 4,049 / 4,608 B                  |
 | Core + DOM gzip size                       | 10,508 / 11,264 B                |
 
-The compiler matrix has 16 behavior fixtures. Each is run with `none` and
+The compiler matrix has 17 behavior fixtures. Each is run with `none` and
 `safe` and compares DOM, owner lifetime, effect counts, evaluation order, and
 error routing. The full suite includes direct-path URL safety, SVG and xlink
 namespaces, boolean attributes, style/class/form properties, event ordering,
@@ -92,7 +92,7 @@ the map result; each mapped `<td>` can compile to a direct template. The table
 benchmark baseline is in the performance record: registry table initial mount
 is 148.7 [135.1–173.3] ms at 5,000 rows and 304.3 [280.3–350.0] ms at 10,000
 rows; sorting is 135.4 [87.3–172.1] ms and 231.9 [173.6–247.7] ms,
-respectively. The next checkpoint adds a direct compiler regression fixture
+respectively. The table checkpoint adds a direct compiler regression fixture
 for this shape and records the table result after that work.
 
 ## Safe-path fallbacks

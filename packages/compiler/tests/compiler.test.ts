@@ -115,6 +115,10 @@ const fixtureMatrix = [
     'export const App = (props) => <input class={props.className()} style={props.style()} value={props.value()} />',
   ],
   [
+    'mapped JSX children in a direct table row',
+    'export const App = (props) => <table><tbody><For each={props.rows()} by={(row) => row.id}>{(row) => <tr>{props.columns().map((column) => <td>{column.value(row())}</td>)}</tr>}</For></tbody></table>',
+  ],
+  [
     'errors',
     'export const App = (props) => <ErrorBoundary fallback={(error) => <p>{error.message}</p>}><div>{props.fail()}</div></ErrorBoundary>',
   ],
@@ -350,6 +354,14 @@ function runMatrixFixture(
       style.set({ color: 'blue', 'font-weight': 'bold' })
       value.set('after')
     }
+  } else if (name === 'mapped JSX children in a direct table row') {
+    const rows = signal([{ id: 1, first: 'first A', second: 'first B' }])
+    const columns = [
+      { value: (row: { first: string; second: string }) => row.first },
+      { value: (row: { first: string; second: string }) => row.second },
+    ]
+    props = { rows, columns: () => columns }
+    update = () => rows.set([{ id: 2, first: 'next A', second: 'next B' }])
   } else if (name === 'errors') {
     props = {
       fail: () => {
@@ -485,6 +497,10 @@ describe('@benosjs/compiler', () => {
       expect(safe.code).toContain('__benos_')
       if (_name.includes('direct bindings'))
         expect(safe.code).toContain('__benos_direct_template(')
+      if (_name === 'mapped JSX children in a direct table row') {
+        expect(safe.code).toContain('html: "<tr><!----></tr>"')
+        expect(safe.code).toContain('html: "<td><!----></td>"')
+      }
     },
   )
 
