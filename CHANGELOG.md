@@ -2,7 +2,21 @@
 
 All notable changes to Benos are documented here.
 
-## [0.3.0] — Unreleased
+## [0.3.1] — Unreleased
+
+### Fixed
+
+- Make `benos info` read installed package versions from package manifests
+  through the project's module resolution paths. Packages that are declared
+  but cannot be read are shown as unavailable with a warning instead of being
+  silently omitted.
+
+### Changed
+
+- Bump all eight publishable packages and the starter's Benos dependency ranges
+  to `0.3.1`.
+
+## [0.3.0] — 2026-10-11
 
 ### Added
 

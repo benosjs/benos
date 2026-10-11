@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "release": "0.3.0",
+  "release": "0.3.1",
   "items": [
     {
       "name": "accordion",
       "type": "registry:component",
       "title": "Accordion",
       "description": "An accessible disclosure group with single or multiple expanded items.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/accordion.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/accordion.json",
       "dependencies": [
         {
           "name": "@benosjs/primitives",
@@ -19,44 +19,44 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:3adb0e8a76c05a2ea24d86b011c27eb5fe4d82357497eddfafdadc3eff0807a2"
+      "checksum": "sha256:b841dd24c84474101fa7ea6d7089629e14ba6311adc7d1744c123077fc36da9e"
     },
     {
       "name": "badge",
       "type": "registry:component",
       "title": "Badge",
       "description": "A compact status label with brand and semantic tones.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/badge.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/badge.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:aeb640d3f0f5e507cfb519004aa229a588a913148f767524fd085446ba914a2b"
+      "checksum": "sha256:c49a998e66b0bdd891c2623d5738d24d0ec4a7393fa1bbec9f72e1b88514ddeb"
     },
     {
       "name": "button",
       "type": "registry:component",
       "title": "Button",
       "description": "A typed button with accessible focus, size, and intent variants.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/button.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/button.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:b1d2f7122994f2bd1c255fcb47213c42acd8ab2d092cecb6d43a0b447fa2d5d3"
+      "checksum": "sha256:02ae8d51ef10ae7ad5b870f4947b49d83bd01080704ea4c582e4e83e0ea3f82a"
     },
     {
       "name": "card",
       "type": "registry:component",
       "title": "Card",
       "description": "A neutral content surface with default, outlined, and raised variants.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/card.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/card.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:b334a5549e4699ee7c8b248e19617ce23bc74ef16a4edf743717addd37442166"
+      "checksum": "sha256:6d904f610a09f7184729797245d28eeccc6d694b8f7603f1940c1a2f601e811e"
     },
     {
       "name": "checkbox",
       "type": "registry:component",
       "title": "Checkbox",
       "description": "An accessible checkbox with controlled and uncontrolled state.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/checkbox.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/checkbox.json",
       "dependencies": [
         {
           "name": "@benosjs/primitives",
@@ -68,14 +68,14 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:8d1b7be93275b11b6cc7f93adea2dda2eccff4d40ad4bb70977211c87ee5531b"
+      "checksum": "sha256:be9619b9967a3fea963775dc371cd24f70023205c4760ee9e2676f52bdc5be89"
     },
     {
       "name": "dialog",
       "type": "registry:component",
       "title": "Dialog",
       "description": "A focus-trapped modal dialog with themed portal rendering.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/dialog.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/dialog.json",
       "dependencies": [
         {
           "name": "@benosjs/core",
@@ -98,14 +98,14 @@
         "overlay-host",
         "button"
       ],
-      "checksum": "sha256:16f0f1be6865538e189d80a30279382dba13549af8eba9a66bffb5b828b0f02a"
+      "checksum": "sha256:507820cc85f720acc85577b473f9ae63794d6e84156860c360aba275c91b0e28"
     },
     {
       "name": "dropdown-menu",
       "type": "registry:component",
       "title": "Dropdown menu",
       "description": "A typeahead-enabled action menu with collision-aware placement.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/dropdown-menu.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/dropdown-menu.json",
       "dependencies": [
         {
           "name": "@benosjs/core",
@@ -128,44 +128,44 @@
         "overlay-host",
         "button"
       ],
-      "checksum": "sha256:d8061014ad1fdd41c77b663f9913624741b1c8f026269acd9f239a08892010c8"
+      "checksum": "sha256:db36d69cc50107511d83962bfa0e2c0f257c966985094093cd2f6899f373658b"
     },
     {
       "name": "input",
       "type": "registry:component",
       "title": "Input",
       "description": "A styled native input with size and invalid-state support.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/input.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/input.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:1cebfdb7218f03423366c1e4a6e28146562a827fe183ecfc49731e8812689f2f"
+      "checksum": "sha256:257386c5125b7840d886dc23dc4e2dc5d312bcd195cb64a3da444a6a57d3cdeb"
     },
     {
       "name": "label",
       "type": "registry:component",
       "title": "Label",
       "description": "A styled, native label with typed control association.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/label.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/label.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:69e68ae7b2e1c4f07a72b9ae1503b01c527ea83fdec48c93888fd844c6c73fd6"
+      "checksum": "sha256:86603aed9c74fbc22d64e300250065286067bd641a6563ee3cc0863e17aa9721"
     },
     {
       "name": "overlay-host",
       "type": "registry:style",
       "title": "Overlay host support",
       "description": "Shared themed portal host used by overlay components.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/overlay-host.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/overlay-host.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:cd235ade3b3593922e71eec2a956d51cea16af785b3ef83cebd757026571ad09"
+      "checksum": "sha256:680d7d0d77b4e7e2016c7b32e380cbfc6b04a83a7be35fd87edb9f8a51413ba8"
     },
     {
       "name": "popover",
       "type": "registry:component",
       "title": "Popover",
       "description": "A collision-aware popover with focus management and themed portal rendering.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/popover.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/popover.json",
       "dependencies": [
         {
           "name": "@benosjs/core",
@@ -188,14 +188,14 @@
         "overlay-host",
         "button"
       ],
-      "checksum": "sha256:548e71366e32a4429e40e1542917ec635b4698c7fa835e27b424d68643691f3a"
+      "checksum": "sha256:73585912761da9a9bcee1fbd0d3c833ccb8003e86e17797ef5b9091b2b05707c"
     },
     {
       "name": "radio-group",
       "type": "registry:component",
       "title": "Radio Group",
       "description": "A typed, keyboard-accessible group of mutually exclusive options.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/radio-group.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/radio-group.json",
       "dependencies": [
         {
           "name": "@benosjs/primitives",
@@ -207,14 +207,14 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:e1db9548f3e6e8d7f17a7c08da724ea64fd54bee9cd3447ac70b4018da4c4c72"
+      "checksum": "sha256:cc943db6028496ecb601b24d33d4afb4a01886abea8c26f45f0d7bf11a0ba35b"
     },
     {
       "name": "select",
       "type": "registry:component",
       "title": "Select",
       "description": "A styled select-only combobox with Zag collection and keyboard behavior.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/select.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/select.json",
       "dependencies": [
         {
           "name": "@benosjs/primitives",
@@ -226,24 +226,24 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:7c4c34f37c51d557d981b5ca75437c2d069c4940323bf5eb6f8927d7b6b99323"
+      "checksum": "sha256:94b2f42bf5c762e4728248c4fc4ad321e6e4fd7131439f684b33f5de644e359c"
     },
     {
       "name": "separator",
       "type": "registry:component",
       "title": "Separator",
       "description": "An accessible horizontal or vertical separator.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/separator.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/separator.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:93b0f5ff493df6b1ba4c804b64898f3dca126daf11840df10943f3b63378293b"
+      "checksum": "sha256:0b5c209203ae5e03c26b49a882627750280c4e4031393b9bf97009cdba9db46d"
     },
     {
       "name": "sortable-table",
       "type": "registry:component",
       "title": "Sortable table",
       "description": "An accessible keyed table with a three-state sortable header.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/sortable-table.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/sortable-table.json",
       "dependencies": [
         {
           "name": "@benosjs/core",
@@ -255,14 +255,14 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:f7124ec30c72022a970e3466369f003b4aec234ad896895bdd025c386e467c98"
+      "checksum": "sha256:acd59b33bd08ef1a4541a2ab836e2ed7bb99e20bd8568c1a24128e498faf2563"
     },
     {
       "name": "switch",
       "type": "registry:component",
       "title": "Switch",
       "description": "An accessible on/off switch with the switch role and native form behavior.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/switch.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/switch.json",
       "dependencies": [
         {
           "name": "@benosjs/primitives",
@@ -274,14 +274,14 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:052c49080b7a4d3bac31f547af605db117854b1c66df0774628ffac45b5f80d0"
+      "checksum": "sha256:e80a004fb3772ea1b350e86ef6ca22e74de7d19c3ef565181517d8fa91e1032c"
     },
     {
       "name": "tabs",
       "type": "registry:component",
       "title": "Tabs",
       "description": "A keyboard-navigable tab list with typed panels and activation modes.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/tabs.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/tabs.json",
       "dependencies": [
         {
           "name": "@benosjs/primitives",
@@ -293,24 +293,24 @@
         }
       ],
       "registryDependencies": [],
-      "checksum": "sha256:d0ac38b471a53388ccc383eaf7e7c808bfb85e2289118350373daccba354e5cd"
+      "checksum": "sha256:3e3650581c4d9cc96bf1541fd18d8c2dc44ef22335890ef892b33b97a92c13ff"
     },
     {
       "name": "textarea",
       "type": "registry:component",
       "title": "Textarea",
       "description": "A styled native textarea with size and invalid-state support.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/textarea.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/textarea.json",
       "dependencies": [],
       "registryDependencies": [],
-      "checksum": "sha256:b0671b278a15c6a142b2e06b879c11a42bff2dacaa408937615bea53a8de74fb"
+      "checksum": "sha256:bd12f29939dcd19dff25ae30999dec909745cde82c4f04284f98d29f3a79e721"
     },
     {
       "name": "toast",
       "type": "registry:component",
       "title": "Toast",
       "description": "A themed live notification with non-stealing focus behavior.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/toast.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/toast.json",
       "dependencies": [
         {
           "name": "@benosjs/core",
@@ -336,14 +336,14 @@
       "registryDependencies": [
         "overlay-host"
       ],
-      "checksum": "sha256:03ed2495481d6713c8d1569ffbf69ab25f458f2a619c47505fca01144aaab15c"
+      "checksum": "sha256:def7fdf29d9a39e8df62e165949ade9d9ec4aa0c997f95b67eb3d1c516c5e5e4"
     },
     {
       "name": "tooltip",
       "type": "registry:component",
       "title": "Tooltip",
       "description": "Supplemental hover and keyboard-focus help with collision-aware placement.",
-      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.0/registry/v1/items/tooltip.json",
+      "url": "https://raw.githubusercontent.com/benosjs/benos/v0.3.1/registry/v1/items/tooltip.json",
       "dependencies": [
         {
           "name": "@benosjs/core",
@@ -366,7 +366,7 @@
         "overlay-host",
         "button"
       ],
-      "checksum": "sha256:f16fdd7ce0eb113e3eb4f864feace195569c7dddcc329cb3d21a2d7b7cac15c9"
+      "checksum": "sha256:a8f7bef454e2a4f72316da2517b62453c03fac280d66ed8b328bd8bb57593d8f"
     }
   ]
 }

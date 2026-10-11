@@ -134,7 +134,7 @@ function packageArchiveName(manifest) {
   return `${manifest.name.replace(/^@/, '').replaceAll('/', '-')}-${manifest.version}.tgz`
 }
 
-async function packFixtureDependency(name, version) {
+async function packFixtureDependency(name, version, exports = './index.js') {
   const fixtureName = name.replace(/^@/, '').replaceAll('/', '-')
   const fixtureRoot = join(temporary, 'fixture-packages', fixtureName)
   await mkdir(fixtureRoot, { recursive: true })
@@ -145,13 +145,14 @@ async function packFixtureDependency(name, version) {
         name,
         version,
         type: 'module',
-        exports: './index.js',
+        exports,
       },
       null,
       2,
     )}\n`,
   )
   await writeFile(join(fixtureRoot, 'index.js'), 'export {}\n')
+  await writeFile(join(fixtureRoot, 'index.d.ts'), 'export {}\n')
   await runCommand(
     'npm',
     ['pack', '--pack-destination', temporary, '--silent'],
@@ -180,7 +181,9 @@ try {
   const fixtureArchives = await Promise.all([
     packFixtureDependency('@benosjs/core', fixtureCoreVersion),
     packFixtureDependency('@benosjs/dom', fixtureDomVersion),
-    packFixtureDependency('@benosjs/primitives', fixturePrimitivesVersion),
+    packFixtureDependency('@benosjs/primitives', fixturePrimitivesVersion, {
+      '.': { types: './index.d.ts' },
+    }),
     packFixtureDependency('@zag-js/dialog', fixtureDialogVersion),
   ])
   localRegistry = await createLocalPackagesRegistry([
@@ -361,6 +364,16 @@ try {
   )
   if (primitive.version !== fixturePrimitivesVersion) {
     throw new Error('benos add did not install its missing primitives package.')
+  }
+  const infoAfterAdd = await runNpxCaptured(['benos', 'info'])
+  if (
+    !infoAfterAdd.stdout.includes(
+      `@benosjs/primitives: ${fixturePrimitivesVersion}`,
+    )
+  ) {
+    throw new Error(
+      `npx benos info did not report the installed primitives package:\n${infoAfterAdd.stdout}`,
+    )
   }
   const appManifest = JSON.parse(
     await readFile(join(app, 'package.json'), 'utf8'),

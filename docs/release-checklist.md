@@ -2,7 +2,7 @@
 
 ## Published release state
 
-- Versions `0.2.0`, `0.2.1`, and `0.2.2` are published for all eight
+- Versions `0.2.0` through `0.3.0` are published for all eight
   packages: `@benosjs/core`, `@benosjs/dom`, `@benosjs/compiler`,
   `@benosjs/vite`, `@benosjs/eslint-plugin`, `@benosjs/primitives`, `benos`,
   and `create-benos`.
@@ -12,8 +12,8 @@
   issue and point users to a fixed version.
 - The accidental `@benosjs/dom@0.0.0-stage` and
   `@benosjs/vite@0.0.0-stage` versions are deprecated.
-- GitHub Releases exist for `v0.2.1` and `v0.2.2`; `v0.2.0` remains
-  represented by its existing tag.
+- GitHub Releases exist for `v0.2.1`, `v0.2.2`, and `v0.3.0`; `v0.2.0`
+  remains represented by its existing tag.
 
 ## Automated release (default for future versions)
 
