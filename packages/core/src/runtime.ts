@@ -136,7 +136,9 @@ const providerOwners = new WeakMap<object, Owner>()
 const inspectedSignals = new WeakMap<() => unknown, StateNode<unknown>>()
 const inspectedComputeds = new WeakMap<() => unknown, ComputedNode<unknown>>()
 let currentOwner: Owner | null = null
+let currentEffectRun: EffectNode | null = null
 let currentConsumer: Consumer | null = null
+let ownerCreationCount = 0
 let trackingSuppression = 0
 let computedDepth = 0
 let batchDepth = 0
@@ -160,6 +162,7 @@ function rejectComputedSideEffect(name: string): void {
 }
 
 function createOwner(parent: Owner | null, kind: OwnerKind): Owner {
+  if (development) ownerCreationCount++
   const owner: Owner = {
     parent,
     firstChild: null,
@@ -184,6 +187,21 @@ function createOwner(parent: Owner | null, kind: OwnerKind): Owner {
     parent.lastChild = owner
   }
   return owner
+}
+
+function ensureCurrentEffectRunOwner(): Owner | null {
+  const run = currentEffectRun
+  if (
+    run &&
+    !run.runOwner &&
+    currentOwner === run.owner &&
+    !run.owner.disposed &&
+    !run.owner.disposing
+  ) {
+    run.runOwner = createOwner(run.owner, 'effect-run')
+    currentOwner = run.runOwner
+  }
+  return currentOwner
 }
 
 function unlinkOwner(owner: Owner): void {
@@ -365,11 +383,13 @@ export function createRoot<T>(fn: (dispose: () => void) => T): T {
   rejectComputedSideEffect('createRoot')
   const root = createOwner(null, 'root')
   const previousOwner = currentOwner
+  const previousEffectRun = currentEffectRun
   let result!: T
   let failed = false
   let thrown: unknown
   setupDepth++
   currentOwner = root
+  currentEffectRun = null
   try {
     result = fn(() => disposeOwner(root))
   } catch (error) {
@@ -377,6 +397,7 @@ export function createRoot<T>(fn: (dispose: () => void) => T): T {
     thrown = error
   } finally {
     currentOwner = previousOwner
+    currentEffectRun = previousEffectRun
     if (failed) {
       try {
         disposeOwner(root)
@@ -399,7 +420,7 @@ export function createUniqueId(): string {
 
 export function onCleanup(fn: () => void): void {
   rejectComputedSideEffect('onCleanup')
-  const owner = currentOwner
+  const owner = ensureCurrentEffectRunOwner()
   if (!owner || owner.disposed || owner.disposing)
     throw new Error('onCleanup requires an active owner')
   owner.hasResources = true
@@ -460,7 +481,7 @@ export function createContext<T>(defaultValue: T): Context<T> {
   const context: Context<T> = {
     Provider(props): unknown {
       rejectComputedSideEffect('Provider')
-      const parent = currentOwner
+      const parent = ensureCurrentEffectRunOwner()
       if (!parent || parent.disposed)
         throw new Error('Provider requires an active owner')
       const captured = untrack(() => props.value)
@@ -779,7 +800,7 @@ export function signal<T>(initial: T, options?: SignalOptions<T>): Signal<T> {
 
 export function computed<T>(fn: () => T): ReadonlySignal<T> {
   rejectComputedSideEffect('computed')
-  const owner = currentOwner ?? syntheticOwner('computed')
+  const owner = ensureCurrentEffectRunOwner() ?? syntheticOwner('computed')
   const node: ComputedNode<T> = {
     kind: 'computed',
     id: nextNodeId++,
@@ -885,24 +906,24 @@ function runEffect(node: EffectNode): void {
     )
     return
   }
-  const canReuseRunOwner = node.runOwner && !node.runOwner.hasResources
-  if (node.runOwner && !canReuseRunOwner) {
+  const previousRunOwner = node.runOwner
+  const canReuseRunOwner = previousRunOwner && !previousRunOwner.hasResources
+  if (previousRunOwner && !canReuseRunOwner) {
     const errors: Array<[unknown, Owner]> = []
-    collectDisposal(node.runOwner, errors)
+    node.runOwner = null
+    collectDisposal(previousRunOwner, errors)
     finishDisposal(errors)
   }
-  const runOwner =
-    canReuseRunOwner && node.runOwner
-      ? node.runOwner
-      : createOwner(node.owner, 'effect-run')
-  node.runOwner = runOwner
+  if (canReuseRunOwner) node.runOwner = previousRunOwner
   const previousOwner = currentOwner
+  const previousEffectRun = currentEffectRun
   const previousConsumer = currentConsumer
   const previousSuppression = trackingSuppression
   const previousRunningEffect = development
     ? (debugState?.currentRunningEffect ?? null)
     : null
-  currentOwner = runOwner
+  currentOwner = node.runOwner ?? node.owner
+  currentEffectRun = node
   currentConsumer = node
   if (development && debugState) debugState.currentRunningEffect = node
   trackingSuppression = 0
@@ -916,6 +937,7 @@ function runEffect(node: EffectNode): void {
     failure = error
   } finally {
     currentOwner = previousOwner
+    currentEffectRun = previousEffectRun
     currentConsumer = previousConsumer
     if (development && debugState)
       debugState.currentRunningEffect = previousRunningEffect
@@ -925,7 +947,7 @@ function runEffect(node: EffectNode): void {
   if (node.sourceCount !== 1 || node.firstSource?.seenEpoch !== node.trackEpoch)
     finishTracking(node, failed)
   node.hasRun = true
-  if (failed) routeError(failure, runOwner)
+  if (failed) routeError(failure, node.runOwner ?? node.owner)
   detachDependencyFreeEffect(node)
 }
 
@@ -976,7 +998,7 @@ function maybeFlush(): void {
 
 function createEffect(fn: () => void, tier: 'render' | 'user'): () => void {
   rejectComputedSideEffect('effect')
-  const owner = currentOwner ?? syntheticOwner('effect')
+  const owner = ensureCurrentEffectRunOwner() ?? syntheticOwner('effect')
   const node: EffectNode = {
     kind: 'effect',
     id: nextNodeId++,
@@ -1038,7 +1060,7 @@ export function createInternalOwner(
   kind: OwnerKind,
   mountReady?: () => boolean,
 ): Owner {
-  const parent = currentOwner
+  const parent = ensureCurrentEffectRunOwner()
   if (!parent || parent.disposed)
     throw new Error('Child owner requires a parent')
   const owner = createOwner(parent, kind)
@@ -1049,12 +1071,19 @@ export function createInternalOwner(
 export function runWithOwner<T>(owner: Owner, fn: () => T): T {
   if (owner.disposed) throw new Error('Owner is disposed')
   const previous = currentOwner
+  const previousEffectRun = currentEffectRun
   currentOwner = owner
+  currentEffectRun = null
   try {
     return fn()
   } finally {
     currentOwner = previous
+    currentEffectRun = previousEffectRun
   }
+}
+
+export function inspectInternalOwnerCreations(): number {
+  return ownerCreationCount
 }
 
 export function disposeInternalOwner(owner: Owner): void {

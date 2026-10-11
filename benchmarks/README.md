@@ -1166,3 +1166,103 @@ minimum–maximum spread.
 | Clear             |       5.41 [2.84–5.66] |       2.60 [2.56–2.65] |         2.08× |
 
 Raw samples: [full interleaved trace](js-framework-benchmark/direct-output-table-check-nine-2026-10-11.json).
+
+## Lazy effect-run owners (2026-10-11)
+
+The runtime now allocates a physical effect-run owner only when the callback
+creates a child computation or owner, registers cleanup, or provides context.
+The owner is disposed before a dependent effect reruns. Resource-free reads
+and writes remain under the effect's stable owner. The owner tests cover
+cleanup order, computed and nested-effect disposal, Provider context, error
+routing, and subscriber/queue removal.
+
+The production compiled generic-row allocation comparison was captured with
+minification disabled, source maps, allocation sampling, and forced-GC heap
+snapshots. Benos creates half as many physical owner objects per row as the
+direct-output checkpoint. Retained plain objects also fall by four per row;
+closure and array counts are unchanged.
+
+| Generic row metric per row     | Direct safe before lazy owners | Direct safe with lazy owners |
+| ------------------------------ | -----------------------------: | ---------------------------: |
+| Owner creation calls           |                              8 |                            4 |
+| Signal / effect creation calls |                          1 / 4 |                        1 / 4 |
+| Retained closures / functions  |                             24 |                           24 |
+| Retained plain objects         |                             57 |                           53 |
+| Retained arrays                |                         15.993 |                       15.993 |
+| Retained plain-object bytes    |                        2,148 B |                      1,860 B |
+
+For the sortable table at 1,000 rows, the allocation profile compares the
+compiled registry component against the handwritten Solid table. Counts are
+retained per row after forced garbage collection; native browser/layout
+objects are excluded from the JavaScript categories below.
+
+| Table metric per row           |   Benos registry | Solid handwritten |
+| ------------------------------ | ---------------: | ----------------: |
+| Owner creation calls           |                5 |                 1 |
+| Signal / effect creation calls |        1 / 9.999 |             0 / 3 |
+| Retained closures / functions  |           30.002 |             7.001 |
+| Retained plain objects         |           67.190 |            10.101 |
+| Retained arrays                |           40.007 |             2.008 |
+| Retained JS objects / bytes    | 139.55 / 4,450 B |     20.39 / 823 B |
+
+The registry table still exceeds the allocation target of two owners per row.
+The first lazy-owner slice targets empty effect-run scopes in the general
+compiled path; it does not remove keyed row lifetime scopes or fold the table's
+sort, empty-state, and per-column bindings. Its allocation profile attributes
+92.3% of retained objects and 91.8% of retained bytes to the listed call
+sites.
+
+The full js-framework-benchmark run below uses production builds, Chrome trace
+click-to-paint timing, two warmups, seven rounds, and interleaved frameworks.
+The ranges show the minimum and maximum across the seven measured rounds.
+
+| Operation         |             Benos (ms) |             Solid (ms) | Benos / Solid |
+| ----------------- | ---------------------: | ---------------------: | ------------: |
+| Create 1,000      |    35.50 [34.39–37.00] |    25.34 [25.07–27.02] |         1.40× |
+| Replace 1,000     |    36.74 [36.06–39.28] |    25.84 [24.94–27.79] |         1.42× |
+| Update every 10th |    13.54 [13.17–16.43] |    14.45 [13.93–26.34] |         0.94× |
+| Select one row    |      1.27 [1.23–21.95] |       0.87 [0.84–1.31] |         1.45× |
+| Swap rows         |      3.99 [3.80–13.72] |       2.90 [2.84–3.06] |         1.38× |
+| Remove one row    |       5.04 [4.72–6.69] |       4.42 [4.19–4.74] |         1.14× |
+| Create 10,000     | 328.71 [324.28–373.04] | 242.17 [239.60–245.86] |         1.36× |
+| Append 1,000      |    47.81 [43.66–53.01] |    36.48 [35.47–42.65] |         1.31× |
+| Clear             |       5.35 [2.65–6.18] |       2.70 [2.57–2.89] |         1.98× |
+
+The 10,000-row create median is 30.69 ms lower than the preceding direct safe
+run (359.40 ms), but the old and new spreads overlap. We therefore record the
+allocation reduction as repeatable and the timing change as inconclusive, not
+as a confirmed speedup. Select, swap, and clear have wide Benos spreads due to
+isolated long samples.
+
+The dedicated sortable-table trace records initial render and sort timings:
+
+| Table workload | Variant           |        Initial (ms) |           Sort (ms) |
+| -------------- | ----------------- | ------------------: | ------------------: |
+| 5,000 rows     | Benos registry    | 162.0 [144.0–170.5] |  106.7 [88.6–174.7] |
+| 5,000 rows     | Handwritten Benos | 117.4 [100.0–146.0] |                   — |
+| 5,000 rows     | Solid             |    76.2 [67.4–86.3] |    87.9 [76.4–90.6] |
+| 10,000 rows    | Benos registry    | 286.3 [274.6–355.2] | 194.5 [186.5–275.1] |
+| 10,000 rows    | Handwritten Benos | 234.3 [203.5–290.0] |                   — |
+| 10,000 rows    | Solid             | 140.5 [136.3–158.8] | 160.6 [154.2–174.2] |
+
+The registry table is 44.6 ms slower than the handwritten Benos fixture at
+5k and 52.0 ms slower at 10k. Its direct-compiled rows still carry sorting,
+empty-state, keyed-range, and column-binding work, so direct DOM emission
+does not bring its mount down to the handwritten fixture's work. Sort medians
+are 1.21× Solid at both sizes; the ranges include occasional slow samples.
+
+Current production bundle measurements after the change:
+
+| Bundle                           | Measured |      Cap | Headroom |
+| -------------------------------- | -------: | -------: | -------: |
+| `@benosjs/core`                  |  4,108 B |  4,608 B |    500 B |
+| `@benosjs/core` + `@benosjs/dom` | 10,580 B | 11,264 B |    684 B |
+
+The lazy-owner change adds 59 B to core and 72 B to core + DOM versus the
+direct-output checkpoint. The added bytes buy a 50% decrease in owner creation
+calls and four fewer retained plain objects per generic row. The 10k-create
+time improvement is promising but overlaps the prior spread.
+
+Raw artifacts: [all nine interleaved rows](js-framework-benchmark/lazy-owner-nine-2026-10-11.json),
+[5k and 10k table trace](js-framework-benchmark/results/lazy-owner-table-2026-10-11.json),
+[allocation and owner profile](js-framework-benchmark/results/lazy-owner-allocation-2026-10-11.json).

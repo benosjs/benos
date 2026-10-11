@@ -163,26 +163,37 @@ const entryPlugin = (framework) => ({
             ? '/src/main-benos.tsx'
             : framework === 'table-benos'
               ? '/src/table-benos.tsx'
-              : '/src/main-solid.jsx',
+              : framework === 'table-solid'
+                ? '/src/table-solid.tsx'
+                : '/src/main-solid.jsx',
       )
     },
   },
 })
-for (const framework of ['benos-runtime', 'benos-safe', 'solid']) {
+for (const framework of [
+  'benos-runtime',
+  'benos-safe',
+  'solid',
+  'table-benos',
+  'table-solid',
+]) {
   await build({
     configFile: false,
     root: benchRoot,
     mode: 'production',
     define: productionDefines,
     plugins:
-      framework === 'solid'
+      framework === 'solid' || framework === 'table-solid'
         ? [allocationCounters, entryPlugin(framework), solid()]
         : [
             allocationCounters,
             entryPlugin(framework),
             benos({ optimization: 'safe' }),
           ],
-    resolve: framework === 'solid' ? {} : { alias: aliases },
+    resolve:
+      framework === 'solid' || framework === 'table-solid'
+        ? {}
+        : { alias: aliases },
     build: {
       target: 'es2022',
       outDir: resolve(buildRoot, `app-${framework}`),
@@ -529,6 +540,8 @@ const servers = [
   await serve(resolve(buildRoot, 'app-benos-runtime'), 4381),
   await serve(resolve(buildRoot, 'app-benos-safe'), 4382),
   await serve(resolve(buildRoot, 'app-solid'), 4383),
+  await serve(resolve(buildRoot, 'app-table-benos'), 4384),
+  await serve(resolve(buildRoot, 'app-table-solid'), 4385),
 ]
 const browser = await chromium.launch({ headless: true })
 const report = {
@@ -660,6 +673,107 @@ try {
         countPerRow: item.count / 1000,
         bytesPerRow: item.bytes / 1000,
       })),
+      retainedAllocationSites,
+      allocationSamplingTopSites: sampleSummary(sampling.profile),
+    }
+    await page.close()
+  }
+
+  for (const [index, framework] of ['table-benos', 'table-solid'].entries()) {
+    const port = 4384 + index
+    const page = await browser.newPage()
+    const client = await page.context().newCDPSession(page)
+    await client.send('HeapProfiler.enable')
+    await page.addInitScript(counterBootstrap)
+    await page.goto(`http://127.0.0.1:${port}/?rows=0`)
+    await page.waitForFunction(() => window.__benosTableBench?.initial)
+    await page.evaluate(() => window.__benosTableBench.initial)
+    const emptyCounts = await page.evaluate(() => ({
+      ...window.__p1AllocationCounts,
+    }))
+    await client.send('HeapProfiler.collectGarbage')
+    await client.send('HeapProfiler.startTrackingHeapObjects', {
+      trackAllocations: true,
+    })
+    const beforeDetailed = await takeHeapSnapshot(client)
+    await page.goto(`http://127.0.0.1:${port}/?rows=1000`)
+    await page.waitForFunction(() => window.__benosTableBench?.initial)
+    await page.evaluate(() => window.__benosTableBench.initial)
+    const fullCounts = await page.evaluate(() => ({
+      ...window.__p1AllocationCounts,
+    }))
+    await client.send('HeapProfiler.collectGarbage')
+    const afterDetailed = await takeHeapSnapshot(client)
+    await client.send('HeapProfiler.stopTrackingHeapObjects', {
+      reportProgress: false,
+    })
+    const retainedAllocationSites = retainedAllocationAttribution(
+      beforeDetailed,
+      afterDetailed,
+      resolve(buildRoot, 'app-' + framework),
+      1000,
+    )
+
+    await page.goto(`http://127.0.0.1:${port}/?rows=0`)
+    await page.waitForFunction(() => window.__benosTableBench?.initial)
+    await page.evaluate(() => window.__benosTableBench.initial)
+    await client.send('HeapProfiler.collectGarbage')
+    const before = await snapshot(client)
+    await client.send('HeapProfiler.startSampling', {
+      samplingInterval: 64,
+      includeObjectsCollectedByMajorGC: true,
+    })
+    await page.goto(`http://127.0.0.1:${port}/?rows=1000`)
+    await page.waitForFunction(() => window.__benosTableBench?.initial)
+    await page.evaluate(() => window.__benosTableBench.initial)
+    const sampling = await client.send('HeapProfiler.stopSampling')
+    await client.send('HeapProfiler.collectGarbage')
+    const after = await snapshot(client)
+    const delta = diffSnapshots(before, after)
+    const byType = new Map()
+    for (const item of delta) {
+      const isDomWrapper =
+        item.type === 'native' &&
+        (/^<[^>]+>$/.test(item.name) ||
+          /^(Text|Comment|Document|DocumentFragment|HTML.*Element|SVG.*Element|.*Node)$/.test(
+            item.name,
+          ))
+      const isArray =
+        item.type === 'array' ||
+        (item.type === 'object' && item.name === 'Array')
+      const group =
+        item.type === 'closure'
+          ? 'closures/functions'
+          : isArray
+            ? 'arrays'
+            : isDomWrapper
+              ? 'DOM wrappers'
+              : item.type === 'native'
+                ? 'browser native/layout objects'
+                : item.type === 'object'
+                  ? 'plain objects'
+                  : item.type
+      const value = byType.get(group) ?? { retainedCount: 0, retainedBytes: 0 }
+      value.retainedCount += item.count
+      value.retainedBytes += item.bytes
+      byType.set(group, value)
+    }
+    report.frameworks[framework] = {
+      nodeCallsPerRow: Object.fromEntries(
+        Object.keys(emptyCounts).map((key) => [
+          key,
+          (fullCounts[key] - emptyCounts[key]) / 1000,
+        ]),
+      ),
+      retainedDeltaPerRow: Object.fromEntries(
+        [...byType].map(([type, value]) => [
+          type,
+          {
+            count: value.retainedCount / 1000,
+            bytes: value.retainedBytes / 1000,
+          },
+        ]),
+      ),
       retainedAllocationSites,
       allocationSamplingTopSites: sampleSummary(sampling.profile),
     }
