@@ -85,6 +85,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm registry:check
+      - name: Require npm 10 for npm consumer tests
+        if: matrix.package_manager == 'npm'
+        run: node -e "const v=require('node:child_process').execSync('npm --version',{encoding:'utf8'}).trim();if(v.split('.')[0]!=='10')throw Error('Expected npm 10, got '+v);console.log('npm '+v)"
       - name: Test packed benos CLI bin shims
         env:
           BENOS_PACKAGE_MANAGER: ${{ matrix.package_manager }}

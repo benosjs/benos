@@ -69,6 +69,31 @@ function mountNested(): void {
   )
 }
 
+function mountDirectNested(): void {
+  dispose?.()
+  host.replaceChildren()
+  function Inner(): JSX.Element {
+    const data = resource(
+      () => 'direct-inner',
+      (next) =>
+        new Promise<string>((resolve, reject) =>
+          requests.set(next, { resolve, reject }),
+        ),
+    )
+    return <b id="direct-inner-content">{data.read()}</b>
+  }
+  dispose = render(
+    () => (
+      <Suspense fallback="outer wait">
+        <Suspense fallback={<i id="direct-inner-fallback">inner wait</i>}>
+          <Inner />
+        </Suspense>
+      </Suspense>
+    ),
+    host,
+  )
+}
+
 function update(next: string): void {
   key.set(next)
 }
@@ -94,6 +119,7 @@ declare global {
     __benosAsync?: {
       mount: typeof mount
       mountNested: typeof mountNested
+      mountDirectNested: typeof mountDirectNested
       update: typeof update
       resolve: typeof resolve
       reject: typeof reject
@@ -106,6 +132,7 @@ declare global {
 window.__benosAsync = {
   mount,
   mountNested,
+  mountDirectNested,
   update,
   resolve,
   reject,

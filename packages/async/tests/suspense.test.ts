@@ -234,6 +234,39 @@ describe('Suspense', () => {
     expect(document.body.textContent).toBe('shelldone')
   })
 
+  it('reveals a directly nested boundary without a wrapper element', async () => {
+    let finish!: (value: string) => void
+    function Inner() {
+      const data = resource(
+        () => 'inner',
+        () => new Promise<string>((resolve) => (finish = resolve)),
+      )
+      return jsx('b', {
+        get children() {
+          return data.read()
+        },
+      })
+    }
+    roots.push(
+      render(
+        () =>
+          jsx(Suspense, {
+            fallback: 'outer wait',
+            children: jsx(Suspense, {
+              fallback: 'inner wait',
+              children: jsx(Inner, {}),
+            }),
+          }),
+        document.body,
+      ),
+    )
+    await flushAsync()
+    expect(document.body.textContent).toBe('inner wait')
+    finish('done')
+    await flushAsync()
+    expect(document.body.textContent).toBe('done')
+  })
+
   it('does not reveal a disposed pending branch', async () => {
     let finish!: (value: string) => void
     function Content() {
@@ -462,6 +495,44 @@ describe('Suspense', () => {
     roots.push(render(() => jsx(App, {}), document.body))
     await flushAsync()
     expect(document.body.textContent).toBe('stale')
+    requests.get('fallback')?.('fallback ready')
+    await flushAsync()
+    expect(document.body.textContent).toBe('fallback ready')
+    requests.get('inner')?.('inner ready')
+    await flushAsync()
+    expect(document.body.textContent).toBe('inner ready')
+  })
+
+  it('lets a nested fallback suspend its outer boundary', async () => {
+    const requests = new Map<string, (value: string) => void>()
+    function App() {
+      const fallbackData = resource(
+        () => 'fallback',
+        (key) => new Promise<string>((resolve) => requests.set(key, resolve)),
+      )
+      const innerData = resource(
+        () => 'inner',
+        (key) => new Promise<string>((resolve) => requests.set(key, resolve)),
+      )
+      return jsx(Suspense, {
+        fallback: 'outer wait',
+        children: jsx(Suspense, {
+          fallback: jsx('i', {
+            get children() {
+              return fallbackData.read() ?? 'stale'
+            },
+          }),
+          children: jsx('p', {
+            get children() {
+              return innerData.read()
+            },
+          }),
+        }),
+      })
+    }
+    roots.push(render(() => jsx(App, {}), document.body))
+    await flushAsync()
+    expect(document.body.textContent).toBe('outer wait')
     requests.get('fallback')?.('fallback ready')
     await flushAsync()
     expect(document.body.textContent).toBe('fallback ready')

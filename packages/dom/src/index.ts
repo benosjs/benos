@@ -1798,7 +1798,8 @@ function prepareInternalStage(
     commit(before = null) {
       if (disposed) throw new Error('Staged branch is disposed')
       if (committed) return
-      moveRange(range, target, before)
+      range.nodes = Array.from(fragment.childNodes)
+      moveRange(range, before?.parentNode ?? target, before)
       committed = true
       setInternalOwnerGate(owner, 0)
       notifyMount(owner)

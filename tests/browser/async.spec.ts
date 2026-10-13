@@ -36,6 +36,19 @@ test('ordinary updates show fallback and nested boundaries reveal independently'
   await expect(page.locator('#inner-content')).toHaveText('ready')
 })
 
+test('directly nested boundary keeps its fallback after parent commit', async ({
+  page,
+}) => {
+  await page.goto('/tests/browser/async-fixture.html')
+  await page.waitForFunction(() => Boolean(window.__benosAsync))
+  await page.evaluate(() => window.__benosAsync?.mountDirectNested())
+  await expect(page.locator('#direct-inner-fallback')).toHaveText('inner wait')
+  await page.evaluate(() =>
+    window.__benosAsync?.resolve('direct-inner', 'done'),
+  )
+  await expect(page.locator('#direct-inner-content')).toHaveText('done')
+})
+
 test('transition retains committed content until replacement is ready', async ({
   page,
 }) => {
