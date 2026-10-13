@@ -16,6 +16,7 @@ import {
   reportInternalError,
   runWithOwner,
   setInternalErrorHandler,
+  setInternalOwnerGate,
 } from '@benosjs/core/internal'
 import type { InternalOwner } from '@benosjs/core/internal'
 import type { ReadonlySignal } from '@benosjs/core'
@@ -66,6 +67,20 @@ type Descriptor =
 const fragment = Symbol('benos.fragment')
 export const Fragment = fragment
 const controlKinds = new WeakMap<object, ControlKind>()
+type InternalControls = WeakMap<
+  object,
+  (
+    props: Props,
+    parent: Node,
+    before: Node | null,
+    owner: InternalOwner,
+  ) => Node[]
+>
+const internalControls = ((
+  globalThis as typeof globalThis & {
+    __benosDomControls?: InternalControls
+  }
+).__benosDomControls ??= new WeakMap())
 const development =
   (
     globalThis as typeof globalThis & {
@@ -812,12 +827,20 @@ function mountComponent(
   parentOwner: InternalOwner,
 ): DomRange {
   const kind = controlKinds.get(descriptor.component)
+  const internalControl = internalControls.get(descriptor.component)
   let componentRange: DomRange = { nodes: [], owner: parentOwner }
   const owner = runWithOwner(parentOwner, () =>
     createInternalOwner('component', () => rangeConnected(componentRange)),
   )
   try {
-    if (kind)
+    if (internalControl)
+      componentRange = {
+        nodes: runWithOwner(owner, () =>
+          internalControl(descriptor.props, parent, before, owner),
+        ),
+        owner,
+      }
+    else if (kind)
       componentRange = mountControl(
         kind,
         descriptor.props,
@@ -1744,6 +1767,73 @@ export function render(
   })
   return () => disposeRoot()
 }
+
+function prepareInternalStage(
+  renderChild: () => Child,
+  target: Node,
+): {
+  owner: InternalOwner
+  nodes: Node[]
+  commit: (before?: Node | null) => void
+  dispose: () => void
+} {
+  const owner = createInternalOwner('branch')
+  const fragment = ownerDocumentOf(target).createDocumentFragment()
+  setInternalOwnerGate(owner, 1)
+  let range: DomRange
+  try {
+    range = runWithOwner(owner, () =>
+      mountValue(renderChild(), fragment, null, owner),
+    )
+    runWithOwner(owner, () => onCleanup(() => removeRange(range)))
+  } catch (error) {
+    disposeInternalOwner(owner)
+    throw error
+  }
+  let committed = false
+  let disposed = false
+  return {
+    owner,
+    nodes: range.nodes,
+    commit(before = null) {
+      if (disposed) throw new Error('Staged branch is disposed')
+      if (committed) return
+      moveRange(range, target, before)
+      committed = true
+      setInternalOwnerGate(owner, 0)
+      notifyMount(owner)
+    },
+    dispose: () => {
+      disposed = true
+      disposeInternalOwner(owner)
+    },
+  }
+}
+
+;(
+  globalThis as typeof globalThis & {
+    __benosDomStage?: typeof prepareInternalStage
+    __benosDomControl?: typeof registerInternalControl
+  }
+).__benosDomStage = prepareInternalStage
+
+function registerInternalControl(
+  component: object,
+  mount: (
+    props: Props,
+    parent: Node,
+    before: Node | null,
+    owner: InternalOwner,
+  ) => Node[],
+): void {
+  internalControls.set(component, mount)
+}
+
+;(
+  globalThis as typeof globalThis & {
+    __benosDomControl?: typeof registerInternalControl
+  }
+).__benosDomControl = registerInternalControl
 
 export interface ShowProps<T = unknown> {
   when: T | false | null | undefined

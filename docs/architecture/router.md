@@ -1,0 +1,148 @@
+# Router architecture for 0.4.0
+
+**Status:** R1 design approved with amendments for R2; no router code exists yet. [The track brief](../router-async-plan.md) sets scope. [The flagship target](./flagship-integration.md) supplies the 0.5 compatibility test. This design preserves current core/DOM public APIs and their synchronous graph semantics.
+
+## Package boundary and budget
+
+`@benosjs/router` owns path matching, route definitions, typed URL construction, navigation state, loaders, browser/memory history, route presentation, and accessibility behavior. Its matcher, URL codec, and loader coordinator must run without `window`/`document`; only its browser history, `Link` interception, focus, announcement, and scroll adapters touch the DOM. The package depends on `@benosjs/async` and `@benosjs/dom`, and uses `@benosjs/core` through their internal seams. It contains no cache, mutation, form, auth, or UI-registry dependency. The 0.5 query adapter can call a loader and share its resource identity; the 0.5 mutation/form layer remains outside the router.
+
+The router cap is **7,168 bytes** minified + gzip for a production entry with framework dependencies externalized. The async cap is **4,096 bytes** on the same basis ([async.md](./async.md)). Both are tighter than the initial R1 proposal. Also record the fully bundled `core + dom + async + router` bytes at R3/R4 so externalization cannot conceal total application cost. The existing measured base is core **4,108 / 4,608** and core + DOM **10,580 / 11,264** bytes (production esbuild/gzip, 2026-10-12). R1 documentation adds **0 bytes**. Internal core/DOM work and estimates appear below; neither cap is raised.
+
+### Comparable production measurements
+
+On 2026-10-12, an isolated temporary npm install measured `@solidjs/router@1.0.0`, `@tanstack/react-router@1.170.42`, and `react-router@8.4.0`. A tiny entry re-exported each package's browser router, memory router/history, route/link/navigation/params/search APIs, loader-capable router, and pending/redirect support where exported. The React bundles also included scroll restoration; Solid's entry included its preload hook. esbuild 0.28.2 used `bundle: true`, `minify: true`, `treeShaking: true`, `platform: 'browser'`, `format: 'esm'`, `target: 'es2022'`, production/browser conditions, no legal comments, and default Node gzip. `react`/`react-dom` or `solid-js` peers were external; each router's own dependencies were bundled.
+
+The exact re-export sets were: Solid `Router, MemoryRouter, createMemoryHistory, Route, A, Navigate, useNavigate, useParams, useSearchParams, useIsRouting, useLocation, usePreloadRoute`; TanStack `createRouter, createRootRoute, createRoute, RouterProvider, Link, createMemoryHistory, createBrowserHistory, redirect, useNavigate, useParams, useSearch, ScrollRestoration`; React Router `createBrowserRouter, createMemoryRouter, RouterProvider, Link, Outlet, redirect, useNavigate, useParams, useSearchParams, useNavigation, ScrollRestoration`.
+
+| Comparable public surface      | Minified bytes | Gzip bytes |
+| ------------------------------ | -------------: | ---------: |
+| Solid Router 1.0.0             |         19,966 |  **8,253** |
+| TanStack React Router 1.170.42 |         78,207 | **28,219** |
+| React Router 8.4.0             |         97,879 | **32,759** |
+
+These are reproducible named-export surface measurements, not equivalent whole-app bundles or feature-for-feature benchmarks. Solid's Suspense/reactivity lives in its externalized peer, and React Router includes features beyond the Benos 0.4 scope. The **7,168 B router cap is 1,085 B below Solid Router's measured surface and 5,120 B below the rejected 12,288 B proposal**. The separate **4,096 B async cap** keeps its resource/Suspense/transition implementation visible in accounting; router + async may reach 11,264 B before shared compression, so R2–R4 must additionally report the combined bundle. If these caps prove impossible without removing required behavior, stop with measured alternatives rather than silently weakening features.
+
+## Route declarations and inferred types
+
+The recommended API separates **route references** from **route presentation**. A `route()` reference contains path, search codec, and loader types; it imports no page or layout component and no router instance. `mountRoute(ref, { lazy, pending, error, children })` binds presentation in the application manifest. Every page and layout is a dynamic import, including shared layouts, so the manifest does not eagerly evaluate a module that imports route references. Inside a rendered owner, package-level `<Link>`, `navigate()`, and `navigation()` resolve the router from context. Their destination types come from the route reference, and runtime checks reject a reference not registered with that router. Outside a rendered owner, a caller receives the router instance explicitly and uses `router.navigate()`. No app page imports the app's router instance at runtime; no global TypeScript module augmentation is needed.
+
+```tsx
+// routes/refs.ts: no component or router-instance imports
+const projectRoute = route('/projects/:projectId', {
+  search: {
+    parse: (raw: URLSearchParams) => ({
+      tab:
+        raw.get('tab') === 'members'
+          ? ('members' as const)
+          : ('details' as const),
+    }),
+    stringify: (value: { tab: 'details' | 'members' }) =>
+      new URLSearchParams({ tab: value.tab }),
+  },
+  loader: ({ params, search, signal }) => getProject(params.projectId, signal),
+})
+// routes/manifest.ts: dynamic component edges only
+const router = createRouter({
+  routes: [
+    mountRoute(homeRoute, { lazy: () => import('./pages/home') }),
+    mountRoute(projectRoute, {
+      lazy: () => import('./pages/project-editor'),
+      pending: () => <p role="status">Loading…</p>,
+      error: ({ retry }) => <button onClick={retry}>Retry project</button>,
+    }),
+  ] as const,
+  notFound: () => <p>Not found</p>,
+  history: browserHistory(),
+})
+// pages/project-editor.tsx: imports projectRoute from refs.ts, never manifest.ts
+const match = projectRoute.match()
+;<Link
+  to={projectRoute}
+  params={{ projectId: 'p-1' }}
+  search={{ tab: 'members' }}
+>
+  Members
+</Link>
+void navigate({
+  to: projectRoute,
+  params: { projectId: 'p-1' },
+  search: { tab: 'details' },
+})
+// app bootstrap or an event outside an owner receives the instance
+router.navigate({
+  to: projectRoute,
+  params: { projectId: 'p-1' },
+  search: { tab: 'details' },
+})
+```
+
+A `route()` call returns an immutable route reference, never global match state. `route.match()` reads the nearest committed match for that reference from the current owner context and throws a clear error outside a matching route scope, following the existing `getContext` rule. It returns a stable signal-bearing handle without the React-style `use` prefix. A route may be nested via `children: [...]` on `mountRoute` and may use a pathless layout whose lazy component renders `<Outlet />`. Parent and child layouts persist while their route identities remain matched. The router accepts an index route and a single `notFound` view for unmatched URLs. Absolute path literals are the public typed destination; a child may declare a relative segment but its reference carries an inferred full path after `createRouter` composition. Route registration rejects ambiguous duplicate full paths and conflicting parameter names. Sibling priority is static literal segment, then named segment, then catch-all; declaration order breaks otherwise equal specificity only with a development warning. Trailing slash policy is one canonical slash (root only) with redirects/replacements to the canonical URL. Path matching is case-sensitive by default and configurable per router only before creation.
+
+Recommended multi-page layout:
+
+```text
+src/
+  app.tsx                  # imports manifest, renders RouterOutlet
+  routes/
+    refs.ts                # route refs, search codecs, loaders; no views
+    manifest.ts            # mountRoute tree and dynamic imports
+    pages/
+      home.tsx             # imports refs only
+      project-list.tsx     # imports refs only
+      project-editor.tsx   # imports refs, form model; no manifest import
+    layouts/
+      app-layout.tsx       # imports refs and Link/navigation; no manifest import
+      projects-layout.tsx  # imports refs and Link/navigation; no manifest import
+  data/
+    projects.ts            # transport/query adapters; no view imports
+```
+
+The import graph is `app → manifest → refs/data`, with **dynamic** `manifest → page/layout` edges and static `page/layout → refs` edges. A page or layout never statically imports `manifest` or `app`. The [circular-prone fixture](../../tests/fixtures/router-circular/README.md) covers nested layouts that link to child/sibling routes and a page that reads its own match. At R3, compile and evaluate it with intentionally shuffled import order, assert lazy modules were not evaluated during manifest creation, and test that a wrong or unregistered route reference is rejected.
+
+At the type level, `PathParams<P>` recursively splits a literal path on `/`, gathers `:name` segments into required string keys, and merges ancestor params for nested children. For example, `PathParams<'/projects/:projectId'>` is `{ projectId: string }`. The 0.4 grammar supports named required segments and a terminal named splat (`*rest`, represented as a string); optional parameters and regex segments are deferred because their undefined/precedence semantics need a separate review. Duplicate names, empty names, splat before the end, and nonliteral/dynamic paths are compile-time errors where TypeScript can see them, with runtime registration errors as a backstop. Percent-encoding is segment based: `navigate` encodes each param once; the matcher decodes once, rejects malformed escapes, and never lets an encoded slash alter segment boundaries. Empty required params are rejected before URL creation.
+
+`Link`, owner-bound `navigate()`, and instance `router.navigate()` accept a route reference rather than an arbitrary string. Their `params` and `search` types are derived from that reference; an excess or misspelled param is a type error for object literals, and an absent required param is a type error. `to` is required except for a separate explicit `router.back()`. A deliberately unsafe external URL uses a native `<a>`. `Link` emits an actual `href` for copy/open-in-new-tab and has reactive exact or descendant active state via `aria-current="page"`. Modified clicks, non-primary buttons, `target`, `download`, default-prevented events, and external origins keep browser behavior. Programmatic navigation returns a result promise with `committed | superseded | redirected` rather than treating cancellation as an error. A redirect helper returns a typed destination; a redirect from a loader is a control result, capped at a finite hop count with cycle detection.
+
+## Search params and URLs
+
+`search.parse(raw)` is required when a route declares typed search; its return type is the parsed search type. `search.stringify(value)` must accept that type and produce `URLSearchParams`. Both are route-owned so links, navigation, direct URLs, history events, and SSR use one codec. A schema helper may be added later, but no assumption is made that Standard Schema itself parses string query values or serializes them. Search parsing errors go to the matched route's error view; the raw URL is not trusted as typed input. Parsed values are immutable snapshots. A change to parsed search that a loader declares as a dependency reloads it; to prevent accidental stale data, the default is to reload on **any** search change. A future explicit `loaderDeps` may narrow that only with type-checked tests. Link generation sorts keys for canonical output and preserves duplicate values only when the codec chooses to. Hash fragments are preserved separately from search.
+
+## Matching and navigation state
+
+`router.location()` is the committed URL; `router.navigation()` is a read-only signal with `idle | loading | blocked`, destination, and reason (`link | programmatic | pop`). A navigation starts by matching, parsing search, resolving redirects, and starting all matched route loaders and lazy imports **before** new route components render. The parent-to-child match order is deterministic; independent loader promises may run concurrently after parent params/search are known. Each navigation has a generation and `AbortController`. A later navigation aborts earlier work; an old completion, including A → B → A, cannot commit. All candidate owners, resources, and lazy imports are released on supersession; an imported module cannot be cancelled, but its result is ignored.
+
+A first load renders the nearest route `pending` view or Suspense fallback while the candidate resolves. On later navigation, the old committed view stays visible with an explicit pending signal. Once candidate code and blocking loaders resolve, the router commits URL, params, search, loader values, and route tree atomically in one batch/reveal. A same-route change retains its component owner: `route.match()` returns a stable owner-bound object with `params: ReadonlySignal<PathParams<P>>`, `search: ReadonlySignal<Search>`, and `data: ReadonlySignal<LoaderOutput>`. The signals update together at commit; code that reads them inside JSX bindings or resource source functions tracks changes. Reading `params()` once in a component setup is still a snapshot and is explicitly documented as such. A change to another route definition disposes the old component scope; common parent layouts persist. Route loader data has a ready value whenever its component is committed, so `match.data()` does not require a non-null assertion. If a route has no loader, `data` is absent from that route's match type.
+
+The router's blocking loader uses an owned `resource` generation under the hood. The resource's pending token participates in Suspense and transition staging, but the router holds the candidate route until ready so no component can mistake stale loader data for the new param's data. Loader functions receive `{ params, search, signal, context }` as immutable values, not live signals, and return a value or promise. They are untracked and never inherit a current owner across `await`. On an explicit reload of a committed match, old data remains visible while pending; success swaps data atomically, failure presents the route error state with retry and does not erase last good data. A 0.5 query adapter may take over cache policy, but the 0.4 router itself does not retain data after a match is disposed or offer deduplication across unrelated navigations.
+
+A loader failure or lazy import failure commits the destination URL with the nearest matched route `error` component; its `retry` starts a new generation. The prior view is retained only during loading, then replaced by the destination error view. If no route error view exists, the router delegates to the existing DOM `<ErrorBoundary>` at the outlet and ultimately reports an unhandled error. Synchronous render errors follow the existing owner boundary semantics. Event-handler errors remain with the existing DOM event reporter and do not activate route error views. The failed candidate never commits a half-built content tree. Redirects replace by default when returned from loaders; explicit navigation redirects may request push. Not-found is a committed route result, not a thrown loader error.
+
+## History, focus, scrolling, and RTL
+
+`browserHistory()` listens to `popstate`, stores a per-entry key in `history.state` without clobbering user state, and removes its listener on router disposal. A pop changes the browser address before loaders settle; the previous view remains during loading, while `router.location()` still names its committed URL and `router.navigation().destination` names the new address. Success commits target content; failure commits the popped URL with its route error/not-found view, so address and committed view converge. A later competing push navigation supersedes the pop generation and writes its own URL at commit. `memoryHistory({ initialEntries, initialIndex })` implements the same interface and exposes stack/index inspection for tests without DOM globals. Router construction is side-effect free; `router.mount()`/the outlet owner starts listeners and `dispose()` releases them.
+
+On successful client navigation, focus moves to an opt-in route heading target (`data-route-focus`), falling back to the outlet landmark, without hijacking focus on hash-only changes, background reloads, or modified-click browser navigation. The router sets a temporary `tabindex="-1"` if needed and restores the prior attribute on disposal. One polite live region in the root announces the committed document/route title and errors; pending navigation has a status announcement without repeated noise. Links keep native keyboard behavior. For push navigation, scroll moves to the hash target or top after commit; for pop it restores the saved per-entry position after the new DOM is committed. `replace` retains scroll by default unless requested otherwise. Hash scrolling is decoded safely and retried once after lazy reveal. A router option allows an app-owned scroll container; window is the default. Tests cover nested layouts, focus visibility, repeated same-route navigations, and screen-reader text. Direction is inherited from document/layout `dir`; matching and data semantics do not depend on LTR. No left/right keyboard assumption enters `Link` or navigation, and UI-registry components remain ordinary children.
+
+## Lazy routes and SSR seam
+
+`lazy: () => Promise<{ default: Component }>` is called after matching and before candidate render, once per route module per router lifetime; module failure is retryable by clearing the failed load. A loader may start concurrently with the import. The public route definition and its path/search/loader types remain eager so type inference and URL matching do not require downloading the component.
+
+No browser global is read at module evaluation. A future server renderer can supply a request-local memory/static history, match a URL, run loaders under a request owner, and render the same outlet with SSR's escaping and marker rules in [ssr.md](./ssr.md). Router state and loaded data must be request local, never module-global. Only explicitly opted-in resource data may be serialized, with stable route ID plus param/search validation key; the router must not serialize arbitrary loader results by default. Hydration claims the committed URL/match and validates snapshot keys before running client setup; a mismatch refetches or renders fallback. Server effects and mounts remain suppressed, and the browser focus/scroll/announcement adapters do nothing on the server. This is an interface reservation, not an SSR implementation in 0.4.
+
+## Internal core/DOM work required
+
+This design **does need internal changes** to current core and DOM, so R2 must wait for approval of this checkpoint. Public `signal`, `effect`, `batch`, `createRoot`, `render`, and `ErrorBoundary` signatures and documented timing stay unchanged.
+
+| Package    | Exact internal need                                                                                                   | Design estimate, minified + gzip | Why                                                                                                             |
+| ---------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------: | --------------------------------------------------------------------------------------------------------------- |
+| core       | Owner-scoped eligibility gate for queued render/user jobs, with release/disposal, plus an internal atomic commit hook |                       +120–240 B | A prepared branch must not run user effects; a retained branch must not react against new signals before reveal |
+| DOM        | Staged child range creation/commit/discard and live mount eligibility; router outlet reuses a same-route owner        |                       +260–420 B | Suspense fallback/reveal and same-route updates need an off-document branch and one committed swap              |
+| core + DOM | Expected combined delta after compression                                                                             |                       +380–660 B | Current combined headroom is 684 B; this estimate is close enough to require measured prototypes                |
+
+The estimates are planning ranges, **not measured additions** and not permission to exceed either cap. Core headroom is 500 B. If the required prototype exceeds a cap, stop and report exact bytes and alternatives; do not change public behavior or budgets silently. No code or configuration is changed in R1.
+
+## Trade-offs and test gates
+
+[TanStack Router](https://tanstack.com/router/latest/docs/guide/type-safety) already has strong route-wide type inference, typed links/search, loaders, pending UI, and [scroll restoration](https://tanstack.com/router/latest/docs/guide/scroll-restoration). Benos should not claim novelty there. Instance-scoped typed references may avoid a global registration step, at the cost of a narrower path grammar and no 0.4 cache. [Solid Router](https://docs.solidjs.com/solid-router/reference/primitives/use-params) has reactive params and [preloading](https://docs.solidjs.com/solid-router/data-fetching/how-to/preload-data); Benos chooses an atomic committed match/data signal so form identity and data change together. [React Router](https://reactrouter.com/start/framework/pending-ui) has mature data/pending navigation integration; Benos 0.4 deliberately lacks its server/action/form workflow. These are design trade-offs, not performance claims.
+
+R3 tests: literal path inference and invalid links; nested/index/pathless layouts; specificity and malformed/encoded URLs; search parse/serialize failures and round trips; redirects and cycles; active links and native-click exemptions; browser back/forward and memory history. R4 tests: loader starts before component; A → B → A generation guards; same-route owner persists while params/data update atomically; failed/aborted loader and retry; lazy failure; route and DOM error boundary separation; pending state; focus/live-region/scroll behavior including RTL and back/forward. Browser suites run in Chromium, Firefox, and WebKit per the brief. Every bug fix gets a regression test.

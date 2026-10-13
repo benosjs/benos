@@ -62,6 +62,7 @@ interface Owner {
   mountReady: (() => boolean) | null
   errorHandler: ((error: unknown) => void) | null
   hasResources: boolean
+  gate: 0 | 1 | 2
   disposed: boolean
   disposing: boolean
   kind: OwnerKind
@@ -130,6 +131,8 @@ const mountQueue: { head: MountJob | null; tail: MountJob | null } = {
   tail: null,
 }
 const pendingErrors: unknown[] = []
+const gatedEffects = new Set<EffectNode>()
+const gatedMounts = new Set<MountJob>()
 const contextIds = new WeakMap<object, symbol>()
 const contextDefaults = new WeakMap<object, unknown>()
 const providerOwners = new WeakMap<object, Owner>()
@@ -176,6 +179,7 @@ function createOwner(parent: Owner | null, kind: OwnerKind): Owner {
     mountReady: null,
     errorHandler: null,
     hasResources: false,
+    gate: 0,
     disposed: false,
     disposing: false,
     kind,
@@ -302,6 +306,7 @@ function disposeEffect(
 ): void {
   if (node.disposed) return
   node.disposed = true
+  gatedEffects.delete(node)
   removeQueuedEffect(node)
   while (node.firstSource) unlinkSource(node.firstSource)
   node.recycledSource = null
@@ -325,6 +330,7 @@ function collectDisposal(owner: Owner, errors: Array<[unknown, Owner]>): void {
   if (owner.disposed) return
   owner.disposed = true
   owner.disposing = true
+  for (const job of owner.mountJobs ?? []) gatedMounts.delete(job)
   while (owner.lastChild) collectDisposal(owner.lastChild, errors)
   if (owner.computations) {
     for (const node of owner.computations) {
@@ -865,6 +871,10 @@ function removeQueuedEffect(node: EffectNode): void {
 
 function runEffect(node: EffectNode): void {
   if (node.disposed || node.owner.disposed) return
+  if (ownerIsGated(node.owner, node.tier === 'render' ? 2 : 1)) {
+    gatedEffects.add(node)
+    return
+  }
   if (node.hasRun) {
     const first = node.firstSource
     if (first && !first.nextSource && first.source.kind === 'state') {
@@ -953,6 +963,10 @@ function runEffect(node: EffectNode): void {
 
 function runMount(job: MountJob): void {
   if (job.cancelled || job.owner.disposed) return
+  if (ownerIsGated(job.owner, 1)) {
+    gatedMounts.add(job)
+    return
+  }
   if (!job.owner.mountReady?.()) return
   job.cancelled = true
   job.owner.mountJobs?.delete(job)
@@ -1066,6 +1080,45 @@ export function createInternalOwner(
   const owner = createOwner(parent, kind)
   owner.mountReady = mountReady ?? null
   return owner
+}
+
+function ownerIsGated(owner: Owner, level: 1 | 2): boolean {
+  for (let current: Owner | null = owner; current; current = current.parent)
+    if (current.gate >= level) return true
+  return false
+}
+
+export function setInternalOwnerGate(owner: Owner, gate: 0 | 1 | 2): void {
+  if (owner.disposed) return
+  owner.gate = gate
+  for (const node of gatedEffects) {
+    if (node.disposed) gatedEffects.delete(node)
+    else if (!ownerIsGated(node.owner, node.tier === 'render' ? 2 : 1)) {
+      gatedEffects.delete(node)
+      enqueueEffect(node)
+    }
+  }
+  for (const job of gatedMounts) {
+    if (job.cancelled) gatedMounts.delete(job)
+    else if (!ownerIsGated(job.owner, 1)) {
+      gatedMounts.delete(job)
+      if (job.owner.mountReady?.()) enqueueMount(job)
+    }
+  }
+  maybeFlush()
+}
+
+export function hasInternalGatedRender(owner: Owner): boolean {
+  for (const node of gatedEffects) {
+    if (node.tier !== 'render') continue
+    for (
+      let current: Owner | null = node.owner;
+      current;
+      current = current.parent
+    )
+      if (current === owner) return true
+  }
+  return false
 }
 
 export function runWithOwner<T>(owner: Owner, fn: () => T): T {

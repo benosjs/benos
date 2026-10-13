@@ -1,16 +1,18 @@
 # Async resources, Suspense, and transitions
 
-**Status:** Phase 2 design; designed now, built later. None of this is in v0.1 or the proposed v0.1 export inventory in [reactivity.md](./reactivity.md).
+**Status:** R1 design approved; the 0.4.0 resource, Suspense, and transition implementation is at the R2 checkpoint. The original resource and renderer contracts below remain the baseline. [The router design](./router.md) defines their later integration. None of these APIs is in 0.3.1.
 
 ## Goals and boundary
 
 An async result must join the existing signal graph without making signal reads, writes, computed values, or `batch` promise-aware. A resource needs explicit loading, error, refresh, cancellation, and last-writer-wins behavior. Suspense coordinates what the renderer reveals; transitions keep an already visible view in place while a replacement becomes ready. All async work belongs to an owner and must stop affecting the graph after disposal.
 
-No implicit network cache, retries, router integration, promise-throwing render convention, concurrent scheduler, or automatic owner/context propagation across `await` is proposed. These are future APIs, not Phase 3 or v0.1 work.
+No implicit network cache, retries, promise-throwing render convention, concurrent scheduler, or automatic owner/context propagation across `await` is proposed. Router loaders use this package's resource and reveal machinery through an internal adapter; there is no public router dependency in `@benosjs/async`.
 
-## Proposed later API
+The selected public package is **`@benosjs/async`**, with a **4,096 byte** minified + gzip cap for its production entry when core/DOM are externalized. The cap is separate from the 7,168 B router cap: resources, Suspense, and transitions remain visible in accounting. The [router size comparison](./router.md#comparable-production-measurements) gives peer measurements and caveats. The R1 baseline was core **4,108 / 4,608 B** and core + DOM **10,580 / 11,264 B**. At R2, the measured sizes are core **4,303 B**, core + DOM **10,964 B**, async with core/DOM external **1,644 / 4,096 B**, and the fully bundled core + DOM + async **12,203 B**. Internal core/DOM changes are described in [router.md](./router.md) and accounted for in [the R2 checkpoint](../checkpoints/ra-r2.md).
 
-The exact package and exported names must be frozen before async implementation. A candidate `@benosjs/async` surface is:
+## 0.4 API
+
+The approved public `@benosjs/async` surface is:
 
 ```ts
 interface Resource<T> {
@@ -91,6 +93,20 @@ On an initial render, pending content is prepared under a child owner but remain
 
 The scheduler retains its render-before-user order at every commit. No user effect or `onMount` in an uncommitted prepared owner may run merely because its signal dependencies changed. When the owner becomes live, eligible effects run after the commit's render work, then `onMount` after connected insertion. Ordinary nontransition updates continue to flush synchronously and may show a fallback on suspension.
 
+## R1 router integration and package seam
+
+A route loader is started by the router's candidate-match coordinator before any candidate route component is invoked. It receives a snapshot of typed params/search and an `AbortSignal`; the router owns one resource generation per candidate match. The loader does not inherit the current owner across `await`. Its result becomes a **ready-only** loader-data signal exposed by `route.match()` after commit. This is distinct from a general `resource.value()`, which may contain stale data while pending. The router must never publish B's params with A's stale loader value. On a same-route navigation A → B, the committed A match and component owner remain visible while B loads; at commit, params, search, and data switch in one batch. On A → B → A, the first A generation still cannot win. An explicit reload keeps the committed identity and stale data visible; its failure enters route error recovery without erasing the last good value. No cross-route request cache or hidden retries are added in 0.4.
+
+The router may subscribe to resource state/tokens through an **internal**, owner-bound adapter. It must not spoof a render read merely to acquire a Suspense token, and it must remove its token on redirect, abort, supersession, or disposal. `<Suspense>` remains useful for resources inside a route and for an initial route fallback. A route's `pending`/`error` views are router policy layered on top of the same owned staging and failure machinery. A loader rejection goes to the route error view; a `resource.read()` failure in ordinary route content follows the nearest DOM `<ErrorBoundary>` unless the route provides the enclosing error scope. Browser event-handler throws retain current DOM reporting semantics.
+
+`cancel()` on an enabled standalone resource intentionally leaves it disabled until `refresh()` or a **different** source key appears; it does not schedule an immediate retry for the same key. A disabled source returns `undefined` from `refresh()` and retains its last value. A synchronous fetcher throw follows the same failed-state path as a promise rejection, and `refresh()` resolves to `undefined`. These rules prevent cancellation loops and unhandled rejections. `AbortSignal` is advisory; generation and owner checks remain mandatory at every settle path.
+
+The package exposes no query-cache, mutation, form, or navigation API. In 0.5, a query adapter can provide the fetcher and typed cache identity to a route loader without changing this resource contract. That adapter must make cache refresh an explicit mutation policy, as [the flagship target](./flagship-integration.md) specifies.
+
+## SSR compatibility check
+
+The optional `ssr` codec in the API above is still required. The server may run only resources with opt-in stable ID/key/codec under a request owner; nonserializable resources leave fallback HTML and do not hold the stream. No async continuation keeps a global current-owner stack across `await`. Route data must include a route ID and params/search validation key in the future request-local snapshot registry; a mismatched key must refetch rather than hydrate stale data. No router or async module may read `window` or `document` during import, and server mode must suppress user effects, DOM render effects, and `onMount` as [SSR architecture](./ssr.md) requires. R2 does not implement SSR, but tests must keep the resource core DOM-free and make server-host integration possible without changing public types.
+
 ## Failure and race cases
 
 - A source changes A → B → A: each launch has a new generation. The first A result cannot overwrite the final A result even though keys match.
@@ -113,7 +129,9 @@ The scheduler retains its render-before-user order at every commit. No user effe
 4. Initial fallback and later reveal; a branch removed before reveal; user effects and `onMount` waiting for a live committed branch.
 5. Transition keeps old DOM and owner until commit, superseded transition cleanup, rejected staged content, and writes after an `await` outside transition scope.
 6. Resource completion uses ordinary synchronous signal flush at settlement, with no tracking or owner stack leaking across `await`.
+7. Router-adapter contract tests: candidate loader token is released on redirect/supersession/disposal; param/data commit is atomic; stale resource value cannot be exposed as new route data; direct `read()` still follows the nearest boundary.
+8. Run browser Suspense, transition, mount/effect gating, and nested-boundary tests in Chromium, Firefox, and WebKit. Type-level tests cover the initialized and uninitialized overloads without `any` in public declarations.
 
 ## Hard-to-reverse decisions
 
-The distinction between `value()` and `read()`, the `initialValue` type overload, discriminated state shape, stale-value retention, error propagation, generation semantics, nested-boundary ownership, and whether transitions delay DOM reveal are public behavior. The async package boundary is provisional. None of these names are added to v0.1; Phase 3 must only preserve the owner, graph, and scheduler hooks that make them possible.
+The distinction between `value()` and `read()`, the `initialValue` type overload, discriminated state shape, stale-value retention, error propagation, generation semantics, nested-boundary ownership, and transition DOM reveal are public behavior. R1 selected the async package name and budget; R2 implements these under the approved internal core/DOM eligibility and staging seams. The measured bytes and verification are in [the R2 checkpoint](../checkpoints/ra-r2.md). Existing core/DOM public APIs and documented synchronous behavior remain unchanged.

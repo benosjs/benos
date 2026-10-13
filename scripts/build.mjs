@@ -4,6 +4,7 @@ import { build } from 'vite'
 const packages = [
   'core',
   'dom',
+  'async',
   'compiler',
   'vite',
   'eslint-plugin',

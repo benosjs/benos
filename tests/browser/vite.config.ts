@@ -17,6 +17,13 @@ export default defineConfig({
   optimizeDeps: {
     noDiscovery: true,
     force: true,
+    exclude: [
+      '@benosjs/core',
+      '@benosjs/core/internal',
+      '@benosjs/dom',
+      '@benosjs/dom/internal',
+      '@benosjs/async',
+    ],
   },
   plugins: [benos({ optimization: 'safe' })],
   resolve: {
@@ -40,6 +47,10 @@ export default defineConfig({
       {
         find: '@benosjs/dom',
         replacement: alias('../../packages/dom/dist/js/index.development.js'),
+      },
+      {
+        find: '@benosjs/async',
+        replacement: alias('../../packages/async/dist/js/index.development.js'),
       },
       {
         find: '@benosjs/compiler',
