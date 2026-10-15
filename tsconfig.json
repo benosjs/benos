@@ -4,6 +4,7 @@
     { "path": "./packages/core" },
     { "path": "./packages/dom" },
     { "path": "./packages/async" },
+    { "path": "./packages/router" },
     { "path": "./packages/compiler" },
     { "path": "./packages/vite" },
     { "path": "./packages/eslint-plugin" },

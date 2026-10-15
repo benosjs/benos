@@ -1,0 +1,27 @@
+{
+  "name": "@benosjs/router",
+  "version": "0.4.0",
+  "description": "Typed routes and navigation for Benos.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
+  },
+  "files": [
+    "dist/js",
+    "dist/types"
+  ],
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "development": "./dist/js/index.development.js",
+      "default": "./dist/js/index.production.js"
+    }
+  },
+  "dependencies": {
+    "@benosjs/async": "workspace:*",
+    "@benosjs/core": "workspace:*",
+    "@benosjs/dom": "workspace:*"
+  }
+}

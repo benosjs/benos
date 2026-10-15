@@ -1,4 +1,4 @@
-/** @jsxImportSource @benosjs/dom */
+import { jsx } from '@benosjs/dom'
 import { createRouter, memoryHistory, mountRoute } from '@benosjs/router'
 import { projectRoute, projectsRoute, rootRoute, settingsRoute } from './refs'
 
@@ -22,5 +22,5 @@ export const router = createRouter({
       ],
     }),
   ],
-  notFound: () => <p>Not found</p>,
+  notFound: () => jsx('p', { children: 'Not found' }),
 })

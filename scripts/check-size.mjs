@@ -39,6 +39,14 @@ const checks = [
     await bundledSize(['async'], ['@benosjs/core', '@benosjs/dom']),
     4_096,
   ],
+  [
+    '@benosjs/router (core, DOM, and async external)',
+    await bundledSize(
+      ['router'],
+      ['@benosjs/core', '@benosjs/dom', '@benosjs/async'],
+    ),
+    7_168,
+  ],
 ]
 
 let failed = false
@@ -52,4 +60,7 @@ for (const [label, bytes, limit] of checks) {
 if (failed) process.exitCode = 1
 process.stdout.write(
   `@benosjs/core + @benosjs/dom + @benosjs/async: ${await bundledSize(['core', 'dom', 'async'])} bytes (minified + gzip)\n`,
+)
+process.stdout.write(
+  `@benosjs/core + @benosjs/dom + @benosjs/async + @benosjs/router: ${await bundledSize(['core', 'dom', 'async', 'router'])} bytes (minified + gzip)\n`,
 )

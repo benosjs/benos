@@ -23,6 +23,7 @@ export default defineConfig({
       '@benosjs/dom',
       '@benosjs/dom/internal',
       '@benosjs/async',
+      '@benosjs/router',
     ],
   },
   plugins: [benos({ optimization: 'safe' })],
@@ -51,6 +52,12 @@ export default defineConfig({
       {
         find: '@benosjs/async',
         replacement: alias('../../packages/async/dist/js/index.development.js'),
+      },
+      {
+        find: '@benosjs/router',
+        replacement: alias(
+          '../../packages/router/dist/js/index.development.js',
+        ),
       },
       {
         find: '@benosjs/compiler',

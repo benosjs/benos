@@ -1,12 +1,12 @@
 # Router architecture for 0.4.0
 
-**Status:** R1 design approved with amendments for R2; no router code exists yet. [The track brief](../router-async-plan.md) sets scope. [The flagship target](./flagship-integration.md) supplies the 0.5 compatibility test. This design preserves current core/DOM public APIs and their synchronous graph semantics.
+**Status:** R1 design approved; R3 router-core implementation is at its checkpoint in [ra-r3](../checkpoints/ra-r3.md). [The track brief](../router-async-plan.md) sets scope. [The flagship target](./flagship-integration.md) supplies the 0.5 compatibility test. This design preserves current core/DOM public APIs and their synchronous graph semantics.
 
 ## Package boundary and budget
 
 `@benosjs/router` owns path matching, route definitions, typed URL construction, navigation state, loaders, browser/memory history, route presentation, and accessibility behavior. Its matcher, URL codec, and loader coordinator must run without `window`/`document`; only its browser history, `Link` interception, focus, announcement, and scroll adapters touch the DOM. The package depends on `@benosjs/async` and `@benosjs/dom`, and uses `@benosjs/core` through their internal seams. It contains no cache, mutation, form, auth, or UI-registry dependency. The 0.5 query adapter can call a loader and share its resource identity; the 0.5 mutation/form layer remains outside the router.
 
-The router cap is **7,168 bytes** minified + gzip for a production entry with framework dependencies externalized. The async cap is **4,096 bytes** on the same basis ([async.md](./async.md)). Both are tighter than the initial R1 proposal. Also record the fully bundled `core + dom + async + router` bytes at R3/R4 so externalization cannot conceal total application cost. The existing measured base is core **4,108 / 4,608** and core + DOM **10,580 / 11,264** bytes (production esbuild/gzip, 2026-10-12). R1 documentation adds **0 bytes**. Internal core/DOM work and estimates appear below; neither cap is raised.
+The router cap is **7,168 bytes** minified + gzip for a production entry with framework dependencies externalized. The async cap is **4,096 bytes** on the same basis ([async.md](./async.md)). Both are tighter than the initial R1 proposal. Also record the fully bundled `core + dom + async + router` bytes at R3/R4 so externalization cannot conceal total application cost. At the R2 baseline, core is **4,303 / 4,608 B** and core + DOM is **10,977 / 11,264 B**, leaving **305 B** and **287 B** respectively. R3 uses the existing internal staging and owner-gating seams; any further core or DOM work must remain within these fixed caps.
 
 ### Comparable production measurements
 
@@ -24,7 +24,7 @@ These are reproducible named-export surface measurements, not equivalent whole-a
 
 ## Route declarations and inferred types
 
-The recommended API separates **route references** from **route presentation**. A `route()` reference contains path, search codec, and loader types; it imports no page or layout component and no router instance. `mountRoute(ref, { lazy, pending, error, children })` binds presentation in the application manifest. Every page and layout is a dynamic import, including shared layouts, so the manifest does not eagerly evaluate a module that imports route references. Inside a rendered owner, package-level `<Link>`, `navigate()`, and `navigation()` resolve the router from context. Their destination types come from the route reference, and runtime checks reject a reference not registered with that router. Outside a rendered owner, a caller receives the router instance explicitly and uses `router.navigate()`. No app page imports the app's router instance at runtime; no global TypeScript module augmentation is needed.
+The recommended API separates **route references** from **route presentation**. A `route()` reference contains path and optional search codec types; R4 adds loader types. It imports no page or layout component and no router instance. R3's `mountRoute(ref, { lazy, children })` binds presentation in the application manifest. R4 adds per-route pending and error views. Every page and layout is a dynamic import, including shared layouts, so the manifest does not eagerly evaluate a module that imports route references. Inside a rendered owner, package-level `<Link>`, `navigate()`, and `navigation()` resolve the router from context. `getRouter()` returns the instance for a component to capture during setup and use in later event callbacks. Their destination types come from the route reference, and runtime checks reject a reference not registered with that router. Outside a rendered owner, a caller receives the router instance explicitly and uses `router.navigate()`. No app page imports the app's router instance at runtime; no global TypeScript module augmentation is needed.
 
 ```tsx
 // routes/refs.ts: no component or router-instance imports
@@ -39,7 +39,6 @@ const projectRoute = route('/projects/:projectId', {
     stringify: (value: { tab: 'details' | 'members' }) =>
       new URLSearchParams({ tab: value.tab }),
   },
-  loader: ({ params, search, signal }) => getProject(params.projectId, signal),
 })
 // routes/manifest.ts: dynamic component edges only
 const router = createRouter({
@@ -47,8 +46,6 @@ const router = createRouter({
     mountRoute(homeRoute, { lazy: () => import('./pages/home') }),
     mountRoute(projectRoute, {
       lazy: () => import('./pages/project-editor'),
-      pending: () => <p role="status">Loading…</p>,
-      error: ({ retry }) => <button onClick={retry}>Retry project</button>,
     }),
   ] as const,
   notFound: () => <p>Not found</p>,
@@ -56,6 +53,7 @@ const router = createRouter({
 })
 // pages/project-editor.tsx: imports projectRoute from refs.ts, never manifest.ts
 const match = projectRoute.match()
+const router = getRouter() // capture during setup for later callbacks
 ;<Link
   to={projectRoute}
   params={{ projectId: 'p-1' }}
@@ -63,11 +61,17 @@ const match = projectRoute.match()
 >
   Members
 </Link>
-void navigate({
-  to: projectRoute,
-  params: { projectId: 'p-1' },
-  search: { tab: 'details' },
-})
+;<button
+  onClick={() =>
+    void router.navigate({
+      to: projectRoute,
+      params: { projectId: 'p-1' },
+      search: { tab: 'details' },
+    })
+  }
+>
+  Details
+</button>
 // app bootstrap or an event outside an owner receives the instance
 router.navigate({
   to: projectRoute,
@@ -129,20 +133,37 @@ On successful client navigation, focus moves to an opt-in route heading target (
 
 No browser global is read at module evaluation. A future server renderer can supply a request-local memory/static history, match a URL, run loaders under a request owner, and render the same outlet with SSR's escaping and marker rules in [ssr.md](./ssr.md). Router state and loaded data must be request local, never module-global. Only explicitly opted-in resource data may be serialized, with stable route ID plus param/search validation key; the router must not serialize arbitrary loader results by default. Hydration claims the committed URL/match and validates snapshot keys before running client setup; a mismatch refetches or renders fallback. Server effects and mounts remain suppressed, and the browser focus/scroll/announcement adapters do nothing on the server. This is an interface reservation, not an SSR implementation in 0.4.
 
-## Internal core/DOM work required
+## Internal core/DOM seam
 
-This design **does need internal changes** to current core and DOM, so R2 must wait for approval of this checkpoint. Public `signal`, `effect`, `batch`, `createRoot`, `render`, and `ErrorBoundary` signatures and documented timing stay unchanged.
+R2 implemented the core and DOM staging seam. Public `signal`, `effect`, `batch`, `createRoot`, `render`, and `ErrorBoundary` signatures and documented timing remain unchanged.
 
-| Package    | Exact internal need                                                                                                   | Design estimate, minified + gzip | Why                                                                                                             |
-| ---------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------: | --------------------------------------------------------------------------------------------------------------- |
-| core       | Owner-scoped eligibility gate for queued render/user jobs, with release/disposal, plus an internal atomic commit hook |                       +120–240 B | A prepared branch must not run user effects; a retained branch must not react against new signals before reveal |
-| DOM        | Staged child range creation/commit/discard and live mount eligibility; router outlet reuses a same-route owner        |                       +260–420 B | Suspense fallback/reveal and same-route updates need an off-document branch and one committed swap              |
-| core + DOM | Expected combined delta after compression                                                                             |                       +380–660 B | Current combined headroom is 684 B; this estimate is close enough to require measured prototypes                |
+| Package    | Implemented internal seam                                               | R2 measured gzip delta |
+| ---------- | ----------------------------------------------------------------------- | ---------------------: |
+| core       | Owner eligibility, delayed jobs, and gated-render detection             |                 +195 B |
+| DOM        | Detached range staging, commit/disposal, and internal controls          |       +202 B marginal* |
+| core + DOM | Combined measured increase, including cross-package compression effects |                 +397 B |
 
-The estimates are planning ranges, **not measured additions** and not permission to exceed either cap. Core headroom is 500 B. If the required prototype exceeds a cap, stop and report exact bytes and alternatives; do not change public behavior or budgets silently. No code or configuration is changed in R1.
+\* The DOM figure is the marginal difference within the combined bundle, not a standalone DOM package measurement. The measured current totals and remaining headroom are in the [R2 checkpoint](../checkpoints/ra-r2.md). R3 must stop if required core/DOM integration would exceed either fixed cap; no cap has been raised.
 
 ## Trade-offs and test gates
 
 [TanStack Router](https://tanstack.com/router/latest/docs/guide/type-safety) already has strong route-wide type inference, typed links/search, loaders, pending UI, and [scroll restoration](https://tanstack.com/router/latest/docs/guide/scroll-restoration). Benos should not claim novelty there. Instance-scoped typed references may avoid a global registration step, at the cost of a narrower path grammar and no 0.4 cache. [Solid Router](https://docs.solidjs.com/solid-router/reference/primitives/use-params) has reactive params and [preloading](https://docs.solidjs.com/solid-router/data-fetching/how-to/preload-data); Benos chooses an atomic committed match/data signal so form identity and data change together. [React Router](https://reactrouter.com/start/framework/pending-ui) has mature data/pending navigation integration; Benos 0.4 deliberately lacks its server/action/form workflow. These are design trade-offs, not performance claims.
 
-R3 tests: literal path inference and invalid links; nested/index/pathless layouts; specificity and malformed/encoded URLs; search parse/serialize failures and round trips; redirects and cycles; active links and native-click exemptions; browser back/forward and memory history. R4 tests: loader starts before component; A → B → A generation guards; same-route owner persists while params/data update atomically; failed/aborted loader and retry; lazy failure; route and DOM error boundary separation; pending state; focus/live-region/scroll behavior including RTL and back/forward. Browser suites run in Chromium, Firefox, and WebKit per the brief. Every bug fix gets a regression test.
+R3 coverage is mapped to its executable tests below. Browser history and click behavior use Playwright's Chromium, Firefox, and WebKit projects ([configuration](../../playwright.config.ts)); the same browser test file runs in each project.
+
+| R3 gate                                                                                                                                     | Verifying test(s)                                                                                                                                                                                                                                                                                                                                                                                                       | Result |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| Literal path parameter/search inference and invalid links                                                                                   | [`packages/router/tests/types.test.ts`](../../packages/router/tests/types.test.ts): `checkRouterTypes` uses `expect-type` and `@ts-expect-error` for missing/misspelled params, missing/invalid search, nonliteral paths, invalid splats/params, duplicate names, and conflicting parent params. Included by `pnpm typecheck:types`.                                                                                    | Pass   |
+| Nested layouts and same-route owner persistence                                                                                             | [`packages/router/tests/outlet.test.ts`](../../packages/router/tests/outlet.test.ts): `preserves nested layouts and a same-route owner while params update`.                                                                                                                                                                                                                                                            | Pass   |
+| Index and pathless layouts                                                                                                                  | [`packages/router/tests/outlet.test.ts`](../../packages/router/tests/outlet.test.ts): `renders an index route inside a pathless layout and a not-found page`.                                                                                                                                                                                                                                                           | Pass   |
+| Static/named/splat specificity, encoded params, malformed escapes, invalid route grammar, and trailing-slash canonicalization               | [`packages/router/tests/router.test.ts`](../../packages/router/tests/router.test.ts): `prefers static, then named, then catch-all routes`; `does not let an empty catch-all shadow an exact parent route`; `retains an encoded slash inside a parameter and rejects malformed escapes`; `canonicalizes a direct trailing slash and preserves a typed destination hash`.                                                 | Pass   |
+| Search parse failures, serialization failures, canonical round trips                                                                        | [`packages/router/tests/router.test.ts`](../../packages/router/tests/router.test.ts): `sorts typed search, round-trips it, and leaves the committed URL on parse failure`; `surfaces search serialization failures before changing history`. Both parse and serialize failures leave committed location/history unchanged.                                                                                              | Pass   |
+| Redirects, redirect cycles, and unregistered references                                                                                     | [`packages/router/tests/router.test.ts`](../../packages/router/tests/router.test.ts): `follows redirects, detects cycles, and rejects unregistered references`.                                                                                                                                                                                                                                                         | Pass   |
+| Active links, normal link navigation, and native-click exemptions (modified clicks, non-primary click, target, download, default-prevented) | [`packages/router/tests/outlet.test.ts`](../../packages/router/tests/outlet.test.ts): `emits href and active state, intercepting only unmodified primary clicks`; [`tests/browser/router.spec.ts`](../../tests/browser/router.spec.ts): `typed links, same-route params, and browser back/forward`; `modified and target links keep native browser handling`. These Playwright cases run in all three browser projects. | Pass   |
+| Browser back/forward                                                                                                                        | [`tests/browser/router.spec.ts`](../../tests/browser/router.spec.ts): `typed links, same-route params, and browser back/forward`, including same-route param navigation and owner reuse. Runs in Chromium, Firefox, and WebKit.                                                                                                                                                                                         | Pass   |
+| Memory history stack and back/forward                                                                                                       | [`packages/router/tests/router.test.ts`](../../packages/router/tests/router.test.ts): `supports memory back and forward with a not-found result`.                                                                                                                                                                                                                                                                       | Pass   |
+| Circular-import fixture and reversed module import order                                                                                    | [`packages/router/tests/circular.test.ts`](../../packages/router/tests/circular.test.ts): `does not evaluate page and layout modules while creating the manifest`; `accepts an intentionally reversed import order without a manifest cycle`. Static import-graph checks are in [`tests/fixtures/router-circular/import-graph.test.mjs`](../../tests/fixtures/router-circular/import-graph.test.mjs).                   | Pass   |
+
+CI runs `pnpm test` and `pnpm test:browser` as ordered steps in the same `verify` job. GitHub Actions waits for each step to finish before starting the next, so the unit and browser suites do not compete for CPU or trigger the overlapping local timeout flake. Keep them in this single job and in this order.
+
+R4 tests: loader starts before component; A → B → A generation guards; same-route owner persists while params/data update atomically; failed/aborted loader and retry; lazy failure; route and DOM error boundary separation; pending state; focus/live-region/scroll behavior including RTL and back/forward. Every bug fix gets a regression test.

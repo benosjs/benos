@@ -1,15 +1,32 @@
-/** @jsxImportSource @benosjs/dom */
+import { jsx } from '@benosjs/dom'
 import { Link, Outlet } from '@benosjs/router'
+import type { LinkProps } from '@benosjs/router'
+import type { JSX } from '@benosjs/dom'
 import { projectRoute, settingsRoute } from '../refs'
 
-export default function ProjectsLayout() {
-  return (
-    <section>
-      <Link to={projectRoute} params={{ projectId: 'p-2' }}>
-        Second project
-      </Link>
-      <Link to={settingsRoute}>Settings</Link>
-      <Outlet />
-    </section>
-  )
+function ProjectLink(props: LinkProps<typeof projectRoute>): JSX.Element {
+  return Link(props)
+}
+function SettingsLink(props: LinkProps<typeof settingsRoute>): JSX.Element {
+  return Link(props)
+}
+
+;(
+  globalThis as typeof globalThis & {
+    __routeImportProbe?: (name: string) => void
+  }
+).__routeImportProbe?.('projects layout')
+
+export default function ProjectsLayout(): JSX.Element {
+  return jsx('section', {
+    children: [
+      ProjectLink({
+        to: projectRoute,
+        params: { projectId: 'p-2' },
+        children: 'Second project',
+      }),
+      SettingsLink({ to: settingsRoute, children: 'Settings' }),
+      jsx(Outlet, {}),
+    ],
+  })
 }

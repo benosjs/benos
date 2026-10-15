@@ -32,6 +32,9 @@ importers:
       '@benosjs/primitives':
         specifier: workspace:*
         version: link:packages/primitives
+      '@benosjs/router':
+        specifier: workspace:*
+        version: link:packages/router
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.11.0)
@@ -277,6 +280,18 @@ importers:
       '@zag-js/tooltip':
         specifier: 1.44.0
         version: 1.44.0
+
+  packages/router:
+    dependencies:
+      '@benosjs/async':
+        specifier: workspace:*
+        version: link:../async
+      '@benosjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@benosjs/dom':
+        specifier: workspace:*
+        version: link:../dom
 
   packages/vite:
     dependencies:
