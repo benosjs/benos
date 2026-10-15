@@ -43,6 +43,7 @@
     "gallery:build": "pnpm --filter @benosjs/ui-gallery build",
     "test:ui-cli:matrix": "node scripts/test-ui-cli-project.mjs",
     "test:packed-benos-cli": "node scripts/test-packed-benos-cli.mjs",
+    "test:create-benos:npm": "node scripts/test-create-benos-npm-install.mjs",
     "check:jsx-types": "node scripts/generate-jsx-types.mjs --check",
     "check:doc-examples": "node scripts/check-doc-examples.mjs",
     "size": "node scripts/check-size.mjs",

@@ -2,6 +2,19 @@
 
 All notable changes to Benos are documented here.
 
+## [0.3.2] — Unreleased
+
+### Fixed
+
+- Fix fresh create-benos projects failing during `npm install` with Node 22's
+  default npm 10 by upgrading the starter template's Vitest dependency to
+  `5.0.4`. Add an npm 10 and npm 11 starter install check to CI on Ubuntu,
+  Windows, and macOS.
+
+### Changed
+
+- Bump all eight publishable packages to `0.3.2`.
+
 ## [0.3.1] — Unreleased
 
 ### Fixed
