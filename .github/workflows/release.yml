@@ -51,12 +51,13 @@ jobs:
         run: node scripts/check-registry-urls.mjs "$GITHUB_REF_NAME"
 
   create-benos:
-    name: create-benos (${{ matrix.os }})
+    name: create-benos npm ${{ matrix.npm_major }} (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        npm_major: [10, 11]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,10 +69,16 @@ jobs:
         with:
           node-version: 22.18.0
           cache: pnpm
+      - run: npm install --global npm@${{ matrix.npm_major }}
+      - run: npm --version
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm check:engines
       - run: pnpm exec vitest run tests/create-benos.test.ts
+      - name: Install a fresh starter with npm ${{ matrix.npm_major }}
+        env:
+          BENOS_EXPECT_NPM_MAJOR: ${{ matrix.npm_major }}
+        run: node scripts/test-create-benos-npm-install.mjs
 
   ui-cli-consumer:
     name: UI CLI (${{ matrix.os }}, ${{ matrix.package_manager }})
