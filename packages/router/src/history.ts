@@ -7,6 +7,9 @@ export interface RouterHistory {
   listen(listener: (url: string) => void): () => void
   back(): void
   forward(): void
+  saveScroll?(): void
+  scrollPosition?(): { x: number; y: number } | null
+  completeScrollRestoration?(): void
 }
 
 export interface MemoryHistory extends RouterHistory {
@@ -65,22 +68,91 @@ export function memoryHistory(
 }
 
 export function browserHistory(): RouterHistory {
+  const stateKey = '__benosjs_router'
+  let keyCounter = 0
+  const nextKey = (): string =>
+    `${Date.now().toString(36)}-${(++keyCounter).toString(36)}`
+  const stateObject = (): Record<string, unknown> => {
+    const state = history.state
+    return state && typeof state === 'object'
+      ? { ...state }
+      : state == null
+        ? {}
+        : { userState: state }
+  }
+  const metadata = (): { key: string; x: number; y: number } => {
+    const state = history.state as Record<string, unknown> | null
+    const existing = state?.[stateKey] as
+      { key?: unknown; x?: unknown; y?: unknown } | undefined
+    if (typeof existing?.key === 'string')
+      return {
+        key: existing.key,
+        x: typeof existing.x === 'number' ? existing.x : 0,
+        y: typeof existing.y === 'number' ? existing.y : 0,
+      }
+    const next = { key: nextKey(), x: 0, y: 0 }
+    history.replaceState({ ...stateObject(), [stateKey]: next }, '')
+    return next
+  }
+  const replaceMetadata = (next: { key: string; x: number; y: number }) => {
+    history.replaceState({ ...stateObject(), [stateKey]: next }, '')
+  }
   const current = (): string =>
     location.pathname + location.search + location.hash
+  let restoringPop = false
   return {
     location: current,
     push(url) {
-      history.pushState(history.state, '', canonicalUrl(url))
+      metadata()
+      history.pushState(
+        { ...stateObject(), [stateKey]: { key: nextKey(), x: 0, y: 0 } },
+        '',
+        canonicalUrl(url),
+      )
     },
     replace(url) {
-      history.replaceState(history.state, '', canonicalUrl(url))
+      const currentMetadata = metadata()
+      history.replaceState(
+        { ...stateObject(), [stateKey]: currentMetadata },
+        '',
+        canonicalUrl(url),
+      )
     },
     listen(listener) {
-      const onPop = (): void => listener(current())
+      restoringPop = false
+      const onPop = (): void => {
+        restoringPop = true
+        listener(current())
+      }
+      metadata()
+      const previousRestoration = history.scrollRestoration
+      history.scrollRestoration = 'manual'
+      const onScroll = (): void => {
+        if (restoringPop) return
+        const currentMetadata = metadata()
+        replaceMetadata({ ...currentMetadata, x: scrollX, y: scrollY })
+      }
       addEventListener('popstate', onPop)
-      return () => removeEventListener('popstate', onPop)
+      addEventListener('scroll', onScroll, { passive: true })
+      const release = (): void => {
+        removeEventListener('popstate', onPop)
+        removeEventListener('scroll', onScroll)
+        history.scrollRestoration = previousRestoration
+      }
+      return release
     },
     back: () => history.back(),
     forward: () => history.forward(),
+    saveScroll() {
+      const currentMetadata = metadata()
+      replaceMetadata({ ...currentMetadata, x: scrollX, y: scrollY })
+    },
+    scrollPosition() {
+      const currentMetadata = metadata()
+      return { x: currentMetadata.x, y: currentMetadata.y }
+    },
+    completeScrollRestoration() {
+      restoringPop = false
+    },
   }
 }

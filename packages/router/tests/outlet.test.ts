@@ -53,7 +53,7 @@ describe('router outlet and links', () => {
     document.querySelector('button')?.click()
     await flushAsync()
     expect(router.location()).toBe('/destination')
-    expect(document.body.textContent).toBe('Destination')
+    expect(document.querySelector('p')?.textContent).toBe('Destination')
   })
 
   it('preserves nested layouts and a same-route owner while params update', async () => {
@@ -98,9 +98,9 @@ describe('router outlet and links', () => {
     })
     roots.push(render(() => jsx(RouterOutlet, { router }), document.body))
     await flushAsync()
-    expect(document.body.textContent).toBe('Appa')
+    expect(document.querySelector('main')?.textContent).toBe('Appa')
     await router.navigate({ to: item, params: { id: 'b' } })
-    expect(document.body.textContent).toBe('Appb')
+    expect(document.querySelector('main')?.textContent).toBe('Appb')
     expect([rootMounts, projectMounts, itemMounts]).toEqual([1, 1, 1])
   })
 
@@ -130,12 +130,12 @@ describe('router outlet and links', () => {
     })
     roots.push(render(() => jsx(RouterOutlet, { router }), document.body))
     await flushAsync()
-    expect(document.body.textContent).toBe('Home')
+    expect(document.querySelector('main')?.textContent).toBe('Home')
     history.push('/unknown')
     history.back()
     history.forward()
     await flushAsync()
-    expect(document.body.textContent).toBe('Missing')
+    expect(document.querySelector('p')?.textContent).toBe('Missing')
   })
 
   it('emits href and active state, intercepting only unmodified primary clicks', async () => {
@@ -190,6 +190,6 @@ describe('router outlet and links', () => {
     expect(clickCount).toBe(2)
     await flushAsync()
     expect(router.location()).toBe('/items/a%20b')
-    expect(document.body.textContent).toBe('Item page')
+    expect(document.querySelector('p')?.textContent).toBe('Item page')
   })
 })

@@ -1,5 +1,17 @@
 # Benos Router & Async Track — Build Brief (0.4.0)
 
+## Current status
+
+| Sub-step                                       | Status                                                                              |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------- |
+| R0 — Plan                                      | Complete                                                                            |
+| R1 — Design documents                          | Complete                                                                            |
+| R2 — Async resources and Suspense              | Complete                                                                            |
+| R3 — Router core                               | Complete; committed and pushed as `e6baa90` on `router-async`, CI passed            |
+| R4 — Loaders, pending state, and accessibility | Complete locally; checkpoint in [`docs/checkpoints/ra-r4.md`](checkpoints/ra-r4.md) |
+| R5 — Validation app                            | Upcoming                                                                            |
+| R6 — Release preparation                       | Upcoming                                                                            |
+
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.3.1): **async resources, Suspense, and the router**. This track is the foundation for the flagship integration (typed routes, data, forms, and cache working as one system), which follows in 0.5.0.
 
 Build in phases with review checkpoints: design first, then implementation, with tests at every step. Push back when an idea is technically weak.
@@ -99,4 +111,4 @@ Documentation (router guide, async guide), starter integration decision (discuss
 
 ## 5. Your Immediate Task
 
-Complete **R0** and **R1** only, then stop at the R1 checkpoint for my review.
+R0 through R4 are complete. Stop at the R4 checkpoint for review before starting R5.

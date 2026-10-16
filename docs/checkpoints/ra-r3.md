@@ -1,6 +1,6 @@
 # R3 — Router core checkpoint
 
-**Status:** R3 implementation is complete for the approved core scope in the local `router-async` working tree. The router package and checkpoint remain uncommitted. `origin/router-async` now includes main through merge commit `0a62b15`; the R3 working changes were not included in that merge or its CI run.
+**Status:** R3 implementation was committed as `e6baa90 Implement typed router core (R3)` and pushed to `origin/router-async`. The restored R3 paths matched the stashed path list, the stash was dropped after CI passed, and the working tree was clean before R4 began.
 
 ## Delivered
 
@@ -35,7 +35,7 @@ Neither fixed core/DOM cap nor the 7,168 B router cap was exceeded or raised. If
 - `pnpm typecheck:types`, `pnpm lint`, `pnpm check:packed`, `pnpm check:public-imports`, `pnpm check:engines`, `pnpm check:jsx-types`, `pnpm check:doc-examples`, and `pnpm audit:template` passed.
 - `node --test tests/fixtures/router-circular/import-graph.test.mjs`: **3/3 passed**; the Vitest circular fixture also passes in the full unit suite.
 - `pnpm test:browser`: **432 passed** in Chromium, Firefox, and WebKit in 12.8 minutes. The router-only browser coverage is **6/6** across those engines. Unit and browser suites run serially in the same CI `verify` job; the CI steps wait for each command to exit before starting the next.
-- The main-merge CI run [38708350250](https://github.com/benosjs/benos/actions/runs/38708350250) completed successfully, including the three-OS npm 10/11 matrix. It verifies the merge commit and 0.3.2 fix, not the uncommitted R3 working changes; those were verified locally above.
+- The R3 CI run [38728260497](https://github.com/benosjs/benos/actions/runs/38728260497) completed successfully, including all 18 cross-platform/package-manager matrix cells and the create-benos npm 10/11 matrix. Its `verify` job runs unit tests before browser tests in the same sequential job, avoiding overlap.
 
 ## Updated documents
 
@@ -44,4 +44,4 @@ Neither fixed core/DOM cap nor the 7,168 B router cap was exceeded or raised. If
 - The async test-coverage table in [ra-r2](./ra-r2.md) is complete: R2 items 1–6 and 8 are covered; the router-adapter contract is explicitly reserved for R4.
 - [Circular-prone fixture README](../../tests/fixtures/router-circular/README.md) describes the executed type/runtime coverage and the remaining R4 loader scope.
 
-R4 has not started. This is the R3 stop point.
+R4 began after the R3 CI run passed. Its implementation and verification are recorded in [`ra-r4.md`](./ra-r4.md).
