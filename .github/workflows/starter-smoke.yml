@@ -1,0 +1,32 @@
+name: Published starter health
+
+on:
+  schedule:
+    - cron: '27 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  starter:
+    name: create-benos@latest npm ${{ matrix.npm_major }} (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        npm_major: [10, 11]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+      - name: Install npm ${{ matrix.npm_major }}
+        run: npm install --global npm@${{ matrix.npm_major }}
+      - name: Verify Node and npm versions
+        run: node --version && npm --version
+      - name: Scaffold and verify the published starter
+        env:
+          BENOS_EXPECT_NPM_MAJOR: ${{ matrix.npm_major }}
+        run: node scripts/test-published-create-benos.mjs

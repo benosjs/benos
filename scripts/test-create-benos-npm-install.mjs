@@ -90,6 +90,11 @@ try {
   console.log(`Installing fresh create-benos app with npm ${npmVersion}...`)
   await run('npm', ['install'], { cwd: project })
   console.log(`Fresh create-benos app installed with npm ${npmVersion}.`)
+
+  for (const script of ['typecheck', 'build', 'test', 'lint']) {
+    console.log(`Running npm run ${script} with npm ${npmVersion}...`)
+    await run('npm', ['run', script], { cwd: project })
+  }
 } finally {
   await rm(temporary, { recursive: true, force: true })
 }

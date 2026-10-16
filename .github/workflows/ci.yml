@@ -58,7 +58,7 @@ jobs:
       - run: pnpm build
       - run: pnpm check:engines
       - run: pnpm exec vitest run tests/create-benos.test.ts
-      - name: Install a fresh starter with npm ${{ matrix.npm_major }}
+      - name: Install and verify a fresh starter with npm ${{ matrix.npm_major }}
         env:
           BENOS_EXPECT_NPM_MAJOR: ${{ matrix.npm_major }}
         run: node scripts/test-create-benos-npm-install.mjs
