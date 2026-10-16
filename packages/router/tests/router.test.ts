@@ -168,7 +168,13 @@ describe('router core', () => {
 
   it('follows redirects, detects cycles, and rejects unregistered references', async () => {
     const home = route('/')
-    const old = route('/old')
+    let redirectLoaderCalls = 0
+    const old = route('/old', {
+      loader: () => {
+        redirectLoaderCalls++
+        return 'a redirect must not start a loader'
+      },
+    })
     const foreign = route('/foreign')
     const router = createRouter({
       history: memoryHistory(),
@@ -181,6 +187,7 @@ describe('router core', () => {
       status: 'redirected',
       location: '/',
     })
+    expect(redirectLoaderCalls).toBe(0)
     expect(router.location()).toBe('/')
     expect(() => router.href({ to: foreign })).toThrow(/Unregistered/)
     const a = route('/a')

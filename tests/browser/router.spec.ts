@@ -5,6 +5,12 @@ declare global {
     __routerR4?: {
       count(id: string): number
       complete(id: string, value: string): void
+      fail(id: string, message: string): void
+      lazyAttempts(): number
+      itemMounts(): number
+      openItem(id: string, replace?: boolean): void
+      openRenderError(): Promise<void>
+      openLazyError(): Promise<void>
     }
   }
 }
@@ -157,4 +163,74 @@ test('pending navigation, focus announcements, and browser scroll restoration', 
   await expect
     .poll(() => page.evaluate(() => Math.round(window.scrollY)))
     .toBe(420)
+})
+
+test('route failures retry in their route view while render failures reach the DOM boundary', async ({
+  page,
+}) => {
+  await page.goto('/tests/browser/router-r4-fixture.html')
+  await page.locator('#item-link').click()
+  await expect
+    .poll(() => page.evaluate(() => window.__routerR4?.count('a')))
+    .toBe(1)
+  await page.evaluate(() =>
+    window.__routerR4?.fail('a', 'temporary loader failure'),
+  )
+  await expect(page.locator('#item-retry')).toBeVisible()
+  await expect(page.locator('[role="alert"]')).toContainText(
+    'Could not load item: temporary loader failure',
+  )
+  await expect(page.locator('#outer-route-error')).toHaveCount(0)
+
+  await page.locator('#item-retry').click()
+  await expect
+    .poll(() => page.evaluate(() => window.__routerR4?.count('a')))
+    .toBe(2)
+  await page.evaluate(() => window.__routerR4?.complete('a', 'recovered item'))
+  await expect(page.locator('#item-data')).toHaveText('recovered item')
+
+  await page.evaluate(() => window.__routerR4?.openLazyError())
+  await expect(page.locator('#lazy-error')).toContainText('chunk unavailable')
+  await expect
+    .poll(() => page.evaluate(() => window.__routerR4?.lazyAttempts()))
+    .toBe(1)
+  await page.locator('#lazy-retry').click()
+  await expect(page.locator('#lazy-ready')).toHaveText('Lazy route ready')
+  await expect
+    .poll(() => page.evaluate(() => window.__routerR4?.lazyAttempts()))
+    .toBe(2)
+  await expect(page.locator('#outer-route-error')).toHaveCount(0)
+
+  await page.evaluate(() => window.__routerR4?.openRenderError())
+  await expect(page.locator('#outer-route-error')).toContainText(
+    'component render failure',
+  )
+  await expect(page.locator('#item-retry, #lazy-retry')).toHaveCount(0)
+})
+
+test('same-route navigation commits matching params and loader data without remounting', async ({
+  page,
+}) => {
+  await page.goto('/tests/browser/router-r4-fixture.html')
+  await page.locator('#item-link').click()
+  await expect
+    .poll(() => page.evaluate(() => window.__routerR4?.count('a')))
+    .toBe(1)
+  await page.evaluate(() => window.__routerR4?.complete('a', 'data A'))
+  await expect(page.locator('#item-heading')).toHaveText('Item a')
+  await expect(page.locator('#item-data')).toHaveText('data A')
+  const mounts = await page.evaluate(() => window.__routerR4?.itemMounts())
+
+  await page.evaluate(() => window.__routerR4?.openItem('b', true))
+  await expect
+    .poll(() => page.evaluate(() => window.__routerR4?.count('b')))
+    .toBe(1)
+  await expect(page.locator('#item-heading')).toHaveText('Item a')
+  await expect(page.locator('#item-data')).toHaveText('data A')
+  await page.evaluate(() => window.__routerR4?.complete('b', 'data B'))
+  await expect(page.locator('#item-heading')).toHaveText('Item b')
+  await expect(page.locator('#item-data')).toHaveText('data B')
+  await expect
+    .poll(() => page.evaluate(() => window.__routerR4?.itemMounts()))
+    .toBe(mounts)
 })
