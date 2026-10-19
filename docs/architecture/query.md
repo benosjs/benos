@@ -1,6 +1,6 @@
 # Query cache, mutations, and invalidation
 
-**Status:** Q1 design for review. Nothing here is implemented. [The track brief](../query-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [async.md](./async.md) and [router.md](./router.md) define the contracts this package builds on.
+**Status:** Q1 design approved on 2026-10-19. The Q2 cache core is implemented in `packages/query`; mutations (Q3) and the router loader adapter (Q4) are not. Differences between this design and the Q2 code are listed in [Q2 implementation notes](#q2-implementation-notes). [The track brief](../query-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [async.md](./async.md) and [router.md](./router.md) define the contracts this package builds on.
 
 ## Goals and boundary
 
@@ -168,7 +168,7 @@ A `QueryEntry` handle is given out only by `load()`, after the entry has data, s
 
 A refetch of an entry that has data is stale-while-revalidate: `value` keeps the old data, `fetching()` is true, and the new value replaces it in one batch. The 5,000 ms default `staleTime` is chosen so that a route loader followed immediately by a component observer of the same entry does not fetch twice (TanStack's default of 0 does), and matches Solid's preload reuse window. This default was decided at the Q1 review on the basis that Benos should match or beat every peer. Peers: TanStack Query defaults to 0, which refetches on every mount and is overridden by most apps; SWR deduplicates identical requests for 2 s; Solid Router's `query` reuses a settled entry for about 5 s; RTK Query and Apollo serve cached data until it is invalidated or evicted. 5 s removes the double fetch without RTK/Apollo's indefinite staleness. Mutations still invalidate their affected entries immediately, so the 5 s window never shows data that is stale because of a write made through a mutation.
 
-**Deduplication.** At most one request per entry is in flight. Any trigger, `load()`, or observer that needs data while a request is in flight **joins** it, incrementing the joiner count. The request's `AbortController` is shared. A joiner that goes away (observer argument change, observer disposal, loader supersession through its `AbortSignal`) decrements the count; when the count reaches zero **and** the entry has no other retainer waiting for data, the request is aborted. Abort is advisory; the generation check below is the guard.
+**Deduplication.** At most one request per entry is in flight. Any trigger, `load()`, or observer that needs data while a request is in flight **joins** it, incrementing the joiner count. The request's `AbortController` is shared. A joiner that goes away (observer argument change, observer disposal, loader supersession through its `AbortSignal`) decrements the count; when the count reaches zero **and** no joiner has rejoined by the end of the current task, the request is aborted (see [Q2 implementation notes](#q2-implementation-notes), item 1). Abort is advisory; the generation check below is the guard.
 
 **Generations.** Every request and every cache write increments the entry generation. A request may write its result only if the generation it started with is still current. So a refetch that started before a mutation's write, an optimistic update, or a newer refetch can never overwrite it. This is the query-level counterpart to the resource A → B → A rule in [async.md](./async.md).
 
@@ -420,6 +420,19 @@ SSR is not implemented in 0.5, but the API reserves it with the same opt-in rule
 7. Mutations: result shape never rejecting, writes, `affects`, `awaitRefetch`, optimistic apply and rollback, rollback skipped after a newer write, cancellation, concurrent runs, and owner disposal before settle.
 8. Router integration: fresh, stale, and missing entries in `load`; supersession; retention while committed and release on replacement; mutation refresh of committed `match.data()` without remount; R4 loader gates unchanged.
 9. Type-level tests listed above, and a size row for the query package.
+
+## Q2 implementation notes
+
+Q2 implements definitions, keys, entries, deduplication, generations for requests, staleness, gc, the retry policy, cancellation, observers, cache scope, `invalidate`, `prefetch`, `peek`, and opt-in focus/reconnect triggers. These points refine or narrow the design above:
+
+1. **Last-joiner abort is deferred by one microtask.** A Suspense boundary that re-suspends disposes its content and sets it up again in the same task. Aborting synchronously when the last observer left made the recreated observer start a second request. The request is now aborted only if no joiner has rejoined by the end of the task. A browser regression test checks that switching to an uncached key fetches once.
+2. **Key interning uses `WeakRef`.** `key(args) === key(args)` holds while any key object for that identity is reachable (an entry always holds its key). An unreachable key is collected and its map slot cleared by a `FinalizationRegistry`. Matching never depends on object identity, only on (definition, canonical string).
+3. **A top-level `true` argument is the enable flag of an argument-free query.** The runtime cannot see whether `A` is `void`, so `q(() => flag())` passes `true` when enabled, which maps to the no-argument key. As with `resource()`, a top-level `false` already disables, so a query whose only argument is a boolean is not supported; wrap it in an object.
+4. **Any `TypeError` is classified as transient.** Fetch reports network failures as a bare `TypeError`, which cannot be told apart from a programming `TypeError`. A programming error of that kind is retried twice before failing. Fetchers can set `retryable: false` to opt out.
+5. **Two small exports were added:** `queryCache()` returns the cache in scope (provider, then default), which is needed to call `invalidate` on the default cache, and `isTransientError(error)` exposes the default classifier for custom `retry` predicates.
+6. **`QueryCacheProvider` is typed as a JSX component** through a type-only import of `JSX` from `@benosjs/dom`, so the package declares `@benosjs/dom` as a dependency. It adds no runtime import.
+7. **Not enforced yet:** the default cache does not throw on the server, because there is no server mode to detect until the SSR track. `createQueryCache({ snapshot })` is also deferred to that track.
+8. **Observer accessors are plain functions over signals,** not `computed` nodes, so an observer allocates one signal, one render effect, and one internal resource. The internal resource uses the existing `createRenderEffect` seam from `@benosjs/core/internal`; no core, DOM, or async change was made.
 
 ## Hard-to-reverse decisions
 

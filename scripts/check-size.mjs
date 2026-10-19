@@ -40,6 +40,14 @@ const checks = [
     4_096,
   ],
   [
+    '@benosjs/query (core, DOM, and async external)',
+    await bundledSize(
+      ['query'],
+      ['@benosjs/core', '@benosjs/dom', '@benosjs/async'],
+    ),
+    3_584,
+  ],
+  [
     '@benosjs/router (core, DOM, and async external)',
     await bundledSize(
       ['router'],
@@ -63,4 +71,10 @@ process.stdout.write(
 )
 process.stdout.write(
   `@benosjs/core + @benosjs/dom + @benosjs/async + @benosjs/router: ${await bundledSize(['core', 'dom', 'async', 'router'])} bytes (minified + gzip)\n`,
+)
+process.stdout.write(
+  `@benosjs/core + @benosjs/dom + @benosjs/async + @benosjs/query: ${await bundledSize(['core', 'dom', 'async', 'query'])} bytes (minified + gzip)\n`,
+)
+process.stdout.write(
+  `@benosjs/core + @benosjs/dom + @benosjs/async + @benosjs/router + @benosjs/query: ${await bundledSize(['core', 'dom', 'async', 'router', 'query'])} bytes (minified + gzip)\n`,
 )
