@@ -7,8 +7,8 @@
 | Q0 — Plan                       | Complete                                                                            |
 | Q1 — Design documents           | Complete; approved, checkpoint in [`docs/checkpoints/q-q1.md`](checkpoints/q-q1.md) |
 | Q2 — Cache core                 | Complete; approved, checkpoint in [`docs/checkpoints/q-q2.md`](checkpoints/q-q2.md) |
-| Q3 — Mutations and invalidation | Ready for review; checkpoint in [`docs/checkpoints/q-q3.md`](checkpoints/q-q3.md)   |
-| Q4 — Router loader integration  | Not started                                                                         |
+| Q3 — Mutations and invalidation | Complete; approved, checkpoint in [`docs/checkpoints/q-q3.md`](checkpoints/q-q3.md) |
+| Q4 — Router loader integration  | Ready for review; checkpoint in [`docs/checkpoints/q-q4.md`](checkpoints/q-q4.md)   |
 | Q5 — Validation app             | Not started                                                                         |
 | Q6 — Release preparation        | Not started                                                                         |
 
@@ -101,4 +101,4 @@ Query guide, API reference entries, CHANGELOG entry, size report, and full verif
 
 ## 5. Your Immediate Task
 
-Q0–Q2 are complete and approved. Q3 is implemented; stop at the Q3 checkpoint for review.
+Q0–Q3 are complete and approved. Q4 is implemented; stop at the Q4 checkpoint for review.

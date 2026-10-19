@@ -34,11 +34,13 @@ export interface SearchCodec<T> {
   stringify(value: T): URLSearchParams
 }
 
-type Immutable<T> = T extends readonly unknown[]
-  ? { readonly [K in keyof T]: Immutable<T[K]> }
-  : T extends object
+type Immutable<T> = T extends (...args: never[]) => unknown
+  ? T
+  : T extends readonly unknown[]
     ? { readonly [K in keyof T]: Immutable<T[K]> }
-    : T
+    : T extends object
+      ? { readonly [K in keyof T]: Immutable<T[K]> }
+      : T
 type MaybeSearch<S> = [S] extends [never]
   ? object
   : { search: ReadonlySignal<Immutable<S>> }

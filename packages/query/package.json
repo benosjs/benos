@@ -35,6 +35,9 @@
     "@benosjs/core": "workspace:*",
     "@benosjs/dom": "workspace:*"
   },
+  "devDependencies": {
+    "@benosjs/router": "workspace:*"
+  },
   "bugs": {
     "url": "https://github.com/benosjs/benos/issues"
   }

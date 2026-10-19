@@ -1,12 +1,14 @@
 import { expectTypeOf } from 'expect-type'
 import { expect, it } from 'vitest'
 import type { Resource, ResourceState } from '@benosjs/async'
+import { route } from '@benosjs/router'
 import { createQueryCache, mutation, query } from '../src/index.js'
 import type {
   MutationHandle,
   MutationResult,
   MutationState,
   QueryCache,
+  QueryEntry,
   QueryWrite,
   QueryKey,
   QueryObserver,
@@ -174,6 +176,38 @@ function checkMutationTypes(cache: QueryCache): void {
   })
 }
 void checkMutationTypes
+
+function checkLoaderTypes(cache: QueryCache, signal: AbortSignal): void {
+  const projectQuery = query({
+    fetch: (id: string, { signal: abort }) => getProject(id, abort),
+  })
+  expectTypeOf(projectQuery.load('p-1')).toEqualTypeOf<
+    Promise<QueryEntry<Project>>
+  >()
+  void projectQuery.load('p-1', signal)
+  void projectQuery.load('p-1', signal, cache)
+  void projectQuery.load('p-1', undefined, cache)
+  // @ts-expect-error The argument type comes from fetch.
+  void projectQuery.load(1)
+  const me = query({ fetch: () => getProject('me', signal) })
+  void me.load(signal, cache)
+
+  const projectRoute = route('/projects/:projectId', {
+    loader: ({ params, signal: abort }) =>
+      projectQuery.load(params.projectId, abort),
+  })
+  const match = projectRoute.match()
+  expectTypeOf(match.data().value()).toEqualTypeOf<Project>()
+  expectTypeOf(match.data().fetching()).toEqualTypeOf<boolean>()
+  expectTypeOf(match.data().refresh()).toEqualTypeOf<
+    Promise<Project | undefined>
+  >()
+  const objectRoute = route('/fn', {
+    loader: () => ({ count: (): number => 42 }),
+  })
+  expectTypeOf(objectRoute.match().data().count()).toEqualTypeOf<number>()
+}
+void checkLoaderTypes
 
 it('compiles the public query types', () => {
   expect(typeof createQueryCache).toBe('function')

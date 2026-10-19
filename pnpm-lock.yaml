@@ -292,6 +292,10 @@ importers:
       '@benosjs/dom':
         specifier: workspace:*
         version: link:../dom
+    devDependencies:
+      '@benosjs/router':
+        specifier: workspace:*
+        version: link:../router
 
   packages/router:
     dependencies:

@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { onCleanup } from '@benosjs/core'
 import { ErrorBoundary, jsx, render } from '@benosjs/dom'
 import {
   createRouter,
@@ -331,5 +332,51 @@ describe('route loaders', () => {
       ),
     )
     expect(router.location()).toBe('/unhandled-loader')
+  })
+})
+
+describe('loader owner contract', () => {
+  it('runs loader cleanup on supersession, replacement, and router disposal', async () => {
+    const requests = new Map<string, ReturnType<typeof deferred<string>>>()
+    const cleaned: string[] = []
+    let owned = true
+    const item = route('/items/:id', {
+      loader: ({ params }) => {
+        try {
+          onCleanup(() => cleaned.push(params.id))
+        } catch {
+          owned = false
+        }
+        const request = deferred<string>()
+        requests.set(params.id, request)
+        return request.promise
+      },
+    })
+    const router = createRouter({
+      history: memoryHistory({ initialEntries: ['/items/a'] }),
+      routes: [
+        mountRoute(item, {
+          component: () => jsx('p', { children: 'item' }),
+        }),
+      ],
+    })
+    roots.push(render(() => jsx(RouterOutlet, { router }), document.body))
+    await vi.waitFor(() => expect(requests.has('a')).toBe(true))
+    requests.get('a')?.resolve('A')
+    await vi.waitFor(() => expect(router.matches()[0]?.data).toBe('A'))
+    expect(owned).toBe(true)
+
+    void router.navigate({ to: item, params: { id: 'b' } })
+    await vi.waitFor(() => expect(requests.has('b')).toBe(true))
+    const toC = router.navigate({ to: item, params: { id: 'c' } })
+    await vi.waitFor(() => expect(requests.has('c')).toBe(true))
+    expect(cleaned).toEqual(['b'])
+
+    requests.get('c')?.resolve('C')
+    await toC
+    expect(cleaned).toEqual(['b', 'a'])
+
+    router.dispose()
+    expect(cleaned).toEqual(['b', 'a', 'c'])
   })
 })

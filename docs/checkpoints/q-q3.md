@@ -1,6 +1,6 @@
 # Q3 — Mutations and invalidation
 
-**Status:** Ready for review. Stopped at the Q3 checkpoint; Q4 (router loader integration) does not start without approval.
+**Status:** Q3 approved on 2026-10-19. The user's words: "Q3 is approved. Start Q4 (router loader integration) and stop at the Q4 checkpoint." Q4 has begun.
 
 ## Delivered
 

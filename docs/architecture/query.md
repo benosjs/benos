@@ -1,6 +1,6 @@
 # Query cache, mutations, and invalidation
 
-**Status:** Q1 design approved on 2026-10-19. The cache core (Q2) and mutations (Q3) are implemented in `packages/query`; the router loader adapter (Q4) is not. Differences between this design and the code are listed in [Q2 implementation notes](#q2-implementation-notes) and [Q3 implementation notes](#q3-implementation-notes). [The track brief](../query-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [async.md](./async.md) and [router.md](./router.md) define the contracts this package builds on.
+**Status:** Q1 design approved on 2026-10-19. The cache core (Q2), mutations (Q3), and the router loader adapter (Q4) are implemented in `packages/query`. Differences between this design and the code are listed in the [Q2](#q2-implementation-notes), [Q3](#q3-implementation-notes), and [Q4](#q4-implementation-notes) implementation notes. [The track brief](../query-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [async.md](./async.md) and [router.md](./router.md) define the contracts this package builds on.
 
 ## Goals and boundary
 
@@ -445,6 +445,17 @@ Q3 implements `mutation()`, owner-bound handles, `QueryKey.set`/`update`, `cache
 5. **`invalidate` refetches each entry once per call,** even when several targets match it. Without this, a cancelled optimistic mutation refetched its entry twice (once for the rolled-back layer, once for `affects`).
 6. **Callback errors are failures, not rejections.** If `writes` or `affects` throws after a successful `run`, the result is `{ ok: false, error, cancelled: false }`, and optimistic layers are already released. A throwing `optimistic` callback rolls back what it applied and fails the run.
 7. **A cancelled run returns the handle to `idle`;** a failed run sets `failed` with its error.
+
+## Q4 implementation notes
+
+Q4 implements `load(args, signal?, cache?)`, the `QueryEntry<T>` handle, loader retention, and the approved router changes.
+
+1. **Known-outdated data waits; time-stale data does not.** The design resolved any cached entry immediately. A mutation that `affects` a record the user is not viewing can only flag its entry, and resolving that flag at once would show the pre-save record on the next visit. `load` now waits for a refetch when the entry is **invalidated**, and still resolves immediately (with a background refetch) when it is only older than `staleTime`. Observers keep stale-while-revalidate for both, because they never block navigation.
+2. **One handle per entry.** `load` returns the same `QueryEntry` object for the same entry, so a reload of a committed match with the same entry does not notify `match.data()` subscribers.
+3. **Retention.** `load` retains its entry and releases it through `onCleanup` on the current owner, which for a route loader is the per-match owner of the [loader owner contract](./router.md#matching-and-navigation-state). Called without an owner, it releases at once and the entry is kept only by `gcTime`.
+4. **Router changes, as approved:** `Immutable<T>` in `@benosjs/router` leaves function types unchanged (type-only, 0 B), and the loader owner contract is documented and tested. With the 0.4 type, the query loader type tests produce 4 errors; with the change, none. No router runtime code changed.
+5. **Test-only dependency.** `@benosjs/query` lists `@benosjs/router` as a dev dependency for its integration tests. The published package still does not import the router.
+6. **Cache argument.** Route loaders run under a detached root, so a `QueryCacheProvider` is not visible to them. A loader passes its cache explicitly (`load(id, signal, cache)`), for example from the router `context`; the default cache needs nothing.
 
 ## Hard-to-reverse decisions
 

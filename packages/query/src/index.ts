@@ -74,9 +74,21 @@ type Source<A> = [A] extends [void]
 // eslint-disable-next-line @typescript-eslint/no-invalid-void-type -- detects argument-free queries
 type Args<A> = [A] extends [void] ? [] : [args: A]
 
+export interface QueryEntry<T> {
+  readonly key: QueryKey<T>
+  readonly value: ReadonlySignal<T>
+  readonly fetching: ReadonlySignal<boolean>
+  readonly error: ReadonlySignal<unknown>
+  refresh(): Promise<T | undefined>
+}
+
 export type Query<A, T> = QueryTarget & {
   (...source: Source<A>): QueryObserver<T>
   key(...args: Args<A>): QueryKey<T>
+  /** Resolves to the entry once it has data; for route loaders. */
+  load(
+    ...args: [...Args<A>, signal?: AbortSignal, cache?: QueryCache]
+  ): Promise<QueryEntry<T>>
   where(match: (args: A) => boolean): QueryTarget
   prefetch(...args: [...Args<A>, cache?: QueryCache]): void
   peek(...args: [...Args<A>, cache?: QueryCache]): T | undefined
@@ -152,6 +164,7 @@ interface Entry {
   req: Request | null
   n: number
   gc?: ReturnType<typeof setTimeout>
+  handle?: QueryEntry<unknown>
 }
 
 interface CacheRecord extends QueryCache {
@@ -459,6 +472,20 @@ function apply(
   return { e, prev, had, g: e.g }
 }
 
+function handleFor(e: Entry): QueryEntry<unknown> {
+  return (e.handle ??= {
+    key: e.k as unknown as QueryKey<unknown>,
+    value: e.value.readonly(),
+    fetching: e.fetching.readonly(),
+    error: e.error.readonly(),
+    refresh: () =>
+      (e.req ?? start(e, true)).done.then(
+        (value) => value,
+        () => undefined,
+      ),
+  })
+}
+
 function wake(cache: CacheRecord, kind: 'focus' | 'reconnect'): void {
   for (const entries of cache.entries.values())
     for (const e of entries.values())
@@ -635,12 +662,41 @@ export function query<A = void, T = unknown>(
     const cache = caches.has(last as object) ? rest.pop() : undefined
     return [keyFor(d, rest[0]), resolveCache(cache as QueryCache | undefined)]
   }
+  const load = (...rest: unknown[]): Promise<QueryEntry<unknown>> => {
+    const explicit = caches.has(rest[rest.length - 1] as object)
+      ? (rest.pop() as QueryCache)
+      : undefined
+    const signal =
+      rest[rest.length - 1] instanceof AbortSignal
+        ? (rest.pop() as AbortSignal)
+        : new AbortController().signal
+    const e = entryFor(resolveCache(explicit), keyFor(d, rest[0]))
+    retain(e)
+    let held = true
+    const drop = (): void => {
+      if (held) release(e)
+      held = false
+    }
+    try {
+      // A route loader runs under its match owner: hold the entry while committed.
+      onCleanup(drop)
+    } catch {
+      drop()
+    }
+    // Known-outdated data waits for a refetch; time-stale data revalidates behind it.
+    if (e.ready() && !e.stale) {
+      if (!e.req && isStale(e)) start(e, true)
+      return Promise.resolve(handleFor(e))
+    }
+    return join(e, signal).then(() => handleFor(e))
+  }
   const self = Object.assign(
     (source?: () => unknown) => observe(d, source ?? (() => true)),
     {
       d,
       key: (args?: unknown) => keyFor(d, args),
       where: (p: (args: unknown) => boolean) => ({ d, p }),
+      load,
       prefetch(...rest: unknown[]) {
         const [k, cache] = lookup(rest)
         const e = entryFor(cache, k)
