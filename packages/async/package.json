@@ -2,7 +2,18 @@
   "name": "@benosjs/async",
   "version": "0.4.0",
   "description": "Owned async resources and Suspense for Benos.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
   "license": "MIT",
+  "keywords": [
+    "benos",
+    "async",
+    "suspense",
+    "resources"
+  ],
+  "homepage": "https://github.com/benosjs/benos#readme",
   "type": "module",
   "engines": {
     "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
@@ -22,5 +33,8 @@
   "dependencies": {
     "@benosjs/core": "workspace:*",
     "@benosjs/dom": "workspace:*"
+  },
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
   }
 }

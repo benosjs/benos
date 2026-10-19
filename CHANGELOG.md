@@ -2,7 +2,47 @@
 
 All notable changes to Benos are documented here.
 
-## [0.3.3] — Unreleased
+## [0.4.0] — Unreleased
+
+### Added
+
+- Publish `@benosjs/async` with `resource()`, `<Suspense>`, and
+  `startTransition()`. Resources take a tracked source and an abortable
+  fetcher, expose a `disabled | pending | ready | failed` state signal, keep
+  stale values while reloading, and ignore superseded responses. Suspense
+  reveals content together and holds effects and `onMount` until reveal.
+- Publish `@benosjs/router` with typed routes whose params are inferred from
+  the path string, typed search codecs, nested layouts with `<Outlet>`, index
+  and not-found routes, redirects, lazy route modules, and typed `<Link>` and
+  `navigate()`. A wrong or missing param is a type error.
+- Add route loaders that start before the route renders, update params,
+  search, and data together without remounting, abort on supersession, and
+  report failures to per-route error views with `retry()`.
+- Add pending navigation state, route-heading focus, polite route
+  announcements, hash and top scrolling, per-entry scroll restoration, and a
+  memory history for tests.
+- Add the [router guide](docs/router.md) and [async guide](docs/async.md).
+- Turn `examples/dashboard` into a multi-page app with loader-backed project
+  list and detail routes under a shared layout.
+
+### Fixed
+
+- Fix `<Show>`, `<Switch>`, and `<For>` updates when they are the root of a
+  staged branch. After a router or Suspense commit, later branch changes
+  inserted into the detached staging fragment, which dropped content or
+  threw `insertBefore` in the browser.
+
+### Changed
+
+- Core and DOM gained internal staging and owner-gating seams used by async
+  and the router. Public core and DOM APIs and their timing are unchanged.
+  Core is 4,303 B and core + DOM is 11,010 B, within the 4,608 B and
+  11,264 B budgets.
+- `benos info` lists `@benosjs/async` and `@benosjs/router`.
+- Bump all ten publishable packages and the starter's Benos dependency
+  ranges to `0.4.0`. The starter does not include the router.
+
+## [0.3.3] — 2026-10-16
 
 ### Fixed
 
@@ -31,7 +71,7 @@ All notable changes to Benos are documented here.
 
 - Bump all eight publishable packages to `0.3.2`.
 
-## [0.3.1] — Unreleased
+## [0.3.1] — 2026-10-11
 
 ### Fixed
 

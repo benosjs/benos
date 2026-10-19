@@ -13,6 +13,8 @@ const documents = [
   'docs/api-reference.md',
   'docs/react-migration.md',
   'docs/event-ordering.md',
+  'docs/router.md',
+  'docs/async.md',
 ]
 const { transformJsx } =
   await import('../packages/compiler/dist/js/index.development.js')

@@ -116,10 +116,10 @@ Write the type-level sketch required by risk 1 in `risks.md`: one typed declarat
 
 Versions 0.2.0, 0.2.1, and 0.2.2 are published. The optional UI system is complete and shipped: primitives, the source-owned component registry, `benos init/add/list/diff/update`, and theming are part of the released product.
 
-Upcoming framework work remains blocks, router, query, forms, the full flagship integration, SSR, and devtools. The Phase 5d type-level sketch is complete; the integrated runtime modules remain upcoming. The sortable table's production initial render is the leading performance item: recorded workloads are roughly 2× Solid (2.46× at 10,000 rows and 2.72× at 5,000 rows); sorting is much closer.
+The router and async track is prepared for 0.4.0 in [router-async-plan.md](./router-async-plan.md). Upcoming framework work remains blocks, query, forms, the full flagship integration, SSR, and devtools. The Phase 5d type-level sketch is complete; the integrated runtime modules remain upcoming. The sortable table's production initial render is the leading performance item: recorded workloads are roughly 2× Solid (2.46× at 10,000 rows and 2.72× at 5,000 rows); sorting is much closer.
 
 The top CLI follow-up for the next patch is to extend the no-project error with a nearby-folder suggestion: `Did you mean to run this in <folder>?`
 
 ## Scope boundary
 
-Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. Blocks, router, forms, query, the full flagship integration, SSR/hydration, async resources, Suspense, devtools, and React interop remain upcoming unless a later approved plan changes this document.
+Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. The router, async resources, Suspense, and transitions are scoped by the router and async track for 0.4.0. Blocks, forms, query, the full flagship integration, SSR/hydration, devtools, and React interop remain upcoming unless a later approved plan changes this document.

@@ -1,6 +1,6 @@
 # Benos roadmap
 
-Versions 0.2.0–0.2.3 are published; 0.3.0 is in release preparation. The phase plan and completed work live in
+Versions 0.2.0 through 0.3.3 are published; 0.4.0 is in release preparation. The phase plan and completed work live in
 [plan.md](./plan.md); this roadmap tracks shipped optional modules and upcoming
 framework work.
 
@@ -29,19 +29,26 @@ framework work.
 `benos@0.2.0` is deprecated because its executable did not work through npm
 bin symlinks and Windows command shims. Users should install a current release.
 
+## In 0.4.0
+
+- **Async:** `@benosjs/async` with owned resources, Suspense, and
+  transitions. See the [async guide](./async.md).
+- **Router:** `@benosjs/router` with typed routes, params and search params,
+  nested layouts, lazy loading, route loaders, pending navigation, and focus
+  and scroll management. See the [router guide](./router.md).
+
 ## Upcoming framework modules
 
 - **Blocks:** reusable application patterns such as login and dashboard flows,
   built on the router and forms modules.
-- **Router:** typed routes, params and search params, nested layouts, lazy
-  loading, and route-level data loading.
 - **Query:** caching, mutations, invalidation, retries, optimistic updates,
   cancellation, and SSR integration.
 - **Forms:** schema-driven, fine-grained field updates with inferred value,
   error, dirty, touched, and submission state.
 - **Flagship integration:** one typed declaration connecting routes, query,
   form schema, validation, mutation, and cache invalidation. The type-level
-  sketch is complete; integrating the runtime modules remains future work.
+  0.5.0 design is in [flagship-integration.md](./architecture/flagship-integration.md);
+  routes and async ship in 0.4.0, and query, mutations, and forms remain.
 - **SSR:** server rendering, hydration, streaming, and async resource
   serialization.
 - **Devtools:** visualize the reactive graph and explain why a DOM node updated.

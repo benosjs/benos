@@ -22,6 +22,8 @@ Vite, Vitest, ESLint, Prettier, signals, components, `<Show>`, and `<For>`.
 
 - [Getting started](docs/getting-started.md)
 - [API reference](docs/api-reference.md)
+- [Router guide](docs/router.md)
+- [Async guide](docs/async.md)
 - [React migration guide](docs/react-migration.md)
 - [Benos UI guide and component catalog](docs/ui/README.md)
 - [Event ordering](docs/event-ordering.md)

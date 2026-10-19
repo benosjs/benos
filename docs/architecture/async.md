@@ -1,6 +1,6 @@
 # Async resources, Suspense, and transitions
 
-**Status:** R1 design approved; the 0.4.0 resource, Suspense, and transition implementation is at the R2 checkpoint. The original resource and renderer contracts below remain the baseline. [The router design](./router.md) defines their later integration. None of these APIs is in 0.3.1.
+**Status:** Implemented in 0.4.0. The user guide is [docs/async.md](../async.md). The original resource and renderer contracts below remain the baseline. [The router design](./router.md) defines their integration.
 
 ## Goals and boundary
 

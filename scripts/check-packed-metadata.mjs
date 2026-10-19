@@ -12,6 +12,8 @@ const root = resolve(fileURLToPath(new URL('../', import.meta.url)))
 const publishable = [
   'core',
   'dom',
+  'async',
+  'router',
   'compiler',
   'vite',
   'eslint-plugin',

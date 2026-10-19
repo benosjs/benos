@@ -11,6 +11,8 @@ export const PUBLISH_VISIBILITY_TIMEOUT_MS = 10 * 60 * 1000
 export const RELEASE_PACKAGES = [
   '@benosjs/core',
   '@benosjs/dom',
+  '@benosjs/async',
+  '@benosjs/router',
   '@benosjs/compiler',
   '@benosjs/vite',
   '@benosjs/eslint-plugin',
