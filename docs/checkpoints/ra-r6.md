@@ -1,7 +1,9 @@
 # R6 — Release preparation (0.4.0)
 
-**Status:** Complete up to the pull request. Nothing is merged, tagged, or
-published.
+**Status:** Complete. The pull request (benosjs/benos#15) is merged, `v0.4.0`
+is tagged on `main`, and all ten packages were published at `0.4.0` on
+2026-10-19. See the [0.4.0 CHANGELOG entry](../../CHANGELOG.md) for how the
+release was published.
 
 ## Delivered
 
