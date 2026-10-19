@@ -240,8 +240,10 @@ function ownerDocumentOf(node: Node): Document {
   return document
 }
 
+// A staged range can move out of the fragment it was mounted into, so an
+// anchor's current parent wins over the parent captured at setup.
 function insert(parent: Node, node: Node, before: Node | null): void {
-  parent.insertBefore(node, before)
+  ;(before?.parentNode ?? parent).insertBefore(node, before)
 }
 
 function rangeConnected(range: DomRange): boolean {
@@ -253,7 +255,7 @@ function removeRange(range: DomRange): void {
 }
 
 function moveRange(range: DomRange, parent: Node, before: Node | null): void {
-  for (const node of range.nodes) parent.insertBefore(node, before)
+  for (const node of range.nodes) insert(parent, node, before)
 }
 
 function disposeMounted(mounted: Mounted | null): void {
@@ -269,8 +271,14 @@ function setSlotRange(slot: Slot): void {
 
 function ensureSlotMarker(slot: Slot): void {
   if (slot.marker.parentNode) return
-  const before = slot.after?.parentNode === slot.parent ? slot.after : null
-  insert(slot.parent, slot.marker, before)
+  const last = slot.range.nodes[slot.range.nodes.length - 1]
+  if (last?.parentNode) insert(last.parentNode, slot.marker, last.nextSibling)
+  else
+    insert(
+      slot.parent,
+      slot.marker,
+      slot.after?.parentNode === slot.parent ? slot.after : null,
+    )
 }
 
 function updateSlot(
@@ -291,9 +299,9 @@ function updateSlot(
     return
   }
   if (slot.current && slot.initialized && Object.is(slot.value, value)) return
+  ensureSlotMarker(slot)
   disposeMounted(slot.current)
   slot.current = null
-  ensureSlotMarker(slot)
   const branch = runWithOwner(owner, () =>
     createInternalOwner('branch', () =>
       slot.current ? rangeConnected(slot.current.range) : false,

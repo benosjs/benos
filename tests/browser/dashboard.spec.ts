@@ -24,6 +24,11 @@ test('loads the overview and navigates through loader-backed project routes', as
     page.getByRole('heading', { name: 'Signal runtime' }),
   ).toBeVisible()
   await expect(page.getByText('Ada Lovelace', { exact: true })).toBeVisible()
+  // The detail page renders inside the shared projects layout outlet.
+  await expect(page.getByRole('heading', { name: 'Projects' })).toHaveCount(1)
+  await expect(
+    page.getByRole('link', { name: 'All projects', exact: true }),
+  ).toBeVisible()
 
   await page.goBack()
   await expect(page).toHaveURL(`${dashboardUrl}/projects`)

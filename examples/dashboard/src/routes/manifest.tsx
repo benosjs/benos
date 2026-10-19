@@ -39,16 +39,16 @@ export const router = createRouter({
                 </section>
               ),
             }),
+            mountRoute(projectRoute, {
+              lazy: () => import('../pages/project-detail.js'),
+              error: (failure) => (
+                <section class="route-error" role="alert">
+                  <p>Project details could not load: {String(failure.error)}</p>
+                  <button onClick={failure.retry}>Retry</button>
+                </section>
+              ),
+            }),
           ],
-        }),
-        mountRoute(projectRoute, {
-          lazy: () => import('../pages/project-detail.js'),
-          error: (failure) => (
-            <section class="route-error" role="alert">
-              <p>Project details could not load: {String(failure.error)}</p>
-              <button onClick={failure.retry}>Retry</button>
-            </section>
-          ),
         }),
         mountRoute(recordsRoute, { lazy: () => import('../pages/records.js') }),
         mountRoute(settingsRoute, {
