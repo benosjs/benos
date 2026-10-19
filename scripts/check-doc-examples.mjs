@@ -13,6 +13,8 @@ const documents = [
   'docs/api-reference.md',
   'docs/react-migration.md',
   'docs/event-ordering.md',
+  'docs/router.md',
+  'docs/async.md',
 ]
 const { transformJsx } =
   await import('../packages/compiler/dist/js/index.development.js')
@@ -82,6 +84,8 @@ try {
           '@benosjs/core': ['packages/core/src/index.ts'],
           '@benosjs/dom': ['packages/dom/src/index.ts'],
           '@benosjs/dom/*': ['packages/dom/src/*'],
+          '@benosjs/async': ['packages/async/src/index.ts'],
+          '@benosjs/router': ['packages/router/dist/types/index.d.ts'],
           '@benosjs/compiler': ['packages/compiler/src/index.ts'],
           '@benosjs/vite': ['packages/vite/src/index.ts'],
           '@benosjs/eslint-plugin': ['packages/eslint-plugin/src/index.ts'],

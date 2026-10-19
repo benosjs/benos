@@ -8,6 +8,8 @@ const root = resolve(import.meta.dirname, '..')
 const packages = [
   '@benosjs/core',
   '@benosjs/dom',
+  '@benosjs/async',
+  '@benosjs/router',
   '@benosjs/compiler',
   '@benosjs/vite',
   '@benosjs/eslint-plugin',

@@ -22,8 +22,36 @@ export default defineConfig({
     jsx: 'preserve',
   },
   plugins:
-    framework === 'solid' ? [solid()] : [benos({ optimization: 'safe' })],
+    framework === 'solid'
+      ? [solid()]
+      : [
+          benos({
+            optimization:
+              process.env.DASHBOARD_OPTIMIZATION === 'none' ? 'none' : 'safe',
+          }),
+        ],
+  ...(framework === 'solid'
+    ? {}
+    : {
+        optimizeDeps: {
+          noDiscovery: true,
+          exclude: [
+            '@benosjs/core',
+            '@benosjs/core/internal',
+            '@benosjs/dom',
+            '@benosjs/dom/internal',
+            '@benosjs/async',
+            '@benosjs/router',
+          ],
+        },
+      }),
   resolve: {
+    dedupe: [
+      '@benosjs/core',
+      '@benosjs/dom',
+      '@benosjs/router',
+      '@benosjs/async',
+    ],
     alias: [
       {
         find: '@benosjs/core/internal',

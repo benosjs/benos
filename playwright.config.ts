@@ -13,11 +13,20 @@ export default defineConfig({
     { name: 'firefox', use: { browserName: 'firefox' } },
     { name: 'webkit', use: { browserName: 'webkit' } },
   ],
-  webServer: {
-    command:
-      'pnpm exec vite --config tests/browser/vite.config.ts --host 127.0.0.1',
-    url: 'http://127.0.0.1:4173/tests/browser/fixture.html',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: [
+    {
+      command:
+        'pnpm exec vite --config tests/browser/vite.config.ts --host 127.0.0.1',
+      url: 'http://127.0.0.1:4173/tests/browser/fixture.html',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+    {
+      command:
+        'pnpm --filter @benosjs/dashboard exec vite --config vite.config.ts --host 127.0.0.1 --port 4174 --strictPort',
+      url: 'http://127.0.0.1:4174/',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
+  ],
 })

@@ -12,7 +12,8 @@ Phase 1 kernel designs (required for v0.1):
 
 Phase 2 designs (designed now, built later):
 
-- [Async](./async.md): resources, Suspense, transitions, cancellation, and race handling.
+- [Async](./async.md): resources, Suspense, transitions, cancellation, and race handling. Implemented in 0.4.0.
+- [Router](./router.md): typed routes, loaders, navigation, focus, and scrolling. Implemented in 0.4.0.
 - [SSR](./ssr.md): server rendering, streaming, serialization, and hydration.
 - [Risks](./risks.md): the ten principal technical and adoption risks with mitigation gates.
 

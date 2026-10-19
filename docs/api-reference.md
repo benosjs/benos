@@ -148,6 +148,84 @@ properties. URL-bearing attributes reject dangerous schemes. A callback `ref`
 receives one concrete, non-null element and registers teardown with
 `onCleanup`; it is never called with `null`.
 
+## `@benosjs/router`
+
+- `route(path, options?)` creates a typed route reference. Optional search
+  codecs infer the accepted link/search shape. A loader receives typed params,
+  parsed search, an `AbortSignal`, and the router context; its awaited return
+  type is exposed by `route.match().data()` inside that route's rendered owner.
+- `mountRoute(ref, { component, lazy, children, pending, error })` attaches
+  presentation and nested route definitions. Route components render only
+  after their matched loaders and lazy imports are ready. A same-route params
+  update keeps the route owner and updates params, search, and data together.
+- `createRouter({ routes, history, context?, notFound? })` creates an
+  instance. `context` is frozen before it is passed to loaders. `memoryHistory`
+  is available for tests and non-browser use; `browserHistory` supplies links,
+  back/forward, and per-entry scroll restoration.
+- `<RouterOutlet router>` provides route context and renders the active route.
+  `<Outlet>` renders a child route. `route.match()` reads only from the owner
+  belonging to that route reference.
+- `<Link to params? search? hash? replace?>` renders a real anchor with `href`
+  and `aria-current`. Modified clicks, non-primary clicks, downloads, and
+  non-self targets keep native browser behavior. After client navigation the
+  router announces the route heading, focuses `[data-route-focus]` (or the
+  main landmark), and scrolls to the top or hash; browser back/forward restores
+  the saved scroll position.
+- A route `pending` view appears during the first load. Later navigation keeps
+  the current view visible and exposes `navigation().status === 'loading'`.
+  Loader and lazy-import failures render the nearest route `error` view with a
+  `retry()` callback. Without one, errors reach the DOM `ErrorBoundary`.
+  Search parse failures reject navigation and preserve the last committed
+  route.
+
+```tsx
+import {
+  browserHistory,
+  createRouter,
+  Link,
+  mountRoute,
+  route,
+  RouterOutlet,
+} from '@benosjs/router'
+
+const projectRoute = route('/projects/:projectId', {
+  loader: async ({ params, signal }) => {
+    const response = await fetch(`/api/projects/${params.projectId}`, {
+      signal,
+    })
+    if (!response.ok) throw new Error('Project could not be loaded')
+    return (await response.json()) as { name: string }
+  },
+})
+
+const router = createRouter({
+  history: browserHistory(),
+  routes: [
+    mountRoute(projectRoute, {
+      component: ProjectPage,
+      pending: () => <p>Loading project…</p>,
+      error: ({ error, retry }) => (
+        <button onClick={retry}>{String(error)} — retry</button>
+      ),
+    }),
+  ],
+})
+
+function ProjectPage() {
+  const project = projectRoute.match()
+  return (
+    <main>
+      <h1 data-route-focus>{project.data().name}</h1>
+      <Link to={projectRoute} params={{ projectId: 'next' }}>
+        Next project
+      </Link>
+    </main>
+  )
+}
+
+;<RouterOutlet router={router} />
+```
+
 ## `@benosjs/compiler`
 
 - `transformJsx(source, { filename, development?, optimization? })` returns

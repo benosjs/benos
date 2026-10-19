@@ -2,7 +2,7 @@ import process from 'node:process'
 import { gzipSync } from 'node:zlib'
 import { build } from 'esbuild'
 
-async function bundledSize(packages) {
+async function bundledSize(packages, external = []) {
   const imports = packages
     .map(
       (name, index) =>
@@ -17,6 +17,7 @@ async function bundledSize(packages) {
       sourcefile: 'size-entry.js',
     },
     bundle: true,
+    external,
     format: 'esm',
     platform: 'browser',
     target: 'es2022',
@@ -33,6 +34,19 @@ async function bundledSize(packages) {
 const checks = [
   ['@benosjs/core', await bundledSize(['core']), 4_608],
   ['@benosjs/core + @benosjs/dom', await bundledSize(['core', 'dom']), 11_264],
+  [
+    '@benosjs/async (core and DOM external)',
+    await bundledSize(['async'], ['@benosjs/core', '@benosjs/dom']),
+    4_096,
+  ],
+  [
+    '@benosjs/router (core, DOM, and async external)',
+    await bundledSize(
+      ['router'],
+      ['@benosjs/core', '@benosjs/dom', '@benosjs/async'],
+    ),
+    7_168,
+  ],
 ]
 
 let failed = false
@@ -44,3 +58,9 @@ for (const [label, bytes, limit] of checks) {
 }
 
 if (failed) process.exitCode = 1
+process.stdout.write(
+  `@benosjs/core + @benosjs/dom + @benosjs/async: ${await bundledSize(['core', 'dom', 'async'])} bytes (minified + gzip)\n`,
+)
+process.stdout.write(
+  `@benosjs/core + @benosjs/dom + @benosjs/async + @benosjs/router: ${await bundledSize(['core', 'dom', 'async', 'router'])} bytes (minified + gzip)\n`,
+)

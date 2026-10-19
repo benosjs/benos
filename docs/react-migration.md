@@ -63,6 +63,15 @@ if (!(host instanceof HTMLElement)) throw new Error('Missing #app')
 render(() => <Rows rows={[{ id: 1, label: 'one' }]} />, host)
 ```
 
+## Route state
+
+React routers re-render a component with new params. Benos keeps the route
+component mounted and updates `route.match()` accessors in place. Read
+`match.params()` and `match.data()` inside JSX or an effect; a read in setup
+is a snapshot. Loader and lazy-import failures go to the route `error` view,
+while render errors go to `<ErrorBoundary>`. The [router guide](./router.md)
+shows both.
+
 ## Callback refs
 
 React callback refs often receive an element and then `null` on unmount. Benos

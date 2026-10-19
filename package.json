@@ -57,6 +57,7 @@
     "@babel/traverse": "^8.0.6",
     "@babel/types": "^8.0.6",
     "@benosjs/dom": "workspace:*",
+    "@benosjs/router": "workspace:*",
     "@benosjs/primitives": "workspace:*",
     "@eslint/js": "^10.0.1",
     "@jridgewell/trace-mapping": "^0.3.31",

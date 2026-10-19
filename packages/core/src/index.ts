@@ -28,10 +28,12 @@ type InternalRegistry = Pick<
   | 'disposeInternalOwner'
   | 'getInternalProviderOwner'
   | 'hasPendingMounts'
+  | 'hasInternalGatedRender'
   | 'notifyMount'
   | 'reportInternalError'
   | 'runWithOwner'
   | 'setInternalErrorHandler'
+  | 'setInternalOwnerGate'
 >
 ;(
   globalThis as typeof globalThis & { __benosCoreInternal?: InternalRegistry }
@@ -41,8 +43,10 @@ type InternalRegistry = Pick<
   disposeInternalOwner: runtime.disposeInternalOwner,
   getInternalProviderOwner: runtime.getInternalProviderOwner,
   hasPendingMounts: runtime.hasPendingMounts,
+  hasInternalGatedRender: runtime.hasInternalGatedRender,
   notifyMount: runtime.notifyMount,
   reportInternalError: runtime.reportInternalError,
   runWithOwner: runtime.runWithOwner,
   setInternalErrorHandler: runtime.setInternalErrorHandler,
+  setInternalOwnerGate: runtime.setInternalOwnerGate,
 }

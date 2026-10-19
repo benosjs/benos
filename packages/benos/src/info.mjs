@@ -11,6 +11,8 @@ import { findProjectRoot, readJson } from './project.mjs'
 const BENOS_PACKAGES = [
   '@benosjs/core',
   '@benosjs/dom',
+  '@benosjs/async',
+  '@benosjs/router',
   '@benosjs/compiler',
   '@benosjs/vite',
   '@benosjs/eslint-plugin',

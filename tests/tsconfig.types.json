@@ -12,6 +12,7 @@
       "@benosjs/core/internal": ["../packages/core/src/internal.ts"],
       "@benosjs/dom": ["../packages/dom/src/index.ts"],
       "@benosjs/dom/jsx-runtime": ["../packages/dom/src/jsx-runtime.ts"],
+      "@benosjs/router": ["../packages/router/src/index.ts"],
       "@zag-js/toast": ["../packages/primitives/node_modules/@zag-js/toast"],
       "@zag-js/vanilla": ["../packages/primitives/node_modules/@zag-js/vanilla"]
     },
@@ -19,6 +20,10 @@
   },
   "include": [
     "../packages/dom/tests/types.test.ts",
+    "../packages/async/tests/types.test.ts",
+    "../packages/router/tests/types.test.ts",
+    "../tests/fixtures/router-circular/**/*.ts",
+    "../tests/fixtures/router-circular/**/*.tsx",
     "../packages/primitives/tests/types.compile.ts",
     "./ui-batch1.types.ts",
     "./ui-batch2.types.ts",

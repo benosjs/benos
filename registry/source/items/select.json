@@ -6,7 +6,7 @@
   "dependencies": [
     {
       "name": "@benosjs/primitives",
-      "version": "^0.3.0"
+      "version": "^0.4.0"
     },
     {
       "name": "@zag-js/select",
@@ -31,15 +31,15 @@
   "minimumBenosVersions": [
     {
       "name": "@benosjs/core",
-      "version": "0.3.0"
+      "version": "0.4.0"
     },
     {
       "name": "@benosjs/dom",
-      "version": "0.3.0"
+      "version": "0.4.0"
     },
     {
       "name": "@benosjs/primitives",
-      "version": "0.3.0"
+      "version": "0.4.0"
     }
   ]
 }
