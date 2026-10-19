@@ -1,6 +1,6 @@
 # Q1 — Query design review
 
-**Status:** Ready for review. Stopped at the Q1 checkpoint; Q2 does not start without approval.
+**Status:** Q1 approved on 2026-10-19. The user's words: "Approve all eight query design decisions, apply the flagship amendments now, and start Q2." Both defaults were decided earlier in the review. Q2 has begun.
 
 ## Deliverables
 
@@ -35,4 +35,4 @@ No dependency, configuration, source code, or public API was changed. The branch
 - **Observer over `resource()`.** Building observers on the public resource avoids async changes, but costs an extra resource per observer. Q2 must measure memory and bytes; if the wrapper is too heavy, the alternative is an internal async seam for Suspense tokens, which would need its own approval.
 - **Ergonomics of `match.data().value()`.** It is one call longer than a plain data signal. The alternative, a router that unwraps signal-bearing loader results, would be a runtime router change and is not proposed.
 
-The two defaults are decided. Approval is still requested for decisions 1–8 and for whether to apply the flagship amendments now or in the forms track.
+All eight decisions are approved and both defaults are decided. The flagship amendments are applied to [flagship-integration.md](../architecture/flagship-integration.md). Q1 is complete.
