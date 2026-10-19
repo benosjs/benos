@@ -16,8 +16,9 @@
   issue and point users to a fixed version.
 - The accidental `@benosjs/dom@0.0.0-stage` and
   `@benosjs/vite@0.0.0-stage` versions are deprecated.
-- GitHub Releases exist for `v0.2.1`, `v0.2.2`, and `v0.3.0`; `v0.2.0`
-  remains represented by its existing tag.
+- GitHub Releases exist for `v0.2.1` through `v0.2.3`, `v0.3.0` through
+  `v0.3.2`, and `v0.4.0`. `v0.2.0` and `v0.3.3` are represented by their
+  tags only.
 
 ## First publish of `@benosjs/async` and `@benosjs/router` (0.4.0)
 
