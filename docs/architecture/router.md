@@ -1,6 +1,6 @@
 # Router architecture for 0.4.0
 
-**Status:** R1 design approved; R3 router-core implementation is at its checkpoint in [ra-r3](../checkpoints/ra-r3.md). [The track brief](../router-async-plan.md) sets scope. [The flagship target](./flagship-integration.md) supplies the 0.5 compatibility test. This design preserves current core/DOM public APIs and their synchronous graph semantics.
+**Status:** Implemented for 0.4.0. R5 validation is recorded in [ra-r5](../checkpoints/ra-r5.md). [The track brief](../router-async-plan.md) sets scope. [The flagship target](./flagship-integration.md) supplies the 0.5 compatibility test. This design preserves current core/DOM public APIs and their synchronous graph semantics.
 
 ## Package boundary and budget
 
@@ -137,11 +137,12 @@ No browser global is read at module evaluation. A future server renderer can sup
 
 R2 implemented the core and DOM staging seam. Public `signal`, `effect`, `batch`, `createRoot`, `render`, and `ErrorBoundary` signatures and documented timing remain unchanged.
 
-| Package    | Implemented internal seam                                               | R2 measured gzip delta |
-| ---------- | ----------------------------------------------------------------------- | ---------------------: |
-| core       | Owner eligibility, delayed jobs, and gated-render detection             |                 +195 B |
-| DOM        | Detached range staging, commit/disposal, and internal controls          |       +202 B marginal* |
-| core + DOM | Combined measured increase, including cross-package compression effects |                 +397 B |
+| Package    | Implemented internal seam                                               | Measured gzip delta |
+| ---------- | ----------------------------------------------------------------------- | ------------------: |
+| core       | Owner eligibility, delayed jobs, and gated-render detection             |              +195 B |
+| DOM        | Detached range staging, commit/disposal, and internal controls          |    +202 B marginal* |
+| core + DOM | Combined measured increase, including cross-package compression effects |              +397 B |
+| DOM (R5)   | Anchor-relative insertion and slot re-anchoring after a staged commit   |               +33 B |
 
 \* The DOM figure is the marginal difference within the combined bundle, not a standalone DOM package measurement. The measured current totals and remaining headroom are in the [R2 checkpoint](../checkpoints/ra-r2.md). R3 must stop if required core/DOM integration would exceed either fixed cap; no cap has been raised.
 
