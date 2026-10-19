@@ -39,6 +39,10 @@ All notable changes to Benos are documented here.
   Core is 4,303 B and core + DOM is 11,010 B, within the 4,608 B and
   11,264 B budgets.
 - `benos info` lists `@benosjs/async` and `@benosjs/router`.
+- Raise UI registry dependency ranges to `^0.4.0` and minimum Benos versions
+  to `0.4.0`, and build registry release `0.4.0`. Under semver's 0.x caret
+  rule, `^0.3.0` excludes 0.4.0, so `benos add` would otherwise refuse fresh
+  0.4.0 projects.
 - Bump all ten publishable packages and the starter's Benos dependency
   ranges to `0.4.0`. The starter does not include the router.
 

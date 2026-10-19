@@ -11,8 +11,10 @@ published.
 - **Package readiness.** `@benosjs/async` and `@benosjs/router` gained a
   README, LICENSE, repository, keywords, homepage, and bugs metadata.
 - **Versions.** All ten publishable packages are `0.4.0`. The starter's Benos
-  dependency ranges are `^0.4.0`. Registry minimum versions stay at `0.3.0`
-  because no registry component needs a 0.4 API.
+  dependency ranges are `^0.4.0`. Registry item ranges are `^0.4.0`, minimum Benos
+  versions are `0.4.0`, and the registry is built as release `0.4.0`. Under
+  semver's 0.x caret rule, `^0.3.0` excludes 0.4.0, so the UI CLI refused
+  fresh 0.4.0 projects until this was raised; the PR's UI CLI matrix caught it.
 - **Release tooling.** The tag check, packed-metadata check, published-version
   verification, `benos info`, and the publish workflow include async and
   router. The workflow publishes `core`, `dom`, `async`, `router`, then the

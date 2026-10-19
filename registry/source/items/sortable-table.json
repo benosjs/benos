@@ -6,11 +6,11 @@
   "dependencies": [
     {
       "name": "@benosjs/core",
-      "version": "^0.3.0"
+      "version": "^0.4.0"
     },
     {
       "name": "@benosjs/dom",
-      "version": "^0.3.0"
+      "version": "^0.4.0"
     }
   ],
   "registryDependencies": [],
@@ -31,11 +31,11 @@
   "minimumBenosVersions": [
     {
       "name": "@benosjs/core",
-      "version": "0.3.0"
+      "version": "0.4.0"
     },
     {
       "name": "@benosjs/dom",
-      "version": "0.3.0"
+      "version": "0.4.0"
     }
   ]
 }

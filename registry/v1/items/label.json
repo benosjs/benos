@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "release": "0.3.1",
+  "release": "0.4.0",
   "name": "label",
   "type": "registry:component",
   "title": "Label",
@@ -9,7 +9,7 @@
   "minimumBenosVersions": [
     {
       "name": "@benosjs/dom",
-      "version": "0.3.0"
+      "version": "0.4.0"
     }
   ],
   "registryDependencies": [],
