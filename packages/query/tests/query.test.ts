@@ -353,6 +353,19 @@ describe('staleness, garbage collection, and invalidation', () => {
     expect([a.value(), b.value()]).toEqual(['a:3', 'b:4'])
   })
 
+  it('refetches each entry once when targets overlap', async () => {
+    const fetch = vi.fn((id: string) => id)
+    const q = query({ fetch, staleTime: Infinity })
+    mount(() => withCache(() => q(() => 'a')))
+    await flush()
+    await cache.invalidate(
+      q,
+      q.key('a'),
+      q.where(() => true),
+    )
+    expect(fetch).toHaveBeenCalledTimes(2)
+  })
+
   it('drops a request that started before invalidation and moves joiners', async () => {
     const io = controlled<string>()
     const q = query({ fetch: io.fetch as Fetch })

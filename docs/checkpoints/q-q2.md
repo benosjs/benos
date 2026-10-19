@@ -1,6 +1,6 @@
 # Q2 — Query cache core
 
-**Status:** Ready for review. Stopped at the Q2 checkpoint; Q3 (mutations and invalidation) does not start without approval.
+**Status:** Q2 approved on 2026-10-19. The user's words: "if all is good all is approved". The condition was met: all 38 CI checks passed on `76ef3c7`, including `verify` (unit and browser suites). The cap stays at 3,584 B and Q2 is not trimmed. Q3 has begun.
 
 ## Delivered
 

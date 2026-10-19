@@ -43,6 +43,7 @@ export type QueryOptions<A, T> = {
 
 declare const targetBrand: unique symbol
 declare const dataBrand: unique symbol
+declare const writeBrand: unique symbol
 
 export interface QueryTarget {
   readonly [targetBrand]: true
@@ -50,6 +51,14 @@ export interface QueryTarget {
 
 export interface QueryKey<T> extends QueryTarget {
   readonly [dataBrand]?: T
+  /** Describes a write of a complete value. */
+  set(value: T): QueryWrite
+  /** Describes an update of existing data; it does nothing without data. */
+  update(fn: (previous: T) => T): QueryWrite
+}
+
+export interface QueryWrite {
+  readonly [writeBrand]: true
 }
 
 export interface QueryObserver<T> extends Resource<T> {
@@ -75,6 +84,7 @@ export type Query<A, T> = QueryTarget & {
 
 export interface QueryCache {
   invalidate(...targets: QueryTarget[]): Promise<void>
+  write(...writes: QueryWrite[]): void
   dispose(): void
 }
 
@@ -83,10 +93,31 @@ interface Definition {
   keys: Map<string, WeakRef<KeyRecord>>
 }
 
-interface KeyRecord {
-  d: Definition
-  h: string
-  a: unknown
+class KeyRecord {
+  constructor(
+    readonly d: Definition,
+    readonly h: string,
+    readonly a: unknown,
+  ) {}
+  set(v: unknown): WriteRecord {
+    return { k: this, v }
+  }
+  update(f: (previous: unknown) => unknown): WriteRecord {
+    return { k: this, f }
+  }
+}
+
+interface WriteRecord {
+  k: KeyRecord
+  v?: unknown
+  f?: (previous: unknown) => unknown
+}
+
+interface Layer {
+  e: Entry
+  prev: unknown
+  had: boolean
+  g: number
 }
 
 interface TargetRecord {
@@ -117,6 +148,7 @@ interface Entry {
   failures: Signal<number>
   at: number
   stale: boolean
+  g: number
   req: Request | null
   n: number
   gc?: ReturnType<typeof setTimeout>
@@ -183,7 +215,7 @@ function keyFor(d: Definition, args: unknown): KeyRecord {
   const h = hashKey(d.o.key ? d.o.key(args) : args)
   let k = d.keys.get(h)?.deref()
   if (!k) {
-    k = { d, h, a: args }
+    k = new KeyRecord(d, h, args)
     d.keys.set(h, new WeakRef(k))
     released.register(k, { d, h })
   }
@@ -257,7 +289,16 @@ function start(e: Entry, bg: boolean): Request {
   })
   done.catch(noop)
   const r: Request = { c: new AbortController(), j: 0, bg, done, ok, no }
+  const g = e.g
   const current = () => e.req === r && !e.cache.dead
+  // A write since this request started wins; joiners receive its value.
+  const written = (): boolean => {
+    if (e.g === g || !e.ready()) return false
+    e.req = null
+    e.fetching.set(false)
+    ok(untrack(e.value))
+    return true
+  }
   e.req = r
   batch(() => {
     e.fetching.set(true)
@@ -282,7 +323,7 @@ function start(e: Entry, bg: boolean): Request {
     }
     Promise.resolve(result).then(
       (value) => {
-        if (!current()) return
+        if (!current() || written()) return
         if (development) freeze(value)
         e.req = null
         e.at = Date.now()
@@ -297,7 +338,7 @@ function start(e: Entry, bg: boolean): Request {
         ok(value)
       },
       (error: unknown) => {
-        if (!current() || r.c.signal.aborted) return
+        if (!current() || r.c.signal.aborted || written()) return
         const delay = nextDelay(e.k.d.o, n + 1, error)
         if (delay === undefined) {
           e.req = null
@@ -382,6 +423,7 @@ function entryFor(cache: CacheRecord, k: KeyRecord): Entry {
       failures: signal(0),
       at: 0,
       stale: false,
+      g: 0,
       req: null,
       n: 1,
     }
@@ -389,6 +431,32 @@ function entryFor(cache: CacheRecord, k: KeyRecord): Entry {
     release(e)
   }
   return e
+}
+
+/** Applies a write; an optimistic one returns its rollback layer. */
+function apply(
+  cache: CacheRecord,
+  w: WriteRecord,
+  optimistic: boolean,
+): Layer | undefined {
+  const e = entryFor(cache, w.k)
+  const had = untrack(e.ready)
+  if (w.f && !had) return undefined
+  const prev = untrack(e.value)
+  const next = w.f ? w.f(prev) : w.v
+  if (development) freeze(next)
+  e.g++
+  batch(() => {
+    e.value.set(next)
+    e.ready.set(true)
+  })
+  if (!optimistic) {
+    e.at = Date.now()
+    e.stale = false
+    return undefined
+  }
+  retain(e)
+  return { e, prev, had, g: e.g }
 }
 
 function wake(cache: CacheRecord, kind: 'focus' | 'reconnect'): void {
@@ -428,15 +496,21 @@ export function createQueryCache(): QueryCache {
     dead: false,
     listening: false,
     invalidate(...targets) {
-      const pending: Promise<unknown>[] = []
+      const pending = new Map<Entry, Promise<unknown>>()
       for (const target of targets as unknown as TargetRecord[]) {
         for (const e of cache.entries.get(target.d)?.values() ?? []) {
-          if (!matches(target, e)) continue
+          if (pending.has(e) || !matches(target, e)) continue
           e.stale = true
-          if (e.n > 0 || e.req) pending.push(restart(e).done)
+          if (e.n > 0 || e.req) pending.set(e, restart(e).done)
         }
       }
-      return Promise.allSettled(pending).then(noop)
+      return Promise.allSettled(pending.values()).then(noop)
+    },
+    write(...writes) {
+      batch(() => {
+        for (const w of writes as unknown as WriteRecord[])
+          apply(cache, w, false)
+      })
     },
     dispose() {
       if (cache.dead) return
@@ -580,4 +654,145 @@ export function query<A = void, T = unknown>(
     },
   )
   return self as unknown as Query<A, T>
+}
+
+export interface MutationOptions<I, O> {
+  run(input: I, context: { signal: AbortSignal }): O | Promise<O>
+  /** Entries to refresh; `output` is undefined only for a cancelled run whose outcome is unknown. */
+  affects?(input: I, output?: O): readonly QueryTarget[]
+  writes?(input: I, output: O): readonly QueryWrite[]
+  optimistic?(input: I): readonly QueryWrite[]
+  awaitRefetch?: boolean
+}
+
+export type MutationResult<O> =
+  { ok: true; value: O } | { ok: false; error: unknown; cancelled: boolean }
+
+export type MutationState<O> =
+  | { status: 'idle' }
+  | { status: 'pending' }
+  | { status: 'succeeded'; value: O }
+  | { status: 'failed'; error: unknown }
+
+export interface MutationHandle<I, O> {
+  run(input: I): Promise<MutationResult<O>>
+  state: ReadonlySignal<MutationState<O>>
+  pending: ReadonlySignal<boolean>
+  cancel(): void
+  reset(): void
+}
+
+export interface Mutation<I, O> {
+  (): MutationHandle<I, O>
+  run(input: I, cache?: QueryCache): Promise<MutationResult<O>>
+}
+
+const IDLE = { status: 'idle' } as const
+const PENDING = { status: 'pending' } as const
+
+function execute<I, O>(
+  o: MutationOptions<I, O>,
+  input: I,
+  cache: CacheRecord,
+  c: AbortController,
+): Promise<MutationResult<O>> {
+  const layers: Layer[] = []
+  const settle = (error: unknown): MutationResult<O> => {
+    const cancelled = c.signal.aborted
+    const unknown: QueryTarget[] = []
+    batch(() => {
+      for (const l of layers) {
+        if (l.e.g === l.g) {
+          l.e.g++
+          l.e.value.set(l.prev)
+          l.e.ready.set(l.had)
+          if (cancelled) unknown.push(l.e.k as unknown as QueryTarget)
+        } else unknown.push(l.e.k as unknown as QueryTarget)
+        release(l.e)
+      }
+      if (cancelled) unknown.push(...(o.affects?.(input) ?? []))
+      void cache.invalidate(...unknown)
+    })
+    return { ok: false, error, cancelled }
+  }
+  return new Promise<O>((resolve) => {
+    batch(() => {
+      for (const w of o.optimistic?.(input) ?? []) {
+        const l = apply(cache, w as unknown as WriteRecord, true)
+        if (l) layers.push(l)
+      }
+    })
+    resolve(untrack(() => o.run(input, { signal: c.signal })))
+  })
+    .then((value) => {
+      let refetch!: Promise<void>
+      batch(() => {
+        for (const l of layers.splice(0)) release(l.e)
+        for (const w of o.writes?.(input, value) ?? [])
+          apply(cache, w as unknown as WriteRecord, false)
+        refetch = cache.invalidate(...(o.affects?.(input, value) ?? []))
+      })
+      const result: MutationResult<O> = { ok: true, value }
+      return o.awaitRefetch === false ? result : refetch.then(() => result)
+    }, settle)
+    .catch((error: unknown) => ({ ok: false, error, cancelled: false }))
+}
+
+/** Defines a mutation whose cache effects are declared, not hand-written. */
+export function mutation<I, O>(options: MutationOptions<I, O>): Mutation<I, O> {
+  const handle = (): MutationHandle<I, O> => {
+    const cache = resolveCache()
+    const state = signal<MutationState<O>>(IDLE)
+    const count = signal(0)
+    const runs = new Set<AbortController>()
+    let live = true
+    let latest = 0
+    try {
+      onCleanup(() => {
+        live = false
+      })
+    } catch {
+      // A handle created outside an owner lives as long as it is referenced.
+    }
+    return {
+      state: state.readonly(),
+      pending: () => count() > 0,
+      run(input) {
+        const id = ++latest
+        const c = new AbortController()
+        runs.add(c)
+        batch(() => {
+          state.set(PENDING)
+          count.update((n) => n + 1)
+        })
+        return execute(options, input, cache, c).then((result) => {
+          runs.delete(c)
+          if (live)
+            batch(() => {
+              count.update((n) => n - 1)
+              if (id === latest)
+                state.set(
+                  result.ok
+                    ? { status: 'succeeded', value: result.value }
+                    : result.cancelled
+                      ? IDLE
+                      : { status: 'failed', error: result.error },
+                )
+            })
+          return result
+        })
+      },
+      cancel() {
+        for (const c of runs) c.abort()
+      },
+      reset() {
+        latest++
+        state.set(IDLE)
+      },
+    }
+  }
+  return Object.assign(handle, {
+    run: (input: I, cache?: QueryCache) =>
+      execute(options, input, resolveCache(cache), new AbortController()),
+  })
 }

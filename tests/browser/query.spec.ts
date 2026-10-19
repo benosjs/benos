@@ -46,3 +46,20 @@ test('a transition keeps the committed entry until the next is ready', async ({
   await page.evaluate(() => window.__benosQuery?.resolve('c', 'Gamma'))
   await expect(page.locator('#content')).toHaveText(['Gamma', 'Gamma'])
 })
+
+test('optimistic writes update the DOM and roll back on failure', async ({
+  page,
+}) => {
+  await page.goto('/tests/browser/query-fixture.html')
+  await page.waitForFunction(() => Boolean(window.__benosQuery))
+  await page.evaluate(() => window.__benosQuery?.mount())
+  await page.evaluate(() => window.__benosQuery?.resolve('a', 'Alpha'))
+  await expect(page.locator('#content')).toHaveText(['Alpha', 'Alpha'])
+  await page.evaluate(() => window.__benosQuery?.save('Renamed'))
+  await expect(page.locator('#content')).toHaveText(['Renamed', 'Renamed'])
+  await page.evaluate(() => window.__benosQuery?.settleSave(false))
+  await expect(page.locator('#content')).toHaveText(['Alpha', 'Alpha'])
+  await page.evaluate(() => window.__benosQuery?.save('Kept'))
+  await page.evaluate(() => window.__benosQuery?.settleSave(true))
+  await expect(page.locator('#content')).toHaveText(['Kept', 'Kept'])
+})

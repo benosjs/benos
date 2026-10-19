@@ -1,6 +1,6 @@
 # Query cache, mutations, and invalidation
 
-**Status:** Q1 design approved on 2026-10-19. The Q2 cache core is implemented in `packages/query`; mutations (Q3) and the router loader adapter (Q4) are not. Differences between this design and the Q2 code are listed in [Q2 implementation notes](#q2-implementation-notes). [The track brief](../query-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [async.md](./async.md) and [router.md](./router.md) define the contracts this package builds on.
+**Status:** Q1 design approved on 2026-10-19. The cache core (Q2) and mutations (Q3) are implemented in `packages/query`; the router loader adapter (Q4) is not. Differences between this design and the code are listed in [Q2 implementation notes](#q2-implementation-notes) and [Q3 implementation notes](#q3-implementation-notes). [The track brief](../query-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [async.md](./async.md) and [router.md](./router.md) define the contracts this package builds on.
 
 ## Goals and boundary
 
@@ -238,7 +238,7 @@ This differs from `resource()` in one deliberate way: a resource keeps its last 
 ```ts
 interface MutationOptions<I, O> {
   run(input: I, context: { signal: AbortSignal }): O | Promise<O>
-  affects?(input: I, output: Awaited<O>): readonly QueryTarget[]
+  affects?(input: I, output?: Awaited<O>): readonly QueryTarget[] // output is undefined only after a cancelled run
   writes?(input: I, output: Awaited<O>): readonly QueryWrite[]
   optimistic?(input: I): readonly QueryWrite[]
   awaitRefetch?: boolean // default true
@@ -296,7 +296,7 @@ const toggleStar = mutation({
 3. Call `run` untracked. A synchronous throw follows the failure path.
 4. **Success:** in one `batch`, apply `writes`, discard optimistic layers (their values are superseded by writes or by the refetch), and mark every `affects` target invalidated. Retained affected entries refetch immediately; others refetch at their next trigger. A written entry is not refetched unless it is also in `affects`. If `awaitRefetch` is true, the result promise waits for the refetches of retained affected entries to settle; a refetch failure is reported on that entry's `error()` and does not fail the mutation.
 5. **Failure:** roll back each optimistic layer whose entry generation still equals the layer's generation (nothing newer has touched it), restoring the previous value. A layer that something else has since overwritten (another mutation, a refetch that started later, a cache write) is not restored blindly: its entry is invalidated instead, so the server decides. No `affects` invalidation runs on failure; the flagship requires that a failed save does not refresh.
-6. **Cancellation** (`cancel()` or owner disposal of the handle aborts the signal): if `run` still resolves, the success path runs; abort is advisory and the server may have committed. If it rejects, optimistic layers roll back as in step 5 **and** the `affects` targets are invalidated, because the server state is unknown. The result is `{ ok: false, cancelled: true }`.
+6. **Cancellation** (only `cancel()` aborts the signal; owner disposal does not): if `run` still resolves, the success path runs; abort is advisory and the server may have committed. If it rejects, optimistic layers roll back as in step 5 **and** their entries plus the `affects` targets are invalidated, because the server state is unknown. `affects` is called with `output` undefined in this case. The result is `{ ok: false, cancelled: true }` and the handle returns to `idle`.
 7. The returned promise **never rejects**. Browser event handlers can call `void save.run(input)` without producing unhandled rejections, and the flagship form reads `state()` instead of using `try/catch`.
 
 **Owner disposal.** Disposing the handle's owner aborts nothing by default and stops only the handle's own state signals; the cache effects in steps 4–6 still happen. This is what lets the flagship save finish after navigation and still refresh the saved record. `cancel()` is the explicit way to abort. Concurrent `run` calls on one handle are allowed: `state()` reflects the latest run, `pending()` is true while any run is pending, and every run applies its own cache effects.
@@ -433,6 +433,18 @@ Q2 implements definitions, keys, entries, deduplication, generations for request
 6. **`QueryCacheProvider` is typed as a JSX component** through a type-only import of `JSX` from `@benosjs/dom`, so the package declares `@benosjs/dom` as a dependency. It adds no runtime import.
 7. **Not enforced yet:** the default cache does not throw on the server, because there is no server mode to detect until the SSR track. `createQueryCache({ snapshot })` is also deferred to that track.
 8. **Observer accessors are plain functions over signals,** not `computed` nodes, so an observer allocates one signal, one render effect, and one internal resource. The internal resource uses the existing `createRenderEffect` seam from `@benosjs/core/internal`; no core, DOM, or async change was made.
+
+## Q3 implementation notes
+
+Q3 implements `mutation()`, owner-bound handles, `QueryKey.set`/`update`, `cache.write`, optimistic layers with rollback, and entry generations that writes bump. These points clarify the approved design:
+
+1. **Owner disposal never aborts a run.** The approved text said both that disposal aborts and that it does not. The code follows the "Owner disposal" paragraph and the flagship requirement: a save that finishes after navigation still applies its writes and invalidation. Only `cancel()` aborts.
+2. **`affects` receives `output?`.** After a cancelled run whose `run` rejected, the server state is unknown and there is no output, but the affected entries still need refreshing. `affects` is called with `output` undefined, and the optional type makes a create-style mutation handle that case explicitly. `affects: (input) => [...]`, as in the flagship, is unaffected.
+3. **A write wins over an earlier request.** A request that was in flight when a write landed does not store its result; it finishes and resolves its joiners with the written value. If the write was later rolled back to "no data", the request result is kept.
+4. **Optimistic writes do not count as fresh.** `writes` and `cache.write` reset the entry's freshness timer; an optimistic value does not, because it is not server data.
+5. **`invalidate` refetches each entry once per call,** even when several targets match it. Without this, a cancelled optimistic mutation refetched its entry twice (once for the rolled-back layer, once for `affects`).
+6. **Callback errors are failures, not rejections.** If `writes` or `affects` throws after a successful `run`, the result is `{ ok: false, error, cancelled: false }`, and optimistic layers are already released. A throwing `optimistic` callback rolls back what it applied and fails the run.
+7. **A cancelled run returns the handle to `idle`;** a failed run sets `failed` with its error.
 
 ## Hard-to-reverse decisions
 
