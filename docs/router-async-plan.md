@@ -2,15 +2,15 @@
 
 ## Current status
 
-| Sub-step                                       | Status                                                                                             |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| R0 — Plan                                      | Complete                                                                                           |
-| R1 — Design documents                          | Complete                                                                                           |
-| R2 — Async resources and Suspense              | Complete                                                                                           |
-| R3 — Router core                               | Complete; committed and pushed as `e6baa90` on `router-async`, CI passed                           |
-| R4 — Loaders, pending state, and accessibility | Complete; checkpoint in [`docs/checkpoints/ra-r4.md`](checkpoints/ra-r4.md)                        |
-| R5 — Validation app                            | Complete; checkpoint in [`docs/checkpoints/ra-r5.md`](checkpoints/ra-r5.md)                        |
-| R6 — Release preparation                       | Complete up to the pull request; checkpoint in [`docs/checkpoints/ra-r6.md`](checkpoints/ra-r6.md) |
+| Sub-step                                       | Status                                                                                                 |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| R0 — Plan                                      | Complete                                                                                               |
+| R1 — Design documents                          | Complete                                                                                               |
+| R2 — Async resources and Suspense              | Complete                                                                                               |
+| R3 — Router core                               | Complete; committed and pushed as `e6baa90` on `router-async`, CI passed                               |
+| R4 — Loaders, pending state, and accessibility | Complete; checkpoint in [`docs/checkpoints/ra-r4.md`](checkpoints/ra-r4.md)                            |
+| R5 — Validation app                            | Complete; checkpoint in [`docs/checkpoints/ra-r5.md`](checkpoints/ra-r5.md)                            |
+| R6 — Release preparation                       | Complete; 0.4.0 released 2026-10-19; checkpoint in [`docs/checkpoints/ra-r6.md`](checkpoints/ra-r6.md) |
 
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.3.1): **async resources, Suspense, and the router**. This track is the foundation for the flagship integration (typed routes, data, forms, and cache working as one system), which follows in 0.5.0.
 
@@ -111,4 +111,4 @@ Documentation (router guide, async guide), starter integration decision (discuss
 
 ## 5. Your Immediate Task
 
-R0 through R6 are complete up to the 0.4.0 pull request. Stop before merging, tagging, or publishing.
+R0 through R6 are complete, and 0.4.0 was released on 2026-10-19 (benosjs/benos#15).

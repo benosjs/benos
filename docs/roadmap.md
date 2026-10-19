@@ -1,6 +1,6 @@
 # Benos roadmap
 
-Versions 0.2.0 through 0.3.3 are published; 0.4.0 is in release preparation. The phase plan and completed work live in
+Versions 0.2.0 through 0.4.0 are published. The phase plan and completed work live in
 [plan.md](./plan.md); this roadmap tracks shipped optional modules and upcoming
 framework work.
 
@@ -29,7 +29,7 @@ framework work.
 `benos@0.2.0` is deprecated because its executable did not work through npm
 bin symlinks and Windows command shims. Users should install a current release.
 
-## In 0.4.0
+## Shipped in 0.4.0
 
 - **Async:** `@benosjs/async` with owned resources, Suspense, and
   transitions. See the [async guide](./async.md).
