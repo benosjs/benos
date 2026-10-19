@@ -10,7 +10,7 @@ Design rules:
 
 1. **Identity is a typed reference.** A cache entry is named by `(query definition, normalized arguments)`. The definition object is the namespace, so there is no global string-key space. Invalidation targets are references produced by a definition; a raw string or array is a type error.
 2. **No stale identity.** An observer whose arguments change from A to B never presents A's value as B's. Keeping old UI during a change is the job of transitions and route loaders, which already do it atomically.
-3. **Explicit defaults.** No retries, no window-focus refetching, and no global listeners unless a query opts in. 0.4 promised "no hidden retries"; 0.5 keeps that promise.
+3. **Explicit, documented defaults.** No window-focus refetching and no global listeners unless a query opts in. Queries **do** retry by default, but only transient failures (see [Retry policy](#retry-policy)). This is a deliberate change from 0.4's "no hidden retries" statement, for queries only: `resource()` in `@benosjs/async` keeps no retries, and mutations never retry by default.
 4. **Declarative mutation effects.** A mutation states which entries it `affects`, which values it `writes`, and how it updates entries `optimistic`ally. Components do not call `invalidate`.
 5. **Request-local on the server.** The default page-global cache exists only in the browser. Server rendering (not part of 0.5) must use an explicit request cache, and only opted-in data is serialized.
 
@@ -22,7 +22,7 @@ The new public package is **`@benosjs/query`**. It depends on `@benosjs/core` (p
 
 Proposed cap: **3,584 bytes** minified + gzip for the production entry with core, DOM, and async external, measured by a new `pnpm size` row on the same basis as the async and router caps. `pnpm size` should also print the fully bundled `core + dom + async + query` and `core + dom + async + router + query` totals so externalization cannot hide application cost.
 
-Estimate by part, after compression: key normalization and interning 300–380 B; entries, deduplicated fetch and reference-counted abort 500–600 B; stale/gc timers 180–220 B; retries and backoff 120–160 B; observers over `resource` 300–380 B; cache scope and context 150–200 B; mutations and their state 300–380 B; `affects` targets and invalidation 200–260 B; writes, optimistic layers and rollback 260–340 B; `load` adapter 120–160 B; opt-in focus/reconnect 100–130 B. Total **2,530–3,210 B**. The cap leaves room for the high estimate plus test-driven fixes. If Q2 + Q3 cannot fit, stop with measured alternatives instead of dropping behavior silently.
+Estimate by part, after compression: key normalization and interning 300–380 B; entries, deduplicated fetch and reference-counted abort 500–600 B; stale/gc timers 180–220 B; transient-failure classifier, `Retry-After` parsing, jittered backoff, and retries 200–280 B; observers over `resource` 300–380 B; cache scope and context 150–200 B; mutations and their state 300–380 B; `affects` targets and invalidation 200–260 B; writes, optimistic layers and rollback 260–340 B; `load` adapter 120–160 B; opt-in focus/reconnect 100–130 B. Total **2,610–3,330 B**, 80–120 B more than the first Q1 estimate because of the retry classifier. The cap leaves room for the high estimate plus test-driven fixes. If Q2 + Q3 cannot fit, stop with measured alternatives instead of dropping behavior silently.
 
 ### Comparable production measurements
 
@@ -55,8 +55,8 @@ interface QueryOptions<A, T> {
   key?(args: A): KeyPart // defaults to args itself; required when A is not a KeyPart
   staleTime?: number // ms; default 5_000; Infinity means never stale by time
   gcTime?: number // ms an unretained entry survives; default 300_000
-  retry?: number | ((attempt: number, error: unknown) => boolean) // default 0
-  retryDelay?: (attempt: number) => number // default min(1_000 * 2 ** attempt, 30_000)
+  retry?: false | number | ((failureCount: number, error: unknown) => boolean) // default: 2 retries of transient failures
+  retryDelay?: (failureCount: number, error: unknown) => number // default: jittered 300 ms, 900 ms; Retry-After honored
   refetchOn?: { focus?: boolean; reconnect?: boolean } // default none
   ssr?: {
     id: string
@@ -166,13 +166,39 @@ A `QueryEntry` handle is given out only by `load()`, after the entry has data, s
 4. A window `focus`/`visibilitychange` to visible, or an `online` event, for queries with `refetchOn` enabled, for retained entries only.
 5. An explicit `refresh()`, which refetches even when fresh.
 
-A refetch of an entry that has data is stale-while-revalidate: `value` keeps the old data, `fetching()` is true, and the new value replaces it in one batch. The 5,000 ms default `staleTime` is chosen so that a route loader followed immediately by a component observer of the same entry does not fetch twice (TanStack's default of 0 does), and matches Solid's preload reuse window. It is an open decision in the checkpoint.
+A refetch of an entry that has data is stale-while-revalidate: `value` keeps the old data, `fetching()` is true, and the new value replaces it in one batch. The 5,000 ms default `staleTime` is chosen so that a route loader followed immediately by a component observer of the same entry does not fetch twice (TanStack's default of 0 does), and matches Solid's preload reuse window. This default was decided at the Q1 review on the basis that Benos should match or beat every peer. Peers: TanStack Query defaults to 0, which refetches on every mount and is overridden by most apps; SWR deduplicates identical requests for 2 s; Solid Router's `query` reuses a settled entry for about 5 s; RTK Query and Apollo serve cached data until it is invalidated or evicted. 5 s removes the double fetch without RTK/Apollo's indefinite staleness. Mutations still invalidate their affected entries immediately, so the 5 s window never shows data that is stale because of a write made through a mutation.
 
 **Deduplication.** At most one request per entry is in flight. Any trigger, `load()`, or observer that needs data while a request is in flight **joins** it, incrementing the joiner count. The request's `AbortController` is shared. A joiner that goes away (observer argument change, observer disposal, loader supersession through its `AbortSignal`) decrements the count; when the count reaches zero **and** the entry has no other retainer waiting for data, the request is aborted. Abort is advisory; the generation check below is the guard.
 
 **Generations.** Every request and every cache write increments the entry generation. A request may write its result only if the generation it started with is still current. So a refetch that started before a mutation's write, an optimistic update, or a newer refetch can never overwrite it. This is the query-level counterpart to the resource A → B → A rule in [async.md](./async.md).
 
-**Failure and retries.** A rejection after `signal.aborted` is a cancellation, not a failure: no retry, no `error`. Otherwise, while `retry` allows it, the request waits `retryDelay(attempt)` and calls `fetch` again with `attempt + 1` and the same signal; the entry stays `fetching`. Abort during backoff clears the timer and settles as cancelled. When retries are exhausted, the entry keeps its last data (if any), sets `error`, and clears `invalidated` only on success. Retries never run on the server. Mutations never retry in 0.5, because their `run` is not assumed to be idempotent.
+**Failure and retries.** A rejection after `signal.aborted` is a cancellation, not a failure: no retry, no `error`. Otherwise the [retry policy](#retry-policy) decides whether to try again. While retrying, the request waits the computed delay and calls `fetch` again with `attempt + 1` and the same signal; the entry stays `fetching`, and an observer without data stays `pending`. Abort during backoff clears the timer at once and settles as cancelled. When retries are exhausted or the error is not retryable, the entry keeps its last data (if any) and sets `error`; `invalidated` clears only on success.
+
+### Retry policy
+
+Queries retry **transient failures only**, up to **2 times (3 attempts in total)**. This default was decided at the Q1 review. It is documented prominently in the query guide as a deliberate change from 0.4's "no hidden retries" statement: it applies to queries only. `resource()` keeps no retries, and mutations never retry by default because their `run` is not assumed to be idempotent.
+
+**Classification.** A fetcher reports an HTTP failure by throwing (or rejecting with) an error that carries a numeric `status` property, for example `Object.assign(new Error('Not found'), { status: 404 })`. A `Retry-After` value may be attached as `retryAfter` (seconds as a number, or the raw header string). The classifier reads only these structural fields, so any HTTP client can opt in without a Benos error class.
+
+| Failure                                                                | Retried by default |
+| ---------------------------------------------------------------------- | ------------------ |
+| `TypeError` from `fetch` (network failure, DNS, CORS-blocked, offline) | Yes                |
+| Error named `TimeoutError` (for example from `AbortSignal.timeout()`)  | Yes                |
+| `status` 408, 429, or 500–599                                          | Yes                |
+| `status` 400–499 other than 408 and 429                                | No                 |
+| `AbortError`, or any rejection after the request's own signal aborted  | No (cancellation)  |
+| Error with `retryable: false`                                          | No                 |
+| Any other error (no `status`, not one of the above)                    | No                 |
+
+Treating unclassified errors as permanent keeps a parsing bug or a thrown application error from being repeated three times. A fetcher can mark any error `retryable: true` to opt it in.
+
+**Delays.** Retry _n_ waits a base of 300 ms for the first retry and 900 ms for the second (base × 3ⁿ), with full jitter between 50% and 100% of the base so many clients don't retry in lockstep. A 429 or 503 with `retryAfter` waits that long instead, capped at 30 s; if `Retry-After` exceeds the cap, the request fails instead of waiting. Backoff timers are abort-aware: cancellation, supersession of every joiner, owner disposal of the last retainer, and `cache.dispose()` stop a pending retry immediately.
+
+**Overrides.** `retry: false` disables retries; `retry: 4` keeps the transient classification with a different count; `retry: (failureCount, error) => boolean` replaces the classification entirely. `retryDelay: (failureCount, error) => ms` replaces the delay; `Retry-After` is then the function's responsibility. Retries never run on the server.
+
+**State during retries.** An observer without data stays `pending` across attempts and does not flash `failed` between them; `error()` stays `undefined` until the final attempt fails. `failureCount()` exposes how many attempts of the current request have failed (0 when none), so a UI can show "Retrying…". It costs one signal per entry.
+
+**Comparison.** TanStack Query retries 3 times on every client error, including 404s and validation errors, so a real "not found" appears only after several seconds of backoff. Solid Router's `query` and RTK Query do not retry by default; transient network blips surface as errors and apps add retry logic themselves. Benos retries the failures that a retry can fix, and fails the others immediately.
 
 **Values are treated as immutable.** Replacement uses `Object.is`; there is no structural sharing. Development builds deep-freeze plain objects and arrays placed into the cache, so an accidental in-place mutation fails loudly instead of desynchronizing observers. Production builds do not freeze.
 
@@ -181,21 +207,23 @@ A refetch of an entry that has data is stale-while-revalidate: `value` keeps the
 ```ts
 interface QueryObserver<T> extends Resource<T> {
   fetching: ReadonlySignal<boolean>
+  failureCount: ReadonlySignal<number>
   error: ReadonlySignal<unknown>
 }
 ```
 
 `projectQuery(() => match.params().projectId)` must run under an owner, like `resource()`. Its source is tracked; `false`, `null`, or `undefined` disables it. Because it extends `Resource<T>`, an observer works anywhere a resource does, including `<Suspense>` and `startTransition`.
 
-| Observer field | Meaning                                                                                                                                                                                                                     |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `value()`      | The current argument's entry value, or `undefined` if that entry has no data yet. **Never another argument's value.**                                                                                                       |
-| `state()`      | `disabled`; `pending` while the current entry has no data and a request is in flight; `ready` while it has data (including during a background refetch); `failed` only when it has **no** data and its last request failed. |
-| `read()`       | Like `resource.read()`: registers with the nearest Suspense boundary while `pending`, throws the error while `failed`, otherwise returns `value()`.                                                                         |
-| `fetching()`   | True during any request for the current entry, including background refetches and retry backoff.                                                                                                                            |
-| `error()`      | The current entry's last request error, even when stale data is still shown; `undefined` after a success.                                                                                                                   |
-| `refresh()`    | Refetches the current entry even if fresh, joining an in-flight request if one exists. Resolves to the new value, or `undefined` on failure, cancellation, or when disabled. Never rejects.                                 |
-| `cancel()`     | Releases this observer's interest: leaves the request (aborting it if it was the last joiner) and disables the observer until `refresh()` or a different argument, as `resource.cancel()` does.                             |
+| Observer field   | Meaning                                                                                                                                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `value()`        | The current argument's entry value, or `undefined` if that entry has no data yet. **Never another argument's value.**                                                                                                       |
+| `state()`        | `disabled`; `pending` while the current entry has no data and a request is in flight; `ready` while it has data (including during a background refetch); `failed` only when it has **no** data and its last request failed. |
+| `read()`         | Like `resource.read()`: registers with the nearest Suspense boundary while `pending`, throws the error while `failed`, otherwise returns `value()`.                                                                         |
+| `failureCount()` | Failed attempts of the current entry's request so far; 0 when none. Resets when a new request starts.                                                                                                                       |
+| `fetching()`     | True during any request for the current entry, including background refetches and retry backoff.                                                                                                                            |
+| `error()`        | The current entry's last request error, even when stale data is still shown; `undefined` after a success.                                                                                                                   |
+| `refresh()`      | Refetches the current entry even if fresh, joining an in-flight request if one exists. Resolves to the new value, or `undefined` on failure, cancellation, or when disabled. Never rejects.                                 |
+| `cancel()`       | Releases this observer's interest: leaves the request (aborting it if it was the last joiner) and disables the observer until `refresh()` or a different argument, as `resource.cancel()` does.                             |
 
 A background refetch failure keeps `state()` at `ready` and reports through `error()`. Throwing it from `read()` would replace a working screen with an error boundary because a revalidation failed; TanStack makes the same split between `status` and `error`.
 
@@ -375,9 +403,9 @@ SSR is not implemented in 0.5, but the API reserves it with the same opt-in rule
 
 ## Prior art and trade-offs
 
-**TanStack Query** ([important defaults](https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults), [query keys](https://tanstack.com/query/latest/docs/framework/react/guides/query-keys), [optimistic updates](https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates)) is the reference for cache semantics: stale-while-revalidate, dedup, gc, retries, focus refetch, and `onMutate`/`onError`/`onSettled` rollback. Benos borrows the entry lifecycle almost directly. It differs in four ways: typed references instead of array keys (no typo-invalidations, no ad hoc prefix matching); declarative `affects`/`writes`/`optimistic` instead of callbacks that call `queryClient` (rollback and generation guards are the library's job, not the app's); explicit defaults (TanStack defaults to `staleTime: 0`, three client retries, and focus refetching); and no structural sharing, `select`, or infinite queries in 0.5. TanStack is far broader, and its 10,167 B core is the price of that.
+**TanStack Query** ([important defaults](https://tanstack.com/query/latest/docs/framework/react/guides/important-defaults), [query keys](https://tanstack.com/query/latest/docs/framework/react/guides/query-keys), [optimistic updates](https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates)) is the reference for cache semantics: stale-while-revalidate, dedup, gc, retries, focus refetch, and `onMutate`/`onError`/`onSettled` rollback. Benos borrows the entry lifecycle almost directly. It differs in four ways: typed references instead of array keys (no typo-invalidations, no ad hoc prefix matching); declarative `affects`/`writes`/`optimistic` instead of callbacks that call `queryClient` (rollback and generation guards are the library's job, not the app's); different defaults (TanStack defaults to `staleTime: 0`, three client retries on every error, and focus refetching; Benos uses 5 s, two retries of transient failures only, and no focus refetching); and no structural sharing, `select`, or infinite queries in 0.5. TanStack is far broader, and its 10,167 B core is the price of that.
 
-**Solid's `query`/`createAsync`/`action`** is the closest fine-grained design. The behavior below was read from the published `@solidjs/router` 1.0.0 source (`dist/data/query.js` and `dist/data/action.js`). `query(fn, name)` keys entries by `name + hashKey(args)`, reuses a settled entry for 5 s after a preload, evicts unobserved entries after 180 s on a 5-minute sweep interval that starts at import in the browser, and uses a per-request cache on the server. An action without explicit keys revalidates **every** cached query. That default is safe but refetches unrelated data; Benos requires each mutation to say what it affects, and makes the type system check it. Solid's cache is coupled to its router; Benos keeps the cache router-free, with the router only seeing a loader that returns a handle. Solid has no built-in retries or optimistic rollback; its `useSubmission` pattern leaves optimistic UI to components.
+**Solid's `query`/`createAsync`/`action`** is the closest fine-grained design. The behavior below was read from the published `@solidjs/router` 1.0.0 source (`dist/data/query.js` and `dist/data/action.js`). `query(fn, name)` keys entries by `name + hashKey(args)`, reuses a settled entry for 5 s after a preload, evicts unobserved entries after 180 s on a 5-minute sweep interval that starts at import in the browser, and uses a per-request cache on the server. An action without explicit keys revalidates **every** cached query. That default is safe but refetches unrelated data; Benos requires each mutation to say what it affects, and makes the type system check it. Solid's cache is coupled to its router; Benos keeps the cache router-free, with the router only seeing a loader that returns a handle. Solid does not retry by default and has no built-in optimistic rollback; its `useSubmission` pattern leaves optimistic UI to components.
 
 **Costs of the Benos choices.** Typed references need a definition object to be importable wherever invalidation happens; with route refs already in a `refs.ts`-style module, that is the existing import graph. Not retaining the previous key's value means a plain argument change without a transition shows a pending state; transitions and loaders are the answer. A 5,000 ms default `staleTime` means a remount within five seconds shows cached data without revalidating. And `match.data().value()` is one call longer than a plain data signal.
 
@@ -387,7 +415,7 @@ SSR is not implemented in 0.5, but the API reserves it with the same opt-in rule
 2. Entry lifecycle with fake timers: stale triggers, gc start and cancel, invalidation of retained versus unretained entries, and dispose.
 3. Deduplication: joins from observers and loaders, partial release, last-joiner abort, and a fetch that ignores abort.
 4. Generations: refetch versus write, refetch versus newer refetch, and A → B → A observers.
-5. Retries: count and predicate, backoff timing, abort during backoff, no retry on cancellation or on the server.
+5. Retries: the classification table (network `TypeError`, `TimeoutError`, 408, 429, 5xx retried; other 4xx, `AbortError`, `retryable: false`, and unclassified errors not), count and predicate overrides, `retry: false`, jittered backoff bounds, `Retry-After` honored and capped, abort during backoff, no `failed` flash between attempts, `failureCount()`, and no retry on cancellation, on the server, or for mutations.
 6. Observer semantics: the state table above, no cross-key value, background failure keeping `ready`, Suspense reveal, transition retention, and owner disposal; browser tests in Chromium, Firefox, and WebKit.
 7. Mutations: result shape never rejecting, writes, `affects`, `awaitRefetch`, optimistic apply and rollback, rollback skipped after a newer write, cancellation, concurrent runs, and owner disposal before settle.
 8. Router integration: fresh, stale, and missing entries in `load`; supersession; retention while committed and release on replacement; mutation refresh of committed `match.data()` without remount; R4 loader gates unchanged.
@@ -395,4 +423,4 @@ SSR is not implemented in 0.5, but the API reserves it with the same opt-in rule
 
 ## Hard-to-reverse decisions
 
-The typed-reference identity model and the ban on raw keys, the observer's no-cross-key-value rule, the `Resource`-compatible observer shape, the entry generation rule, `MutationResult` never rejecting, rollback-or-invalidate on conflicting optimistic layers, cache effects surviving owner disposal, `load` resolving to a handle, and the defaults (`staleTime` 5,000 ms, `gcTime` 300,000 ms, no retries, no focus refetching) are public behavior. The SSR snapshot shape is reserved but not frozen until the SSR track.
+The typed-reference identity model and the ban on raw keys, the observer's no-cross-key-value rule, the `Resource`-compatible observer shape, the entry generation rule, `MutationResult` never rejecting, rollback-or-invalidate on conflicting optimistic layers, cache effects surviving owner disposal, `load` resolving to a handle, and the defaults (`staleTime` 5,000 ms, `gcTime` 300,000 ms, two retries of transient failures with the classification above, no focus refetching) are public behavior. The SSR snapshot shape is reserved but not frozen until the SSR track.

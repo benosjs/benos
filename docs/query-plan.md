@@ -43,7 +43,7 @@ Build in phases with review checkpoints: design first, then implementation, with
 1. **No stale identity.** The router never publishes B's params with A's data. A query must not show A's cached value as B's by default.
 2. **Synchronous graph.** Signal writes stay synchronous; async completion is an ordinary batched write. No promise-throwing render convention.
 3. **Owner lifetime.** Every observer, retention, and timer belongs to an owner or a cache and stops affecting the graph after disposal.
-4. **No hidden behavior.** 0.4 promised no implicit network cache, hidden retries, or global listeners. Any of those in 0.5 is an explicit, documented default.
+4. **No hidden behavior.** 0.4 promised no implicit network cache, hidden retries, or global listeners. Any of those in 0.5 is an explicit, documented default. Decided at Q1: queries retry transient failures by default (2 retries, abort-aware jittered backoff, `Retry-After` honored). This is a deliberate change for queries only; `resource()` keeps no retries and mutations never retry by default.
 5. **SSR stays possible.** Cache state is request-local on the server; only opted-in data is serialized.
 
 ---
@@ -53,7 +53,7 @@ Build in phases with review checkpoints: design first, then implementation, with
 ### `@benosjs/query`
 
 - `query()` definitions with **typed references** for cache identity, not string keys. Arguments and data types are inferred from `fetch`.
-- Per-entry deduplication, stale/refresh policy, garbage collection, retries, and cancellation through `AbortSignal`.
+- Per-entry deduplication, stale/refresh policy (default `staleTime` 5,000 ms), garbage collection, transient-only retries, and cancellation through `AbortSignal`.
 - Owner-bound observers that work with `<Suspense>` and transitions like a `resource()`.
 - `mutation()` with declarative invalidation via `affects`, typed cache writes, and optimistic updates with rollback.
 - A route loader adapter (`query.load`) that shares cache identity with component observers, so revisiting a route can reuse cached data and a mutation can refresh committed route data without a router reload.
@@ -79,7 +79,7 @@ Save this brief as `docs/query-plan.md` and create the branch. No code.
 
 ### Q2 — Cache core
 
-The `@benosjs/query` package, query definitions and key interning, entries, deduplication, stale and garbage-collection policy, retries, cancellation, and owner-bound observers with Suspense. Tests: key identity and hashing, A → B → A observer races, a fetch that ignores `AbortSignal`, deduplicated joins and partial release, gc timing with fake timers, retry/backoff and abort during backoff, disposal, and Suspense reveal in all three browsers. Type-level tests for inference and rejected keys.
+The `@benosjs/query` package, query definitions and key interning, entries, deduplication, stale and garbage-collection policy, retries, cancellation, and owner-bound observers with Suspense. Tests: key identity and hashing, A → B → A observer races, a fetch that ignores `AbortSignal`, deduplicated joins and partial release, gc timing with fake timers, the transient-failure retry classification, jittered backoff, `Retry-After`, abort during backoff, no `failed` flash between attempts, disposal, and Suspense reveal in all three browsers. Type-level tests for inference and rejected keys.
 
 ### Q3 — Mutations and invalidation
 
