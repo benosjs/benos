@@ -2,7 +2,23 @@
 
 All notable changes to Benos are documented here.
 
-## [0.3.2] — Unreleased
+## [0.3.3] — Unreleased
+
+### Fixed
+
+- Align the starter's pinned Vitest version with the current Vitest peer family.
+  Vitest `5.0.5` was published after the `5.0.4` starter pin and npm 10's
+  Arborist crashes while resolving the resulting optional peer version skew.
+  The targeted pin fixes fresh installs without changing unrelated packages.
+- Add a daily cross-platform smoke check for the published latest starter using
+  npm 10 and npm 11, including install, type-check, build, tests, and lint.
+
+### Changed
+
+- Bump all eight publishable packages and the starter's Benos dependency ranges
+  to `0.3.3`.
+
+## [0.3.2] — 2026-10-15
 
 ### Fixed
 
