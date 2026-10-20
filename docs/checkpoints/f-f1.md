@@ -1,6 +1,6 @@
 # F1 — Forms design review
 
-**Status:** Awaiting approval. Nothing is implemented; F2 has not begun.
+**Status:** F1 approved on 2026-10-20. The user's words: "Approve all nine forms design decisions, including the router navigation blocker, apply the flagship amendments, and start F2." The flagship amendments are applied to [flagship-integration.md](../architecture/flagship-integration.md). F2 has begun.
 
 ## Deliverables
 
@@ -39,4 +39,4 @@ No dependency, configuration, source code, or public API was changed. The branch
 
 ## Next
 
-On approval, F2 builds the form core. If decision 6 is approved, its router work happens in F5 with its own byte report; F2–F4 do not depend on it.
+All nine decisions are approved, including decision 6. F2 builds the form core. The router blocker is built in F5 with its own byte report; F2–F4 do not depend on it.
