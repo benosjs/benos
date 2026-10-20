@@ -12,6 +12,7 @@ const BENOS_PACKAGES = [
   '@benosjs/core',
   '@benosjs/dom',
   '@benosjs/async',
+  '@benosjs/query',
   '@benosjs/router',
   '@benosjs/compiler',
   '@benosjs/vite',

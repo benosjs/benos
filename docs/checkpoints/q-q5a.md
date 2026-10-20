@@ -1,6 +1,6 @@
 # Q5a — `<Show>` keeps its branch while `when` stays present
 
-**Status:** Ready for review. Stopped at the Q5a checkpoint; Q6 (release preparation) does not start without approval.
+**Status:** Q5a approved on 2026-10-20. The user's words: "Q5a is approved. Start Q6 (release preparation) and stop before merging." CI passed all 38 checks on `dd75991`. Q6 has begun.
 
 ## What changed and why
 

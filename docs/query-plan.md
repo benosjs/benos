@@ -2,16 +2,16 @@
 
 ## Current status
 
-| Sub-step                        | Status                                                                              |
-| ------------------------------- | ----------------------------------------------------------------------------------- |
-| Q0 — Plan                       | Complete                                                                            |
-| Q1 — Design documents           | Complete; approved, checkpoint in [`docs/checkpoints/q-q1.md`](checkpoints/q-q1.md) |
-| Q2 — Cache core                 | Complete; approved, checkpoint in [`docs/checkpoints/q-q2.md`](checkpoints/q-q2.md) |
-| Q3 — Mutations and invalidation | Complete; approved, checkpoint in [`docs/checkpoints/q-q3.md`](checkpoints/q-q3.md) |
-| Q4 — Router loader integration  | Complete; approved, checkpoint in [`docs/checkpoints/q-q4.md`](checkpoints/q-q4.md) |
-| Q5 — Validation app             | Complete; approved, checkpoint in [`docs/checkpoints/q-q5.md`](checkpoints/q-q5.md) |
-| Q5a — `<Show>` in-place updates | Ready for review; checkpoint in [`docs/checkpoints/q-q5a.md`](checkpoints/q-q5a.md) |
-| Q6 — Release preparation        | Not started                                                                         |
+| Sub-step                        | Status                                                                                           |
+| ------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Q0 — Plan                       | Complete                                                                                         |
+| Q1 — Design documents           | Complete; approved, checkpoint in [`docs/checkpoints/q-q1.md`](checkpoints/q-q1.md)              |
+| Q2 — Cache core                 | Complete; approved, checkpoint in [`docs/checkpoints/q-q2.md`](checkpoints/q-q2.md)              |
+| Q3 — Mutations and invalidation | Complete; approved, checkpoint in [`docs/checkpoints/q-q3.md`](checkpoints/q-q3.md)              |
+| Q4 — Router loader integration  | Complete; approved, checkpoint in [`docs/checkpoints/q-q4.md`](checkpoints/q-q4.md)              |
+| Q5 — Validation app             | Complete; approved, checkpoint in [`docs/checkpoints/q-q5.md`](checkpoints/q-q5.md)              |
+| Q5a — `<Show>` in-place updates | Complete; approved, checkpoint in [`docs/checkpoints/q-q5a.md`](checkpoints/q-q5a.md)            |
+| Q6 — Release preparation        | Complete up to the pull request; checkpoint in [`docs/checkpoints/q-q6.md`](checkpoints/q-q6.md) |
 
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.4.0): **the query cache, mutations, and invalidation**. This track is the data half of the flagship integration (typed routes, data, forms, and cache working as one system). Forms and the full flagship integration follow in their own track; both target 0.5.0.
 
@@ -106,4 +106,4 @@ Query guide, API reference entries, CHANGELOG entry, size report, and full verif
 
 ## 5. Your Immediate Task
 
-Q0–Q5 are complete and approved. Q5a is implemented; stop at its checkpoint for review.
+Q0–Q5a are complete and approved. Q6 is complete up to the pull request; stop before merging, tagging, or publishing.

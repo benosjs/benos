@@ -1,6 +1,6 @@
 # Query cache, mutations, and invalidation
 
-**Status:** Q1 design approved on 2026-10-19. The cache core (Q2), mutations (Q3), and the router loader adapter (Q4) are implemented in `packages/query`. Differences between this design and the code are listed in the [Q2](#q2-implementation-notes), [Q3](#q3-implementation-notes), and [Q4](#q4-implementation-notes) implementation notes. [The track brief](../query-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [async.md](./async.md) and [router.md](./router.md) define the contracts this package builds on.
+**Status:** Q1 design approved on 2026-10-19. The cache core (Q2), mutations (Q3), and the router loader adapter (Q4) are implemented in `packages/query`; the user guide is [docs/query.md](../query.md). Differences between this design and the code are listed in the [Q2](#q2-implementation-notes), [Q3](#q3-implementation-notes), and [Q4](#q4-implementation-notes) implementation notes. [The track brief](../query-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [async.md](./async.md) and [router.md](./router.md) define the contracts this package builds on.
 
 ## Goals and boundary
 

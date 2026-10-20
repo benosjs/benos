@@ -2,6 +2,52 @@
 
 All notable changes to Benos are documented here.
 
+## [Unreleased]
+
+### Added
+
+- Add `@benosjs/query`, a typed cache for server data. `query()`
+  definitions infer argument and data types from `fetch`; each argument
+  names one shared entry, and identity comes from the definition plus the
+  argument, not string keys. Requests are deduplicated, fresh data is reused
+  (`staleTime` 5 s by default), unused entries are collected after 5 minutes,
+  and a request that started before a newer write can never overwrite it.
+- Query observers are `resource()`s: they work with `<Suspense>` and
+  `startTransition()`, expose `fetching()`, `error()`, and `failureCount()`,
+  and never show one argument's data for another.
+- Queries retry transient failures (network errors, timeouts, and HTTP 408,
+  429, and 5xx) up to two times with jittered backoff, honoring
+  `Retry-After`. Other errors fail at once. Mutations and `resource()` never
+  retry.
+- Add `mutation()` with declarative cache effects: `writes` stores the
+  server's response, `affects` refreshes typed targets, and `optimistic`
+  applies writes at once and rolls them back on failure. `run()` resolves to
+  `{ ok, … }` and never rejects; a save that finishes after navigation still
+  updates the cache.
+- Add `query.load()` for route loaders. Route data becomes a live cache entry:
+  revisits reuse cached data, records a mutation invalidated wait for fresh
+  data, and mutations update the current page in place.
+- Add the [query guide](docs/query.md). The dashboard example's project pages
+  now use the query cache, with a rename mutation and an optimistic star.
+
+### Fixed
+
+- `<Show>` now keeps its branch while `when` stays present, as the
+  components design always specified. A function child is called once and
+  its accessor tracks the latest value; a plain child is created once. 0.4
+  recreated the branch whenever `when` changed to another present value,
+  which reset component state such as form drafts on every data update. Code
+  that relied on setup running again must now react to the accessor.
+
+### Changed
+
+- Router loader data types keep function members callable, so
+  `match.data().value()` type-checks for a query entry. Loaders run under a
+  per-match owner whose cleanup fires on supersession, replacement, and
+  router disposal; this is now a documented contract.
+- Sizes: `@benosjs/query` is 3,498 B against a 3,584 B budget. Core + DOM is
+  11,006 B; core, async, and router are unchanged.
+
 ## [0.4.0] — 2026-10-19
 
 ### Added

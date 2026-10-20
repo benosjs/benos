@@ -13,6 +13,7 @@ const publishable = [
   'core',
   'dom',
   'async',
+  'query',
   'router',
   'compiler',
   'vite',
