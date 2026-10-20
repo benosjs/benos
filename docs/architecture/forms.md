@@ -1,6 +1,6 @@
 # Forms, validation, and the flagship binding
 
-**Status:** F1 design, awaiting approval. Nothing here is implemented. [The track brief](../forms-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [query.md](./query.md) and [router.md](./router.md) define the contracts this package builds on. Numbered decisions refer to the list in the [F1 checkpoint](../checkpoints/f-f1.md#decisions-proposed-for-approval).
+**Status:** F1 design approved on 2026-10-20, including the router navigation blocker (decision 6). The form core (F2) is implemented in `packages/forms`; differences from this design are in the [F2 implementation notes](#f2-implementation-notes). [The track brief](../forms-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [query.md](./query.md) and [router.md](./router.md) define the contracts this package builds on. Numbered decisions refer to the list in the [F1 checkpoint](../checkpoints/f-f1.md#decisions-proposed-for-approval).
 
 ## Goals and boundary
 
@@ -338,7 +338,7 @@ The forms leave policy uses it: `leave: 'confirm'` (the proposed default) blocks
 
 ## Flagship sketch amendments
 
-The [flagship target](./flagship-integration.md) works on this design unchanged. The editor block stays at **13 lines** and the shared setup at its current size. These clarifications are listed for approval rather than applied, because flagship-integration.md is the shared 0.5 target:
+The [flagship target](./flagship-integration.md) works on this design unchanged. The editor block stays at **13 lines** and the shared setup at its current size. These clarifications were approved at F1 and are applied to flagship-integration.md:
 
 1. `from` runs inside a `computed` and must be pure; the flagship `from` already is.
 2. The default mutation input for a route-bound form is `{ ...params, values }`. The flagship's `saveProject` input `{ projectId: string; values: EditProject }` matches exactly, which is why `formModel` needs no `input` line.
@@ -385,6 +385,19 @@ The [flagship target](./flagship-integration.md) works on this design unchanged.
 6. `<form.Field>` and adapters with every registry form control: ids, `for`, `aria-describedby` merging, `aria-invalid`, error element presence, focus, keyboard, axe, RTL, in Chromium, Firefox, and WebKit.
 7. Router blocker (if approved): link, programmatic, pop restoration, unload, confirm true/false/async, owner release, and the R4 loader gates unchanged.
 8. Type-level tests listed above, and a size row for the forms package.
+
+## F2 implementation notes
+
+F2 implements `formModel` with the three sources, identity epochs, the field store, `values()`, dirty, touched, `remoteChanged`, `acceptRemote`, `reset`, and submission through the mutation handle. These points refine or narrow the design above:
+
+1. **The epoch is a fresh token per identity change, not the handle itself.** `load()` returns one handle per entry, so after A → B → A the router publishes A's original handle again. Tagging edits with the handle would bring A's discarded edits back. The epoch is now a new token whenever the identity differs from the previous one, so A → B → A starts clean. The comparison runs when the epoch is read; a form whose fields nobody reads across A → B → A could keep its token, which no rendered form does.
+2. **`form.field()` creates two signals** (the edit and the touched flag) when a path is first requested, instead of allocating nothing until the first edit. It must therefore be called during setup or in an effect, never inside a `computed`, which the kernel forbids from creating signals. `<form.Field>` (F4) calls it during setup.
+3. **Field accessors are plain functions over signals,** as query observers are. Only the server projection and `values()` are `computed` nodes, because they allocate.
+4. **No validation yet.** `submit` passes the values through to the mutation; F3 validates the snapshot at that point. `issues`, `validating`, and the field error accessors arrive in F3; `Field`, `id`, `errorId`, and `describedBy` arrive in F4.
+5. **A create form returns to its initial values after a successful save,** because every submitted edit is dropped by the rebase rule and the initial accessor has not changed.
+6. **A `source` form's values may be missing.** Its model is `FormModel<In, Out, O, true>`, whose `values()`, `value()`, and `remote()` include `undefined`. A new object from the source is a new record; a query entry handle is the same record across refetches.
+7. **Mutation input checks follow method bivariance.** `Mutation.run` is declared as a method, so a mutation whose `values` type is a supertype of the schema output is accepted. Incompatible shapes (a different params key, a `number` where the output has a `string`) are errors, and the type tests cover them.
+8. **`reset()` keeps a pending save's state;** it clears a finished save's error.
 
 ## Hard-to-reverse decisions
 

@@ -1,0 +1,44 @@
+{
+  "name": "@benosjs/forms",
+  "version": "0.4.0",
+  "description": "Forms for Benos: identity-aware editable copies of server data, Standard Schema validation, and mutation binding.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "benos",
+    "forms",
+    "validation",
+    "standard-schema"
+  ],
+  "homepage": "https://github.com/benosjs/benos#readme",
+  "type": "module",
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
+  },
+  "files": [
+    "dist/js",
+    "dist/types"
+  ],
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "development": "./dist/js/index.development.js",
+      "default": "./dist/js/index.production.js"
+    }
+  },
+  "dependencies": {
+    "@benosjs/core": "workspace:*",
+    "@benosjs/query": "workspace:*"
+  },
+  "devDependencies": {
+    "@benosjs/dom": "workspace:*",
+    "@benosjs/router": "workspace:*"
+  },
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
+  }
+}

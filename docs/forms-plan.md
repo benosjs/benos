@@ -5,8 +5,8 @@
 | Sub-step                                     | Status                                                                                       |
 | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | F0 — Plan                                    | Complete                                                                                     |
-| F1 — Design documents                        | Complete; awaiting approval, checkpoint in [`docs/checkpoints/f-f1.md`](checkpoints/f-f1.md) |
-| F2 — Form core                               | Not started                                                                                  |
+| F1 — Design documents                        | Complete; approved, checkpoint in [`docs/checkpoints/f-f1.md`](checkpoints/f-f1.md)          |
+| F2 — Form core                               | Complete; awaiting approval, checkpoint in [`docs/checkpoints/f-f2.md`](checkpoints/f-f2.md) |
 | F3 — Standard Schema validation              | Not started                                                                                  |
 | F4 — Field and UI adapter                    | Not started                                                                                  |
 | F5 — Flagship integration and validation app | Not started                                                                                  |
@@ -102,4 +102,4 @@ Forms guide, API reference, CHANGELOG, size report, release wiring for the twelf
 
 ## 5. Your Immediate Task
 
-F1 is complete. Stop for review of [the design](architecture/forms.md) and the [F1 checkpoint](checkpoints/f-f1.md). Do not start F2 until the design decisions are approved.
+F1 is approved, including the router navigation blocker (decision 6), and the flagship amendments are applied. F2 is complete: stop for review of the [F2 checkpoint](checkpoints/f-f2.md). Do not start F3 until it is approved. The router blocker belongs to F5.

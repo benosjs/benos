@@ -22,6 +22,7 @@
     "../packages/dom/tests/types.test.ts",
     "../packages/async/tests/types.test.ts",
     "../packages/query/tests/types.test.ts",
+    "../packages/forms/tests/types.test.ts",
     "../packages/router/tests/types.test.ts",
     "../tests/fixtures/router-circular/**/*.ts",
     "../tests/fixtures/router-circular/**/*.tsx",

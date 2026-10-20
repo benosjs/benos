@@ -232,6 +232,22 @@ importers:
         specifier: ^10.0.0
         version: 10.11.0
 
+  packages/forms:
+    dependencies:
+      '@benosjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@benosjs/query':
+        specifier: workspace:*
+        version: link:../query
+    devDependencies:
+      '@benosjs/dom':
+        specifier: workspace:*
+        version: link:../dom
+      '@benosjs/router':
+        specifier: workspace:*
+        version: link:../router
+
   packages/primitives:
     dependencies:
       '@benosjs/core':
