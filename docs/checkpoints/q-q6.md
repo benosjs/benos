@@ -1,6 +1,6 @@
 # Q6 — Release preparation
 
-**Status:** Ready for review. The pull request (benosjs/benos#17) is ready and stopped before merging. Nothing is tagged or published, and package versions are unchanged pending the decisions below.
+**Status:** Decided on 2026-10-20. The user's words: "Hold the version bump: merge-ready as unreleased work, and release query together with forms and the flagship in 0.5.0." The pull request (benosjs/benos#17) is ready for review with all 38 CI checks passing, including the Windows and macOS matrices. It is not merged, nothing is tagged or published, and all eleven packages stay at `0.4.0`.
 
 ## Delivered
 
@@ -40,7 +40,13 @@ Three-OS coverage comes from the CI `create-benos` and UI CLI matrices (Ubuntu, 
 | core + DOM + async + router         | 17,871 B |    17,865 B |        — |
 | core + DOM + async + router + query |        — |    20,829 B |        — |
 
-## Decisions for review
+## Decision record
+
+- **Version: held.** Query is merge-ready as unreleased work and ships with forms and the flagship integration in 0.5.0. The CHANGELOG entry stays under `[Unreleased]`.
+- **Until 0.5.0:** do not cut a 0.4.x patch release from a `main` that contains this work without first deciding how to handle `@benosjs/query`, because the tag check and the publish workflow now include it and its first publish must be manual.
+- Starter, first publish, and merge stay as proposed below: no starter change, the documented first-publish procedure at 0.5.0, and no merge without your go-ahead.
+
+## Decisions as proposed
 
 1. **Version.** All eleven packages are still `0.4.0`; `@benosjs/query` has never been published. Options:
    - **(Recommended) Merge without a version bump and release with forms.** The roadmap puts query, forms, and the flagship integration in 0.5.0 together. Query lands on `main` as unreleased work, and the forms track builds on it. Until 0.5.0, do not cut a 0.4.x patch release from `main` without first deciding how to handle `@benosjs/query`, because the tag check and workflow now include it.

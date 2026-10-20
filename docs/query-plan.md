@@ -106,4 +106,4 @@ Query guide, API reference entries, CHANGELOG entry, size report, and full verif
 
 ## 5. Your Immediate Task
 
-Q0–Q5a are complete and approved. Q6 is complete up to the pull request; stop before merging, tagging, or publishing.
+The track is complete. Q6 is complete up to the pull request, and the version bump is held: query is merge-ready as unreleased work and ships with forms and the flagship integration in 0.5.0. Do not merge, tag, or publish without explicit approval.
