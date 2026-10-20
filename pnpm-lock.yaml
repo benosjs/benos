@@ -237,13 +237,13 @@ importers:
       '@benosjs/core':
         specifier: workspace:*
         version: link:../core
+      '@benosjs/dom':
+        specifier: workspace:*
+        version: link:../dom
       '@benosjs/query':
         specifier: workspace:*
         version: link:../query
     devDependencies:
-      '@benosjs/dom':
-        specifier: workspace:*
-        version: link:../dom
       '@benosjs/router':
         specifier: workspace:*
         version: link:../router

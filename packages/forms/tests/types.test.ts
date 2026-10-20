@@ -5,7 +5,13 @@ import { mutation, query } from '@benosjs/query'
 import { type } from 'arktype'
 import * as v from 'valibot'
 import { z } from 'zod'
-import { formModel } from '../src/index.js'
+import { checked, choice, formModel, select, text } from '../src/index.js'
+import type * as checkbox from '../../../registry/source/components/checkbox.js'
+import type * as input from '../../../registry/source/components/input.js'
+import type * as radioGroup from '../../../registry/source/components/radio-group.js'
+import type * as selectBox from '../../../registry/source/components/select.js'
+import type * as toggle from '../../../registry/source/components/switch.js'
+import type * as textarea from '../../../registry/source/components/textarea.js'
 import type {
   FieldHandle,
   FieldPath,
@@ -323,6 +329,94 @@ function checkLibraryTypes(): void {
   })
 }
 void checkLibraryTypes
+
+// Type-only: the registry components are TSX that vitest does not compile here.
+declare const Checkbox: typeof checkbox.Checkbox
+declare const Input: typeof input.Input
+declare const RadioGroup: typeof radioGroup.RadioGroup
+declare const Select: typeof selectBox.Select
+declare const Switch: typeof toggle.Switch
+declare const Textarea: typeof textarea.Textarea
+
+function checkFieldTypes(): void {
+  const settings = formModel({
+    initial: () => ({
+      name: '',
+      bio: '',
+      age: 0,
+      archived: false,
+      notify: true,
+      tier: null as string | null,
+      region: 'eu' as string | null,
+    }),
+    schema: {} as StandardSchemaV1<{
+      name: string
+      bio: string
+      age: number
+      archived: boolean
+      notify: boolean
+      tier: string | null
+      region: string | null
+    }>,
+    save: mutation({ run: (input: { name: string }) => input.name }),
+    input: (values) => ({ name: values.name }),
+  })
+  const form = settings()
+  const Field = form.Field
+  Field({ name: 'name', component: Input, label: 'Name', placeholder: 'Ada' })
+  Field({ name: 'name', component: Input, label: 'Name', bind: text })
+  Field({ name: 'bio', component: Textarea, label: 'Bio', rows: 4 })
+  Field({ name: 'archived', component: Checkbox, bind: checked, label: 'A' })
+  Field({ name: 'notify', component: Switch, bind: checked, label: 'N' })
+  Field({
+    name: 'tier',
+    component: RadioGroup,
+    bind: choice,
+    label: 'T',
+    items: [],
+  })
+  Field({
+    name: 'region',
+    component: Select,
+    bind: select,
+    label: 'R',
+    items: [],
+  })
+  Field({
+    name: 'name',
+    component: Input,
+    label: 'Name',
+    'aria-describedby': 'hint',
+  })
+  // @ts-expect-error Field names come from the schema input.
+  Field({ name: 'nmae', component: Input, label: 'Name' })
+  // @ts-expect-error The default text adapter needs a string field.
+  Field({ name: 'age', component: Input, label: 'Age' })
+  // @ts-expect-error The checked adapter needs a boolean field.
+  Field({ name: 'name', component: Checkbox, bind: checked, label: 'Name' })
+  Field({
+    name: 'region',
+    // @ts-expect-error Select takes the select adapter, not choice.
+    component: Select,
+    bind: choice,
+    label: 'R',
+    items: [],
+  })
+  // @ts-expect-error Forwarded props are checked against the component.
+  Field({ name: 'name', component: Input, label: 'Name', type: 'checkbox' })
+  // @ts-expect-error Unknown props are rejected.
+  Field({ name: 'name', component: Input, label: 'Name', colour: 'red' })
+  // @ts-expect-error The label is required.
+  Field({ name: 'name', component: Input })
+  // @ts-expect-error Controlled props cannot be passed.
+  Field({ name: 'name', component: Input, label: 'Name', value: 'x' })
+
+  const handle = form.field('name')
+  expectTypeOf(handle.id).toEqualTypeOf<string>()
+  expectTypeOf(handle.errorId).toEqualTypeOf<string>()
+  expectTypeOf(handle.describedBy()).toEqualTypeOf<string | undefined>()
+}
+void checkFieldTypes
 
 it('compiles the public forms types', () => {
   expect(typeof formModel).toBe('function')

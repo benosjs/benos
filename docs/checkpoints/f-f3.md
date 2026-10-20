@@ -1,6 +1,6 @@
 # F3 — Standard Schema validation
 
-**Status:** Awaiting approval, including one size decision below. F4 has not begun.
+**Status:** F3 approved on 2026-10-20 with option 1 of the size decision. The user's words: "Approve F3, raise the forms cap to 3,072 B, and start F4." The forms cap is now **3,072 B**. F4 has begun.
 
 ## Delivered
 

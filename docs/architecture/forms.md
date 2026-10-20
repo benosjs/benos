@@ -1,6 +1,6 @@
 # Forms, validation, and the flagship binding
 
-**Status:** F1 design approved on 2026-10-20, including the router navigation blocker (decision 6). The form core (F2) and Standard Schema validation (F3) are implemented in `packages/forms`; differences from this design are in the [F2](#f2-implementation-notes) and [F3](#f3-implementation-notes) implementation notes. [The track brief](../forms-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [query.md](./query.md) and [router.md](./router.md) define the contracts this package builds on. Numbered decisions refer to the list in the [F1 checkpoint](../checkpoints/f-f1.md#decisions-proposed-for-approval).
+**Status:** F1 design approved on 2026-10-20, including the router navigation blocker (decision 6). The form core (F2), Standard Schema validation (F3), and `<form.Field>` with its adapters (F4) are implemented in `packages/forms`; differences from this design are in the [F2](#f2-implementation-notes), [F3](#f3-implementation-notes), and [F4](#f4-implementation-notes) implementation notes. [The track brief](../forms-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [query.md](./query.md) and [router.md](./router.md) define the contracts this package builds on. Numbered decisions refer to the list in the [F1 checkpoint](../checkpoints/f-f1.md#decisions-proposed-for-approval).
 
 ## Goals and boundary
 
@@ -29,7 +29,7 @@ The new public package is **`@benosjs/forms`**. Runtime imports:
 
 Route references are used structurally (`route.match()` is a method on the reference), so binding a form to a route needs no router import. Standard Schema types are vendored as types, as the specification recommends; there is no runtime dependency on any validation library. No module reads `window` or `document` at import.
 
-Proposed cap: **2,560 bytes** minified + gzip for the production entry, with core, DOM, async, router, and query external, measured by a new `pnpm size` row. `pnpm size` also prints the fully bundled `core + dom + async + router + query + forms` total.
+Cap: **3,072 bytes** minified + gzip for the production entry (proposed at 2,560 B; raised at F3, approved 2026-10-20, after the form core and validation measured 2,058 B), with core, DOM, async, router, and query external, measured by a new `pnpm size` row. `pnpm size` also prints the fully bundled `core + dom + async + router + query + forms` total.
 
 Estimate by part, after compression:
 
@@ -45,7 +45,7 @@ Estimate by part, after compression:
 | Leave policy wiring (decision 6)                                             |           50–80 B |
 | **Total**                                                                    | **1,500–2,060 B** |
 
-The cap leaves about 500 B above the high estimate for test-driven fixes. If F2–F4 cannot fit, stop with measured alternatives instead of dropping behavior silently. At Q6 the fully bundled `core + dom + async + router + query` total was 20,829 B, so the expected all-in total is about **22.3–22.9 KB**.
+The original 2,560 B cap left about 500 B above the high estimate; F2 and F3 used most of it (see [f-f3](../checkpoints/f-f3.md#bytes-per-part)), so F3 raised the cap to 3,072 B. If F2–F4 cannot fit, stop with measured alternatives instead of dropping behavior silently. At Q6 the fully bundled `core + dom + async + router + query` total was 20,829 B, so the expected all-in total is about **22.3–22.9 KB**.
 
 ### Comparable production measurements
 
@@ -61,7 +61,7 @@ On 2026-10-20, an isolated temporary npm install (`--ignore-scripts --legacy-pee
 | `@felte/solid` 1.2.14: `createForm, createField`                                                       |         26,158 |  **9,071** |
 | `@modular-forms/solid` 0.25.1: `createForm, Form, Field, setValue, getValues, reset, submit, valiForm` |         10,683 |  **3,793** |
 
-These are named-export surface measurements, not feature-for-feature benchmarks. TanStack Form and React Hook Form include field arrays, per-field validators, listeners, and much more; Modular Forms includes field arrays and its own validation helpers but has no Standard Schema adapter in the measured version (its exports offer `zodForm`/`valiForm`). The proposed **2,560 B cap is 1,233 B below Modular Forms** and about a fifth of TanStack Form's core, and buys identity-aware server data, Standard Schema validation, mutation binding, and accessible field rendering. It does not buy field arrays.
+These are named-export surface measurements, not feature-for-feature benchmarks. TanStack Form and React Hook Form include field arrays, per-field validators, listeners, and much more; Modular Forms includes field arrays and its own validation helpers but has no Standard Schema adapter in the measured version (its exports offer `zodForm`/`valiForm`). The **3,072 B cap is 721 B below Modular Forms** and about a quarter of TanStack Form's core (the original 2,560 B proposal was 1,233 B below), and buys identity-aware server data, Standard Schema validation, mutation binding, and accessible field rendering. It does not buy field arrays.
 
 ## Defining a form model
 
@@ -409,6 +409,19 @@ F3 implements validation timing, sync and async `validate` with generations, iss
 4. **Server issues.** A mutation error whose `issues` is an array of objects with string `message`s is mapped like validation issues, and `form.error()` stays empty for that failure. Server issues last until the next validation replaces them, so the next edit after a failed save (which always counts as a submit attempt) clears them if the schema passes.
 5. **Clearing.** A successful save clears the record's issues and submit attempt. `reset()` also cancels any in-flight async validation by advancing the generation.
 6. **The development warning** for an issue path with no field fires once per path per form instance. Production builds strip it; the flag must be declared above its first use for the minifier to fold it, which an early F3 build did not do (it shipped 97 B of warning code).
+
+## F4 implementation notes
+
+F4 implements `<form.Field>`, the handle's `id`, `errorId`, and `describedBy`, four adapters, focus on the first invalid field, and the field CSS. These points refine the design above:
+
+1. **Four adapters, not three.** The registry `Select` takes `value: string[]` and `RadioGroup` takes `string | null`, so one `choice` adapter cannot type both. `choice` binds `RadioGroup`; a new `select` adapter maps a single `string | null` field to and from a one-item array for `Select`. Unused adapters are tree-shaken from applications.
+2. **No `id` override prop.** Ids are always the form's prefix plus the path (`f1-address-city`), so `describedBy`, the error element, and focus never disagree. A custom id would have to flow into the handle, which costs bytes for little benefit.
+3. **Focus follows registration order.** Fields register when `<form.Field>` or `form.field()` is first called during setup, which is their JSX order. After a failed submit, focus moves to the first invalid field that has an element: the element with the field's id when it is focusable, otherwise its first focusable descendant (the hidden input of `Checkbox`, `Switch`, and `RadioGroup`, the trigger of `Select`). Headless handles without an element are skipped. Comparing document positions instead cost 28 B more and is not needed.
+4. **Change adapters mark the field touched.** `checked`, `choice`, and `select` call `blur()` after `set`, because those controls emit no blur event to the field; `blur` mode would otherwise never show their errors before a submit.
+5. **Type errors for an incompatible component** surface as "not assignable to `never`" on the `component` prop. They are caught, but the message is not self-explanatory; the guide must show the adapter for each registry component.
+6. **Compiler fix.** `<form.Field>` compiled to `"form".Field`: the compiler treated the lowercase object of a JSX member tag as an intrinsic element name. Member tags are now always values (`form.Field`, `ui.forms.Input`, `this.View`), as in TypeScript and React. This was a 0.4 compiler bug that the flagship editor would have hit.
+7. **Registry gaps (not fixed in F4).** The 0.4.0 registry `Input` and `Textarea` compute `aria-invalid` once during setup, so it does not follow `invalid` after the first render. `Checkbox` and `Switch` put `aria-describedby` on their root `<label>`, not on the hidden input that has the checkbox role. Fixing either changes immutable 0.4.0 registry payloads, so it belongs to the 0.5.0 registry build (see [f-f4](../checkpoints/f-f4.md)).
+8. **Field CSS** is in `registry/source/css/field.css`. Its registry item is added with the 0.5.0 registry build in F6, because adding it now would publish an item URL under the `v0.4.0` tag, where the file does not exist.
 
 ## Hard-to-reverse decisions
 

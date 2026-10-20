@@ -59,7 +59,7 @@ const checks = [
         '@benosjs/query',
       ],
     ),
-    2_560,
+    3_072,
   ],
   [
     '@benosjs/router (core, DOM, and async external)',

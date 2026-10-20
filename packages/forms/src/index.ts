@@ -1,5 +1,7 @@
 import { batch, computed, onCleanup, signal, untrack } from '@benosjs/core'
 import type { ReadonlySignal, Signal } from '@benosjs/core'
+import { jsx, mergeProps, Show, splitProps } from '@benosjs/dom'
+import type { Child, Component, JSX } from '@benosjs/dom'
 import type { Mutation } from '@benosjs/query'
 
 const development = process.env.NODE_ENV !== 'production'
@@ -88,6 +90,11 @@ type Value<V, M extends boolean> = M extends true ? V | undefined : V
 
 export interface FieldHandle<V, M extends boolean = false> {
   readonly name: string
+  /** The id `<form.Field>` gives the control: the form's prefix and the path. */
+  readonly id: string
+  readonly errorId: string
+  /** The error id while an error is visible, for `aria-describedby`. */
+  describedBy: ReadonlySignal<string | undefined>
   /** The edit for the current record, or the server value when there is none. */
   value: ReadonlySignal<Value<V, M>>
   set(value: V): void
@@ -115,9 +122,79 @@ export type FormSubmitResult<O> =
   | { ok: false; reason: 'busy' | 'invalid' | 'no-source' }
   | { ok: false; reason: 'failed'; error: unknown; cancelled: boolean }
 
+/** Props `<form.Field>` sets on every control. */
+export interface FieldControl {
+  id: string
+  name: string
+  invalid: boolean
+  'aria-describedby'?: string
+}
+/** Binds a field to a kind of control. */
+export interface FieldAdapter<V, A extends object> {
+  /** Where the label goes: a `<label>` element when omitted, else the control's children or `label` prop. */
+  readonly label?: 'children' | 'prop'
+  props(field: FieldHandle<V, boolean>): A
+}
+export interface TextControl {
+  value: string
+  onInput(event: { currentTarget: { value: string } }): void
+  onBlur(): void
+}
+export interface CheckedControl {
+  checked: boolean
+  onCheckedChange(details: { checked: boolean | 'indeterminate' }): void
+  children: string
+}
+export interface ChoiceControl {
+  value: string | null
+  onValueChange(details: { value: string | null }): void
+  label: string
+}
+export interface SelectControl {
+  value: string[]
+  onValueChange(details: { value: string[] }): void
+  label: string
+}
+
+type FieldOwnProps<N, V, A extends object> = {
+  name: N
+  label: string
+  description?: string
+  bind?: FieldAdapter<V, A>
+  'aria-describedby'?: string
+}
+type Rest<P, A> = Omit<
+  P,
+  keyof A | keyof FieldControl | 'label' | 'children' | 'component'
+>
+/** The default `text` adapter needs a string field; others must be passed. */
+type NeedsBind<V, A extends object> = [A] extends [TextControl]
+  ? [V] extends [string]
+    ? unknown
+    : { bind: FieldAdapter<V, A> }
+  : unknown
+/** The component must accept the controlled props. */
+type Accepts<P, A> = [Rest<P, A> & A & FieldControl] extends [P]
+  ? unknown
+  : { component: never }
+
+/** Renders a label, the control, an optional description, and the field error. */
+export type FieldComponent<In> = <
+  N extends FieldPath<In>,
+  P extends object,
+  A extends object = TextControl,
+>(
+  props: FieldOwnProps<N, PathValue<In, N>, A> & {
+    component: (props: P) => Child
+  } & Rest<P, A> &
+    NeedsBind<PathValue<In, N>, A> &
+    Accepts<P, A>,
+) => JSX.Element
+
 export interface Form<In, Out, O, M extends boolean = false> {
   /** Validates and saves; never rejects. Pass it to `onSubmit`. */
   submit(event?: Event): Promise<FormSubmitResult<O>>
+  Field: FieldComponent<In>
   field<N extends FieldPath<In>>(name: N): FieldHandle<PathValue<In, N>, M>
   /** Server values with the current edits applied. */
   values: ReadonlySignal<Value<In, M>>
@@ -205,6 +282,7 @@ export function formModel(o: {
     const handle = o.save()
     const match = o.route?.match()
     const read = match ? match.data : (o.source ?? (() => o))
+    const prefix = `f${++forms}-`
     let disposed = false
     onCleanup(() => (disposed = true))
 
@@ -311,6 +389,7 @@ export function formModel(o: {
         touched() || tried()
           ? issues().find((i) => owner(i.path) === name)?.message
           : undefined
+      const id = prefix + name.replace(/\./g, '-')
       const r: Rec = {
         p: path,
         s: false,
@@ -318,6 +397,9 @@ export function formModel(o: {
         t: signal<unknown>(undefined),
         h: {
           name,
+          id,
+          errorId: id + '-error',
+          describedBy: () => (error() ? id + '-error' : undefined),
           value: () => {
             const x = current(r)
             return x ? x.v : remote()
@@ -374,8 +456,26 @@ export function formModel(o: {
     const submission = signal<Submission | undefined>(undefined)
     const mine = () => ours(submission)
     const clear = (r: Rec | undefined) => r?.x.set(undefined)
-
+    /**
+     * Moves focus to the first invalid control. Fields register in setup
+     * order, which is their JSX order; headless fields without an element are skipped.
+     */
+    const focusFirst = () => {
+      for (const { h } of fields.values()) {
+        const el =
+          h.invalid() && typeof document === 'object'
+            ? document.getElementById(h.id)
+            : null
+        if (el)
+          return (
+            (el.matches(FOCUSABLE)
+              ? el
+              : el.querySelector(FOCUSABLE)) as HTMLElement | null
+          )?.focus()
+      }
+    }
     return {
+      Field: (props) => FieldView(field, props),
       field,
       values,
       dirty: () => each().some((r) => r.h.dirty()),
@@ -467,6 +567,7 @@ export function formModel(o: {
                 | Promise<FormSubmitResult<unknown>> => {
                 if (checked.issues) {
                   finish({ e, p: false })
+                  focusFirst()
                   return INVALID
                 }
                 const output = checked.value
@@ -500,7 +601,16 @@ interface Edit {
   b: unknown
 }
 type Handle = FieldHandle<unknown, boolean>
+interface AnyFieldProps extends Record<string, unknown> {
+  name: string
+  label: string
+  description?: string
+  bind?: FieldAdapter<unknown, object>
+  component: (props: object) => Child
+  'aria-describedby'?: string
+}
 interface AnyForm {
+  Field(props: AnyFieldProps): JSX.Element
   submit(event?: Event): Promise<FormSubmitResult<unknown>>
   field(name: string): Handle
   values: ReadonlySignal<unknown>
@@ -531,6 +641,130 @@ interface Submission {
   f?: { error: unknown }
 }
 
+let forms = 0
+const FOCUSABLE = 'input,select,textarea,button,[tabindex]'
+
+/** `<form.Field>`: the label, the bound control, the description, and the error. */
+const FieldView = (
+  field: (name: string) => Handle,
+  props: AnyFieldProps,
+): JSX.Element => {
+  const f = field(props.name)
+  const bind = props.bind ?? (text as FieldAdapter<unknown, object>)
+  const where = bind.label
+  const id = f.id
+  const description = props.description && id + '-description'
+  const [, rest] = splitProps(props, [
+    'name',
+    'component',
+    'label',
+    'description',
+    'bind',
+    'aria-describedby',
+  ])
+  return jsx('div', {
+    class: 'benos-field',
+    get 'data-invalid'() {
+      return String(f.invalid())
+    },
+    children: [
+      !where &&
+        jsx('label', { class: 'benos-label', for: id, children: props.label }),
+      jsx(
+        props.component,
+        mergeProps(rest, bind.props(f), {
+          id,
+          name: props.name,
+          get invalid() {
+            return f.invalid()
+          },
+          get 'aria-describedby'() {
+            return (
+              [description, f.describedBy(), props['aria-describedby']]
+                .filter(Boolean)
+                .join(' ') || undefined
+            )
+          },
+          [where === 'children' ? 'children' : 'label']: where && props.label,
+        }),
+      ),
+      description &&
+        jsx('p', {
+          class: 'benos-field-description',
+          id: description,
+          children: props.description,
+        }),
+      jsx(Show as unknown as Component, {
+        get when() {
+          return f.error()
+        },
+        children: (message: () => string) =>
+          jsx('p', {
+            class: 'benos-field-error',
+            id: f.errorId,
+            get children() {
+              return message()
+            },
+          }),
+      }),
+    ],
+  })
+}
+
+/** Binds a string field to `Input` and `Textarea`. The default adapter. */
+export const text: FieldAdapter<string, TextControl> = {
+  props: (f) => ({
+    get value() {
+      return (f.value() as string | undefined) ?? ''
+    },
+    onInput: (event) => f.set(event.currentTarget.value),
+    onBlur: f.blur,
+  }),
+}
+/** Binds a boolean field to `Checkbox` and `Switch`; the label is their content. */
+export const checked: FieldAdapter<boolean, CheckedControl> = {
+  label: 'children',
+  props: (f) =>
+    ({
+      get checked() {
+        return f.value() === true
+      },
+      onCheckedChange: (details: { checked: boolean | 'indeterminate' }) => {
+        f.set(details.checked === true)
+        f.blur()
+      },
+    }) as CheckedControl,
+}
+/** Binds a `string | null` field to `RadioGroup`; the label is its `label` prop. */
+export const choice: FieldAdapter<string | null, ChoiceControl> = {
+  label: 'prop',
+  props: (f) =>
+    ({
+      get value() {
+        return f.value() ?? null
+      },
+      onValueChange: (details: { value: string | null }) => {
+        f.set(details.value)
+        f.blur()
+      },
+    }) as ChoiceControl,
+}
+/** Binds a `string | null` field to a single-choice `Select`; the label is its `label` prop. */
+export const select: FieldAdapter<string | null, SelectControl> = {
+  label: 'prop',
+  props: (f) =>
+    ({
+      get value() {
+        const v = f.value()
+        return v == null ? [] : [v]
+      },
+      onValueChange: (details: { value: string[] }) => {
+        f.set(details.value[0] ?? null)
+        f.blur()
+      },
+    }) as SelectControl,
+}
+
 interface Report {
   e: unknown
   i: readonly FormIssue[]
@@ -557,7 +791,7 @@ const issue = (i: StandardIssue): FormIssue => {
 
 /** A thrown or rejected validator becomes a root issue. */
 const invalid = (error: unknown): StandardResult<unknown> => ({
-  issues: [{ message: text(error, 'Could not validate.') }],
+  issues: [{ message: messageOf(error, 'Could not validate.') }],
 })
 
 const isEntry = (
@@ -611,8 +845,8 @@ const equal = (a: unknown, b: unknown): boolean => {
   )
 }
 
-const text = (error: unknown, fallback: string): string => {
+const messageOf = (error: unknown, fallback: string): string => {
   const value = (error as { message?: unknown } | null | undefined)?.message
   return typeof value === 'string' && value ? value : fallback
 }
-const message = (error: unknown): string => text(error, 'Could not save.')
+const message = (error: unknown): string => messageOf(error, 'Could not save.')

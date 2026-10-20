@@ -32,10 +32,10 @@
   },
   "dependencies": {
     "@benosjs/core": "workspace:*",
+    "@benosjs/dom": "workspace:*",
     "@benosjs/query": "workspace:*"
   },
   "devDependencies": {
-    "@benosjs/dom": "workspace:*",
     "@benosjs/router": "workspace:*",
     "arktype": "^2.2.8",
     "valibot": "^1.5.0",

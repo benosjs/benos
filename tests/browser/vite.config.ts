@@ -24,6 +24,7 @@ export default defineConfig({
       '@benosjs/dom/internal',
       '@benosjs/async',
       '@benosjs/query',
+      '@benosjs/forms',
       '@benosjs/router',
     ],
   },
@@ -57,6 +58,10 @@ export default defineConfig({
       {
         find: '@benosjs/query',
         replacement: alias('../../packages/query/dist/js/index.development.js'),
+      },
+      {
+        find: '@benosjs/forms',
+        replacement: alias('../../packages/forms/dist/js/index.development.js'),
       },
       {
         find: '@benosjs/router',
