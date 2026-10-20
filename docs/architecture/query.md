@@ -70,7 +70,7 @@ function query<A = void, T = unknown>(
 ): Query<A, Awaited<T>>
 ```
 
-`A` is inferred from the annotation on `fetch`'s first parameter, `T` from its return type. A query without arguments declares `fetch: (_: void, { signal }) => …` and is called with no argument. Several arguments are passed as one object; this keeps one inference site and one key function.
+`A` is inferred from the annotation on `fetch`'s first parameter, `T` from its return type. A query without arguments leaves its first parameter unannotated, `fetch: (_, { signal }) => …`, which infers `A = void`; it is called with no argument. Writing `_: void` also works but trips the repository's `no-invalid-void-type` lint rule. Several arguments are passed as one object; this keeps one inference site and one key function.
 
 ```ts
 const projectQuery = query({

@@ -1,6 +1,6 @@
 # Q4 — Router loader integration
 
-**Status:** Ready for review. Stopped at the Q4 checkpoint; Q5 (validation app) does not start without approval.
+**Status:** Q4 approved on 2026-10-20. The user's words: "Q4 is approved. Start Q5 (validation app) and stop at the Q5 checkpoint." CI passed on `198dfaa`. Q5 has begun.
 
 ## Delivered
 

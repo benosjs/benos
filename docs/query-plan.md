@@ -8,8 +8,8 @@
 | Q1 — Design documents           | Complete; approved, checkpoint in [`docs/checkpoints/q-q1.md`](checkpoints/q-q1.md) |
 | Q2 — Cache core                 | Complete; approved, checkpoint in [`docs/checkpoints/q-q2.md`](checkpoints/q-q2.md) |
 | Q3 — Mutations and invalidation | Complete; approved, checkpoint in [`docs/checkpoints/q-q3.md`](checkpoints/q-q3.md) |
-| Q4 — Router loader integration  | Ready for review; checkpoint in [`docs/checkpoints/q-q4.md`](checkpoints/q-q4.md)   |
-| Q5 — Validation app             | Not started                                                                         |
+| Q4 — Router loader integration  | Complete; approved, checkpoint in [`docs/checkpoints/q-q4.md`](checkpoints/q-q4.md) |
+| Q5 — Validation app             | Ready for review; checkpoint in [`docs/checkpoints/q-q5.md`](checkpoints/q-q5.md)   |
 | Q6 — Release preparation        | Not started                                                                         |
 
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.4.0): **the query cache, mutations, and invalidation**. This track is the data half of the flagship integration (typed routes, data, forms, and cache working as one system). Forms and the full flagship integration follow in their own track; both target 0.5.0.
@@ -101,4 +101,4 @@ Query guide, API reference entries, CHANGELOG entry, size report, and full verif
 
 ## 5. Your Immediate Task
 
-Q0–Q3 are complete and approved. Q4 is implemented; stop at the Q4 checkpoint for review.
+Q0–Q4 are complete and approved. Q5 is implemented; stop at the Q5 checkpoint for review.

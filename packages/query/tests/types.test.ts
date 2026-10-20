@@ -71,6 +71,10 @@ function checkQueryTypes(id: () => string, cache: QueryCache): void {
   me(() => true)
   expectTypeOf(me.key()).toEqualTypeOf<QueryKey<Project>>()
   me.peek(cache)
+  // An unannotated first parameter also makes an argument-free query.
+  const list = query({ fetch: (_, { signal }) => getProject('all', signal) })
+  expectTypeOf(list.key()).toEqualTypeOf<QueryKey<Project>>()
+  list()
 
   const filtered = query({
     key: (filter: { owner: string; since: Date }) => ({

@@ -122,6 +122,9 @@ importers:
       '@benosjs/dom':
         specifier: workspace:*
         version: link:../../packages/dom
+      '@benosjs/query':
+        specifier: workspace:*
+        version: link:../../packages/query
       '@benosjs/vite':
         specifier: workspace:*
         version: link:../../packages/vite
