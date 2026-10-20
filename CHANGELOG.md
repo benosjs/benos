@@ -2,7 +2,7 @@
 
 All notable changes to Benos are documented here.
 
-## [0.4.0] — Unreleased
+## [0.4.0] — 2026-10-19
 
 ### Added
 
@@ -45,6 +45,14 @@ All notable changes to Benos are documented here.
   0.4.0 projects.
 - Bump all ten publishable packages and the starter's Benos dependency
   ranges to `0.4.0`. The starter does not include the router.
+
+### Verification
+
+- Published at `0.4.0` across all ten packages. `@benosjs/core` and
+  `@benosjs/dom` were published by the release workflow with provenance. The
+  other eight were published manually because npm trusted publishing could not
+  be configured on the new packages before their first version. Trusted
+  publishing is now configured for all ten packages.
 
 ## [0.3.3] — 2026-10-16
 

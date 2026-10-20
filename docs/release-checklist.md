@@ -2,21 +2,31 @@
 
 ## Published release state
 
-- Versions `0.2.0` through `0.3.3` are published for the original eight
-  packages: `@benosjs/core`, `@benosjs/dom`, `@benosjs/compiler`,
-  `@benosjs/vite`, `@benosjs/eslint-plugin`, `@benosjs/primitives`, `benos`,
-  and `create-benos`. Version `0.4.0` adds `@benosjs/async` and
-  `@benosjs/router`, for ten publishable packages.
+- Versions `0.2.0` through `0.4.0` are published. Through `0.3.3` this
+  covers the original eight packages: `@benosjs/core`, `@benosjs/dom`,
+  `@benosjs/compiler`, `@benosjs/vite`, `@benosjs/eslint-plugin`,
+  `@benosjs/primitives`, `benos`, and `create-benos`. From `0.4.0`,
+  `@benosjs/async` and `@benosjs/router` are also published, for ten
+  packages.
+- Trusted publishing is configured for all ten packages, so future releases
+  use the automated release below.
 - The optional UI system shipped in 0.2.0: primitives, 19 registry components,
   the `benos` component CLI, and theming.
 - `benos@0.2.0` is deprecated. The 0.2.1 release notes document the launcher
   issue and point users to a fixed version.
 - The accidental `@benosjs/dom@0.0.0-stage` and
   `@benosjs/vite@0.0.0-stage` versions are deprecated.
-- GitHub Releases exist for `v0.2.1`, `v0.2.2`, and `v0.3.0`; `v0.2.0`
-  remains represented by its existing tag.
+- GitHub Releases exist for `v0.2.1` through `v0.2.3`, `v0.3.0` through
+  `v0.3.2`, and `v0.4.0`. `v0.2.0` and `v0.3.3` are represented by their
+  tags only.
 
 ## First publish of `@benosjs/async` and `@benosjs/router` (0.4.0)
+
+**Complete.** This one-time procedure is kept as a record. In practice, the
+release workflow published `@benosjs/core` and `@benosjs/dom` with provenance
+before stopping, and the other eight packages were published manually. Trusted
+publishing is now configured for `@benosjs/async` and `@benosjs/router` as
+well as the other eight packages.
 
 `@benosjs/async` and `@benosjs/router` are new in 0.4.0. npm only allows
 trusted publishing to be configured on a package that already exists, so the
