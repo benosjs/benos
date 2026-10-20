@@ -79,13 +79,9 @@ function ProjectEditor(props: { project: () => Project }) {
 export default function ProjectDetailPage() {
   const match = projectRoute.match()
   const project = () => match.data().value()
-  // <Show> recreates a function child whenever `when` changes, and every cache
-  // write or refetch is a new object. Gate on presence so the editor (and its
-  // mutation state) survives in-place updates; see docs/query-findings.md.
-  const current = (): Project => project() as Project
   return (
     <Show
-      when={project() !== null}
+      when={project()}
       fallback={
         <Card>
           <p class="eyebrow">Project unavailable</p>
@@ -103,7 +99,7 @@ export default function ProjectDetailPage() {
         </Card>
       }
     >
-      {
+      {(current) => (
         <>
           <p class="page-intro">
             Project ID: <code>{match.params().projectId}</code>
@@ -137,7 +133,7 @@ export default function ProjectDetailPage() {
             </Link>
           </Card>
         </>
-      }
+      )}
     </Show>
   )
 }

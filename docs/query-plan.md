@@ -9,7 +9,8 @@
 | Q2 — Cache core                 | Complete; approved, checkpoint in [`docs/checkpoints/q-q2.md`](checkpoints/q-q2.md) |
 | Q3 — Mutations and invalidation | Complete; approved, checkpoint in [`docs/checkpoints/q-q3.md`](checkpoints/q-q3.md) |
 | Q4 — Router loader integration  | Complete; approved, checkpoint in [`docs/checkpoints/q-q4.md`](checkpoints/q-q4.md) |
-| Q5 — Validation app             | Ready for review; checkpoint in [`docs/checkpoints/q-q5.md`](checkpoints/q-q5.md)   |
+| Q5 — Validation app             | Complete; approved, checkpoint in [`docs/checkpoints/q-q5.md`](checkpoints/q-q5.md) |
+| Q5a — `<Show>` in-place updates | Ready for review; checkpoint in [`docs/checkpoints/q-q5a.md`](checkpoints/q-q5a.md) |
 | Q6 — Release preparation        | Not started                                                                         |
 
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.4.0): **the query cache, mutations, and invalidation**. This track is the data half of the flagship integration (typed routes, data, forms, and cache working as one system). Forms and the full flagship integration follow in their own track; both target 0.5.0.
@@ -93,6 +94,10 @@ The `@benosjs/query` package, query definitions and key interning, entries, dedu
 
 Extend `examples/dashboard` with cached list and detail routes, an edit mutation with `affects`, and an optimistic toggle. Write `docs/query-findings.md` listing anything awkward, from the perspective of a React developer who uses TanStack Query.
 
+### Q5a — `<Show>` in-place updates (DOM)
+
+Added after Q5 review. Make `<Show>` keep its branch while `when` stays present: a function child is called once and receives an accessor that tracks the latest `when` value, and a plain child is created once, as [components.md](architecture/components.md) already specifies. Pin the old and new behavior with tests, report the DOM byte cost, remove the dashboard workaround, and stop for review. This is the track's only DOM change.
+
 ### Q6 — Release preparation
 
 Query guide, API reference entries, CHANGELOG entry, size report, and full verification on three browsers and three operating systems. Open a pull request and stop before merging. The 0.5.0 version bump and release are decided with me, because forms and the flagship integration also target 0.5.0.
@@ -101,4 +106,4 @@ Query guide, API reference entries, CHANGELOG entry, size report, and full verif
 
 ## 5. Your Immediate Task
 
-Q0–Q4 are complete and approved. Q5 is implemented; stop at the Q5 checkpoint for review.
+Q0–Q5 are complete and approved. Q5a is implemented; stop at its checkpoint for review.

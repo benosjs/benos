@@ -133,6 +133,77 @@ describe('@benosjs/dom', () => {
     expect(document.body.childNodes).toHaveLength(1)
   })
 
+  it('keeps a Show function child while when stays present', () => {
+    const record = signal<{ name: string } | null>({ name: 'A' })
+    let setups = 0
+    let disposals = 0
+    roots.push(
+      render(
+        () =>
+          jsx(Show, {
+            get when() {
+              return record()
+            },
+            fallback: jsx('i', { children: 'none' }),
+            children: (current: () => { name: string }) => {
+              setups++
+              onCleanup(() => disposals++)
+              return jsx('p', {
+                get children() {
+                  return current().name
+                },
+              })
+            },
+          }),
+        document.body,
+      ),
+    )
+    const first = document.querySelector('p')
+    expect(first?.textContent).toBe('A')
+    record.set({ name: 'B' })
+    expect(document.querySelector('p')).toBe(first)
+    expect(first?.textContent).toBe('B')
+    expect([setups, disposals]).toEqual([1, 0])
+    record.set(null)
+    expect(document.querySelector('i')?.textContent).toBe('none')
+    expect(disposals).toBe(1)
+    record.set({ name: 'C' })
+    expect(document.querySelector('p')?.textContent).toBe('C')
+    expect(setups).toBe(2)
+  })
+
+  it('creates a plain Show child once while when stays present', () => {
+    const count = signal<number | null>(0)
+    let setups = 0
+    function Child() {
+      setups++
+      return jsx('b', { children: 'child' })
+    }
+    roots.push(
+      render(
+        () =>
+          jsx(Show, {
+            get when() {
+              return count()
+            },
+            get children() {
+              return jsx(Child, {})
+            },
+          }),
+        document.body,
+      ),
+    )
+    const first = document.querySelector('b')
+    count.set(1)
+    count.set(2)
+    expect(document.querySelector('b')).toBe(first)
+    expect(setups).toBe(1)
+    count.set(null)
+    expect(document.querySelector('b')).toBeNull()
+    count.set(3)
+    expect(setups).toBe(2)
+  })
+
   it('for-swap-preserves-node-identity', () => {
     const items = signal([{ id: 'a' }, { id: 'b' }, { id: 'c' }])
     roots.push(

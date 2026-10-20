@@ -1,6 +1,6 @@
 # Q5 — Validation app
 
-**Status:** Ready for review. Stopped at the Q5 checkpoint; Q6 (release preparation) does not start without approval.
+**Status:** Q5 approved on 2026-10-20. The user's words: "Q5 is approved. For <Show>, take option 2: keep the function child while `when` stays truthy, as its own reviewed DOM step with a size measurement, before Q6." That step is Q5a; Q6 waits for its review.
 
 ## Delivered
 

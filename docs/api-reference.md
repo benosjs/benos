@@ -70,7 +70,8 @@ dispose()
 ### Control flow
 
 - `<Show when fallback?>` selects a child; a function child receives a typed
-  accessor for the narrowed value.
+  accessor for the narrowed value. While `when` stays present, the branch is
+  kept and the accessor tracks the latest value.
 - `<For each by? fallback?>` reconciles keyed items. Its child receives
   `item()` and `index()` accessors; index access is lazy.
 - `<Switch fallback?>` selects the first truthy `<Match when>` child.
