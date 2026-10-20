@@ -1,6 +1,6 @@
 # F2 — Form core
 
-**Status:** Awaiting approval. F3 has not begun.
+**Status:** F2 approved on 2026-10-20. The user's words: "Approve F2 and start F3." F3 has begun.
 
 ## Delivered
 

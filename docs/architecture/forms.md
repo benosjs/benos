@@ -1,6 +1,6 @@
 # Forms, validation, and the flagship binding
 
-**Status:** F1 design approved on 2026-10-20, including the router navigation blocker (decision 6). The form core (F2) is implemented in `packages/forms`; differences from this design are in the [F2 implementation notes](#f2-implementation-notes). [The track brief](../forms-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [query.md](./query.md) and [router.md](./router.md) define the contracts this package builds on. Numbered decisions refer to the list in the [F1 checkpoint](../checkpoints/f-f1.md#decisions-proposed-for-approval).
+**Status:** F1 design approved on 2026-10-20, including the router navigation blocker (decision 6). The form core (F2) and Standard Schema validation (F3) are implemented in `packages/forms`; differences from this design are in the [F2](#f2-implementation-notes) and [F3](#f3-implementation-notes) implementation notes. [The track brief](../forms-plan.md) sets scope; [the flagship target](./flagship-integration.md) is the compatibility test; [query.md](./query.md) and [router.md](./router.md) define the contracts this package builds on. Numbered decisions refer to the list in the [F1 checkpoint](../checkpoints/f-f1.md#decisions-proposed-for-approval).
 
 ## Goals and boundary
 
@@ -398,6 +398,17 @@ F2 implements `formModel` with the three sources, identity epochs, the field sto
 6. **A `source` form's values may be missing.** Its model is `FormModel<In, Out, O, true>`, whose `values()`, `value()`, and `remote()` include `undefined`. A new object from the source is a new record; a query entry handle is the same record across refetches.
 7. **Mutation input checks follow method bivariance.** `Mutation.run` is declared as a method, so a mutation whose `values` type is a supertype of the schema output is accepted. Incompatible shapes (a different params key, a `number` where the output has a `string`) are errors, and the type tests cover them.
 8. **`reset()` keeps a pending save's state;** it clears a finished save's error.
+
+## F3 implementation notes
+
+F3 implements validation timing, sync and async `validate` with generations, issue normalization and mapping, root issues, `form.error()` precedence, and mutation errors that carry issues. These points refine the design above:
+
+1. **In `change` mode an edit counts as touching the field.** With the visibility rule alone (touched or submitted), an error in `change` mode stayed hidden until blur, which is what `blur` mode is for. The field is now marked touched by `set` in `change` mode only.
+2. **Issue mapping reads the field registry when an accessor is read.** Fields are created during setup, before any validation, so this matches the design. A field created after issues were reported finds its issues on its next read, but nothing notifies an existing binding.
+3. **A thrown or rejected validator** becomes one root issue whose message is the error's message, or "Could not validate." when it has none. `submit` resolves `invalid`.
+4. **Server issues.** A mutation error whose `issues` is an array of objects with string `message`s is mapped like validation issues, and `form.error()` stays empty for that failure. Server issues last until the next validation replaces them, so the next edit after a failed save (which always counts as a submit attempt) clears them if the schema passes.
+5. **Clearing.** A successful save clears the record's issues and submit attempt. `reset()` also cancels any in-flight async validation by advancing the generation.
+6. **The development warning** for an issue path with no field fires once per path per form instance. Production builds strip it; the flag must be declared above its first use for the minifier to fold it, which an early F3 build did not do (it shipped 97 B of warning code).
 
 ## Hard-to-reverse decisions
 

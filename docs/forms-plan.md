@@ -6,8 +6,8 @@
 | -------------------------------------------- | -------------------------------------------------------------------------------------------- |
 | F0 — Plan                                    | Complete                                                                                     |
 | F1 — Design documents                        | Complete; approved, checkpoint in [`docs/checkpoints/f-f1.md`](checkpoints/f-f1.md)          |
-| F2 — Form core                               | Complete; awaiting approval, checkpoint in [`docs/checkpoints/f-f2.md`](checkpoints/f-f2.md) |
-| F3 — Standard Schema validation              | Not started                                                                                  |
+| F2 — Form core                               | Complete; approved, checkpoint in [`docs/checkpoints/f-f2.md`](checkpoints/f-f2.md)          |
+| F3 — Standard Schema validation              | Complete; awaiting approval, checkpoint in [`docs/checkpoints/f-f3.md`](checkpoints/f-f3.md) |
 | F4 — Field and UI adapter                    | Not started                                                                                  |
 | F5 — Flagship integration and validation app | Not started                                                                                  |
 | F6 — Release preparation for 0.5.0           | Not started                                                                                  |
@@ -102,4 +102,4 @@ Forms guide, API reference, CHANGELOG, size report, release wiring for the twelf
 
 ## 5. Your Immediate Task
 
-F1 is approved, including the router navigation blocker (decision 6), and the flagship amendments are applied. F2 is complete: stop for review of the [F2 checkpoint](checkpoints/f-f2.md). Do not start F3 until it is approved. The router blocker belongs to F5.
+F1 is approved, including the router navigation blocker (decision 6), and the flagship amendments are applied. F2 is approved. F3 is complete: stop for review of the [F3 checkpoint](checkpoints/f-f3.md), which includes a size-cap decision. Do not start F4 until it is approved. The router blocker belongs to F5.

@@ -2,11 +2,15 @@ import { expectTypeOf } from 'expect-type'
 import { expect, it } from 'vitest'
 import { route } from '@benosjs/router'
 import { mutation, query } from '@benosjs/query'
+import { type } from 'arktype'
+import * as v from 'valibot'
+import { z } from 'zod'
 import { formModel } from '../src/index.js'
 import type {
   FieldHandle,
   FieldPath,
   Form,
+  FormIssue,
   FormModel,
   FormSubmitResult,
   InferInput,
@@ -238,6 +242,87 @@ function checkPaths(): void {
   expectTypeOf<PathValue<Profile, 'born'>>().toEqualTypeOf<Date>()
 }
 void checkPaths
+
+function checkLibraryTypes(): void {
+  const zodSchema = z.object({
+    age: z.coerce.number(),
+    name: z.string().transform((name) => name.trim()),
+  })
+  expectTypeOf<InferInput<typeof zodSchema>>().toEqualTypeOf<{
+    age: unknown
+    name: string
+  }>()
+  expectTypeOf<InferOutput<typeof zodSchema>>().toEqualTypeOf<{
+    age: number
+    name: string
+  }>()
+  const zodForm = formModel({
+    initial: () => ({ age: '1', name: 'x' }),
+    schema: zodSchema,
+    save: mutation({
+      run: (input: { age: number; name: string }) => input.age,
+    }),
+  })()
+  expectTypeOf(zodForm.values()).toEqualTypeOf<{ age: unknown; name: string }>()
+  // @ts-expect-error The mutation receives the parsed output: age is a number.
+  formModel({
+    initial: () => ({ age: '1', name: 'x' }),
+    schema: zodSchema,
+    save: mutation({
+      run: (input: { age: string; name: string }) => input.age,
+    }),
+  })
+
+  const valibotSchema = v.object({
+    email: v.pipe(v.string(), v.email()),
+    tags: v.array(v.string()),
+  })
+  const valibotForm = formModel({
+    initial: () => ({ email: '', tags: [] }),
+    schema: valibotSchema,
+    save: mutation({
+      run: (input: { email: string; tags: string[] }) => input.email,
+    }),
+  })()
+  expectTypeOf(valibotForm.field('tags.0').value()).toEqualTypeOf<string>()
+
+  const arkSchema = type({ address: { city: 'string' }, count: 'number' })
+  const arkForm = formModel({
+    initial: () => ({ address: { city: '' }, count: 0 }),
+    schema: arkSchema,
+    save: mutation({
+      run: (input: { address: { city: string }; count: number }) => input.count,
+    }),
+  })()
+  expectTypeOf(arkForm.field('address.city').value()).toEqualTypeOf<string>()
+  // @ts-expect-error Field names come from the schema.
+  arkForm.field('address.town')
+
+  expectTypeOf(arkForm.issues()).toEqualTypeOf<readonly FormIssue[]>()
+  expectTypeOf(arkForm.validating()).toEqualTypeOf<boolean>()
+  expectTypeOf(arkForm.field('count').error()).toEqualTypeOf<
+    string | undefined
+  >()
+  expectTypeOf(arkForm.field('count').invalid()).toEqualTypeOf<boolean>()
+  formModel({
+    initial: () => ({ address: { city: '' }, count: 0 }),
+    schema: arkSchema,
+    save: mutation({
+      run: (input: { address: { city: string }; count: number }) => input.count,
+    }),
+    validate: 'blur',
+  })
+  formModel({
+    initial: () => ({ address: { city: '' }, count: 0 }),
+    schema: arkSchema,
+    save: mutation({
+      run: (input: { address: { city: string }; count: number }) => input.count,
+    }),
+    // @ts-expect-error Validation timing is one of three modes.
+    validate: 'input',
+  })
+}
+void checkLibraryTypes
 
 it('compiles the public forms types', () => {
   expect(typeof formModel).toBe('function')
