@@ -16,6 +16,9 @@
     },
     {
       "path": "../query"
+    },
+    {
+      "path": "../router"
     }
   ]
 }
