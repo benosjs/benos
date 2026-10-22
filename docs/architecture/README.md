@@ -14,6 +14,7 @@ Phase 2 designs (designed now, built later):
 
 - [Async](./async.md): resources, Suspense, transitions, cancellation, and race handling. Implemented in 0.4.0.
 - [Router](./router.md): typed routes, loaders, navigation, focus, and scrolling. Implemented in 0.4.0.
+- [Query](./query.md): typed query cache, mutations, invalidation, retries, optimistic updates, and route loader integration. Implemented for 0.5.0.
 - [SSR](./ssr.md): server rendering, streaming, serialization, and hydration.
 - [Risks](./risks.md): the ten principal technical and adoption risks with mitigation gates.
 

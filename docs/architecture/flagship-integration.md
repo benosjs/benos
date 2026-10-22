@@ -1,6 +1,6 @@
 # Flagship integration target for 0.5.0
 
-**Status:** R1 design for review. Route and async pieces target 0.4.0; query cache, mutations, and forms below are **0.5.0 targets**, not implemented APIs. This replaces the old sketch: its one-time `projectQuery.value(params())` lookup went stale, and its refetch effect overwrote edits.
+**Status:** R1 design, amended at query Q1 (approved 2026-10-19): `fetch` takes `(args, { signal })`, the redundant `key` line is gone, and route data is a query entry handle. Route and async pieces shipped in 0.4.0; query cache, mutations, and forms below are **0.5.0 targets**, not implemented APIs. This replaces the old sketch: its one-time `projectQuery.value(params())` lookup went stale, and its refetch effect overwrote edits.
 
 ## Project editor slice
 
@@ -8,8 +8,7 @@ The declarations outside the editor establish the transport, Standard Schema val
 
 ```tsx
 const projectQuery = query({
-  key: (id: string) => ['project', id] as const,
-  fetch: (id: string, signal: AbortSignal) => getProject(id, signal),
+  fetch: (id: string, { signal }) => getProject(id, signal),
 })
 const saveProject = mutation({
   run: (input: { projectId: string; values: EditProject }) =>
@@ -43,7 +42,7 @@ const router = createRouter({
 })
 ```
 
-`params.projectId` is inferred as `string` from the path literal. `projectQuery.load` is a 0.5 adapter to the 0.4 route loader/resource contract. `affects` is a **declarative identity rule** evaluated from the completed mutation input. The mutation executor refreshes precisely those entries after success. It uses the saved record's ID, even if the user has navigated elsewhere by the time saving finishes. A failed save does not refresh. Nothing in the component manually invalidates a cache entry.
+`params.projectId` is inferred as `string` from the path literal. `projectQuery.load` is a 0.5 adapter to the 0.4 route loader/resource contract: it resolves to the cache entry's `QueryEntry<Project>` handle, so `projectRoute.match().data()` is that handle and `match.data().value()` is a live cache signal ([query.md](./query.md#router-loaders-share-identity-with-queries)). The query definition is the cache namespace, so no key function is needed for a single string argument. `affects` is a **declarative identity rule** evaluated from the completed mutation input. The mutation executor refreshes precisely those entries after success. It uses the saved record's ID, even if the user has navigated elsewhere by the time saving finishes. A failed save does not refresh. Nothing in the component manually invalidates a cache entry.
 
 `<form.Field>` is a proposed 0.5 form/UI adapter: it renders a visible label, the existing registry `Input`, and a field error with stable `id`/`aria-describedby`, passing `invalid` to `Input`. The current `Input` already accepts those props; no UI component API change is assumed. The editor calls the form model bound to its route reference; no runtime import of the router instance is needed.
 
@@ -63,7 +62,7 @@ function ProjectEditor() {
 }
 ```
 
-`formModel.from` projects the loaded `Project` into editable `EditProject` fields; it must not pass the server object wholesale into the form. `projectForm()` reads `projectRoute.match()` under its current component owner and binds mutation input from the current **committed** match identity and validated form output. Its source is the route's stable loader-data signal; the router starts loading before the initial editor render and updates that signal when same-route params change. The form captures an editable copy when an identity first becomes ready. A background refetch for the **same** identity updates pristine fields/baseline but never overwrites dirty fields; if server data conflicts, the form exposes `remoteChanged`. A different identity resets from the new committed data only after navigation commits. Unsaved changes during navigation require an explicit blocker policy in 0.5; this sketch must not silently carry record A's edits into B.
+`formModel.from` projects the loaded `Project` into editable `EditProject` fields; it must not pass the server object wholesale into the form. `projectForm()` reads `projectRoute.match()` under its current component owner and binds mutation input from the current **committed** match identity and validated form output. Its source is the route's stable loader-data signal, read as `match.data().value()`: a new handle at commit is a new identity, and an in-place change of `value()` is a same-identity refetch; the router starts loading before the initial editor render and updates that signal when same-route params change. The form captures an editable copy when an identity first becomes ready. A background refetch for the **same** identity updates pristine fields/baseline but never overwrites dirty fields; if server data conflicts, the form exposes `remoteChanged`. A different identity resets from the new committed data only after navigation commits. Unsaved changes during navigation require an explicit blocker policy in 0.5; this sketch must not silently carry record A's edits into B.
 
 Submission calls `schema['~standard'].validate`, awaits async validators, maps issue paths to fields, blocks invalid input, and passes parsed output to the mutation. A rejected mutation is captured as `form.error()` and `form.submitting()` covers the save. It does not throw from a browser event callback. [Standard Schema](https://standardschema.dev/) supplies validation, input/output types, and issue paths, but does not introspect field names or render fields; field names remain explicit in JSX.
 
@@ -273,7 +272,7 @@ All three code samples are formatted by repository Prettier with **no ignore dir
 | Formatted nonblank lines | Benos target | React native inputs | React shadcn/ui |
 | ------------------------ | -----------: | ------------------: | --------------: |
 | Page/editor block        |           13 |                  73 |              92 |
-| Full shown slice         |           47 |                  87 |             106 |
+| Full shown slice         |           46 |                  87 |             106 |
 
 Both React variants use typed TanStack Router params, a route loader that primes Query, TanStack Form's dirty-field-preserving defaults, and explicit success invalidation. The Benos target uses a typed route reference, atomic route data/identity commit, the proposed form adapter, and a mutation's typed `affects` rule. The shadcn example connects its field errors to shadcn `Input` through `FieldError`; the native version renders its own error text.
 

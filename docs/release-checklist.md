@@ -43,19 +43,36 @@ hand first would make it fail partway through. Release 0.4.0 this way:
 
 From 0.4.1 on, use the automated release for all ten packages.
 
+## First publish of `@benosjs/query` (0.5.0)
+
+**Not done yet.** `@benosjs/query` is new. As with async and router in 0.4.0,
+npm only allows trusted publishing on a package that already exists, so the
+automated workflow cannot publish its first version, and it publishes
+sequentially and stops on the first error. For the release that first
+includes it:
+
+1. Merge the reviewed release change and push the version tag so the
+   verification, browser, and consumer-matrix jobs run.
+2. When the `publish` job asks for `release` environment approval, reject it.
+3. Publish all eleven packages with the manual fallback below, in its order.
+4. Configure trusted publishing for `@benosjs/query` with the same settings
+   as the other packages.
+
+After that, use the automated release for all eleven packages.
+
 ## Automated release (default for future versions)
 
 The `.github/workflows/release.yml` workflow runs when a `v*` tag is pushed.
-It checks that the tag version matches all ten package manifests, runs the
+It checks that the tag version matches all eleven package manifests, runs the
 full verification suite and OS/package-manager consumer matrices, and checks
 the registry item URLs from that tag. Only after those jobs pass does the
 `publish` job wait for approval in the GitHub `release` environment. It then
 publishes in the order below with npm trusted publishing (GitHub OIDC),
-without an npm token, and verifies all ten versions with `npm view`.
+without an npm token, and verifies all eleven versions with `npm view`.
 Trusted publishing automatically creates npm provenance for these public
 packages from this public GitHub repository.
 
-Before the first automated release, configure each of the ten package
+Before the first automated release, configure each of the eleven package
 settings on npmjs.com under **Package → Settings → Trusted publishing**:
 
 | Field                | Value                |
@@ -67,7 +84,7 @@ settings on npmjs.com under **Package → Settings → Trusted publishing**:
 | Environment name     | `release`            |
 | Allowed action       | Direct `npm publish` |
 
-Repeat this configuration for all ten packages. On GitHub, open the
+Repeat this configuration for all eleven packages. On GitHub, open the
 repository **Settings → Environments → New environment**, create an environment
 named `release`, add `ahomsi0` as a required reviewer, and save it. The release
 job uses this environment, so publishing remains blocked until that reviewer
@@ -75,7 +92,7 @@ approves the deployment.
 
 For a release:
 
-1. Update all ten package versions, registry minimums, and `CHANGELOG.md`.
+1. Update all eleven package versions, registry minimums, and `CHANGELOG.md`.
 2. Merge the reviewed release change to `main` after CI is green.
 3. Create and push an annotated `vX.Y.Z` tag from the reviewed `main` commit.
    The workflow rejects the tag if its version differs from any package.
@@ -85,7 +102,7 @@ For a release:
    job becomes available.
 5. Review and approve the `release` environment deployment. The workflow
    publishes each package sequentially and stops on the first error.
-6. Confirm all ten `npm view <package>@<version> version` checks match the
+6. Confirm all eleven `npm view <package>@<version> version` checks match the
    tag. If a CLI version must be deprecated, run and verify that separately.
 
 The workflow uses `pnpm publish --provenance`; it does not read or store an
@@ -106,6 +123,7 @@ npm whoami
 pnpm --filter @benosjs/core publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/dom publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/async publish --dry-run --access public --publish-branch main
+pnpm --filter @benosjs/query publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/router publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/compiler publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/vite publish --dry-run --access public --publish-branch main
@@ -123,6 +141,7 @@ the command's success line before starting the next one:
 pnpm --filter @benosjs/core publish --access public --publish-branch main
 pnpm --filter @benosjs/dom publish --access public --publish-branch main
 pnpm --filter @benosjs/async publish --access public --publish-branch main
+pnpm --filter @benosjs/query publish --access public --publish-branch main
 pnpm --filter @benosjs/router publish --access public --publish-branch main
 pnpm --filter @benosjs/compiler publish --access public --publish-branch main
 pnpm --filter @benosjs/vite publish --access public --publish-branch main
@@ -138,6 +157,7 @@ Then verify the exact version for every package:
 npm view @benosjs/core version
 npm view @benosjs/dom version
 npm view @benosjs/async version
+npm view @benosjs/query version
 npm view @benosjs/router version
 npm view @benosjs/compiler version
 npm view @benosjs/vite version

@@ -70,7 +70,8 @@ dispose()
 ### Control flow
 
 - `<Show when fallback?>` selects a child; a function child receives a typed
-  accessor for the narrowed value.
+  accessor for the narrowed value. While `when` stays present, the branch is
+  kept and the accessor tracks the latest value.
 - `<For each by? fallback?>` reconciles keyed items. Its child receives
   `item()` and `index()` accessors; index access is lazy.
 - `<Switch fallback?>` selects the first truthy `<Match when>` child.
@@ -177,6 +178,10 @@ receives one concrete, non-null element and registers teardown with
   `retry()` callback. Without one, errors reach the DOM `ErrorBoundary`.
   Search parse failures reject navigation and preserve the last committed
   route.
+- Loader data is exposed read-only, but function members stay callable, so a
+  loader may return a query entry whose `value()` is live. A loader runs under
+  a per-match owner: `onCleanup` registered while it runs fires when the
+  navigation is superseded, the match is replaced, or the router is disposed.
 
 ```tsx
 import {
@@ -225,6 +230,36 @@ function ProjectPage() {
 
 ;<RouterOutlet router={router} />
 ```
+
+## `@benosjs/query`
+
+- `query({ fetch, key?, staleTime?, gcTime?, retry?, retryDelay?, refetchOn? })`
+  defines a cached query. `fetch(args, { signal, attempt })` infers the
+  argument and data types; leave its first parameter unannotated for a query
+  without arguments. Defaults: `staleTime` 5,000 ms, `gcTime` 300,000 ms, and
+  two retries of transient failures (network `TypeError`, `TimeoutError`, and
+  errors whose numeric `status` is 408, 429, or 5xx).
+- Calling a definition with a tracked source, `projectQuery(() => id())`,
+  returns an owner-bound observer that extends `Resource<T>` with
+  `fetching()`, `error()`, and `failureCount()`. It never shows another
+  argument's data.
+- `projectQuery.load(args, signal?, cache?)` resolves to a `QueryEntry<T>`
+  (`value()`, `fetching()`, `error()`, `refresh()`) for route loaders.
+  `prefetch(args)` warms an entry; `peek(args)` reads it without fetching.
+- `projectQuery.key(args)` is a typed `QueryKey<T>`. It is a cache target and
+  makes typed writes with `set(value)` and `update(fn)`. A definition and
+  `projectQuery.where(predicate)` are also targets.
+- `mutation({ run, writes?, affects?, optimistic?, awaitRefetch? })` defines a
+  mutation. Calling it in a component returns a handle with `run(input)`,
+  `state()`, `pending()`, `cancel()`, and `reset()`; outside components use
+  `definition.run(input, cache?)`. `run` resolves to `{ ok, … }` and never
+  rejects.
+- `createQueryCache()`, `<QueryCacheProvider cache>`, and `queryCache()`
+  create, provide, and resolve caches. A cache has `invalidate(...targets)`,
+  `write(...writes)`, and `dispose()`. `isTransientError(error)` is the
+  default retry classification.
+
+See the [query guide](./query.md) for examples.
 
 ## `@benosjs/compiler`
 

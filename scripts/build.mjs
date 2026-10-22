@@ -5,6 +5,7 @@ const packages = [
   'core',
   'dom',
   'async',
+  'query',
   'router',
   'compiler',
   'vite',

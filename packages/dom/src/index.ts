@@ -895,20 +895,25 @@ function mountShow(
   owner: InternalOwner,
 ): DomRange {
   const slot = createSlot(parent, before, owner)
-  runWithOwner(owner, () =>
+  runWithOwner(owner, () => {
+    // The branch depends on presence only, so a change from one present
+    // value to another keeps the branch; its accessor reads the latest value.
+    const when = computed(() => props.when)
+    const present = computed(() => {
+      const value = when()
+      return value !== null && value !== undefined && value !== false
+    })
     createRenderEffect(() => {
-      const when = props.when
-      const present = when !== null && when !== undefined && when !== false
-      const child = present ? props.children : props.fallback
+      const child = present() ? props.children : props.fallback
       const value =
         typeof child === 'function'
-          ? (child as (value: () => unknown) => Child)(() => when)
+          ? (child as (value: () => unknown) => Child)(when)
           : (child as Child)
       updateSlot(slot, value, owner, (branch, at) =>
         createChildMount(value, parent, at, branch),
       )
-    }),
-  )
+    })
+  })
   return slot.range
 }
 

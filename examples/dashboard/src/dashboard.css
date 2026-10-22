@@ -449,3 +449,19 @@ h2 {
     flex-direction: column;
   }
 }
+
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-block: 1rem;
+}
+
+.detail-actions p {
+  margin: 0;
+}
+
+.star {
+  color: var(--benos-color-warning, #b7791f);
+}

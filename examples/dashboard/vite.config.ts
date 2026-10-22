@@ -41,6 +41,7 @@ export default defineConfig({
             '@benosjs/dom',
             '@benosjs/dom/internal',
             '@benosjs/async',
+            '@benosjs/query',
             '@benosjs/router',
           ],
         },
@@ -51,6 +52,7 @@ export default defineConfig({
       '@benosjs/dom',
       '@benosjs/router',
       '@benosjs/async',
+      '@benosjs/query',
     ],
     alias: [
       {

@@ -13,12 +13,13 @@ const toneByStatus = {
 } as const
 
 export default function ProjectsPage() {
-  const projects = projectsIndexRoute.match().data
+  const projects = () => projectsIndexRoute.match().data().value()
   return (
     <>
       <p class="page-intro">
-        This page receives data from a route loader before the view is
-        committed.
+        This page reads the project list through the query cache. Revisiting it,
+        or opening a project you have already seen, does not wait for the
+        network.
       </p>
       <div class="projects-list">
         <For each={projects()} by={(project) => project.id}>
@@ -30,7 +31,14 @@ export default function ProjectsPage() {
             >
               <Card class="project-card">
                 <div class="project-card-heading">
-                  <h2>{project().name}</h2>
+                  <h2>
+                    {project().starred ? (
+                      <span class="star" aria-label="Starred">
+                        ★{' '}
+                      </span>
+                    ) : null}
+                    {project().name}
+                  </h2>
                   <Badge tone={toneByStatus[project().status]}>
                     {project().status}
                   </Badge>

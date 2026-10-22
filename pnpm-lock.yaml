@@ -122,6 +122,9 @@ importers:
       '@benosjs/dom':
         specifier: workspace:*
         version: link:../../packages/dom
+      '@benosjs/query':
+        specifier: workspace:*
+        version: link:../../packages/query
       '@benosjs/vite':
         specifier: workspace:*
         version: link:../../packages/vite
@@ -280,6 +283,22 @@ importers:
       '@zag-js/tooltip':
         specifier: 1.44.0
         version: 1.44.0
+
+  packages/query:
+    dependencies:
+      '@benosjs/async':
+        specifier: workspace:*
+        version: link:../async
+      '@benosjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@benosjs/dom':
+        specifier: workspace:*
+        version: link:../dom
+    devDependencies:
+      '@benosjs/router':
+        specifier: workspace:*
+        version: link:../router
 
   packages/router:
     dependencies:
