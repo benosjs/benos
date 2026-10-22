@@ -1,6 +1,6 @@
 # F5 — Flagship integration and validation app
 
-**Status:** Awaiting approval, including two decisions below. F6 has not begun.
+**Status:** F5 approved on 2026-10-22 with both recommended options. The user's words: "Approve F5 with both recommended options: mark @benosjs/async and @benosjs/router sideEffects false, and fix the template Vite pin in a separate PR on main. Start F6." `@benosjs/async` and `@benosjs/router` are marked `"sideEffects": false` in F6; the template's Vite pin is fixed separately in benosjs/benos#19. F6 has begun.
 
 ## Delivered
 
