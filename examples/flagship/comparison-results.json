@@ -1,0 +1,48 @@
+{
+  "withZod": {
+    "benos": {
+      "total": 47875,
+      "chunks": {
+        "index.js": 47172,
+        "project-editor.js": 703
+      }
+    },
+    "react": {
+      "total": 147815,
+      "chunks": {
+        "native.js": 42407,
+        "react.js": 105408
+      }
+    },
+    "reactShadcn": {
+      "total": 148268,
+      "chunks": {
+        "react.js": 105411,
+        "shadcn.js": 42857
+      }
+    }
+  },
+  "withoutZod": {
+    "benos": {
+      "total": 24923,
+      "chunks": {
+        "index.js": 24218,
+        "project-editor.js": 705
+      }
+    },
+    "react": {
+      "total": 124879,
+      "chunks": {
+        "native.js": 19469,
+        "react.js": 105410
+      }
+    },
+    "reactShadcn": {
+      "total": 125328,
+      "chunks": {
+        "react.js": 105411,
+        "shadcn.js": 19917
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@
 
 All notable changes to Benos are documented here.
 
-## [Unreleased]
+## [0.5.0] — Unreleased
 
 ### Added
 
@@ -27,8 +27,40 @@ All notable changes to Benos are documented here.
 - Add `query.load()` for route loaders. Route data becomes a live cache entry:
   revisits reuse cached data, records a mutation invalidated wait for fresh
   data, and mutations update the current page in place.
-- Add the [query guide](docs/query.md). The dashboard example's project pages
-  now use the query cache, with a rename mutation and an optimistic star.
+- Add the [query guide](docs/query.md).
+- Add `@benosjs/forms`. `formModel()` binds a form to a route's loader data, a
+  tracked source, or fixed initial values. The form follows the committed
+  record: fields you have not edited show the latest server data, edited
+  fields keep your value and report `remoteChanged()` when the server moves,
+  and another record resets the form when the router commits it, in the same
+  component.
+- Forms validate with any Standard Schema v1 library (tested with Zod,
+  Valibot, and ArkType), sync or async, on submit, blur, or change. Issues map
+  to the exact field, then the nearest ancestor field, then the form, and a
+  mutation error carrying Standard Schema `issues` maps to fields too.
+- `form.submit` saves the schema's output through a query mutation, by default
+  as `{ ...params, values }`, and never rejects. Saved fields become pristine;
+  fields edited during the save stay dirty; a save that finishes after
+  navigation still refreshes its record.
+- Add `<form.Field>`, which renders a label, the control, a description, and
+  the error with ids and `aria-describedby`, and the `text`, `checked`,
+  `choice`, and `select` adapters for the registry `Input`, `Textarea`,
+  `Checkbox`, `Switch`, `RadioGroup`, and `Select`. A failed submit focuses
+  the first invalid field. `form.field()` is the headless handle.
+- Route-bound forms ask before you leave with unsaved changes
+  (`leave: 'confirm'` by default; `'discard'` or your own dialog).
+- Add `blockNavigation({ when, confirm })` to `@benosjs/router`. It holds link,
+  programmatic, and Back/Forward navigations, reports
+  `navigation().status === 'blocked'`, resolves a refused navigation as
+  `{ status: 'blocked' }`, undoes a refused Back or Forward, and warns before
+  unload while blocking. Router histories record each entry's position for
+  this.
+- Add the registry `field` item, the layout, description, and error styles of
+  `<form.Field>`.
+- Add the [forms guide](docs/forms.md). The dashboard example's project pages
+  use the query cache, with an optimistic star, and edit a project with a
+  form. `examples/flagship` is the flagship project editor as executable code,
+  next to the same editor in React with TanStack Router, Query, and Form.
 
 ### Fixed
 
@@ -38,6 +70,13 @@ All notable changes to Benos are documented here.
   recreated the branch whenever `when` changed to another present value,
   which reset component state such as form drafts on every data update. Code
   that relied on setup running again must now react to the accessor.
+- The compiler now compiles a JSX member tag with a lowercase object, such as
+  `<form.Field>`, as a value. It produced the string `"form"` and threw
+  "Invalid Benos JSX element type".
+- The registry `Input` and `Textarea` keep `aria-invalid` and their invalid
+  style in step with `invalid` after the first render, and `Checkbox` and
+  `Switch` put `aria-describedby` on the input that has their role, so screen
+  readers read a field's description and error.
 
 ### Changed
 
@@ -45,8 +84,19 @@ All notable changes to Benos are documented here.
   `match.data().value()` type-checks for a query entry. Loaders run under a
   per-match owner whose cleanup fires on supersession, replacement, and
   router disposal; this is now a documented contract.
-- Sizes: `@benosjs/query` is 3,498 B against a 3,584 B budget. Core + DOM is
-  11,006 B; core, async, and router are unchanged.
+- `RouterOutlet` registers the outlet when it renders instead of at module
+  load, and `@benosjs/async` and `@benosjs/router` are marked
+  `"sideEffects": false`, so a bundle that uses only the router's
+  `blockNavigation` (as forms without a route do) drops the rest.
+- Raise UI registry dependency ranges to `^0.5.0` and minimum Benos versions
+  to `0.5.0`, and build registry release `0.5.0`.
+- Bump all twelve publishable packages and the starter's Benos dependency
+  ranges to `0.5.0`. The starter does not include the router, query, or
+  forms.
+- Sizes: `@benosjs/query` is 3,498 B against a 3,584 B budget,
+  `@benosjs/forms` 2,878 B against 3,072 B, and the router 6,739 B against
+  7,168 B (+390 B for the navigation blocker). Core is 4,303 B and core + DOM
+  11,006 B; async is unchanged.
 
 ## [0.4.0] — 2026-10-19
 

@@ -41,16 +41,15 @@ bin symlinks and Windows command shims. Users should install a current release.
 
 - **Blocks:** reusable application patterns such as login and dashboard flows,
   built on the router and forms modules.
-- **Query:** `@benosjs/query` with caching, mutations, invalidation,
-  retries, optimistic updates, cancellation, and route loader integration is
-  ready for release on the `query` branch; see the [query guide](./query.md).
-  SSR integration follows the SSR module.
-- **Forms:** schema-driven, fine-grained field updates with inferred value,
-  error, dirty, touched, and submission state.
-- **Flagship integration:** one typed declaration connecting routes, query,
-  form schema, validation, mutation, and cache invalidation. The type-level
-  0.5.0 design is in [flagship-integration.md](./architecture/flagship-integration.md);
-  routes and async ship in 0.4.0, query and mutations are ready for 0.5.0, and forms remain.
+- **Query, forms, and the flagship integration (0.5.0):** `@benosjs/query`
+  with caching, mutations, invalidation, retries, optimistic updates,
+  cancellation, and route loader integration; `@benosjs/forms` with
+  identity-aware form models, Standard Schema validation, accessible fields,
+  and a leave policy; and the flagship editor connecting them as executable
+  code ([flagship-integration.md](./architecture/flagship-integration.md)).
+  Prepared for release on the `forms` branch; see the
+  [query guide](./query.md) and [forms guide](./forms.md). SSR integration
+  follows the SSR module.
 - **SSR:** server rendering, hydration, streaming, and async resource
   serialization.
 - **Devtools:** visualize the reactive graph and explain why a DOM node updated.

@@ -157,6 +157,8 @@ jobs:
         run: pnpm --filter @benosjs/query publish --access public --provenance --no-git-checks
       - name: Publish @benosjs/router with provenance
         run: pnpm --filter @benosjs/router publish --access public --provenance --no-git-checks
+      - name: Publish @benosjs/forms with provenance
+        run: pnpm --filter @benosjs/forms publish --access public --provenance --no-git-checks
       - name: Publish @benosjs/compiler with provenance
         run: pnpm --filter @benosjs/compiler publish --access public --provenance --no-git-checks
       - name: Publish @benosjs/vite with provenance

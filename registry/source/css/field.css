@@ -1,0 +1,19 @@
+.benos-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--benos-space-1);
+  min-inline-size: 0;
+}
+
+.benos-field-description {
+  color: var(--benos-color-text-muted);
+  font-size: var(--benos-text-xs);
+  margin: 0;
+}
+
+.benos-field-error {
+  color: var(--benos-color-danger-strong);
+  font-size: var(--benos-text-xs);
+  font-weight: 500;
+  margin: 0;
+}

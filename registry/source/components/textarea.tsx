@@ -21,7 +21,8 @@ export function Textarea(props: TextareaProps): JSX.Element {
     'children',
     'aria-invalid',
   ] as const)
-  const ariaInvalid =
+  // A function, so the attributes follow `invalid` after the first render.
+  const ariaInvalid = () =>
     local.invalid || local['aria-invalid'] === true || local['aria-invalid'] === 'true'
       ? 'true'
       : (local['aria-invalid'] ?? 'false')
@@ -33,8 +34,8 @@ export function Textarea(props: TextareaProps): JSX.Element {
       class={['benos-textarea', 'benos-textarea--' + local.size, local.class]
         .filter(Boolean)
         .join(' ')}
-      aria-invalid={ariaInvalid}
-      data-invalid={ariaInvalid === 'true' ? 'true' : 'false'}
+      aria-invalid={ariaInvalid()}
+      data-invalid={ariaInvalid() === 'true' ? 'true' : 'false'}
       ref={ref}
     >
       {local.children}

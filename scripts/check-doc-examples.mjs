@@ -16,6 +16,7 @@ const documents = [
   'docs/router.md',
   'docs/async.md',
   'docs/query.md',
+  'docs/forms.md',
 ]
 const { transformJsx } =
   await import('../packages/compiler/dist/js/index.development.js')
@@ -87,11 +88,13 @@ try {
           '@benosjs/dom/*': ['packages/dom/src/*'],
           '@benosjs/async': ['packages/async/src/index.ts'],
           '@benosjs/query': ['packages/query/src/index.ts'],
+          '@benosjs/forms': ['packages/forms/src/index.ts'],
           '@benosjs/router': ['packages/router/dist/types/index.d.ts'],
           '@benosjs/compiler': ['packages/compiler/src/index.ts'],
           '@benosjs/vite': ['packages/vite/src/index.ts'],
           '@benosjs/eslint-plugin': ['packages/eslint-plugin/src/index.ts'],
           '@zag-js/*': ['packages/primitives/node_modules/@zag-js/*'],
+          zod: ['packages/forms/node_modules/zod'],
         },
       },
       files,

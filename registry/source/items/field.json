@@ -1,0 +1,27 @@
+{
+  "name": "field",
+  "title": "Field",
+  "description": "Layout, description, and error styles for @benosjs/forms <form.Field>.",
+  "type": "registry:style",
+  "dependencies": [
+    {
+      "name": "@benosjs/forms",
+      "version": "^0.5.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "field.css",
+      "target": "css/field.css",
+      "contentType": "text/css",
+      "sourceFile": "css/field.css"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.5.0"
+    }
+  ]
+}

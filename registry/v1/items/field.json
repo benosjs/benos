@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "release": "0.5.0",
+  "name": "field",
+  "type": "registry:style",
+  "title": "Field",
+  "description": "Layout, description, and error styles for @benosjs/forms <form.Field>.",
+  "dependencies": [
+    {
+      "name": "@benosjs/forms",
+      "version": "^0.5.0"
+    }
+  ],
+  "minimumBenosVersions": [
+    {
+      "name": "@benosjs/dom",
+      "version": "0.5.0"
+    }
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "field.css",
+      "target": "css/field.css",
+      "contentType": "text/css",
+      "content": ".benos-field {\n  display: flex;\n  flex-direction: column;\n  gap: var(--benos-space-1);\n  min-inline-size: 0;\n}\n\n.benos-field-description {\n  color: var(--benos-color-text-muted);\n  font-size: var(--benos-text-xs);\n  margin: 0;\n}\n\n.benos-field-error {\n  color: var(--benos-color-danger-strong);\n  font-size: var(--benos-text-xs);\n  font-weight: 500;\n  margin: 0;\n}\n",
+      "checksum": "sha256:67a1d69367cada170d722672d1f331d7634e05c3726ad9510929617954ec7165"
+    }
+  ]
+}

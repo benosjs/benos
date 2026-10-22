@@ -118,9 +118,21 @@ export function getProject(
   })
 }
 
-export function putProjectName(
+export interface ProjectEdit {
+  name: string
+  owner: string
+}
+
+/** A 422 whose `issues` follow Standard Schema, so a form maps them to fields. */
+function invalid(message: string, path: string): Error {
+  return Object.assign(httpError(422, message), {
+    issues: [{ message, path: [path] }],
+  })
+}
+
+export function putProject(
   id: string,
-  name: string,
+  values: ProjectEdit,
   signal: AbortSignal,
 ): Promise<Project> {
   return respond(
@@ -129,10 +141,15 @@ export function putProjectName(
     () => {
       const project = server.get(id)
       if (!project) throw httpError(404, 'This project no longer exists.')
-      if (name.trim().length < 2)
-        throw httpError(422, 'Names need at least two characters.')
-      project.name = name.trim()
-      project.updatedAt = '2026-10-20'
+      const name = values.name.trim()
+      if (name.length < 2)
+        throw invalid('Names need at least two characters.', 'name')
+      for (const other of server.values())
+        if (other.id !== id && other.name.toLowerCase() === name.toLowerCase())
+          throw invalid('Another project already uses this name.', 'name')
+      project.name = name
+      project.owner = values.owner.trim()
+      project.updatedAt = '2026-10-22'
       return { ...project }
     },
     250,

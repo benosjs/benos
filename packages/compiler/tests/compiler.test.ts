@@ -782,6 +782,32 @@ describe('@benosjs/compiler', () => {
     expect(document.body.innerHTML).toBe('')
   })
 
+  it('compiles member tags with a lowercase object as component values', () => {
+    const source = `
+export function App() {
+  const form = { Field: (props) => <span>{props.label}</span> }
+  const ui = { forms: { Input: (props) => <em>{props.label}</em> } }
+  return <form><form.Field label="field" /><ui.forms.Input label="deep" /></form>
+}
+`
+    for (const optimization of ['none', 'safe'] as const) {
+      const result = transformJsx(source, {
+        filename: 'fixtures/member-tags.tsx',
+        development: true,
+        optimization,
+      })
+      expect(result.code).not.toContain('"form".Field')
+      const module = evaluate(result.code, {
+        ...domRuntime,
+        ...domInternalRuntime,
+      } as Record<string, unknown>)
+      const dispose = render(() => (module.App as () => Child)(), document.body)
+      expect(document.querySelector('form > span')?.textContent).toBe('field')
+      expect(document.querySelector('form > em')?.textContent).toBe('deep')
+      dispose()
+    }
+  })
+
   it('keeps prop expressions lazy until the component reads them', () => {
     const source = `
 function Child(props) { return <span>{props.value}</span> }

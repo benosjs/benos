@@ -1,0 +1,51 @@
+{
+  "name": "@benosjs/flagship",
+  "version": "0.4.0",
+  "description": "The Benos 0.5 flagship project editor as executable code, with the equivalent React stack for comparison.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/benosjs/benos#readme",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
+  },
+  "scripts": {
+    "dev": "vite --config vite.config.ts",
+    "build": "vite build --config vite.config.ts && FLAGSHIP_FRAMEWORK=react vite build --config vite.config.ts && FLAGSHIP_FRAMEWORK=react-shadcn vite build --config vite.config.ts",
+    "build:plain": "FLAGSHIP_SCHEMA=plain vite build --config vite.config.ts && FLAGSHIP_SCHEMA=plain FLAGSHIP_FRAMEWORK=react vite build --config vite.config.ts && FLAGSHIP_SCHEMA=plain FLAGSHIP_FRAMEWORK=react-shadcn vite build --config vite.config.ts",
+    "typecheck": "tsc -p tsconfig.json && tsc -p tsconfig.react.json",
+    "lines": "node scripts/count-lines.mjs",
+    "compare": "pnpm build && pnpm build:plain && node scripts/compare.mjs"
+  },
+  "dependencies": {
+    "@benosjs/core": "workspace:*",
+    "@benosjs/dom": "workspace:*",
+    "@benosjs/forms": "workspace:*",
+    "@benosjs/query": "workspace:*",
+    "@benosjs/router": "workspace:*",
+    "@tanstack/react-form": "1.33.5",
+    "@tanstack/react-query": "5.104.1",
+    "@tanstack/react-router": "1.170.41",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@benosjs/vite": "workspace:*",
+    "@types/node": "^22.19.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "arktype": "2.2.8",
+    "typescript": "^5.9.3",
+    "valibot": "1.5.0",
+    "vite": "8.3.5"
+  },
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
+  }
+}

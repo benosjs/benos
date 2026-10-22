@@ -93,13 +93,22 @@ function jsxNameExpression(
         : t.identifier(node.name)
     return t.stringLiteral(node.name)
   }
-  if (t.isJSXMemberExpression(node))
-    return t.memberExpression(
-      jsxNameExpression(node.object),
-      jsxNameExpression(node.property),
-    )
+  if (t.isJSXMemberExpression(node)) return jsxMemberExpression(node)
   if (t.isJSXNamespacedName(node)) return t.stringLiteral(nameOf(node))
   return t.stringLiteral(nameOf(node))
+}
+
+/**
+ * A member tag such as `<form.Field>` or `<ui.forms.Input>` is always a value:
+ * its object is a variable even when it starts with a lowercase letter.
+ */
+function jsxMemberExpression(node: t.JSXMemberExpression): t.MemberExpression {
+  const object = t.isJSXMemberExpression(node.object)
+    ? jsxMemberExpression(node.object)
+    : node.object.name === 'this'
+      ? t.thisExpression()
+      : t.identifier(node.object.name)
+  return t.memberExpression(object, t.identifier(node.property.name))
 }
 
 function attributeName(node: t.JSXAttribute['name']): string {

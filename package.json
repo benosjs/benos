@@ -46,6 +46,7 @@
     "test:create-benos:npm": "node scripts/test-create-benos-npm-install.mjs",
     "check:jsx-types": "node scripts/generate-jsx-types.mjs --check",
     "check:doc-examples": "node scripts/check-doc-examples.mjs",
+    "check:flagship": "pnpm --filter @benosjs/flagship typecheck && node examples/flagship/scripts/count-lines.mjs",
     "size": "node scripts/check-size.mjs",
     "test:browser": "node scripts/test-browser.mjs"
   },

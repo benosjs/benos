@@ -23,7 +23,8 @@ export function Input(props: InputProps): JSX.Element {
     'children',
     'aria-invalid',
   ] as const)
-  const ariaInvalid =
+  // A function, so the attributes follow `invalid` after the first render.
+  const ariaInvalid = () =>
     local.invalid || local['aria-invalid'] === true || local['aria-invalid'] === 'true'
       ? 'true'
       : (local['aria-invalid'] ?? 'false')
@@ -33,8 +34,8 @@ export function Input(props: InputProps): JSX.Element {
     <input
       {...native}
       class={['benos-input', 'benos-input--' + local.size, local.class].filter(Boolean).join(' ')}
-      aria-invalid={ariaInvalid}
-      data-invalid={ariaInvalid === 'true' ? 'true' : 'false'}
+      aria-invalid={ariaInvalid()}
+      data-invalid={ariaInvalid() === 'true' ? 'true' : 'false'}
       ref={ref}
     />
   )

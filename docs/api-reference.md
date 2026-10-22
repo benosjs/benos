@@ -182,6 +182,14 @@ receives one concrete, non-null element and registers teardown with
   loader may return a query entry whose `value()` is live. A loader runs under
   a per-match owner: `onCleanup` registered while it runs fires when the
   navigation is superseded, the match is replaced, or the router is disposed.
+- `blockNavigation({ when, confirm })` (0.5), called during component setup
+  under a `RouterOutlet`, holds link, programmatic, and Back/Forward
+  navigations while `when({ location, reason })` is true and continues only if
+  `confirm({ location })` resolves true. While held, `navigation()` is
+  `{ status: 'blocked', destination }`; a refused navigation resolves
+  `{ status: 'blocked' }`, and a refused Back or Forward is undone. While
+  `when({ reason: 'unload' })` is true, the page also warns before unloading.
+  The blocker is released with its owner.
 
 ```tsx
 import {
@@ -260,6 +268,38 @@ function ProjectPage() {
   default retry classification.
 
 See the [query guide](./query.md) for examples.
+
+## `@benosjs/forms`
+
+- `formModel({ route | source | initial, schema, from?, save, input?, validate?, leave?, message? })`
+  defines a form. `route` binds it to a route reference's loader data,
+  `source` to a tracked value, and `initial` to fixed starting values;
+  `from(record)` (pure) projects a record into fields. `schema` is any
+  Standard Schema v1 validator, whose input type types the fields and whose
+  output reaches `save`, a query mutation. A route-bound form saves
+  `{ ...params, values }` unless `input(values, { params })` is given.
+  `validate` is `'submit'` (default), `'blur'`, or `'change'`. `leave` is
+  `'confirm'` (default, route-bound forms only), `'discard'`, or a function
+  that resolves true to leave.
+- Calling the model during component setup returns an owner-bound form:
+  `Field`, `field(name)`, `submit(event?)`, `values()`, `dirty()`,
+  `remoteChanged()`, `submitting()`, `validating()`, `issues()`, `error()`,
+  `acceptRemote(name?)`, and `reset()`. `submit` never rejects; it resolves
+  `{ ok: true, value }` or `{ ok: false, reason }` with `'invalid'`, `'busy'`,
+  `'no-source'`, or `'failed'`.
+- A field handle has `name`, `id`, `errorId`, `describedBy()`, `value()`,
+  `set(value)`, `blur()`, `dirty()`, `touched()`, `remote()`,
+  `remoteChanged()`, `error()`, and `invalid()`. Pristine fields follow the
+  server; edited fields keep their value until saved, reset, or accepted.
+- `<form.Field name component label description? bind?>` renders a label, the
+  control, a description, and the error, wired with ids and
+  `aria-describedby`. The adapters `text` (default), `checked`, `choice`, and
+  `select` bind `Input`/`Textarea`, `Checkbox`/`Switch`, `RadioGroup`, and a
+  single-value `Select`. The registry `field` item styles the markup.
+- `StandardSchemaV1`, `InferInput`, `InferOutput`, `FieldPath`, and
+  `PathValue` are exported types.
+
+See the [forms guide](./forms.md) for examples.
 
 ## `@benosjs/compiler`
 

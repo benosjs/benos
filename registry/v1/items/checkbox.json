@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "release": "0.4.0",
+  "release": "0.5.0",
   "name": "checkbox",
   "type": "registry:component",
   "title": "Checkbox",
@@ -8,7 +8,7 @@
   "dependencies": [
     {
       "name": "@benosjs/primitives",
-      "version": "^0.4.0"
+      "version": "^0.5.0"
     },
     {
       "name": "@zag-js/checkbox",
@@ -18,15 +18,15 @@
   "minimumBenosVersions": [
     {
       "name": "@benosjs/core",
-      "version": "0.4.0"
+      "version": "0.5.0"
     },
     {
       "name": "@benosjs/dom",
-      "version": "0.4.0"
+      "version": "0.5.0"
     },
     {
       "name": "@benosjs/primitives",
-      "version": "0.4.0"
+      "version": "0.5.0"
     }
   ],
   "registryDependencies": [],
@@ -35,8 +35,8 @@
       "path": "checkbox.tsx",
       "target": "components/checkbox.tsx",
       "contentType": "text/tsx",
-      "content": "import { createCheckbox } from '@benosjs/primitives/checkbox'\nimport { mergeProps, splitProps } from '@benosjs/dom'\nimport type { CheckboxOptions } from '@benosjs/primitives/checkbox'\nimport type { JSX } from '@benosjs/dom'\n\nexport type CheckboxProps = Omit<JSX.IntrinsicElements['label'], 'class' | 'for' | 'ref'> &\n  Pick<\n    CheckboxOptions,\n    | 'checked'\n    | 'defaultChecked'\n    | 'disabled'\n    | 'invalid'\n    | 'required'\n    | 'readOnly'\n    | 'onCheckedChange'\n    | 'name'\n    | 'form'\n    | 'value'\n    | 'dir'\n  > & {\n    id?: string\n    class?: string\n    ref?: (element: HTMLLabelElement) => void\n  }\n\nexport function Checkbox(props: CheckboxProps): JSX.Element {\n  const merged = mergeProps({ defaultChecked: false }, props)\n  const [local, native] = splitProps(merged, [\n    'id',\n    'class',\n    'ref',\n    'children',\n    'checked',\n    'defaultChecked',\n    'disabled',\n    'invalid',\n    'required',\n    'readOnly',\n    'onCheckedChange',\n    'name',\n    'form',\n    'value',\n    'dir',\n  ] as const)\n  const machine = createCheckbox(() => ({\n    ...(local.id === undefined ? {} : { id: local.id }),\n    ...(local.checked === undefined ? {} : { checked: local.checked }),\n    defaultChecked: local.defaultChecked,\n    ...(local.disabled === undefined ? {} : { disabled: local.disabled }),\n    ...(local.invalid === undefined ? {} : { invalid: local.invalid }),\n    ...(local.required === undefined ? {} : { required: local.required }),\n    ...(local.readOnly === undefined ? {} : { readOnly: local.readOnly }),\n    ...(local.onCheckedChange === undefined ? {} : { onCheckedChange: local.onCheckedChange }),\n    ...(local.name === undefined ? {} : { name: local.name }),\n    ...(local.form === undefined ? {} : { form: local.form }),\n    ...(local.value === undefined ? {} : { value: local.value }),\n    ...(local.dir === undefined ? {} : { dir: local.dir }),\n  }))\n  const api = machine.api\n  const root = api().getRootProps()\n  const rootRef = root.ref as ((element: HTMLLabelElement) => void) | undefined\n  const ref = (element: HTMLLabelElement) => {\n    rootRef?.(element)\n    local.ref?.(element)\n  }\n\n  return (\n    <label\n      {...root}\n      {...native}\n      id={local.id}\n      class={['benos-checkbox', local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      <input {...api().getHiddenInputProps()} />\n      <span class=\"benos-checkbox__control\" {...api().getControlProps()}>\n        <span aria-hidden=\"true\" {...api().getIndicatorProps()}>\n          ✓\n        </span>\n      </span>\n      <span class=\"benos-checkbox__label\" {...api().getLabelProps()}>\n        {local.children}\n      </span>\n    </label>\n  )\n}\n",
-      "checksum": "sha256:e55a685ec2c845d54ec69491d0d603897ac93f28742cbf92e7502c62305b59e8"
+      "content": "import { createCheckbox } from '@benosjs/primitives/checkbox'\nimport { mergeProps, splitProps } from '@benosjs/dom'\nimport type { CheckboxOptions } from '@benosjs/primitives/checkbox'\nimport type { JSX } from '@benosjs/dom'\n\nexport type CheckboxProps = Omit<JSX.IntrinsicElements['label'], 'class' | 'for' | 'ref'> &\n  Pick<\n    CheckboxOptions,\n    | 'checked'\n    | 'defaultChecked'\n    | 'disabled'\n    | 'invalid'\n    | 'required'\n    | 'readOnly'\n    | 'onCheckedChange'\n    | 'name'\n    | 'form'\n    | 'value'\n    | 'dir'\n  > & {\n    id?: string\n    class?: string\n    ref?: (element: HTMLLabelElement) => void\n  }\n\nexport function Checkbox(props: CheckboxProps): JSX.Element {\n  const merged = mergeProps({ defaultChecked: false }, props)\n  const [local, native] = splitProps(merged, [\n    'id',\n    'class',\n    'ref',\n    'children',\n    'aria-describedby',\n    'checked',\n    'defaultChecked',\n    'disabled',\n    'invalid',\n    'required',\n    'readOnly',\n    'onCheckedChange',\n    'name',\n    'form',\n    'value',\n    'dir',\n  ] as const)\n  const machine = createCheckbox(() => ({\n    ...(local.id === undefined ? {} : { id: local.id }),\n    ...(local.checked === undefined ? {} : { checked: local.checked }),\n    defaultChecked: local.defaultChecked,\n    ...(local.disabled === undefined ? {} : { disabled: local.disabled }),\n    ...(local.invalid === undefined ? {} : { invalid: local.invalid }),\n    ...(local.required === undefined ? {} : { required: local.required }),\n    ...(local.readOnly === undefined ? {} : { readOnly: local.readOnly }),\n    ...(local.onCheckedChange === undefined ? {} : { onCheckedChange: local.onCheckedChange }),\n    ...(local.name === undefined ? {} : { name: local.name }),\n    ...(local.form === undefined ? {} : { form: local.form }),\n    ...(local.value === undefined ? {} : { value: local.value }),\n    ...(local.dir === undefined ? {} : { dir: local.dir }),\n  }))\n  const api = machine.api\n  const root = api().getRootProps()\n  const rootRef = root.ref as ((element: HTMLLabelElement) => void) | undefined\n  const ref = (element: HTMLLabelElement) => {\n    rootRef?.(element)\n    local.ref?.(element)\n  }\n\n  return (\n    <label\n      {...root}\n      {...native}\n      id={local.id}\n      class={['benos-checkbox', local.class].filter(Boolean).join(' ')}\n      ref={ref}\n    >\n      {/* The input has the checkbox role, so it carries the description. */}\n      <input {...api().getHiddenInputProps()} aria-describedby={local['aria-describedby']} />\n      <span class=\"benos-checkbox__control\" {...api().getControlProps()}>\n        <span aria-hidden=\"true\" {...api().getIndicatorProps()}>\n          ✓\n        </span>\n      </span>\n      <span class=\"benos-checkbox__label\" {...api().getLabelProps()}>\n        {local.children}\n      </span>\n    </label>\n  )\n}\n",
+      "checksum": "sha256:3aaa2b60d6ac2b87e8bd93c56ba3381018be0fe5af1a76a156c487276453a547"
     },
     {
       "path": "checkbox.css",

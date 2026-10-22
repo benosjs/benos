@@ -30,6 +30,7 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
     'class',
     'ref',
     'children',
+    'aria-describedby',
     'checked',
     'defaultChecked',
     'disabled',
@@ -72,7 +73,8 @@ export function Checkbox(props: CheckboxProps): JSX.Element {
       class={['benos-checkbox', local.class].filter(Boolean).join(' ')}
       ref={ref}
     >
-      <input {...api().getHiddenInputProps()} />
+      {/* The input has the checkbox role, so it carries the description. */}
+      <input {...api().getHiddenInputProps()} aria-describedby={local['aria-describedby']} />
       <span class="benos-checkbox__control" {...api().getControlProps()}>
         <span aria-hidden="true" {...api().getIndicatorProps()}>
           ✓

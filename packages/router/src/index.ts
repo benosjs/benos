@@ -6,6 +6,7 @@ import {
   getContext,
   onCleanup,
   signal,
+  untrack,
 } from '@benosjs/core'
 import type { ReadonlySignal, Signal } from '@benosjs/core'
 import { createRenderEffect, runWithOwner } from '@benosjs/core/internal'
@@ -90,7 +91,7 @@ type MatchContextValue = {
   ref: RouteBase | null
   handle: RuntimeMatchHandle
 } | null
-const matchContext = createContext<MatchContextValue>(null)
+const matchContext = /* @__PURE__ */ createContext<MatchContextValue>(null)
 const routeLoaders = new WeakMap<RouteBase, RuntimeLoader>()
 type ChildPath<Parent extends RouteBase, C extends string> = C &
   ValidRelative<C> &
@@ -287,6 +288,17 @@ export type NavigationResult =
   | { status: 'committed'; location: string }
   | { status: 'redirected'; location: string }
   | { status: 'superseded' }
+  | { status: 'blocked' }
+
+export interface NavigationBlocker {
+  /** Whether to hold a navigation; `unload` asks whether to warn before the page unloads. */
+  when(destination: {
+    location: string
+    reason: 'link' | 'programmatic' | 'pop' | 'unload'
+  }): boolean
+  /** Resolves true to continue the navigation. */
+  confirm(destination: { location: string }): boolean | Promise<boolean>
+}
 
 interface PendingRouteView {
   destination: string
@@ -332,6 +344,7 @@ interface RouterInternal extends Router {
   readonly announcement: ReadonlySignal<string>
   readonly notFound: (() => Child) | undefined
   retry(url: string): Promise<NavigationResult>
+  block(blocker: NavigationBlocker): () => void
   navigateLink<R extends RouteBase>(
     target: NavigationTarget<R>,
   ): Promise<NavigationResult>
@@ -440,6 +453,10 @@ export function createRouter(options: {
   const failure = signal<RouteFailureState | null>(null)
   const announcement = signal('')
   let generation = 0
+  let requests = 0
+  /** The committed entry's history position, for undoing a refused pop. */
+  let committedIndex: number | undefined
+  const blockers = new Set<NavigationBlocker>()
   let mounted = 0
   let unlisten: (() => void) | null = null
   let disposeCandidate: (() => void) | null = null
@@ -642,6 +659,7 @@ export function createRouter(options: {
       navigationState.set({ status: 'idle' })
       ready.set(true)
     })
+    committedIndex = history.index?.()
     for (const dispose of disposePrevious) dispose()
   }
   const afterCommit = (
@@ -724,6 +742,35 @@ export function createRouter(options: {
     mode: 'push' | 'replace' | 'pop' | 'initial',
     reason: 'link' | 'programmatic' | 'pop',
   ): Promise<NavigationResult> => {
+    const request = ++requests
+    const destination = canonicalUrl(input)
+    // Entries to move back after a refused pop; NaN when a position is unknown.
+    const delta = (committedIndex ?? NaN) - (history.index?.() ?? NaN)
+    // A pop has already moved the browser, so it is held only when it can be undone.
+    const blocker =
+      mode !== 'initial' &&
+      (reason !== 'pop' || delta === delta) &&
+      untrack(() =>
+        [...blockers].find((b) => b.when({ location: destination, reason })),
+      )
+    if (blocker) {
+      const previous = untrack(navigationState)
+      const held: NavigationState = { status: 'blocked', destination }
+      navigationState.set(held)
+      let allowed: boolean | undefined
+      try {
+        allowed = await blocker.confirm({ location: destination })
+      } catch {
+        // A failing confirm refuses.
+      }
+      if (request !== requests) return { status: 'superseded' }
+      if (!allowed) {
+        if (untrack(navigationState) === held) navigationState.set(previous)
+        if (delta) history.go?.(delta)
+        history.completeScrollRestoration?.()
+        return { status: 'blocked' }
+      }
+    }
     const id = ++generation
     disposeCandidate?.()
     disposeCandidate = null
@@ -733,7 +780,7 @@ export function createRouter(options: {
       candidateRoots.clear()
     }
     disposeCandidate = discardCandidate
-    let url = canonicalUrl(input)
+    let url = destination
     let redirected = false
     const seen = new Set<string>()
     navigationState.set({ status: 'loading', destination: url, reason })
@@ -907,6 +954,10 @@ export function createRouter(options: {
     announcement,
     notFound: options.notFound,
     retry: (url) => navigateUrl(url, 'replace', 'programmatic'),
+    block(blocker) {
+      blockers.add(blocker)
+      return () => blockers.delete(blocker)
+    },
     href,
     navigate: (target) =>
       navigateUrl(
@@ -947,7 +998,7 @@ type RouterContextValue = {
   router: RouterInternal
   depth: number
 } | null
-const routerContext = createContext<RouterContextValue>(null)
+const routerContext = /* @__PURE__ */ createContext<RouterContextValue>(null)
 function currentRouter(): RouterInternal {
   let context: RouterContextValue
   try {
@@ -969,8 +1020,31 @@ export function navigate<R extends RouteBase>(
 ): Promise<NavigationResult> {
   return currentRouter().navigate(target)
 }
+/**
+ * Holds navigations while `when` is true and asks `confirm` whether to
+ * continue. Owner-bound: released when the calling component is disposed.
+ * While `when({ reason: 'unload' })` is true, the page also warns before unloading.
+ */
+export function blockNavigation(blocker: NavigationBlocker): void {
+  const router = currentRouter()
+  onCleanup(router.block(blocker))
+  if (typeof document !== 'undefined')
+    effect(() => {
+      if (!blocker.when({ location: router.location(), reason: 'unload' }))
+        return
+      const warn = (event: BeforeUnloadEvent): void => {
+        event.preventDefault()
+        event.returnValue = ''
+      }
+      addEventListener('beforeunload', warn)
+      onCleanup(() => removeEventListener('beforeunload', warn))
+    })
+}
 
 export function RouterOutlet(props: { router: Router }): JSX.Element {
+  // Registered here rather than at module load, so an app that imports only
+  // blockNavigation (through @benosjs/forms) does not keep the outlet.
+  registerInternalControl(Outlet, mountOutlet)
   const router = props.router as RouterInternal
   const release = router.mount()
   onCleanup(release)
@@ -1005,7 +1079,12 @@ export function RouterOutlet(props: { router: Router }): JSX.Element {
 export function Outlet(): JSX.Element {
   throw new Error('Outlet requires the Benos DOM renderer')
 }
-registerInternalControl(Outlet, (_props, parent, before, owner) => {
+const mountOutlet: Parameters<typeof registerInternalControl>[1] = (
+  _props,
+  parent,
+  before,
+  owner,
+) => {
   const context = getContext(routerContext)
   if (!context) throw new Error('Outlet requires a RouterOutlet owner')
   const document = parent instanceof Document ? parent : parent.ownerDocument
@@ -1095,7 +1174,7 @@ registerInternalControl(Outlet, (_props, parent, before, owner) => {
     marker.remove()
   })
   return [marker]
-})
+}
 
 type AnchorProps = JSX.IntrinsicElements['a']
 export type LinkProps<R extends RouteBase> = NavigationTarget<R> &

@@ -5,6 +5,7 @@
     { "path": "./packages/dom" },
     { "path": "./packages/async" },
     { "path": "./packages/query" },
+    { "path": "./packages/forms" },
     { "path": "./packages/router" },
     { "path": "./packages/compiler" },
     { "path": "./packages/vite" },

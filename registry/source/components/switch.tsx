@@ -31,6 +31,7 @@ export function Switch(props: SwitchProps): JSX.Element {
     'class',
     'ref',
     'children',
+    'aria-describedby',
     'checked',
     'defaultChecked',
     'disabled',
@@ -75,7 +76,12 @@ export function Switch(props: SwitchProps): JSX.Element {
       class={['benos-switch', local.class].filter(Boolean).join(' ')}
       ref={ref}
     >
-      <input {...api().getHiddenInputProps()} role="switch" />
+      {/* The input has the switch role, so it carries the description. */}
+      <input
+        {...api().getHiddenInputProps()}
+        role="switch"
+        aria-describedby={local['aria-describedby']}
+      />
       <span class="benos-switch__control" {...api().getControlProps()}>
         <span class="benos-switch__thumb" {...api().getThumbProps()} />
       </span>
