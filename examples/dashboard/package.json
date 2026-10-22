@@ -31,9 +31,11 @@
     "@benosjs/compiler": "workspace:*",
     "@benosjs/core": "workspace:*",
     "@benosjs/dom": "workspace:*",
+    "@benosjs/forms": "workspace:*",
     "@benosjs/query": "workspace:*",
     "@benosjs/vite": "workspace:*",
-    "solid-js": "1.9.15"
+    "solid-js": "1.9.15",
+    "valibot": "1.5.0"
   },
   "devDependencies": {
     "vite-plugin-solid": "2.11.14",

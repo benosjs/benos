@@ -43,6 +43,7 @@ export default defineConfig({
             '@benosjs/async',
             '@benosjs/query',
             '@benosjs/router',
+            '@benosjs/forms',
           ],
         },
       }),
@@ -53,6 +54,7 @@ export default defineConfig({
       '@benosjs/router',
       '@benosjs/async',
       '@benosjs/query',
+      '@benosjs/forms',
     ],
     alias: [
       {

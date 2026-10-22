@@ -122,6 +122,9 @@ importers:
       '@benosjs/dom':
         specifier: workspace:*
         version: link:../../packages/dom
+      '@benosjs/forms':
+        specifier: workspace:*
+        version: link:../../packages/forms
       '@benosjs/query':
         specifier: workspace:*
         version: link:../../packages/query
@@ -131,6 +134,9 @@ importers:
       solid-js:
         specifier: 1.9.15
         version: 1.9.15
+      valibot:
+        specifier: 1.5.0
+        version: 1.5.0(typescript@5.9.3)
     devDependencies:
       '@playwright/test':
         specifier: ^1.55.0
@@ -243,10 +249,10 @@ importers:
       '@benosjs/query':
         specifier: workspace:*
         version: link:../query
-    devDependencies:
       '@benosjs/router':
         specifier: workspace:*
         version: link:../router
+    devDependencies:
       arktype:
         specifier: ^2.2.8
         version: 2.2.8

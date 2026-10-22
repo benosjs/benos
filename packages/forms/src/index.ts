@@ -3,6 +3,7 @@ import type { ReadonlySignal, Signal } from '@benosjs/core'
 import { jsx, mergeProps, Show, splitProps } from '@benosjs/dom'
 import type { Child, Component, JSX } from '@benosjs/dom'
 import type { Mutation } from '@benosjs/query'
+import { blockNavigation } from '@benosjs/router'
 
 const development = process.env.NODE_ENV !== 'production'
 
@@ -229,6 +230,15 @@ interface Common<S extends StandardSchemaV1, I, O> {
   /** When to validate before the first submit; afterwards every change validates. */
   validate?: 'submit' | 'blur' | 'change'
 }
+/**
+ * What a route-bound form does when the user navigates away with unsaved
+ * changes: ask with `window.confirm` (the default), let the edits go, or ask
+ * through an app dialog that resolves true to leave.
+ */
+export type LeavePolicy =
+  | 'confirm'
+  | 'discard'
+  | ((destination: { location: string }) => boolean | Promise<boolean>)
 interface RouteSource<P, D> {
   match(): { params: ReadonlySignal<P>; data: ReadonlySignal<D> }
 }
@@ -247,6 +257,7 @@ export function formModel<
   options: Common<S, I, O> & {
     route: RouteSource<P, D>
     from: (data: SourceData<D>) => InferInput<S>
+    leave?: LeavePolicy
   } & InputOption<
       P & { values: InferOutput<S> },
       InferOutput<S>,
@@ -273,6 +284,7 @@ export function formModel(o: {
   message?: (error: unknown) => string
   validate?: 'submit' | 'blur' | 'change'
   route?: RouteSource<object, unknown>
+  leave?: LeavePolicy
   source?: () => unknown
   from?(data: unknown): unknown
   initial?: () => unknown
@@ -455,6 +467,17 @@ export function formModel(o: {
     })
     const submission = signal<Submission | undefined>(undefined)
     const mine = () => ours(submission)
+    const dirty = () => each().some((r) => r.h.dirty())
+    const submitting = () => !!mine()?.p
+    const leave = o.leave ?? 'confirm'
+    if (match && leave !== 'discard')
+      blockNavigation({
+        when: () => dirty() && !submitting(),
+        confirm:
+          leave === 'confirm'
+            ? () => confirm('Discard unsaved changes?')
+            : leave,
+      })
     const clear = (r: Rec | undefined) => r?.x.set(undefined)
     /**
      * Moves focus to the first invalid control. Fields register in setup
@@ -478,9 +501,9 @@ export function formModel(o: {
       Field: (props) => FieldView(field, props),
       field,
       values,
-      dirty: () => each().some((r) => r.h.dirty()),
+      dirty,
       remoteChanged: () => each().some((r) => r.h.remoteChanged()),
-      submitting: () => !!mine()?.p,
+      submitting,
       validating: () => now(checking),
       issues,
       error: () => {

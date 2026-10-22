@@ -1,6 +1,6 @@
 # F4 — Field and UI adapter
 
-**Status:** Awaiting approval, including a decision on registry fixes below. F5 has not begun.
+**Status:** F4 approved on 2026-10-22 with the recommended registry option. The user's words: "Approve F4 with the recommended option: fix the registry gaps in F6. Start F5." The `Input`/`Textarea` `aria-invalid` binding and the `Checkbox`/`Switch` `aria-describedby` forwarding are fixed in F6 with the 0.5.0 registry build. F5 has begun.
 
 ## Delivered
 

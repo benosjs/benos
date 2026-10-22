@@ -2,15 +2,15 @@
 
 ## Current status
 
-| Sub-step                                     | Status                                                                                       |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| F0 — Plan                                    | Complete                                                                                     |
-| F1 — Design documents                        | Complete; approved, checkpoint in [`docs/checkpoints/f-f1.md`](checkpoints/f-f1.md)          |
-| F2 — Form core                               | Complete; approved, checkpoint in [`docs/checkpoints/f-f2.md`](checkpoints/f-f2.md)          |
-| F3 — Standard Schema validation              | Complete; approved, checkpoint in [`docs/checkpoints/f-f3.md`](checkpoints/f-f3.md)          |
-| F4 — Field and UI adapter                    | Complete; awaiting approval, checkpoint in [`docs/checkpoints/f-f4.md`](checkpoints/f-f4.md) |
-| F5 — Flagship integration and validation app | Not started                                                                                  |
-| F6 — Release preparation for 0.5.0           | Not started                                                                                  |
+| Sub-step                                     | Status                                                                              |
+| -------------------------------------------- | ----------------------------------------------------------------------------------- |
+| F0 — Plan                                    | Complete                                                                            |
+| F1 — Design documents                        | Complete; approved, checkpoint in [`docs/checkpoints/f-f1.md`](checkpoints/f-f1.md) |
+| F2 — Form core                               | Complete; approved, checkpoint in [`docs/checkpoints/f-f2.md`](checkpoints/f-f2.md) |
+| F3 — Standard Schema validation              | Complete; approved, checkpoint in [`docs/checkpoints/f-f3.md`](checkpoints/f-f3.md) |
+| F4 — Field and UI adapter                    | Complete; approved, checkpoint in [`docs/checkpoints/f-f4.md`](checkpoints/f-f4.md) |
+| F5 — Flagship integration and validation app | In progress                                                                         |
+| F6 — Release preparation for 0.5.0           | Not started                                                                         |
 
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.4.0, with `@benosjs/query` merge-ready and unreleased): **forms, Standard Schema validation, and the flagship integration**. This track completes 0.5.0. Query ships together with it; its version bump was held for this track ([q-q6](checkpoints/q-q6.md)).
 
@@ -96,10 +96,10 @@ Implement the approved router blocker (if approved), the flagship project editor
 
 ### F6 — Release preparation for 0.5.0
 
-Forms guide, API reference, CHANGELOG, size report, release wiring for the twelfth package, and full verification on three browsers and three operating systems. The 0.5.0 version bump covers query, forms, and the flagship integration; it is decided with me. Open or update the pull request and stop before merging.
+Forms guide, API reference, CHANGELOG, size report, release wiring for the twelfth package, the 0.5.0 registry build with the `field` item and the F4 registry fixes (`aria-invalid` as a binding in `Input` and `Textarea`, `aria-describedby` forwarded to the hidden input in `Checkbox` and `Switch`, and the expected-to-fail browser test turned into a passing one), and full verification on three browsers and three operating systems. The 0.5.0 version bump covers query, forms, and the flagship integration; it is decided with me. Open or update the pull request and stop before merging.
 
 ---
 
 ## 5. Your Immediate Task
 
-F1 is approved, including the router navigation blocker (decision 6), and the flagship amendments are applied. F3 is approved and the forms cap is raised to 3,072 B. F4 is complete: stop for review of the [F4 checkpoint](checkpoints/f-f4.md), which asks for a decision on the registry fixes. Do not start F5 until it is approved. The router blocker belongs to F5.
+F1 is approved, including the router navigation blocker (decision 6), and the flagship amendments are applied. F3 is approved and the forms cap is raised to 3,072 B. F4 is approved (2026-10-22): the registry `Input`/`Textarea` `aria-invalid` and `Checkbox`/`Switch` `aria-describedby` gaps are fixed in F6 with the 0.5.0 registry build. Build F5: the router navigation blocker with its own byte report, the forms leave policy, the flagship editor as executable code, the dashboard editor, the measured React comparison, and `docs/forms-findings.md`. Stop at the F5 checkpoint.

@@ -2,10 +2,10 @@ import { mutation, query } from '@benosjs/query'
 import {
   getProject,
   getProjects,
-  putProjectName,
+  putProject,
   putProjectStar,
 } from './projects.js'
-import type { Project } from './projects.js'
+import type { Project, ProjectEdit } from './projects.js'
 
 export const projectsQuery = query({
   fetch: (_, { signal }) => getProjects(signal),
@@ -17,10 +17,10 @@ export const projectQuery = query({
   staleTime: 30_000,
 })
 
-export const renameProject = mutation({
-  run: (input: { id: string; name: string }, { signal }) =>
-    putProjectName(input.id, input.name, signal),
-  writes: (input, saved) => [projectQuery.key(input.id).set(saved)],
+export const saveProject = mutation({
+  run: (input: { projectId: string; values: ProjectEdit }, { signal }) =>
+    putProject(input.projectId, input.values, signal),
+  writes: (input, saved) => [projectQuery.key(input.projectId).set(saved)],
   affects: () => [projectsQuery],
 })
 

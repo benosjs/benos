@@ -16,7 +16,7 @@ import {
 } from '@benosjs/query'
 import type { QueryCache } from '@benosjs/query'
 import { formModel } from '../src/index.js'
-import type { Form, StandardSchemaV1 } from '../src/index.js'
+import type { Form, LeavePolicy, StandardSchemaV1 } from '../src/index.js'
 
 interface Project {
   id: string
@@ -57,8 +57,14 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-/** The flagship editor slice: a route loader, a cached query, a save mutation, and a form. */
-function setup(options: { gcTime?: number; save?: 'manual' } = {}) {
+/**
+ * The flagship editor slice: a route loader, a cached query, a save mutation, and a form.
+ * The identity tests navigate away from edits, so they leave with 'discard'; the
+ * leave policy tests pass their own.
+ */
+function setup(
+  options: { gcTime?: number; save?: 'manual'; leave?: LeavePolicy } = {},
+) {
   const cache = createQueryCache()
   caches.push(cache)
   const server = new Map<string, Project>([
@@ -114,6 +120,8 @@ function setup(options: { gcTime?: number; save?: 'manual' } = {}) {
       ownerEmail: project.ownerEmail,
     }),
     save: saveProject,
+    // `{ leave: undefined }` tests the default.
+    ...('leave' in options ? { leave: options.leave } : { leave: 'discard' }),
   })
   let form!: Form<EditProject, EditProject, Project>
   let mounts = 0
@@ -456,5 +464,107 @@ describe('submission through the mutation', () => {
     gate(app, 0).resolve(undefined)
     await expect(pending).resolves.toMatchObject({ ok: true })
     expect(project(app, 'a').name).toBe('After disposal')
+  })
+})
+
+/** happy-dom has no window.confirm. */
+function stubConfirm(answer: boolean) {
+  const ask = vi.fn<(message?: string) => boolean>(() => answer)
+  vi.stubGlobal('confirm', ask)
+  return ask
+}
+
+describe('leave policy', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('asks with window.confirm by default and stays when refused', async () => {
+    const ask = stubConfirm(false)
+    const app = setup({ leave: undefined })
+    await vi.waitFor(() => expect(app.text()).toBe('a:Alpha'))
+    app.form().field('name').set('Edited A')
+    await expect(app.go('b')).resolves.toEqual({ status: 'blocked' })
+    expect(ask).toHaveBeenCalledWith('Discard unsaved changes?')
+    expect(app.fetches).toEqual(['a'])
+    expect(app.text()).toBe('a:Edited A')
+  })
+
+  it('leaves and discards the edits when confirmed', async () => {
+    const ask = stubConfirm(true)
+    const app = setup({ leave: 'confirm' })
+    await vi.waitFor(() => expect(app.text()).toBe('a:Alpha'))
+    app.form().field('name').set('Edited A')
+    await app.go('b')
+    expect(ask).toHaveBeenCalledTimes(1)
+    expect(app.text()).toBe('b:Beta')
+    expect(app.form().dirty()).toBe(false)
+    expect(app.mounts()).toBe(1)
+  })
+
+  it('does not ask while the form is pristine', async () => {
+    const ask = stubConfirm(false)
+    const app = setup({ leave: 'confirm' })
+    await vi.waitFor(() => expect(app.text()).toBe('a:Alpha'))
+    await app.go('b')
+    expect(app.text()).toBe('b:Beta')
+    expect(ask).not.toHaveBeenCalled()
+  })
+
+  it('uses an app dialog that resolves later', async () => {
+    let answer!: (leave: boolean) => void
+    const dialog = vi.fn(() => new Promise<boolean>((done) => (answer = done)))
+    const app = setup({ leave: dialog })
+    await vi.waitFor(() => expect(app.text()).toBe('a:Alpha'))
+    app.form().field('name').set('Edited A')
+    const pending = app.go('b')
+    expect(dialog).toHaveBeenCalledWith({ location: '/projects/b' })
+    expect(app.router.navigation()).toEqual({
+      status: 'blocked',
+      destination: '/projects/b',
+    })
+    expect(app.fetches).toEqual(['a'])
+    answer(true)
+    await pending
+    expect(app.text()).toBe('b:Beta')
+  })
+
+  it("never asks with 'discard'", async () => {
+    const ask = stubConfirm(false)
+    const app = setup({ leave: 'discard' })
+    await vi.waitFor(() => expect(app.text()).toBe('a:Alpha'))
+    app.form().field('name').set('Edited A')
+    await app.go('b')
+    expect(app.text()).toBe('b:Beta')
+    expect(ask).not.toHaveBeenCalled()
+  })
+
+  it('does not ask while the edits are being saved, or after they are saved', async () => {
+    const ask = stubConfirm(false)
+    const app = setup({ leave: 'confirm', save: 'manual' })
+    await vi.waitFor(() => expect(app.text()).toBe('a:Alpha'))
+    const form = app.form()
+    form.field('name').set('Saved A')
+    const pending = form.submit()
+    await vi.waitFor(() => expect(app.saves).toHaveLength(1))
+    expect(form.submitting()).toBe(true)
+    await app.go('b')
+    expect(app.text()).toBe('b:Beta')
+    gate(app, 0).resolve(undefined)
+    await pending
+    await app.go('a')
+    await vi.waitFor(() => expect(app.text()).toBe('a:Saved A'))
+    expect(form.dirty()).toBe(false)
+    await app.go('b')
+    expect(app.text()).toBe('b:Beta')
+    expect(ask).not.toHaveBeenCalled()
+  })
+
+  it('stops blocking when the editor is disposed', async () => {
+    const ask = stubConfirm(false)
+    const app = setup({ leave: 'confirm' })
+    await vi.waitFor(() => expect(app.text()).toBe('a:Alpha'))
+    app.form().field('name').set('Edited A')
+    while (roots.length) roots.pop()?.()
+    await expect(app.go('b')).resolves.toMatchObject({ status: 'committed' })
+    expect(ask).not.toHaveBeenCalled()
   })
 })
