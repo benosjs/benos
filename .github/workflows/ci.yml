@@ -29,6 +29,7 @@ jobs:
       - run: pnpm typecheck:types
       - run: pnpm check:jsx-types
       - run: pnpm check:doc-examples
+      - run: pnpm check:flagship
       - run: pnpm check:public-imports
       - run: pnpm check:packed
       - run: pnpm audit:template
