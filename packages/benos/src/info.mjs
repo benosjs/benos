@@ -14,6 +14,7 @@ const BENOS_PACKAGES = [
   '@benosjs/async',
   '@benosjs/query',
   '@benosjs/router',
+  '@benosjs/forms',
   '@benosjs/compiler',
   '@benosjs/vite',
   '@benosjs/eslint-plugin',

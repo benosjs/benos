@@ -18,10 +18,10 @@ function check(tag: string) {
 }
 
 describe('release tag validation', () => {
-  it('accepts a tag matching all eleven package versions', () => {
+  it('accepts a tag matching all twelve package versions', () => {
     const result = check(`v${currentVersion}`)
     expect(result.status).toBe(0)
-    expect(result.stdout).toContain('matches all 11 package versions')
+    expect(result.stdout).toContain('matches all 12 package versions')
   })
 
   it('rejects a tag when the package versions do not match', () => {

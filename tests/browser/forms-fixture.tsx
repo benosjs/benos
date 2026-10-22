@@ -105,6 +105,7 @@ function SettingsEditor() {
         component={Switch}
         bind={checked}
         label="Email notifications"
+        description="A weekly summary."
       />
       <form.Field
         name="plan"

@@ -70,20 +70,27 @@ test('form fields: labels, descriptions, and errors are linked to the controls',
   await expect(page.locator('.benos-field-error[role]')).toHaveCount(0)
 })
 
-// Known gap, pending approval: the 0.4.0 registry Input and Textarea read
-// `invalid` once during setup, so aria-invalid does not follow later changes.
-// Fixing them changes immutable 0.4.0 registry payloads; it belongs to the
-// 0.5.0 registry build. This test flips to passing when they are fixed.
-test.fail(
-  'form fields: registry Input reflects invalid after a failed submit',
-  async ({ page }) => {
-    await open(page)
-    await save(page).click()
-    await expect(
-      page.getByRole('textbox', { name: 'Display name' }),
-    ).toHaveAttribute('aria-invalid', 'true', { timeout: 1_000 })
-  },
-)
+// The 0.5.0 registry Input and Textarea bind aria-invalid, and Checkbox and
+// Switch put aria-describedby on the input that has their role (fixed in F6).
+test('form fields: registry controls reflect invalid and expose their descriptions', async ({
+  page,
+}) => {
+  await open(page)
+  const name = page.getByRole('textbox', { name: 'Display name' })
+  const bio = page.getByRole('textbox', { name: 'Bio' })
+  await expect(name).toHaveAttribute('aria-invalid', 'false')
+  await save(page).click()
+  await expect(name).toHaveAttribute('aria-invalid', 'true')
+  await expect(bio).toHaveAttribute('aria-invalid', 'true')
+  await expect(
+    page.getByRole('checkbox', { name: 'I accept the terms' }),
+  ).toHaveAccessibleDescription('Accept the terms to continue.')
+  await expect(
+    page.getByRole('switch', { name: 'Email notifications' }),
+  ).toHaveAccessibleDescription('A weekly summary.')
+  await bio.fill('Mathematician')
+  await expect(bio).toHaveAttribute('aria-invalid', 'false')
+})
 
 test('form fields: keyboard entry, focus on the first invalid field, and a successful save', async ({
   page,

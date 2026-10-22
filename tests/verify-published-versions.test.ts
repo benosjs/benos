@@ -79,7 +79,7 @@ describe('release version verification', () => {
     expect(requestTimeouts.at(-1)).toBeGreaterThan(0)
   })
 
-  it('verifies all eleven package versions concurrently', async () => {
+  it('verifies all twelve package versions concurrently', async () => {
     const viewVersion = vi.fn(
       async (_packageName: string, version: string) => version,
     )
@@ -89,7 +89,7 @@ describe('release version verification', () => {
       log: { log: vi.fn(), warn: vi.fn() },
     })
 
-    expect(viewVersion).toHaveBeenCalledTimes(11)
+    expect(viewVersion).toHaveBeenCalledTimes(12)
     expect(viewVersion.mock.calls.map(([name]) => name)).toEqual(
       RELEASE_PACKAGES,
     )

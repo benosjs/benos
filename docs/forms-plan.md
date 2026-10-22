@@ -9,8 +9,8 @@
 | F2 — Form core                               | Complete; approved, checkpoint in [`docs/checkpoints/f-f2.md`](checkpoints/f-f2.md)          |
 | F3 — Standard Schema validation              | Complete; approved, checkpoint in [`docs/checkpoints/f-f3.md`](checkpoints/f-f3.md)          |
 | F4 — Field and UI adapter                    | Complete; approved, checkpoint in [`docs/checkpoints/f-f4.md`](checkpoints/f-f4.md)          |
-| F5 — Flagship integration and validation app | Complete; awaiting approval, checkpoint in [`docs/checkpoints/f-f5.md`](checkpoints/f-f5.md) |
-| F6 — Release preparation for 0.5.0           | Not started                                                                                  |
+| F5 — Flagship integration and validation app | Complete; approved, checkpoint in [`docs/checkpoints/f-f5.md`](checkpoints/f-f5.md)          |
+| F6 — Release preparation for 0.5.0           | Complete; awaiting approval, checkpoint in [`docs/checkpoints/f-f6.md`](checkpoints/f-f6.md) |
 
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.4.0, with `@benosjs/query` merge-ready and unreleased): **forms, Standard Schema validation, and the flagship integration**. This track completes 0.5.0. Query ships together with it; its version bump was held for this track ([q-q6](checkpoints/q-q6.md)).
 
@@ -102,4 +102,4 @@ Forms guide, API reference, CHANGELOG, size report, release wiring for the twelf
 
 ## 5. Your Immediate Task
 
-F1 is approved, including the router navigation blocker (decision 6), and the flagship amendments are applied. F3 is approved and the forms cap is raised to 3,072 B. F4 is approved (2026-10-22): the registry `Input`/`Textarea` `aria-invalid` and `Checkbox`/`Switch` `aria-describedby` gaps are fixed in F6 with the 0.5.0 registry build. F5 is complete: stop for review of the [F5 checkpoint](checkpoints/f-f5.md), which asks for decisions on what a form without the router pays for the router import and on the template's Vite advisory. Do not start F6 until it is approved.
+F1 is approved, including the router navigation blocker (decision 6), and the flagship amendments are applied. F3 is approved and the forms cap is raised to 3,072 B. F4 is approved (2026-10-22): the registry `Input`/`Textarea` `aria-invalid` and `Checkbox`/`Switch` `aria-describedby` gaps are fixed in F6 with the 0.5.0 registry build. F5 is approved (2026-10-22): `@benosjs/async` and `@benosjs/router` are marked `"sideEffects": false`, and the template's Vite pin is fixed in benosjs/benos#19. F6 is complete with the 0.5.0 bump you chose: stop for review of the [F6 checkpoint](checkpoints/f-f6.md). Do not merge, tag, or publish until you authorize each step.

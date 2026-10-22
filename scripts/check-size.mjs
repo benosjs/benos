@@ -92,6 +92,16 @@ process.stdout.write(
 process.stdout.write(
   `@benosjs/core + @benosjs/dom + @benosjs/async + @benosjs/router + @benosjs/query: ${await bundledSize(['core', 'dom', 'async', 'router', 'query'])} bytes (minified + gzip)\n`,
 )
+// A form without a route still imports the router's blockNavigation; this is
+// what that import costs an app that does not use the router.
+const formsWithoutRouter = await bundledSize(['core', 'dom', 'forms'])
+const formsRouterExternal = await bundledSize(
+  ['core', 'dom', 'forms'],
+  ['@benosjs/router'],
+)
+process.stdout.write(
+  `@benosjs/core + @benosjs/dom + @benosjs/forms, router not used: ${formsWithoutRouter} bytes (minified + gzip), ${formsWithoutRouter - formsRouterExternal} of them for the router import\n`,
+)
 process.stdout.write(
   `@benosjs/core + @benosjs/dom + @benosjs/async + @benosjs/router + @benosjs/query + @benosjs/forms: ${await bundledSize(['core', 'dom', 'async', 'router', 'query', 'forms'])} bytes (minified + gzip)\n`,
 )
