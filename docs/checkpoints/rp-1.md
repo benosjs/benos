@@ -1,6 +1,6 @@
 # RP1 — Pin the CLI registry to its release tag
 
-**Status:** Implemented on branch `registry-pin` and waiting for approval. The plan was approved on 2026-10-27. The user's words: "Approved. Create the registry-pin branch and implement the plan inline, stopping at the rp-1 checkpoint." Nothing has been pushed, merged, tagged or published.
+**Status:** RP1 approved on 2026-10-27. The user's words: "Approve rp-1. Push registry-pin and open a PR against main." The plan was approved earlier the same day: "Approved. Create the registry-pin branch and implement the plan inline, stopping at the rp-1 checkpoint." The branch is pushed and a PR is open against `main`; nothing has been merged, tagged or published.
 
 ## Why
 
@@ -46,4 +46,4 @@ Not run locally: the browser suite, the size check (the CLI has no budget), and 
 
 ## Next
 
-On approval: push `registry-pin` and open a PR against `main`.
+Review and merge the PR (your decision). Users get the fix only through a 0.5.1 release, which needs separate authorization.
