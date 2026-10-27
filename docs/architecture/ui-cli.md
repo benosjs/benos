@@ -47,7 +47,7 @@ unscoped CLI and is separate from the private `benos-monorepo` workspace root.
 - Detect the project root/package manager and a supported @benosjs/dom setup.
 - Create benos.json and shared token CSS at configured destinations.
 - Preflight the existing Vite config and TypeScript config before writing. Never programmatically edit an existing `vite.config.*` file. The create-benos template includes the `@/` alias in both Vite and TypeScript configuration.
-- Configure component/CSS destinations and registry from [ui-registry.md](./ui-registry.md).
+- Configure component/CSS destinations and registry from [ui-registry.md](./ui-registry.md). The default registry resolves to the index at the CLI's own release tag; `--registry` and custom `benos.json` values are used as written.
 - If either resolver is missing the `@/` alias, print the exact Vite and/or TypeScript lines to add, then stop without writing UI files. TypeScript paths alone do not configure Vite runtime resolution.
 - Add `.benos/` to `.gitignore` idempotently; it contains local cache and conflict artifacts. `benos.lock.json` records installed registry state and must be committed.
 - Without interactive confirmation or explicit --yes, write nothing.

@@ -2,6 +2,14 @@
 
 All notable changes to Benos are documented here.
 
+## [Unreleased]
+
+### Fixed
+
+- `benos` reads its default UI registry index from its own release tag instead
+  of `main`, so merging a release before publishing it no longer breaks
+  published CLIs.
+
 ## [0.5.0] — Unreleased
 
 ### Added
