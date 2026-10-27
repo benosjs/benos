@@ -9,12 +9,28 @@ import {
 } from 'node:fs/promises'
 import { dirname, isAbsolute, posix, relative, resolve, sep } from 'node:path'
 import { createInterface } from 'node:readline/promises'
+import { fileURLToPath } from 'node:url'
 import { stdin, stdout } from 'node:process'
 import process from 'node:process'
 import { isSafePosixRelativePath } from './path-safety.mjs'
 
+const { version: CLI_VERSION } = JSON.parse(
+  await readFile(
+    resolve(dirname(fileURLToPath(import.meta.url)), '../package.json'),
+    'utf8',
+  ),
+)
+
 export const DEFAULT_REGISTRY =
   'https://raw.githubusercontent.com/benosjs/benos/main/registry/v1/index.json'
+
+// benos.json stores DEFAULT_REGISTRY to mean "the registry for this CLI".
+// Fetching it from main lets a merged but unpublished release break published
+// CLIs, so it resolves to the index at this CLI's own release tag.
+export function resolveRegistryUrl(url, version = CLI_VERSION) {
+  if (url !== DEFAULT_REGISTRY) return url
+  return `https://raw.githubusercontent.com/benosjs/benos/v${version}/registry/v1/index.json`
+}
 
 const VITE_FILES = [
   'vite.config.ts',

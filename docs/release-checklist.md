@@ -106,6 +106,10 @@ For a release:
    publishes each package sequentially and stops on the first error.
 6. Confirm all twelve `npm view <package>@<version> version` checks match the
    tag. If a CLI version must be deprecated, run and verify that separately.
+7. From 0.5.1, the `benos` CLI reads the registry from its own tag, so new
+   CLIs are unaffected by merges to `main`. CLIs up to 0.5.0 still read
+   `main`. Publish promptly after tagging, then run **Actions → Published
+   starter health → Run workflow** and confirm it passes.
 
 The workflow uses `pnpm publish --provenance`; it does not read or store an
 npm token. See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/)
