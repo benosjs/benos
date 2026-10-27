@@ -114,12 +114,12 @@ Write the type-level sketch required by risk 1 in `risks.md`: one typed declarat
 
 ## Current release and next scope
 
-Versions 0.2.0, 0.2.1, and 0.2.2 are published. The optional UI system is complete and shipped: primitives, the source-owned component registry, `benos init/add/list/diff/update`, and theming are part of the released product.
+Versions 0.2.0 through 0.5.0 are published. The optional UI system is complete and shipped: primitives, the source-owned component registry, `benos init/add/list/diff/update`, and theming are part of the released product. 0.4.0 shipped async resources and the router ([router-async-plan.md](./router-async-plan.md)); 0.5.0 shipped query, forms, and the flagship integration as executable code ([query-plan.md](./query-plan.md), [forms-plan.md](./forms-plan.md)).
 
-The router and async track is prepared for 0.4.0 in [router-async-plan.md](./router-async-plan.md). Upcoming framework work remains blocks, query, forms, the full flagship integration, SSR, and devtools. The Phase 5d type-level sketch is complete; the integrated runtime modules remain upcoming. The sortable table's production initial render is the leading performance item: recorded workloads are roughly 2× Solid (2.46× at 10,000 rows and 2.72× at 5,000 rows); sorting is much closer.
+Upcoming framework work is blocks, SSR, and devtools. The sortable table's production initial render is the leading performance item: recorded workloads are roughly 2× Solid (2.46× at 10,000 rows and 2.72× at 5,000 rows); sorting is much closer.
 
-The top CLI follow-up for the next patch is to extend the no-project error with a nearby-folder suggestion: `Did you mean to run this in <folder>?`
+The top CLI follow-up for the next patch is reading the default registry index from the CLI's own release tag (benosjs/benos#20).
 
 ## Scope boundary
 
-Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. The router, async resources, Suspense, and transitions are scoped by the router and async track for 0.4.0. Blocks, forms, query, the full flagship integration, SSR/hydration, devtools, and React interop remain upcoming unless a later approved plan changes this document.
+Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. The router, async resources, Suspense, and transitions shipped in 0.4.0; query, forms, and the flagship integration shipped in 0.5.0. Blocks, SSR/hydration, devtools, and React interop remain upcoming unless a later approved plan changes this document.

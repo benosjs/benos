@@ -1,6 +1,6 @@
 # Benos roadmap
 
-Versions 0.2.0 through 0.4.0 are published. The phase plan and completed work live in
+Versions 0.2.0 through 0.5.0 are published. The phase plan and completed work live in
 [plan.md](./plan.md); this roadmap tracks shipped optional modules and upcoming
 framework work.
 
@@ -37,25 +37,29 @@ bin symlinks and Windows command shims. Users should install a current release.
   nested layouts, lazy loading, route loaders, pending navigation, and focus
   and scroll management. See the [router guide](./router.md).
 
+## Shipped in 0.5.0
+
+- **Query:** `@benosjs/query` with caching, mutations, invalidation, retries,
+  optimistic updates, cancellation, and route loader integration. See the
+  [query guide](./query.md).
+- **Forms:** `@benosjs/forms` with identity-aware form models, Standard Schema
+  validation, accessible fields, and a leave policy. See the
+  [forms guide](./forms.md).
+- **Flagship integration:** the editor connecting typed routes, data, forms,
+  and the cache as executable code
+  ([flagship-integration.md](./architecture/flagship-integration.md)). SSR
+  integration follows the SSR module.
+
 ## Upcoming framework modules
 
 - **Blocks:** reusable application patterns such as login and dashboard flows,
   built on the router and forms modules.
-- **Query, forms, and the flagship integration (0.5.0):** `@benosjs/query`
-  with caching, mutations, invalidation, retries, optimistic updates,
-  cancellation, and route loader integration; `@benosjs/forms` with
-  identity-aware form models, Standard Schema validation, accessible fields,
-  and a leave policy; and the flagship editor connecting them as executable
-  code ([flagship-integration.md](./architecture/flagship-integration.md)).
-  Prepared for release on the `forms` branch; see the
-  [query guide](./query.md) and [forms guide](./forms.md). SSR integration
-  follows the SSR module.
 - **SSR:** server rendering, hydration, streaming, and async resource
   serialization.
 - **Devtools:** visualize the reactive graph and explain why a DOM node updated.
 
 ## Next CLI patch
 
-- Improve the no-project error with the nearby-folder suggestion
-  `Did you mean to run this in <folder>?`. This is planned work; it is not
-  implemented yet.
+- Read the default UI registry index from the CLI's own release tag instead
+  of `main`, so a release merged before it is published cannot break
+  published CLIs (benosjs/benos#20).
