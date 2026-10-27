@@ -9,8 +9,10 @@ All notable changes to Benos are documented here.
 - `benos` reads its default UI registry index from its own release tag instead
   of `main`, so merging a release before publishing it no longer breaks
   published CLIs.
+- Update the starter template's `happy-dom` to 21.0.4 so a fresh scaffold has
+  no high-severity audit advisories (GHSA-834v-8h66-3h79).
 
-## [0.5.0] — Unreleased
+## [0.5.0] — 2026-10-27
 
 ### Added
 

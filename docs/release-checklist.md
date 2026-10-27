@@ -2,14 +2,16 @@
 
 ## Published release state
 
-- Versions `0.2.0` through `0.4.0` are published. Through `0.3.3` this
+- Versions `0.2.0` through `0.5.0` are published. Through `0.3.3` this
   covers the original eight packages: `@benosjs/core`, `@benosjs/dom`,
   `@benosjs/compiler`, `@benosjs/vite`, `@benosjs/eslint-plugin`,
   `@benosjs/primitives`, `benos`, and `create-benos`. From `0.4.0`,
   `@benosjs/async` and `@benosjs/router` are also published, for ten
-  packages.
-- Trusted publishing is configured for all ten packages, so future releases
-  use the automated release below.
+  packages. From `0.5.0`, `@benosjs/query` and `@benosjs/forms` are also
+  published, for twelve packages.
+- Trusted publishing is configured for the original ten packages.
+  `@benosjs/query` and `@benosjs/forms` still need it (see the 0.5.0 section
+  below) before the automated release can publish all twelve.
 - The optional UI system shipped in 0.2.0: primitives, 19 registry components,
   the `benos` component CLI, and theming.
 - `benos@0.2.0` is deprecated. The 0.2.1 release notes document the launcher
@@ -45,7 +47,9 @@ From 0.4.1 on, use the automated release for all ten packages.
 
 ## First publish of `@benosjs/query` and `@benosjs/forms` (0.5.0)
 
-**Not done yet.** `@benosjs/query` and `@benosjs/forms` are new in 0.5.0. As
+**Published on 2026-10-27; step 4 is still open.** All twelve packages were
+published manually and the `0.5.0` changelog section is dated. Trusted
+publishing for `@benosjs/query` and `@benosjs/forms` is not configured yet. `@benosjs/query` and `@benosjs/forms` are new in 0.5.0. As
 with async and router in 0.4.0, npm only allows trusted publishing on a
 package that already exists, so the automated workflow cannot publish their
 first versions, and it publishes sequentially and stops on the first error.
