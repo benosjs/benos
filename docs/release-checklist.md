@@ -66,6 +66,19 @@ Release 0.5.0 this way:
 
 From 0.5.1 on, use the automated release for all twelve packages.
 
+## Release 0.5.1
+
+0.5.1 is a CLI and starter patch: the `benos` CLI reads its default registry
+index from its own release tag, and the starter template's `happy-dom` is
+updated for GHSA-834v-8h66-3h79. The registry stays at release `0.5.0`; no
+item or minimum version changes.
+
+Before tagging `v0.5.1`, configure trusted publishing for `@benosjs/query` and
+`@benosjs/forms` (step 4 of the 0.5.0 section above). Then follow the
+automated release below. If that configuration is not in place, the `publish`
+job fails at `@benosjs/query`; reject the approval and use the manual
+fallback instead. Date the `0.5.1` section in `CHANGELOG.md` when publishing.
+
 ## Automated release (default for future versions)
 
 The `.github/workflows/release.yml` workflow runs when a `v*` tag is pushed.

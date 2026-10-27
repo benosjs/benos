@@ -2,7 +2,7 @@
 
 All notable changes to Benos are documented here.
 
-## [Unreleased]
+## [0.5.1] — Unreleased
 
 ### Fixed
 
