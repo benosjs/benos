@@ -37,6 +37,7 @@ Branch: `registry-pin` from `main` (`5ec11d2`). Don't merge, tag or publish with
 ### Task 1: `resolveRegistryUrl`
 
 **Files:**
+
 - Modify: `packages/benos/src/project.mjs:1-17`
 - Test: `tests/benos-registry-url.test.ts`
 
@@ -126,6 +127,7 @@ git commit -m "feat(benos): resolve the default registry to the CLI release tag"
 All four index readers (`add.mjs:283`, `diff.mjs:136`, `update.mjs:301`, `list.mjs:28`) go through `loadIndex`, so this is the only place the change is needed.
 
 **Files:**
+
 - Modify: `packages/benos/src/registry.mjs:14` (import) and `:474-489` (`loadIndex`)
 - Test: `tests/benos-registry-url.test.ts`
 

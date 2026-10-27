@@ -9,12 +9,16 @@ import {
 } from 'node:fs/promises'
 import { dirname, isAbsolute, posix, relative, resolve, sep } from 'node:path'
 import { createInterface } from 'node:readline/promises'
+import { fileURLToPath } from 'node:url'
 import { stdin, stdout } from 'node:process'
 import process from 'node:process'
 import { isSafePosixRelativePath } from './path-safety.mjs'
 
 const { version: CLI_VERSION } = JSON.parse(
-  await readFile(new URL('../package.json', import.meta.url), 'utf8'),
+  await readFile(
+    resolve(dirname(fileURLToPath(import.meta.url)), '../package.json'),
+    'utf8',
+  ),
 )
 
 export const DEFAULT_REGISTRY =
