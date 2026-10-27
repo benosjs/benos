@@ -12,6 +12,7 @@ import {
 import { isAbsolute, relative, resolve, sep } from 'node:path'
 import semver from 'semver'
 import { isSafePosixRelativePath } from './path-safety.mjs'
+import { resolveRegistryUrl } from './project.mjs'
 
 const MAX_BYTES = 2 * 1024 * 1024
 const NAME_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -471,7 +472,8 @@ async function getBytesWithCache(root, url, name) {
   }
 }
 
-export async function loadIndex(root, registryUrl, options = {}) {
+export async function loadIndex(root, configuredUrl, options = {}) {
+  const registryUrl = resolveRegistryUrl(configuredUrl)
   let bytes
   let downloaded
   try {
