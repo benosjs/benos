@@ -1,6 +1,6 @@
 # S3 — Hydration
 
-**Status:** Awaiting approval, with one cap decision. S2 was approved on 2026-10-28. The user's words: "Approve S2. Start S3: hydration. Stop at the s-s3 checkpoint with the measured claim-cursor cost and the cap decision."
+**Status:** Approved on 2026-10-28 with both caps as proposed: core + DOM 11,520 B, `@benosjs/dom/hydrate` 3,328 B. The user's words: "Approve S3. Raise the core+DOM cap to 11,520 B and set the @benosjs/dom/hydrate cap to 3,328 B. Start S4: data and routing integration. Stop at the s-s4 checkpoint." S4 has begun. S2 was approved on 2026-10-28. The user's words: "Approve S2. Start S3: hydration. Stop at the s-s3 checkpoint with the measured claim-cursor cost and the cap decision."
 
 ## The cap decision
 

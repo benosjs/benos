@@ -33,7 +33,7 @@ async function bundledSize(packages, external = []) {
 
 const checks = [
   ['@benosjs/core', await bundledSize(['core']), 4_608],
-  ['@benosjs/core + @benosjs/dom', await bundledSize(['core', 'dom']), 11_264],
+  ['@benosjs/core + @benosjs/dom', await bundledSize(['core', 'dom']), 11_520],
   [
     '@benosjs/async (core and DOM external)',
     await bundledSize(['async'], ['@benosjs/core', '@benosjs/dom']),
@@ -72,7 +72,7 @@ const checks = [
   [
     '@benosjs/dom/hydrate (core and DOM external)',
     await bundledSize(['dom:hydrate'], ['@benosjs/core', '@benosjs/dom']),
-    2_048,
+    3_328,
   ],
   [
     '@benosjs/server (core and DOM external)',
