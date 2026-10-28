@@ -79,19 +79,35 @@ automated release below. If that configuration is not in place, the `publish`
 job fails at `@benosjs/query`; reject the approval and use the manual
 fallback instead. Date the `0.5.1` section in `CHANGELOG.md` when publishing.
 
+## First publish of `@benosjs/server` (0.6.0)
+
+**Not done yet.** `@benosjs/server` is new in 0.6.0, so, as with query and
+forms, npm cannot trust-publish its first version. Release 0.6.0 this way:
+
+1. Merge the reviewed release change and push the `v0.6.0` tag so the
+   verification, browser, and consumer-matrix jobs run.
+2. When the `publish` job asks for `release` environment approval, reject it.
+3. Publish all thirteen packages with the manual fallback below, in its order.
+   `@benosjs/server` depends on core and DOM only, so it comes after forms.
+4. Configure trusted publishing for `@benosjs/server` with the same settings
+   as the other packages.
+5. Set the date of the `0.6.0` section in `CHANGELOG.md`.
+
+From 0.6.1 on, use the automated release for all thirteen packages.
+
 ## Automated release (default for future versions)
 
 The `.github/workflows/release.yml` workflow runs when a `v*` tag is pushed.
-It checks that the tag version matches all twelve package manifests, runs the
+It checks that the tag version matches all thirteen package manifests (from 0.6.0), runs the
 full verification suite and OS/package-manager consumer matrices, and checks
 the registry item URLs from that tag. Only after those jobs pass does the
 `publish` job wait for approval in the GitHub `release` environment. It then
 publishes in the order below with npm trusted publishing (GitHub OIDC),
-without an npm token, and verifies all twelve versions with `npm view`.
+without an npm token, and verifies every version with `npm view`.
 Trusted publishing automatically creates npm provenance for these public
 packages from this public GitHub repository.
 
-Before the first automated release, configure each of the twelve package
+Before the first automated release, configure each package's
 settings on npmjs.com under **Package → Settings → Trusted publishing**:
 
 | Field                | Value                |
@@ -103,7 +119,7 @@ settings on npmjs.com under **Package → Settings → Trusted publishing**:
 | Environment name     | `release`            |
 | Allowed action       | Direct `npm publish` |
 
-Repeat this configuration for all twelve packages. On GitHub, open the
+Repeat this configuration for every package. On GitHub, open the
 repository **Settings → Environments → New environment**, create an environment
 named `release`, add `ahomsi0` as a required reviewer, and save it. The release
 job uses this environment, so publishing remains blocked until that reviewer
@@ -111,7 +127,7 @@ approves the deployment.
 
 For a release:
 
-1. Update all twelve package versions, registry minimums, and `CHANGELOG.md`.
+1. Update every package version, registry minimums, and `CHANGELOG.md`.
 2. Merge the reviewed release change to `main` after CI is green.
 3. Create and push an annotated `vX.Y.Z` tag from the reviewed `main` commit.
    The workflow rejects the tag if its version differs from any package.
@@ -121,7 +137,7 @@ For a release:
    job becomes available.
 5. Review and approve the `release` environment deployment. The workflow
    publishes each package sequentially and stops on the first error.
-6. Confirm all twelve `npm view <package>@<version> version` checks match the
+6. Confirm every `npm view <package>@<version> version` check matches the
    tag. If a CLI version must be deprecated, run and verify that separately.
 7. From 0.5.1, the `benos` CLI reads the registry from its own tag, so new
    CLIs are unaffected by merges to `main`. CLIs up to 0.5.0 still read
@@ -149,6 +165,7 @@ pnpm --filter @benosjs/async publish --dry-run --access public --publish-branch 
 pnpm --filter @benosjs/query publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/router publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/forms publish --dry-run --access public --publish-branch main
+pnpm --filter @benosjs/server publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/compiler publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/vite publish --dry-run --access public --publish-branch main
 pnpm --filter @benosjs/eslint-plugin publish --dry-run --access public --publish-branch main
@@ -168,6 +185,7 @@ pnpm --filter @benosjs/async publish --access public --publish-branch main
 pnpm --filter @benosjs/query publish --access public --publish-branch main
 pnpm --filter @benosjs/router publish --access public --publish-branch main
 pnpm --filter @benosjs/forms publish --access public --publish-branch main
+pnpm --filter @benosjs/server publish --access public --publish-branch main
 pnpm --filter @benosjs/compiler publish --access public --publish-branch main
 pnpm --filter @benosjs/vite publish --access public --publish-branch main
 pnpm --filter @benosjs/eslint-plugin publish --access public --publish-branch main
@@ -185,6 +203,7 @@ npm view @benosjs/async version
 npm view @benosjs/query version
 npm view @benosjs/router version
 npm view @benosjs/forms version
+npm view @benosjs/server version
 npm view @benosjs/compiler version
 npm view @benosjs/vite version
 npm view @benosjs/eslint-plugin version

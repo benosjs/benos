@@ -50,12 +50,20 @@ bin symlinks and Windows command shims. Users should install a current release.
   ([flagship-integration.md](./architecture/flagship-integration.md)). SSR
   integration follows the SSR module.
 
+## Prepared for 0.6.0
+
+- **Server rendering:** `@benosjs/server` and `@benosjs/dom/hydrate` with
+  opt-in data serialization, router status codes, and in-place hydration of
+  routed content; the dashboard rendered on the server. See the
+  [server rendering guide](./ssr.md) and [findings](./ssr-findings.md).
+  Streaming follows in its own track.
+
 ## Upcoming framework modules
 
 - **Blocks:** reusable application patterns such as login and dashboard flows,
   built on the router and forms modules.
-- **SSR:** server rendering, hydration, streaming, and async resource
-  serialization.
+- **Streaming:** out-of-order Suspense patches over the 0.6.0 markers and
+  payload, with strict and CSP-nonce delivery.
 - **Devtools:** visualize the reactive graph and explain why a DOM node updated.
 
 ## Next CLI patch

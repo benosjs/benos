@@ -241,7 +241,7 @@ function ProjectPage() {
 
 ## `@benosjs/query`
 
-- `query({ fetch, key?, staleTime?, gcTime?, retry?, retryDelay?, refetchOn? })`
+- `query({ fetch, key?, staleTime?, gcTime?, retry?, retryDelay?, refetchOn?, ssr? })`
   defines a cached query. `fetch(args, { signal, attempt })` infers the
   argument and data types; leave its first parameter unannotated for a query
   without arguments. Defaults: `staleTime` 5,000 ms, `gcTime` 300,000 ms, and
@@ -266,6 +266,9 @@ function ProjectPage() {
   create, provide, and resolve caches. A cache has `invalidate(...targets)`,
   `write(...writes)`, and `dispose()`. `isTransientError(error)` is the
   default retry classification.
+- `ssr: { id, serialize, deserialize }` opts a query into server
+  serialization; `resource(source, fetcher, { ssr: { id, key, serialize, deserialize } })`
+  does the same for a resource. See the [server rendering guide](./ssr.md).
 
 See the [query guide](./query.md) for examples.
 
@@ -300,6 +303,32 @@ See the [query guide](./query.md) for examples.
   `PathValue` are exported types.
 
 See the [forms guide](./forms.md) for examples.
+
+## `@benosjs/server`
+
+- `renderToString(app, { rootId?, signal?, onError?, maxPayloadBytes? })`
+  renders the app factory once inside a request root and resolves to
+  `{ html, payload, status, headers }`. `html` holds the markup between root
+  markers and the payload script; `status` is `200`, `404` for the not-found
+  view, or `302` with a `Location` header for a route `redirect`. Aborting
+  `signal` disposes the request and rejects. `rootId` (`[A-Za-z0-9_-]{1,32}`,
+  default `"0"`) distinguishes roots on one page. `onError(error, { phase })`
+  receives setup and data errors. `maxPayloadBytes` (default 1 MiB) bounds the
+  payload; exceeding it rejects with a `RangeError`.
+- Only a `resource` or `query` with an `ssr` codec is awaited and serialized,
+  as `[id, key, serialize(value)]`; the rest render their fallback. Uses only
+  Web APIs. See the [server rendering guide](./ssr.md).
+
+## `@benosjs/dom/hydrate`
+
+- `hydrate(app, host, { rootId?, payload?, onMismatch? })` claims the server
+  markup inside `host` for the same app and returns an idempotent disposer. It
+  attaches handlers once, keeps input typed before hydration, runs effects and
+  `onMount` after the claim, and keeps claiming until tracked work (a router's
+  loaders) settles. `onMismatch` receives
+  `{ rootId, path, expected, actual, recovered }` when a range or the root is
+  client rendered instead. `payload` overrides the `<script data-benos>`
+  lookup.
 
 ## `@benosjs/compiler`
 

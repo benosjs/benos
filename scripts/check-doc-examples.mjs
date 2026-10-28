@@ -17,6 +17,7 @@ const documents = [
   'docs/async.md',
   'docs/query.md',
   'docs/forms.md',
+  'docs/ssr.md',
 ]
 const { transformJsx } =
   await import('../packages/compiler/dist/js/index.development.js')
@@ -85,6 +86,8 @@ try {
           '@/styles/*': ['registry/source/css/*'],
           '@benosjs/core': ['packages/core/src/index.ts'],
           '@benosjs/dom': ['packages/dom/src/index.ts'],
+          '@benosjs/dom/hydrate': ['packages/dom/src/hydrate.ts'],
+          '@benosjs/server': ['packages/server/src/index.ts'],
           '@benosjs/dom/*': ['packages/dom/src/*'],
           '@benosjs/async': ['packages/async/src/index.ts'],
           '@benosjs/query': ['packages/query/src/index.ts'],
