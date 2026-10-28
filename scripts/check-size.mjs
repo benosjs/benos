@@ -45,7 +45,7 @@ const checks = [
       ['query'],
       ['@benosjs/core', '@benosjs/dom', '@benosjs/async'],
     ),
-    3_584,
+    3_840,
   ],
   [
     '@benosjs/forms (core, DOM, async, router, and query external)',

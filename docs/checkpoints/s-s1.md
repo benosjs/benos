@@ -1,6 +1,6 @@
 # S1 — Design documents
 
-**Status:** Awaiting approval. S0 was approved on 2026-10-28. The user's words: "Approve SSR S0. Start S1: update ssr.md to the 0.6.0 contract and stop at the s-s1 checkpoint." No implementation code was written.
+**Status:** Approved on 2026-10-28 with all twelve decisions, including the query cap of 3,840 B. The user's words: "Approve S1 with all 12 decisions, including the query cap of 3,840 B. Start S2: the server renderer. Stop at the s-s2 checkpoint." S2 has begun. S0 was approved on 2026-10-28. The user's words: "Approve SSR S0. Start S1: update ssr.md to the 0.6.0 contract and stop at the s-s1 checkpoint." No implementation code was written.
 
 ## Delivered
 
