@@ -143,3 +143,27 @@ test('a tampered range is client rendered inside its boundary', async ({
   await page.evaluate(() => window.__benosHydrate.setItems(['z']))
   await expect(page.locator('#server #list li')).toHaveText(['z'])
 })
+
+test('hydrating a 1,000-row table costs no more than a few client renders', async ({
+  page,
+  browserName,
+}) => {
+  await open(page)
+  const runs: Array<{ hydrated: number; rendered: number }> = []
+  for (let round = 0; round < 5; round++) {
+    await page.evaluate(() => window.__benosHydrate.serve('table'))
+    runs.push(await page.evaluate(() => window.__benosHydrate.timeTable()))
+  }
+  const median = (values: number[]) =>
+    values.sort((a, b) => a - b)[Math.floor(values.length / 2)] ?? 0
+  const hydrated = median(runs.map((run) => run.hydrated))
+  const rendered = median(runs.map((run) => run.rendered))
+  console.log(
+    `[${browserName}] hydrate 1,000 rows: ${hydrated.toFixed(1)} ms, client render: ${rendered.toFixed(1)} ms`,
+  )
+  expect(
+    await page.evaluate(() => window.__benosHydrate.mismatches.length),
+  ).toBe(0)
+  expect(await page.locator('#server #bench tr').count()).toBe(1000)
+  expect(hydrated).toBeLessThan(rendered * 4 + 50)
+})

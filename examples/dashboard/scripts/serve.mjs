@@ -1,4 +1,4 @@
-/* global console, process, Request, Response, AbortController */
+/* global console, process, Request, AbortController */
 // Serves the built dashboard: static assets from the client build, every
 // other GET through the server entry. It uses node:http, which Bun provides
 // as well, so `node scripts/serve.mjs` and `bun scripts/serve.mjs` both work.

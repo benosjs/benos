@@ -134,10 +134,16 @@ function serialize(node: SNode): string {
   let out = `<${tag}`
   // A textarea's value is its text content; the DOM renderer sets the
   // property, which the parser reads back from the content.
-  const textareaValue = tag === 'textarea' ? node.attrs.get('value') : undefined
-  for (const [name, value] of node.attrs)
-    if (textareaValue === undefined || name !== 'value')
-      out += ` ${name}="${escapeAttribute(value)}"`
+  const textareaValue = tag === 'textarea' ? node.attrs.value : undefined
+  for (const name in node.attrs) {
+    const value = node.attrs[name]
+    if (
+      value === undefined ||
+      (textareaValue !== undefined && name === 'value')
+    )
+      continue
+    out += ` ${name}="${escapeAttribute(value)}"`
+  }
   out += '>'
   if (textareaValue !== undefined)
     return `${out}${escapeText(textareaValue)}</${tag}>`

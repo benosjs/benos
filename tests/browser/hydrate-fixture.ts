@@ -151,10 +151,60 @@ function Data(): Child {
   })
 }
 
+/** A 1,000-row table, for timing hydration against a client render. */
+function Table(): Child {
+  const rows = Array.from({ length: 1000 }, (_, index) => ({
+    id: index + 1,
+    name: `Record ${String(index + 1).padStart(5, '0')}`,
+    team: ['Core', 'DOM', 'Compiler', 'Tooling', 'Examples'][index % 5],
+    value: ((index * 37) % 997) + 3,
+  }))
+  return jsx('table', {
+    id: 'bench',
+    children: jsx('tbody', {
+      children: jsx(For, {
+        each: rows,
+        by: (row: { id: number }) => row.id,
+        children: (
+          row: () => { id: number; name: string; team: string; value: number },
+        ) =>
+          jsx('tr', {
+            get class() {
+              return row().value > 500 ? 'high' : 'low'
+            },
+            children: [
+              jsx('td', {
+                get children() {
+                  return row().id
+                },
+              }),
+              jsx('td', {
+                get children() {
+                  return row().name
+                },
+              }),
+              jsx('td', {
+                get children() {
+                  return row().team
+                },
+              }),
+              jsx('td', {
+                get children() {
+                  return row().value
+                },
+              }),
+            ],
+          }),
+      }),
+    }),
+  })
+}
+
 const scenarios: Record<string, () => Child> = {
   basic: Basic,
   parser: ParserSensitive,
   data: Data,
+  table: Table,
 }
 
 function reset(): void {
@@ -268,6 +318,17 @@ window.__benosHydrate = {
   clientHtml: () => clientHost.innerHTML,
   serverShape: () => [...serverHost.childNodes].map(shape).join(''),
   clientShape: () => [...clientHost.childNodes].map(shape).join(''),
+  /** Milliseconds to hydrate the served table, then to client render it. */
+  timeTable: () => {
+    const app = scenarios.table as () => Child
+    const hydrateStart = performance.now()
+    disposers.push(hydrate(app, serverHost))
+    const hydrated = performance.now() - hydrateStart
+    const renderStart = performance.now()
+    disposers.push(render(app, clientHost))
+    const rendered = performance.now() - renderStart
+    return { hydrated, rendered }
+  },
   dispose: reset,
 }
 
@@ -288,6 +349,7 @@ declare global {
       clientHtml: () => string
       serverShape: () => string
       clientShape: () => string
+      timeTable: () => { hydrated: number; rendered: number }
       dispose: () => void
     }
   }

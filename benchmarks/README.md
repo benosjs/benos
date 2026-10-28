@@ -6,6 +6,8 @@ Run `pnpm build && pnpm bench:compare` to compare equivalent signal reads, a 20-
 
 Run `pnpm bench:profile` for Benos-only V8 sampled allocation estimates and peak signal subscriber counts. Sampling is approximate and run-to-run values vary. The peak count is read directly from the kernel's private graph inspection hook. The profile exercises a 10,000-effect fanout and a 200-node computed chain; it does not claim to measure retained memory after disposal.
 
+Run `pnpm build && pnpm bench:ssr [rows]` to time `renderToString` for a header, a filter form, and a sortable table of `rows` rows (default 1,000) in Benos and in Solid. The Benos component is compiled by the real compiler with the client build's `safe` output; the Solid component is the hand-lowered equivalent of babel-preset-solid's `ssr` templates. The script checks that both pages rendered the same number of rows and reports the median of seven rounds after one warmup, with the HTML sizes. Results and their reading are in [docs/ssr-findings.md](../docs/ssr-findings.md).
+
 CI runs `pnpm bench:guard` after `pnpm build`. The guard runs the production comparison seven times and fails if the median Benos/Preact ratio exceeds 2.00 for any workload. Each comparison checks matching outputs and effect counts; a missing or invalid timing also fails. Seven independent runs reduce sensitivity to one noisy sample, but shared-runner contention can still affect a performance gate.
 
 ## Recorded before and after

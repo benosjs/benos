@@ -195,12 +195,12 @@ function applyOneProp(
     return
   }
   if (booleanAttributes.has(lower)) {
-    if (value) target.attrs.set(key, '')
-    else target.attrs.delete(key)
+    if (value) target.attrs[key] = ''
+    else target.attrs[key] = undefined
     return
   }
   if (value === null || value === undefined) {
-    target.attrs.delete(key)
+    target.attrs[key] = undefined
     return
   }
   if (key === 'style' && typeof value === 'object') {
@@ -211,13 +211,13 @@ function applyOneProp(
       if (next === null || next === undefined) continue
       css += `${css ? ' ' : ''}${name}: ${String(next)};`
     }
-    if (css) target.attrs.set('style', css)
-    else target.attrs.delete('style')
+    if (css) target.attrs.style = css
+    else target.attrs.style = undefined
     return
   }
   if (urlAttributes.has(lower) && typeof value === 'string') {
     if (isDangerousUrl(value)) {
-      target.attrs.delete(key)
+      target.attrs[key] = undefined
       return
     }
     if (value.trim().toLowerCase().startsWith('data:')) {
@@ -226,12 +226,12 @@ function applyOneProp(
         target.tag === 'img' &&
         /^data:image\//i.test(value.trim())
       if (!imageData) {
-        target.attrs.delete(key)
+        target.attrs[key] = undefined
         return
       }
     }
   }
-  target.attrs.set(key, String(value))
+  target.attrs[key] = String(value)
 }
 
 function emptyComment(parent: SContainer, before: SNode | null): SNode {

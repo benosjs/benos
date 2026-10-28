@@ -16,7 +16,8 @@ export interface SElement extends Linked {
   readonly kind: 1
   readonly tag: string
   readonly ns: Namespace
-  readonly attrs: Map<string, string>
+  /** Attribute values by name; a plain object allocates less than a Map. */
+  readonly attrs: Record<string, string | undefined>
   first: SNode | null
   last: SNode | null
 }
@@ -50,7 +51,7 @@ export function element(tag: string, ns: Namespace): SElement {
     kind: 1,
     tag,
     ns,
-    attrs: new Map(),
+    attrs: {},
     first: null,
     last: null,
     parent: null,
