@@ -24,6 +24,8 @@ jobs:
       - run: pnpm exec tsc -p examples/ui-gallery/tsconfig.json --noEmit
       - run: pnpm exec tsc -p examples/dashboard/tsconfig.json --noEmit
       - run: pnpm --filter @benosjs/dashboard build
+      - run: pnpm --filter @benosjs/dashboard build:ssr
+      - run: node scripts/test-dashboard-ssr.mjs
       - run: pnpm exec playwright install --with-deps chromium firefox webkit
       - run: pnpm test
       - run: pnpm typecheck:types
@@ -56,6 +58,9 @@ jobs:
       - run: pnpm build
       - run: bun --version
       - run: bun scripts/test-server-runtime.mjs
+      - run: pnpm --filter @benosjs/dashboard build
+      - run: pnpm --filter @benosjs/dashboard build:ssr
+      - run: bun scripts/test-dashboard-ssr.mjs
 
   create-benos:
     name: create-benos npm ${{ matrix.npm_major }} (${{ matrix.os }})

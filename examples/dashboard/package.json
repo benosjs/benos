@@ -25,14 +25,19 @@
     "build:solid": "DASHBOARD_FRAMEWORK=solid vite build --config vite.config.ts",
     "build:slice:benos": "DASHBOARD_FRAMEWORK=benos DASHBOARD_ENTRY=slice vite build --config vite.config.ts",
     "build:slice:solid": "DASHBOARD_FRAMEWORK=solid DASHBOARD_ENTRY=slice vite build --config vite.config.ts",
-    "build:compare": "pnpm build:slice:benos && pnpm build:slice:solid && node scripts/compare.mjs"
+    "build:compare": "pnpm build:slice:benos && pnpm build:slice:solid && node scripts/compare.mjs",
+    "build:ssr": "DASHBOARD_FRAMEWORK=benos vite build --config vite.config.ts --ssr src/entry-server.tsx --outDir dist/server",
+    "serve": "node scripts/serve.mjs"
   },
   "dependencies": {
+    "@benosjs/async": "workspace:*",
     "@benosjs/compiler": "workspace:*",
     "@benosjs/core": "workspace:*",
     "@benosjs/dom": "workspace:*",
     "@benosjs/forms": "workspace:*",
     "@benosjs/query": "workspace:*",
+    "@benosjs/router": "workspace:*",
+    "@benosjs/server": "workspace:*",
     "@benosjs/vite": "workspace:*",
     "solid-js": "1.9.15",
     "valibot": "1.5.0"

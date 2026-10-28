@@ -1,10 +1,11 @@
 import { defineConfig } from 'vitest/config'
 import benos from '@benosjs/vite'
 
-// The server renderer walks the compiler's plan output, so these tests use
-// the plan-only optimization that an SSR build uses.
+// The server renderer walks plans and direct skeletons alike; these tests
+// compile exactly as the client build does, so both sides agree on every
+// dynamic position.
 export default defineConfig({
-  plugins: [benos({ optimization: 'none' })],
+  plugins: [benos({ optimization: 'safe' })],
   test: {
     name: 'flagship-ssr',
     include: ['tests/**/*.ssr.test.tsx'],

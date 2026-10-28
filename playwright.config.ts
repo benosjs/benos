@@ -28,5 +28,12 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,
     },
+    {
+      // The built dashboard, server rendered: needs `build` and `build:ssr`.
+      command: 'node examples/dashboard/scripts/serve.mjs --port 4175',
+      url: 'http://127.0.0.1:4175/',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+    },
   ],
 })

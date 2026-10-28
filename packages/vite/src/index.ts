@@ -46,6 +46,9 @@ export default function benos(options: BenosViteOptions = {}): Plugin {
       if (!isSourceModule(clean)) return null
       if (options.include && !matches(clean, options.include)) return null
       if (matches(clean, options.exclude)) return null
+      // A server build gets the same output as the client build: the server
+      // renderer walks plans and direct skeletons alike, and the two builds
+      // must agree on where every dynamic position is.
       let result: TransformResult
       try {
         result = transformJsx(code, {

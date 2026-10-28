@@ -32,6 +32,7 @@ import {
   type TemplatePlan,
   type TemplateScope,
 } from '@benosjs/dom'
+import type { DirectTemplateDescriptor } from '@benosjs/dom/internal'
 import {
   comment,
   element,
@@ -379,9 +380,133 @@ export function mountValue(
       before,
       owner,
     )
-  throw new Error(
-    'Direct templates cannot render on the server; compile the server build with optimization "none"',
+  if (descriptor.kind === 'direct-template')
+    return mountDirectTemplate(
+      descriptor as DirectTemplateDescriptor,
+      parent,
+      before,
+      owner,
+    )
+  throw new Error(`Unsupported Benos descriptor ${String(descriptor.kind)}`)
+}
+
+/** The n-th child, as the DOM renderer's `nodeAtPath` counts. */
+function nodeAtPath(root: SNode, path: readonly number[]): SNode {
+  let node = root
+  for (const index of path) {
+    if (node.kind !== 1) throw new Error('Invalid Benos template slot path')
+    let child = node.first
+    for (let i = 0; i < index && child; i++) child = child.next
+    if (!child) throw new Error('Invalid Benos template slot path')
+    node = child
+  }
+  return node
+}
+
+const decodeEntities = (text: string): string =>
+  text.replace(/&(amp|lt|gt);/g, (_, name: string) =>
+    name === 'amp' ? '&' : name === 'lt' ? '<' : '>',
   )
+
+/**
+ * Builds a direct template's skeleton. The compiler emits only `<tag>`,
+ * `</tag>`, escaped text, and `<!---->` child anchors; attributes arrive
+ * typed, by path, so no attribute parsing is needed.
+ */
+function buildSkeleton(html: string, parent: SContainer): SElement {
+  const stack: SContainer[] = [parent]
+  let root: SElement | null = null
+  const tokens = /<!---->|<\/([\w-]+)>|<([\w-]+)>|([^<]+)/g
+  for (const match of html.matchAll(tokens)) {
+    const current = stack[stack.length - 1] as SContainer
+    if (match[0] === '<!---->') insert(current, comment(''), null)
+    else if (match[1] !== undefined) stack.pop()
+    else if (match[2] !== undefined) {
+      const node = element(
+        match[2],
+        namespaceFor(match[2], parentNamespace(current)),
+      )
+      insert(current, node, null)
+      root ??= node
+      stack.push(node)
+    } else insert(current, text(decodeEntities(match[3] ?? '')), null)
+  }
+  if (!root || stack.length !== 1)
+    throw new Error('Invalid Benos direct template skeleton')
+  return root
+}
+
+function mountDirectTemplate(
+  descriptor: DirectTemplateDescriptor,
+  parent: SContainer,
+  before: SNode | null,
+  owner: InternalOwner,
+): Range {
+  const holder = fragment()
+  const root = buildSkeleton(descriptor.definition.html, holder)
+  for (const attribute of descriptor.definition.attributes) {
+    const target = nodeAtPath(root, attribute.path)
+    if (target.kind === 1) applyOneProp(target, attribute.name, attribute.value)
+  }
+  const nodes = moveChildren(holder, before?.parent ?? parent, before)
+  const range: Range = { nodes, owner }
+  runWithOwner(owner, () => {
+    onCleanup(() => {
+      for (const node of range.nodes) remove(node)
+    })
+    // Targets resolve before any anchor becomes a pair, which shifts siblings.
+    const targets = descriptor.definition.bindings.map((binding) =>
+      nodeAtPath(root, binding.path),
+    )
+    descriptor.definition.bindings.forEach((binding, index) => {
+      const target = targets[index] as SNode
+      if (binding.kind === 'attribute') {
+        if (target.kind === 1)
+          createRenderEffect(() =>
+            applyOneProp(
+              target,
+              binding.name ?? '',
+              binding.get(descriptor.values),
+            ),
+          )
+      } else if (binding.kind === 'child') {
+        const container = target.kind === 8 ? target.parent : null
+        if (!container) return
+        // The anchor becomes a slot pair, as a plan anchor does.
+        rejectDynamicContent(container, 'children')
+        const open = comment('b')
+        const close = comment('/b')
+        insert(container, open, target)
+        insert(container, close, target)
+        remove(target)
+        const slot: Slot = {
+          parent: container,
+          open,
+          marker: close,
+          current: null,
+          range: { nodes: [open, close], owner },
+          initialized: false,
+          value: undefined,
+          ordinal: claimInternalOrdinal(),
+        }
+        onCleanup(() => {
+          disposeMounted(slot.current)
+          slot.current = null
+          remove(open)
+          remove(close)
+          slot.range.nodes = []
+        })
+        createRenderEffect(() => {
+          const value = binding.get(descriptor.values) as Child
+          updateSlot(slot, value, owner, (branch, at) =>
+            createChildMount(value, container, at, branch),
+          )
+        })
+      }
+      // Events attach on the client only.
+    })
+  })
+  return range
 }
 
 function mountElement(

@@ -44,6 +44,7 @@
     "test:ui-cli:matrix": "node scripts/test-ui-cli-project.mjs",
     "test:packed-benos-cli": "node scripts/test-packed-benos-cli.mjs",
     "test:server-runtime": "node scripts/test-server-runtime.mjs",
+    "test:dashboard-ssr": "node scripts/test-dashboard-ssr.mjs",
     "test:create-benos:npm": "node scripts/test-create-benos-npm-install.mjs",
     "check:jsx-types": "node scripts/generate-jsx-types.mjs --check",
     "check:doc-examples": "node scripts/check-doc-examples.mjs",

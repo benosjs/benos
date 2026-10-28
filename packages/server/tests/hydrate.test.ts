@@ -400,8 +400,10 @@ describe('hydrate', () => {
       directTemplate(
         {
           id: 'd',
-          html: '<p class="x">Count: <!----></p>',
-          attributes: [],
+          html: '<p>Count: <!----></p>',
+          attributes: [
+            { path: [], name: 'class', namespace: 'html', value: 'x' },
+          ],
           bindings: [
             {
               kind: 'child',
@@ -413,7 +415,10 @@ describe('hydrate', () => {
         },
         [() => count()],
       )
-    const host = await serve(serverApp)
+    const direct = await renderToString(clientApp)
+    const plan = await renderToString(serverApp)
+    expect(direct.html).toBe(plan.html)
+    const host = await serve(clientApp)
     const p = host.querySelector('p')
     roots.push(hydrate(clientApp, host))
     expect(host.querySelector('p')).toBe(p)

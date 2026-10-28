@@ -113,6 +113,9 @@ importers:
 
   examples/dashboard:
     dependencies:
+      '@benosjs/async':
+        specifier: workspace:*
+        version: link:../../packages/async
       '@benosjs/compiler':
         specifier: workspace:*
         version: link:../../packages/compiler
@@ -128,6 +131,12 @@ importers:
       '@benosjs/query':
         specifier: workspace:*
         version: link:../../packages/query
+      '@benosjs/router':
+        specifier: workspace:*
+        version: link:../../packages/router
+      '@benosjs/server':
+        specifier: workspace:*
+        version: link:../../packages/server
       '@benosjs/vite':
         specifier: workspace:*
         version: link:../../packages/vite
