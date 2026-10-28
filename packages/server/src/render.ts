@@ -94,6 +94,7 @@ export async function renderToString(
   const signal = options.signal
   if (signal?.aborted) throw signal.reason
   const pending = new Set<Promise<unknown>>()
+  const cleanups: Array<() => void> = []
   const response = { status: 200, headers: new Headers() }
   const request: InternalRequest = {
     id: rootId,
@@ -107,6 +108,9 @@ export async function renderToString(
         pending.delete(promise)
       }
       promise.then(done, done)
+    },
+    cleanup: (fn) => {
+      cleanups.push(fn)
     },
   }
   if (signal) request.signal = signal
@@ -173,5 +177,6 @@ export async function renderToString(
   } finally {
     if (aborted) signal?.removeEventListener('abort', aborted)
     dispose()
+    for (const fn of cleanups) fn()
   }
 }

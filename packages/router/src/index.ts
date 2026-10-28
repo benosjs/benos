@@ -9,7 +9,11 @@ import {
   untrack,
 } from '@benosjs/core'
 import type { ReadonlySignal, Signal } from '@benosjs/core'
-import { createRenderEffect, runWithOwner } from '@benosjs/core/internal'
+import {
+  createRenderEffect,
+  internalRequest,
+  runWithOwner,
+} from '@benosjs/core/internal'
 import { jsx } from '@benosjs/dom'
 import {
   prepareInternalStage,
@@ -975,7 +979,24 @@ export function createRouter(options: {
         unlisten = history.listen((url) => {
           void navigateUrl(url, 'pop', 'pop')
         })
-        void navigateUrl(history.location(), 'initial', 'programmatic')
+        const initial = navigateUrl(
+          history.location(),
+          'initial',
+          'programmatic',
+        )
+        // A server or hydrating request waits for the loaders; the server
+        // also learns the response status from the outcome.
+        const request = internalRequest()
+        request?.track?.(initial)
+        void initial.then((result) => {
+          const response = request?.response
+          if (!response) return
+          if (result.status === 'redirected') {
+            response.status = 302
+            response.headers.set('Location', result.location)
+          } else if (result.status === 'committed' && active().length === 0)
+            response.status = 404
+        })
       }
       let released = false
       return () => {
@@ -1084,13 +1105,12 @@ const mountOutlet: Parameters<typeof registerInternalControl>[1] = (
   parent,
   before,
   owner,
+  host,
 ) => {
   const context = getContext(routerContext)
   if (!context) throw new Error('Outlet requires a RouterOutlet owner')
-  const document = parent instanceof Document ? parent : parent.ownerDocument
-  if (!document) throw new Error('Outlet requires a DOM document')
-  const marker = document.createComment('')
-  parent.insertBefore(marker, before)
+  const marker = host.comment(parent, before)
+  host.insert(parent, marker, before)
   let current: Registered | null = null
   let currentMode = 'empty'
   let stage: ReturnType<typeof prepareInternalStage> | null = null
@@ -1164,14 +1184,12 @@ const mountOutlet: Parameters<typeof registerInternalControl>[1] = (
     currentMode = mode
     const renderStage = render
     if (renderStage && mode !== 'suppressed')
-      stage = runWithOwner(owner, () =>
-        prepareInternalStage(renderStage, parent),
-      )
+      stage = runWithOwner(owner, () => host.stage(renderStage, parent))
     stage?.commit(marker)
   })
   onCleanup(() => {
     stage?.dispose()
-    marker.remove()
+    host.remove(marker)
   })
   return [marker]
 }

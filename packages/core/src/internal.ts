@@ -10,6 +10,8 @@ export interface InternalRequest {
   track?: (promise: Promise<unknown>) => void
   onError?: (error: unknown, info: { phase: 'setup' | 'data' }) => void
   response?: { status: number; headers: Headers }
+  /** Registers work to run when the request root is disposed. */
+  cleanup?: (fn: () => void) => void
 }
 
 interface InternalRegistry {

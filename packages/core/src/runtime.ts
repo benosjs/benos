@@ -28,6 +28,8 @@ export interface InternalRequest {
   track?: (promise: Promise<unknown>) => void
   onError?: (error: unknown, info: { phase: 'setup' | 'data' }) => void
   response?: { status: number; headers: Headers }
+  /** Registers work to run when the request root is disposed. */
+  cleanup?: (fn: () => void) => void
 }
 type Producer = StateNode<unknown> | ComputedNode<unknown>
 type Consumer = ComputedNode<unknown> | EffectNode
@@ -423,11 +425,11 @@ function disposeOwner(owner: Owner): void {
 
 export function createRoot<T>(fn: (dispose: () => void) => T): T {
   rejectComputedSideEffect('createRoot')
-  if (development && currentOwner && requestOf(currentOwner))
-    console.warn(
-      'createRoot during server rendering is not disposed with the request; create per-request state inside the app factory instead.',
-    )
   const root = createOwner(null, 'root')
+  // A root made during a request (a route loader's, for example) shares the
+  // request's caches and ids; its creator still owns its disposal.
+  const inherited = currentOwner && requestOf(currentOwner)
+  if (inherited) root.request = inherited
   const previousOwner = currentOwner
   const previousEffectRun = currentEffectRun
   let result!: T

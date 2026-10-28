@@ -36,7 +36,10 @@
     "@benosjs/dom": "workspace:*"
   },
   "devDependencies": {
-    "@benosjs/async": "workspace:*"
+    "@benosjs/async": "workspace:*",
+    "@benosjs/forms": "workspace:*",
+    "@benosjs/query": "workspace:*",
+    "@benosjs/router": "workspace:*"
   },
   "bugs": {
     "url": "https://github.com/benosjs/benos/issues"

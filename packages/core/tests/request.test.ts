@@ -180,12 +180,11 @@ describe('development warnings during a request', () => {
     expect(warn.mock.calls).toHaveLength(1)
   })
 
-  it('warns when createRoot runs inside a request', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
-    const { dispose } = withRequest('0', () => {
-      createRoot(() => undefined)
-    })
+  it('lets a root created inside a request share the request', () => {
+    const { result, dispose } = withRequest('0', () =>
+      createRoot(() => internalRequest()?.id),
+    )
+    expect(result).toBe('0')
     dispose()
-    expect(String(warn.mock.calls[0]?.[0])).toContain('createRoot')
   })
 })

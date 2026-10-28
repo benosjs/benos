@@ -43,7 +43,8 @@
     "arktype": "2.2.8",
     "typescript": "^5.9.3",
     "valibot": "1.5.0",
-    "vite": "8.3.5"
+    "vite": "8.3.5",
+    "@benosjs/server": "workspace:*"
   },
   "bugs": {
     "url": "https://github.com/benosjs/benos/issues"

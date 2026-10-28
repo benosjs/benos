@@ -168,10 +168,11 @@ export function resource<S, T>(
     if (request?.mode === 'server') {
       if (success) {
         try {
-          request.resources.set(
-            snapshotKey(pending.key as S),
-            ssr?.serialize(outcome as T),
-          )
+          // A codec may serialize to undefined to record nothing; the query
+          // cache does, because it serializes its entries itself.
+          const snapshot = ssr?.serialize(outcome as T)
+          if (snapshot !== undefined)
+            request.resources.set(snapshotKey(pending.key as S), snapshot)
         } catch (error) {
           success = false
           outcome = error

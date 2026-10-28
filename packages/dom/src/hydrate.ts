@@ -624,14 +624,25 @@ export function hydrate(
     options.onMismatch?.(info)
   }
   const { resources, queries } = readPayload(host, rootId, options.payload)
+  // Loaders and opted-in data the app starts are awaited before the claim
+  // ends, so routed content that commits after them can still claim.
+  const pending = new Set<Promise<unknown>>()
   const request: InternalRequest = {
     id: rootId,
     mode: 'hydrate',
     resources,
     queries,
+    track(promise) {
+      pending.add(promise)
+      const done = (): void => {
+        pending.delete(promise)
+      }
+      promise.then(done, done)
+    },
   }
   const claimer = createClaimer(rootId, host, options.onMismatch)
   let disposeRoot = (): void => undefined
+  let disposed = false
   let rootRange: { nodes: Node[] } = { nodes: [] }
   let rootOwner!: InternalOwner
   try {
@@ -663,35 +674,51 @@ export function hydrate(
         }),
       )
     })
-  } finally {
+  } catch (error) {
     registry.setClaim(null)
+    throw error
   }
-  if (claimable) {
-    const rest = claimer.cursor.get(close as Comment)
-    if (rest && rest !== close) {
-      const info: HydrationMismatch = {
-        rootId,
-        path: 'root',
-        expected: 'end of root',
-        actual: describe(rest),
-        recovered: 'boundary',
+  const finish = (): void => {
+    registry.setClaim(null)
+    if (disposed) return
+    if (claimable) {
+      const rest = claimer.cursor.get(close as Comment)
+      if (rest && rest !== close) {
+        const info: HydrationMismatch = {
+          rootId,
+          path: 'root',
+          expected: 'end of root',
+          actual: describe(rest),
+          recovered: 'boundary',
+        }
+        if (development)
+          console.error(
+            `Benos hydration left server nodes after the app: ${info.actual}; they are removed.`,
+          )
+        options.onMismatch?.(info)
+        for (let node: Node | null = rest; node && node !== close;) {
+          const next: Node | null = node.nextSibling
+          drop(node)
+          node = next
+        }
       }
-      if (development)
-        console.error(
-          `Benos hydration left server nodes after the app: ${info.actual}; they are removed.`,
-        )
-      options.onMismatch?.(info)
-      for (let node: Node | null = rest; node && node !== close;) {
-        const next: Node | null = node.nextSibling
-        drop(node)
-        node = next
-      }
+      drop(open as Comment)
+      drop(close as Comment)
+      claimer.sweep(rootRange.nodes)
     }
-    ;(open as Comment).remove()
-    ;(close as Comment).remove()
-    claimer.sweep(rootRange.nodes)
+    setInternalOwnerGate(rootOwner, 0)
+    notifyMount(rootOwner)
   }
-  setInternalOwnerGate(rootOwner, 0)
-  notifyMount(rootOwner)
-  return () => disposeRoot()
+  if (pending.size === 0) finish()
+  else {
+    const settle = async (): Promise<void> => {
+      while (pending.size && !disposed) await Promise.allSettled([...pending])
+      finish()
+    }
+    void settle()
+  }
+  return () => {
+    disposed = true
+    disposeRoot()
+  }
 }

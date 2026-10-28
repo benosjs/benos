@@ -7,7 +7,11 @@ import {
   untrack,
 } from '@benosjs/core'
 import type { ReadonlySignal, Signal } from '@benosjs/core'
-import { createRenderEffect } from '@benosjs/core/internal'
+import {
+  createRenderEffect,
+  internalRequest,
+  type InternalRequest,
+} from '@benosjs/core/internal'
 import { resource } from '@benosjs/async'
 import type { Resource, ResourceState } from '@benosjs/async'
 import type { JSX } from '@benosjs/dom'
@@ -39,6 +43,12 @@ export type QueryOptions<A, T> = {
   retry?: false | number | ((failureCount: number, error: unknown) => boolean)
   retryDelay?: (failureCount: number, error: unknown) => number
   refetchOn?: { focus?: boolean; reconnect?: boolean }
+  /** Opt in to server serialization: only the projection reaches the browser. */
+  ssr?: {
+    id: string
+    serialize(value: T): unknown
+    deserialize(value: unknown): T
+  }
 } & KeyOption<A>
 
 declare const targetBrand: unique symbol
@@ -172,6 +182,8 @@ interface CacheRecord extends QueryCache {
   dead: boolean
   listening: boolean
   off?: () => void
+  /** The server request this cache belongs to; it records opted-in entries. */
+  rq?: InternalRequest
 }
 
 const development = process.env.NODE_ENV !== 'production'
@@ -179,6 +191,7 @@ const noop = (): void => undefined
 const READY: ResourceState = { status: 'ready' }
 const cacheContext = createContext<QueryCache | null>(null)
 let defaultCache: CacheRecord | undefined
+const requestCaches = new WeakMap<InternalRequest, CacheRecord>()
 const caches = new WeakSet<object>()
 const released = new FinalizationRegistry<{ d: Definition; h: string }>(
   ({ d, h }) => {
@@ -313,6 +326,7 @@ function start(e: Entry, bg: boolean): Request {
     return true
   }
   e.req = r
+  e.cache.rq?.track?.(done)
   batch(() => {
     e.fetching.set(true)
     e.failures.set(0)
@@ -338,6 +352,12 @@ function start(e: Entry, bg: boolean): Request {
       (value) => {
         if (!current() || written()) return
         if (development) freeze(value)
+        const ssr = e.k.d.o.ssr
+        if (ssr && e.cache.rq)
+          e.cache.rq.queries.set(
+            `${ssr.id}\u0000${e.k.h}`,
+            ssr.serialize(value),
+          )
         e.req = null
         e.at = Date.now()
         e.stale = false
@@ -425,16 +445,26 @@ function entryFor(cache: CacheRecord, k: KeyRecord): Entry {
   if (!entries) cache.entries.set(k.d, (entries = new Map()))
   let e = entries.get(k.h)
   if (!e) {
+    // A hydrating root seeds the entry from the server's payload, fresh now.
+    const request = internalRequest()
+    const ssr = k.d.o.ssr
+    const snapshot = ssr && `${ssr.id}\u0000${k.h}`
+    const seeded =
+      request?.mode === 'hydrate' && snapshot && request.queries.has(snapshot)
+    const value = seeded
+      ? ssr.deserialize(request.queries.get(snapshot))
+      : undefined
+    if (seeded) request.queries.delete(snapshot)
     e = {
       k,
       cache,
-      value: signal<unknown>(undefined),
-      ready: signal(false),
+      value: signal<unknown>(value),
+      ready: signal(Boolean(seeded)),
       fetching: signal(false),
       failed: signal(false),
       error: signal<unknown>(undefined),
       failures: signal(0),
-      at: 0,
+      at: seeded ? Date.now() : 0,
       stale: false,
       g: 0,
       req: null,
@@ -564,8 +594,22 @@ function resolveCache(explicit?: QueryCache): CacheRecord {
       // Event handlers and module code have no current owner.
     }
   }
-  return (cache ??
-    (defaultCache ??= createQueryCache() as CacheRecord)) as CacheRecord
+  if (cache) return cache as CacheRecord
+  // The page default never serves a server request: each request gets its
+  // own cache, disposed with the request root.
+  const request = internalRequest()
+  if (request?.mode === 'server') {
+    let own = requestCaches.get(request)
+    if (!own) {
+      own = createQueryCache() as CacheRecord
+      own.rq = request
+      requestCaches.set(request, own)
+      const cache = own
+      request.cleanup?.(() => cache.dispose())
+    }
+    return own
+  }
+  return (defaultCache ??= createQueryCache() as CacheRecord)
 }
 
 /** Returns the cache in scope: the nearest provider, else the page default. */
@@ -611,10 +655,17 @@ function observe(d: Definition, source: () => unknown): QueryObserver<unknown> {
     untrack(() => select(args))
   })
   onCleanup(() => hold(undefined))
-  const inner = resource(current, (e, { signal }) => {
-    if (held !== e) hold(e)
-    return e.ready() ? e.value() : join(e, signal)
-  })
+  const inner = resource(
+    current,
+    (e, { signal }) => {
+      if (held !== e) hold(e)
+      return e.ready() ? e.value() : join(e, signal)
+    },
+    // An opted-in query may run on the server; the entry serializes itself.
+    d.o.ssr
+      ? { ssr: { id: 'q', key: () => '', serialize: noop, deserialize: noop } }
+      : {},
+  )
   const ready = (): Entry | undefined => {
     const e = current()
     return e && e.ready() ? e : undefined
