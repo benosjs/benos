@@ -1,6 +1,6 @@
 # S5 — Tooling and validation app
 
-**Status:** Awaiting approval, with one superseded S1 decision to confirm. S4 was approved on 2026-10-28. The user's words: "Approve S4. Start S5: tooling and the validation app. Stop at the s-s5 checkpoint."
+**Status:** Approved on 2026-10-28, with the same-optimization rule confirmed. The user's words: "Confirm the same-optimization rule and approve S5. Start S6: release preparation for 0.6.0. Stop at the s-s6 checkpoint before any pull request." S6 has begun. S4 was approved on 2026-10-28. The user's words: "Approve S4. Start S5: tooling and the validation app. Stop at the s-s5 checkpoint."
 
 ## Delivered
 
