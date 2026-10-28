@@ -33,6 +33,11 @@ All notable changes to Benos are documented here.
   SSR environment exactly like the client; the server renders both the plan
   and the direct template output.
 
+### Changed (registry)
+
+- Raise UI registry dependency ranges to `^0.6.0` and minimum Benos versions
+  to `0.6.0`, and build registry release `0.6.0`. No component changed.
+
 ### Sizes
 
 - Core 4,490 B and core + DOM 11,515 B (cap raised to 11,520 B for the

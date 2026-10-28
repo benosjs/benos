@@ -18,7 +18,7 @@ I propose **0.6.0 for all thirteen packages**, `@benosjs/server` included, as th
 1. **Release 0.5.1** from `main` (it carries the registry fix and the starter audit fix): configure trusted publishing for `@benosjs/query` and `@benosjs/forms`, tag `v0.5.1`, approve the publish job, date the changelog section. The automated release can handle it.
 2. Then, on this branch: bump to 0.6.0, raise the starter template's ranges to `^0.6.0`, open the pull request, merge after CI, tag `v0.6.0`, reject the publish approval, publish all thirteen manually (the checklist order), configure trusted publishing for `@benosjs/server`, and date the `0.6.0` section.
 
-The registry stays at release `0.5.0` unless you want the 0.6.0 bump to raise item minimums; nothing in this track changed a registry component.
+The registry is built as release `0.6.0`: a minor bump must raise the item ranges and minimum Benos versions to `^0.6.0`/`0.6.0`, because the `benos` CLI refuses to add components into a project whose `@benosjs/dom` range is above what the registry declares (the UI CLI matrix on the pull request caught this). No registry component changed.
 
 ## Verification on this machine
 
