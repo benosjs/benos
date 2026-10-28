@@ -2,15 +2,15 @@
 
 ## Current status
 
-| Sub-step                           | Status                                                                                       |
-| ---------------------------------- | -------------------------------------------------------------------------------------------- |
-| S0 — Plan                          | Complete; approved 2026-10-28                                                                |
-| S1 — Design documents              | Complete; approved, checkpoint in [`docs/checkpoints/s-s1.md`](checkpoints/s-s1.md)          |
-| S2 — Server renderer               | Complete; approved, checkpoint in [`docs/checkpoints/s-s2.md`](checkpoints/s-s2.md)          |
-| S3 — Hydration                     | Complete; approved, checkpoint in [`docs/checkpoints/s-s3.md`](checkpoints/s-s3.md)          |
-| S4 — Data and routing integration  | Complete; awaiting approval, checkpoint in [`docs/checkpoints/s-s4.md`](checkpoints/s-s4.md) |
-| S5 — Tooling and validation app    | Not started                                                                                  |
-| S6 — Release preparation for 0.6.0 | Not started                                                                                  |
+| Sub-step                           | Status                                                                              |
+| ---------------------------------- | ----------------------------------------------------------------------------------- |
+| S0 — Plan                          | Complete; approved 2026-10-28                                                       |
+| S1 — Design documents              | Complete; approved, checkpoint in [`docs/checkpoints/s-s1.md`](checkpoints/s-s1.md) |
+| S2 — Server renderer               | Complete; approved, checkpoint in [`docs/checkpoints/s-s2.md`](checkpoints/s-s2.md) |
+| S3 — Hydration                     | Complete; approved, checkpoint in [`docs/checkpoints/s-s3.md`](checkpoints/s-s3.md) |
+| S4 — Data and routing integration  | Complete; approved, checkpoint in [`docs/checkpoints/s-s4.md`](checkpoints/s-s4.md) |
+| S5 — Tooling and validation app    | In progress                                                                         |
+| S6 — Release preparation for 0.6.0 | Not started                                                                         |
 
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.5.0): **server rendering and hydration**. The same component functions produce HTML on the server and then hydrate into a live client owner tree, reusing the server's DOM nodes. Streaming follows in its own track and builds on the marker and payload protocols this track freezes.
 
@@ -115,4 +115,4 @@ SSR guide, API reference, CHANGELOG, size report, release wiring for `@benosjs/s
 
 ## 5. Your Immediate Task
 
-S0 is approved (2026-10-28). The user's words: "Approve SSR S0. Start S1: update ssr.md to the 0.6.0 contract and stop at the s-s1 checkpoint." S1 is approved (2026-10-28) with all twelve decisions, including the query cap of 3,840 B. The user's words: "Approve S1 with all 12 decisions, including the query cap of 3,840 B. Start S2: the server renderer. Stop at the s-s2 checkpoint." S2 is approved (2026-10-28). The user's words: "Approve S2. Start S3: hydration. Stop at the s-s3 checkpoint with the measured claim-cursor cost and the cap decision." S3 is approved (2026-10-28) with the core + DOM cap raised to 11,520 B and the `@benosjs/dom/hydrate` cap set to 3,328 B. The user's words: "Approve S3. Raise the core+DOM cap to 11,520 B and set the @benosjs/dom/hydrate cap to 3,328 B. Start S4: data and routing integration. Stop at the s-s4 checkpoint." S4 is complete: stop for review of the [S4 checkpoint](checkpoints/s-s4.md) before S5.
+S0 is approved (2026-10-28). The user's words: "Approve SSR S0. Start S1: update ssr.md to the 0.6.0 contract and stop at the s-s1 checkpoint." S1 is approved (2026-10-28) with all twelve decisions, including the query cap of 3,840 B. The user's words: "Approve S1 with all 12 decisions, including the query cap of 3,840 B. Start S2: the server renderer. Stop at the s-s2 checkpoint." S2 is approved (2026-10-28). The user's words: "Approve S2. Start S3: hydration. Stop at the s-s3 checkpoint with the measured claim-cursor cost and the cap decision." S3 is approved (2026-10-28) with the core + DOM cap raised to 11,520 B and the `@benosjs/dom/hydrate` cap set to 3,328 B. The user's words: "Approve S3. Raise the core+DOM cap to 11,520 B and set the @benosjs/dom/hydrate cap to 3,328 B. Start S4: data and routing integration. Stop at the s-s4 checkpoint." S4 is approved (2026-10-28). The user's words: "Approve S4. Start S5: tooling and the validation app. Stop at the s-s5 checkpoint." S5 is in progress: stop for review of the [S5 checkpoint](checkpoints/s-s5.md) before S6.

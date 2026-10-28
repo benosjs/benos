@@ -1,6 +1,6 @@
 # S4 — Data and routing integration
 
-**Status:** Awaiting approval. S3 was approved on 2026-10-28 with both caps. The user's words: "Approve S3. Raise the core+DOM cap to 11,520 B and set the @benosjs/dom/hydrate cap to 3,328 B. Start S4: data and routing integration. Stop at the s-s4 checkpoint."
+**Status:** Approved on 2026-10-28. The user's words: "Approve S4. Start S5: tooling and the validation app. Stop at the s-s5 checkpoint." S5 has begun. S3 was approved on 2026-10-28 with both caps. The user's words: "Approve S3. Raise the core+DOM cap to 11,520 B and set the @benosjs/dom/hydrate cap to 3,328 B. Start S4: data and routing integration. Stop at the s-s4 checkpoint."
 
 ## Delivered
 
