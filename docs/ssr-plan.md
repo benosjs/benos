@@ -2,15 +2,15 @@
 
 ## Current status
 
-| Sub-step                           | Status                           |
-| ---------------------------------- | -------------------------------- |
-| S0 — Plan                          | Brief written; awaiting approval |
-| S1 — Design documents              | Not started                      |
-| S2 — Server renderer               | Not started                      |
-| S3 — Hydration                     | Not started                      |
-| S4 — Data and routing integration  | Not started                      |
-| S5 — Tooling and validation app    | Not started                      |
-| S6 — Release preparation for 0.6.0 | Not started                      |
+| Sub-step                           | Status                        |
+| ---------------------------------- | ----------------------------- |
+| S0 — Plan                          | Complete; approved 2026-10-28 |
+| S1 — Design documents              | In progress                   |
+| S2 — Server renderer               | Not started                   |
+| S3 — Hydration                     | Not started                   |
+| S4 — Data and routing integration  | Not started                   |
+| S5 — Tooling and validation app    | Not started                   |
+| S6 — Release preparation for 0.6.0 | Not started                   |
 
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.5.0): **server rendering and hydration**. The same component functions produce HTML on the server and then hydrate into a live client owner tree, reusing the server's DOM nodes. Streaming follows in its own track and builds on the marker and payload protocols this track freezes.
 
@@ -115,4 +115,4 @@ SSR guide, API reference, CHANGELOG, size report, release wiring for `@benosjs/s
 
 ## 5. Your Immediate Task
 
-S0: this brief is written on the `ssr` branch. Stop for my review before starting S1.
+S0 is approved (2026-10-28). The user's words: "Approve SSR S0. Start S1: update ssr.md to the 0.6.0 contract and stop at the s-s1 checkpoint." S1 is in progress: stop for review of the [S1 checkpoint](checkpoints/s-s1.md) before S2.
