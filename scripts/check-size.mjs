@@ -6,7 +6,7 @@ async function bundledSize(packages, external = []) {
   const imports = packages
     .map(
       (name, index) =>
-        `export * as package${index} from './packages/${name}/dist/js/index.production.js'`,
+        `export * as package${index} from './packages/${name.split(':')[0]}/dist/js/${name.split(':')[1] ?? 'index'}.production.js'`,
     )
     .join('\n')
 
@@ -68,6 +68,11 @@ const checks = [
       ['@benosjs/core', '@benosjs/dom', '@benosjs/async'],
     ),
     7_168,
+  ],
+  [
+    '@benosjs/dom/hydrate (core and DOM external)',
+    await bundledSize(['dom:hydrate'], ['@benosjs/core', '@benosjs/dom']),
+    2_048,
   ],
   [
     '@benosjs/server (core and DOM external)',

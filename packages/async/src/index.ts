@@ -271,7 +271,7 @@ export function Suspense(_props: SuspenseProps): JSX.Element {
 }
 
 registerInternalControl(Suspense, (props, parent, before, owner, host) => {
-  const marker = host.comment(parent)
+  const marker = host.comment(parent, before)
   host.insert(parent, marker, before)
   let disposed = false
   let fallback: ReturnType<typeof prepareInternalStage> | null = null
@@ -291,7 +291,12 @@ registerInternalControl(Suspense, (props, parent, before, owner, host) => {
     tokens.clear()
   }
   const reveal = (): void => {
-    if (disposed || tokens.size) return
+    if (disposed) return
+    if (tokens.size) {
+      // Hydrated content was claimed in place; it must not show while pending.
+      if (content && !visible) content.hold?.()
+      return
+    }
     if (candidate) {
       content?.dispose()
       content = candidate

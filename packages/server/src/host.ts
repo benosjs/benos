@@ -458,8 +458,18 @@ function rejectDynamicContent(parent: SContainer, what: string): void {
     )
 }
 
+/**
+ * Stage pairs carry the stage's ordinal under its parent, counted from the
+ * control's marker, so the client claims a Suspense fallback or content only
+ * with the stage that produced it.
+ */
+const stageCounts = new WeakMap<object, number>()
+
 const serverHost: InternalHost = {
-  comment: () => comment('') as unknown as Node,
+  comment: (parent) => {
+    stageCounts.set(parent, 0)
+    return comment('') as unknown as Node
+  },
   insert: (parent, node, before) =>
     insert(
       parent as unknown as SContainer,
@@ -486,6 +496,8 @@ function prepareStage(
 } {
   const owner = createInternalOwner('branch')
   const holder = fragment()
+  const index = stageCounts.get(target) ?? 0
+  stageCounts.set(target, index + 1)
   setInternalOwnerGate(owner, 1)
   let range: Range
   try {
@@ -509,7 +521,12 @@ function prepareStage(
     commit(before = null) {
       if (disposed) throw new Error('Staged branch is disposed')
       if (committed) return
-      range.nodes = moveChildren(holder, before?.parent ?? target, before)
+      const open = comment(`b:${index}`)
+      const close = comment('/b')
+      const parent = before?.parent ?? target
+      insert(parent, open, before)
+      range.nodes = [open, ...moveChildren(holder, parent, before), close]
+      insert(parent, close, before)
       committed = true
       setInternalOwnerGate(owner, 0)
     },
@@ -682,8 +699,8 @@ function mountFor(
         )
         const entry: ForEntry = {
           owner: itemOwner,
-          open: comment('b'),
-          close: comment('/b'),
+          open: comment('i'),
+          close: comment('/i'),
           nodes: [],
           item,
         }

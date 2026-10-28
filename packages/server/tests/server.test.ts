@@ -65,7 +65,10 @@ function canon(node: Node): string {
 
 function stripMarkers(html: string): string {
   return html
-    .replace(/<!--benos:[^>]*-->|<!--\/benos:[^>]*-->|<!--\/?b-->|<!---->/g, '')
+    .replace(
+      /<!--benos:[^>]*-->|<!--\/benos:[^>]*-->|<!--\/?[bi](?::\d+)?-->|<!---->/g,
+      '',
+    )
     .replace(/<script type="application\/json"[^>]*>.*<\/script>$/s, '')
 }
 
@@ -411,7 +414,7 @@ describe('markers and ids', () => {
     )
     expect(html).toBe(
       '<!--benos:0:1--><div>' +
-        '<!--b--><!--b--><i>a</i><!--/b--><!--b--><i>b</i><!--/b--><!--/b-->' +
+        '<!--b--><!--i--><i>a</i><!--/i--><!--i--><i>b</i><!--/i--><!--/b-->' +
         '<!--b--><!----><!--/b-->' +
         '<!--b--><!--/b-->' +
         '</div><!--/benos:0-->',

@@ -22,19 +22,11 @@ export type {
 export type { InternalHost, TemplatePlan, TemplateScope } from '@benosjs/dom'
 
 import '@benosjs/dom'
-import type { Child, InternalHost } from '@benosjs/dom'
+import type { InternalHost } from '@benosjs/dom'
 
 const stage = (
   globalThis as typeof globalThis & {
-    __benosDomStage?: (
-      renderChild: () => Child,
-      target: Node,
-    ) => {
-      owner: object
-      nodes: Node[]
-      commit: (before?: Node | null) => void
-      dispose: () => void
-    }
+    __benosDomStage?: InternalHost['stage']
   }
 ).__benosDomStage
 if (!stage) throw new Error('Benos DOM staging is unavailable')

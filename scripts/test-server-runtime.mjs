@@ -61,9 +61,9 @@ function app() {
 const expected =
   '<!--benos:0:1--><main>' +
   '<label for="b0-0-1-0"><input id="b0-0-1-0"></label>' +
-  '<!--b--><!--b--><i>a</i><!--/b--><!--b--><i>b</i><!--/b--><!--/b-->' +
+  '<!--b--><!--i--><i>a</i><!--/i--><!--i--><i>b</i><!--/i--><!--/b-->' +
   '<!--b--><!----><!--/b-->' +
-  '<b><!--b-->Ada<!--/b--></b><!---->' +
+  '<!--b:1--><b><!--b-->Ada<!--/b--></b><!--/b--><!---->' +
   '</main><!--/benos:0-->' +
   '<script type="application/json" data-benos="0">{"v":1,"r":[["user","7",{"name":"Ada"}]],"q":[]}</script>'
 

@@ -38,6 +38,11 @@
       "development": "./dist/js/internal.development.js",
       "default": "./dist/js/internal.production.js"
     },
+    "./hydrate": {
+      "types": "./dist/types/hydrate.d.ts",
+      "development": "./dist/js/hydrate.development.js",
+      "default": "./dist/js/hydrate.production.js"
+    },
     "./jsx-runtime": {
       "types": "./dist/types/jsx-runtime.d.ts",
       "development": "./dist/js/jsx-runtime.development.js",

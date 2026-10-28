@@ -74,7 +74,7 @@ const controlKinds = new WeakMap<object, ControlKind>()
  * server hosts.
  */
 export interface InternalHost<N = Node> {
-  comment(parent: N): N
+  comment(parent: N, before?: N | null): N
   insert(parent: N, node: N, before: N | null): void
   remove(node: N): void
   stage(
@@ -85,6 +85,8 @@ export interface InternalHost<N = Node> {
     nodes: N[]
     commit: (before?: N | null) => void
     dispose: () => void
+    /** Takes a stage claimed in place back out of the document until commit. */
+    hold?: () => void
   }
 }
 type InternalControls = WeakMap<
@@ -266,8 +268,34 @@ function ownerDocumentOf(node: Node): Document {
 // A staged range can move out of the fragment it was mounted into, so an
 // anchor's current parent wins over the parent captured at setup.
 function insert(parent: Node, node: Node, before: Node | null): void {
-  ;(before?.parentNode ?? parent).insertBefore(node, before)
+  // A claimed node is already in place; moving it would drop focus and state.
+  const target = before?.parentNode ?? parent
+  if (claim && node.parentNode === target) return
+  target.insertBefore(node, before)
 }
+
+/**
+ * The hydrate entry's claim hook. While set, creation sites ask it for the
+ * server-rendered node at a position and skip their first attribute write;
+ * it answers `undefined` for positions it does not cover.
+ */
+type ClaimKind =
+  | 'text'
+  | 'comment'
+  | 'marker'
+  | 'element'
+  | 'template'
+  | 'direct'
+  | 'stage'
+  | 'write'
+let claim:
+  | ((
+      kind: ClaimKind,
+      parent: Node,
+      before: Node | null,
+      arg?: unknown,
+    ) => unknown)
+  | null = null
 
 function rangeConnected(range: DomRange): boolean {
   return range.nodes.length > 0 && range.nodes.every((node) => node.isConnected)
@@ -356,7 +384,9 @@ function createSlot(
   before: Node | null,
   owner: InternalOwner,
 ): Slot {
-  const marker = domHost.comment(parent) as Comment
+  const marker =
+    (claim?.('marker', parent, before) as Comment | undefined) ??
+    (domHost.comment(parent) as Comment)
   insert(parent, marker, before)
   const slot: Slot = {
     parent,
@@ -397,17 +427,19 @@ function mountValue(
     for (const item of values)
       nodes.push(...mountValue(item, parent, before, owner).nodes)
     if (nodes.length > 0) return { nodes, owner }
-    const empty = domHost.comment(parent)
+    const empty = domHost.comment(parent, before)
     insert(parent, empty, before)
     return { nodes: [empty], owner }
   }
   if (value === null || value === undefined || typeof value === 'boolean') {
-    const empty = domHost.comment(parent)
+    const empty = domHost.comment(parent, before)
     insert(parent, empty, before)
     return { nodes: [empty], owner }
   }
   if (typeof value === 'string' || typeof value === 'number') {
-    const text = ownerDocumentOf(parent).createTextNode(String(value))
+    const text =
+      (claim?.('text', parent, before, String(value)) as Text | undefined) ??
+      ownerDocumentOf(parent).createTextNode(String(value))
     insert(parent, text, before)
     return { nodes: [text], owner }
   }
@@ -443,14 +475,16 @@ function mountElement(
       : 'html'
   const namespace = namespaceFor(descriptor.tag, parentNamespace)
   const element =
-    namespace === 'html'
+    (claim?.('element', parent, before, [descriptor.tag, namespace]) as
+      Element | undefined) ??
+    (namespace === 'html'
       ? document.createElement(descriptor.tag)
       : document.createElementNS(
           namespace === 'svg'
             ? 'http://www.w3.org/2000/svg'
             : 'http://www.w3.org/1998/Math/MathML',
           descriptor.tag,
-        )
+        ))
   insert(parent, element, before)
   const range: DomRange = { nodes: [element], owner }
   runWithOwner(owner, () => {
@@ -742,7 +776,9 @@ function applyOneProp(
   value: unknown,
   namespace: 'html' | 'svg' | 'mathml',
 ): void {
-  if (typeof key !== 'string') return
+  // The server wrote a claimed element's values; skipping their first write
+  // keeps input the user typed before hydration.
+  if (typeof key !== 'string' || claim?.('write', element, null)) return
   if (propertyNames.has(key) && key in element)
     (element as unknown as Record<string, unknown>)[key] = value ?? ''
   else setAttributeValue(element, key, value, namespace)
@@ -1468,16 +1504,25 @@ function mountTemplate(
   before: Node | null,
   owner: InternalOwner,
 ): DomRange {
-  const document = ownerDocumentOf(parent)
-  const prototype = templatePrototype(document, descriptor.plan)
-  const fragment = prototype.fragment.cloneNode(true) as DocumentFragment
-  const nodes = Array.from(fragment.childNodes)
-  // Compiler slot ids are numeric; a sparse array keeps per-instance lookup
-  // direct without allocating a Map for every template mount.
-  const slots: Node[] = []
-  for (const [slot, path] of prototype.slots)
-    slots[slot] = nodeAtPath(fragment, path)
-  insert(parent, fragment, before)
+  const claimed = claim?.('template', parent, before, descriptor.plan) as
+    { nodes: Node[]; slots: Node[] } | undefined
+  let nodes: Node[]
+  let slots: Node[]
+  if (claimed) ({ nodes, slots } = claimed)
+  else {
+    const prototype = templatePrototype(
+      ownerDocumentOf(parent),
+      descriptor.plan,
+    )
+    const fragment = prototype.fragment.cloneNode(true) as DocumentFragment
+    nodes = Array.from(fragment.childNodes)
+    // Compiler slot ids are numeric; a sparse array keeps per-instance lookup
+    // direct without allocating a Map for every template mount.
+    slots = []
+    for (const [slot, path] of prototype.slots)
+      slots[slot] = nodeAtPath(fragment, path)
+    insert(parent, fragment, before)
+  }
   const range: DomRange = { nodes, owner }
   runWithOwner(owner, () => {
     onCleanup(() => removeRange(range))
@@ -1564,22 +1609,30 @@ function mountDirectTemplate(
 ): DomRange {
   const document = ownerDocumentOf(parent)
   const prototype = directTemplatePrototype(document, descriptor.definition)
-  const fragment = prototype.content.cloneNode(true) as DocumentFragment
-  const nodes = Array.from(fragment.childNodes)
+  const claimed = claim?.('direct', parent, before, prototype.content) as
+    { root: Element; at: (path: readonly number[]) => Node } | undefined
+  const fragment = claimed
+    ? null
+    : (prototype.content.cloneNode(true) as DocumentFragment)
+  const nodes: Node[] = claimed
+    ? [claimed.root]
+    : Array.from((fragment as DocumentFragment).childNodes)
   const root = nodes[0]
   if (!(root instanceof Element) || nodes.length !== 1)
     throw new Error(`Invalid direct template ${descriptor.definition.id}`)
+  const at =
+    claimed?.at ?? ((path: readonly number[]) => nodeAtPath(root, path))
   for (const attribute of descriptor.definition.attributes) {
-    const target = nodeAtPath(root, attribute.path)
+    const target = at(attribute.path)
     if (target instanceof Element)
       applyOneProp(target, attribute.name, attribute.value, attribute.namespace)
   }
-  insert(parent, fragment, before)
+  if (fragment) insert(parent, fragment, before)
   const range: DomRange = { nodes, owner }
   runWithOwner(owner, () => {
     onCleanup(() => removeRange(range))
     for (const binding of descriptor.definition.bindings) {
-      const target = nodeAtPath(root, binding.path)
+      const target = at(binding.path)
       if (binding.kind === 'attribute') {
         if (target instanceof Element)
           createRenderEffect(() =>
@@ -1827,15 +1880,24 @@ function prepareInternalStage(
   nodes: Node[]
   commit: (before?: Node | null) => void
   dispose: () => void
+  hold: () => void
 } {
   const owner = createInternalOwner('branch')
-  const fragment = ownerDocumentOf(target).createDocumentFragment()
+  // Under hydration the stage claims the server's committed nodes in place.
+  const place = claim?.('stage', target, null) as { before: Node } | undefined
+  let fragment = place ? null : ownerDocumentOf(target).createDocumentFragment()
   setInternalOwnerGate(owner, 1)
   let range: DomRange
   try {
     range = runWithOwner(owner, () =>
-      mountValue(renderChild(), fragment, null, owner),
+      mountValue(
+        renderChild(),
+        fragment ?? target,
+        place?.before ?? null,
+        owner,
+      ),
     )
+    if (place) domHost.remove(place.before)
     runWithOwner(owner, () => onCleanup(() => removeRange(range)))
   } catch (error) {
     disposeInternalOwner(owner)
@@ -1849,8 +1911,10 @@ function prepareInternalStage(
     commit(before = null) {
       if (disposed) throw new Error('Staged branch is disposed')
       if (committed) return
-      range.nodes = Array.from(fragment.childNodes)
-      moveRange(range, before?.parentNode ?? target, before)
+      if (fragment) {
+        range.nodes = Array.from(fragment.childNodes)
+        moveRange(range, before?.parentNode ?? target, before)
+      }
       committed = true
       setInternalOwnerGate(owner, 0)
       notifyMount(owner)
@@ -1858,6 +1922,11 @@ function prepareInternalStage(
     dispose: () => {
       disposed = true
       disposeInternalOwner(owner)
+    },
+    hold() {
+      if (fragment || committed) return
+      fragment = ownerDocumentOf(target).createDocumentFragment()
+      for (const node of range.nodes) fragment.appendChild(node)
     },
   }
 }
@@ -1868,6 +1937,20 @@ function prepareInternalStage(
     __benosDomControl?: typeof registerInternalControl
   }
 ).__benosDomStage = prepareInternalStage
+
+;(
+  globalThis as typeof globalThis & {
+    __benosDomHydrate?: {
+      mountValue: typeof mountValue
+      setClaim: (next: typeof claim) => void
+    }
+  }
+).__benosDomHydrate = {
+  mountValue,
+  setClaim: (next) => {
+    claim = next
+  },
+}
 
 function registerInternalControl(
   component: object,
@@ -1883,7 +1966,9 @@ function registerInternalControl(
 }
 
 const domHost: InternalHost = {
-  comment: (parent) => ownerDocumentOf(parent).createComment(''),
+  comment: (parent, before = null) =>
+    (claim?.('comment', parent, before) as Comment | undefined) ??
+    ownerDocumentOf(parent).createComment(''),
   insert,
   remove: (node) => node.parentNode?.removeChild(node),
   stage: prepareInternalStage,
