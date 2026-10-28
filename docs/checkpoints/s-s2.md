@@ -1,6 +1,6 @@
 # S2 — Server renderer
 
-**Status:** Awaiting approval. S1 was approved on 2026-10-28 with all twelve decisions. The user's words: "Approve S1 with all 12 decisions, including the query cap of 3,840 B. Start S2: the server renderer. Stop at the s-s2 checkpoint."
+**Status:** Approved on 2026-10-28. The user's words: "Approve S2. Start S3: hydration. Stop at the s-s3 checkpoint with the measured claim-cursor cost and the cap decision." S3 has begun. S1 was approved on 2026-10-28 with all twelve decisions. The user's words: "Approve S1 with all 12 decisions, including the query cap of 3,840 B. Start S2: the server renderer. Stop at the s-s2 checkpoint."
 
 ## Delivered
 
