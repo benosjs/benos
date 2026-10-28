@@ -18,6 +18,17 @@ export interface Context<T> {
 }
 
 type OwnerKind = 'root' | 'component' | 'branch' | 'effect-run' | 'boundary'
+/** Per-root record set by a server or hydrating renderer; see ssr.md. */
+export interface InternalRequest {
+  id: string
+  mode: 'server' | 'hydrate'
+  resources: Map<string, unknown>
+  queries: Map<string, unknown>
+  signal?: AbortSignal
+  track?: (promise: Promise<unknown>) => void
+  onError?: (error: unknown, info: { phase: 'setup' | 'data' }) => void
+  response?: { status: number; headers: Headers }
+}
 type Producer = StateNode<unknown> | ComputedNode<unknown>
 type Consumer = ComputedNode<unknown> | EffectNode
 type Computation = ComputedNode<unknown> | EffectNode
@@ -66,9 +77,19 @@ interface Owner {
   disposed: boolean
   disposing: boolean
   kind: OwnerKind
+  /** Creation order under the parent; a slot branch reuses its slot's. */
+  ordinal: number
+  /** Next ordinal for a child owner, a computation, a slot, or a unique id. */
+  childOrdinal: number
+  /** Set by a keyed list; the id segment used instead of the ordinal. */
+  key?: string
+  /** Set on a server or hydrating root only. */
+  request?: InternalRequest
 }
 
 interface StateNode<T> extends Sinks {
+  inRequest?: boolean
+  warnedRequest?: boolean
   kind: 'state'
   id: number
   value: T
@@ -93,6 +114,7 @@ interface ComputedNode<T> extends Sources, Sinks {
 }
 
 interface EffectNode extends Sources {
+  ordinal: number
   kind: 'effect'
   id: number
   run: () => void
@@ -151,6 +173,7 @@ let writeVersion = 0
 let nextNodeId = 1
 let nextUniqueId = 0
 let flushVersion = 0
+let activeRequests = 0
 const development = process.env.NODE_ENV !== 'production'
 const debugState = development
   ? {
@@ -164,7 +187,11 @@ function rejectComputedSideEffect(name: string): void {
     throw new Error(`${name} cannot run during computed evaluation`)
 }
 
-function createOwner(parent: Owner | null, kind: OwnerKind): Owner {
+function createOwner(
+  parent: Owner | null,
+  kind: OwnerKind,
+  ordinal?: number,
+): Owner {
   if (development) ownerCreationCount++
   const owner: Owner = {
     parent,
@@ -183,6 +210,8 @@ function createOwner(parent: Owner | null, kind: OwnerKind): Owner {
     disposed: false,
     disposing: false,
     kind,
+    ordinal: ordinal ?? (parent ? parent.childOrdinal++ : 0),
+    childOrdinal: 0,
   }
   if (parent) {
     parent.hasResources = true
@@ -202,7 +231,7 @@ function ensureCurrentEffectRunOwner(): Owner | null {
     !run.owner.disposed &&
     !run.owner.disposing
   ) {
-    run.runOwner = createOwner(run.owner, 'effect-run')
+    run.runOwner = createOwner(run.owner, 'effect-run', run.ordinal)
     currentOwner = run.runOwner
   }
   return currentOwner
@@ -326,9 +355,16 @@ function detachDependencyFreeEffect(node: EffectNode): void {
   }
 }
 
+function requestOf(owner: Owner): InternalRequest | undefined {
+  let root = owner
+  while (root.parent) root = root.parent
+  return root.request
+}
+
 function collectDisposal(owner: Owner, errors: Array<[unknown, Owner]>): void {
   if (owner.disposed) return
   owner.disposed = true
+  if (development && owner.request) activeRequests--
   owner.disposing = true
   for (const job of owner.mountJobs ?? []) gatedMounts.delete(job)
   while (owner.lastChild) collectDisposal(owner.lastChild, errors)
@@ -387,6 +423,10 @@ function disposeOwner(owner: Owner): void {
 
 export function createRoot<T>(fn: (dispose: () => void) => T): T {
   rejectComputedSideEffect('createRoot')
+  if (development && currentOwner && requestOf(currentOwner))
+    console.warn(
+      'createRoot during server rendering is not disposed with the request; create per-request state inside the app factory instead.',
+    )
   const root = createOwner(null, 'root')
   const previousOwner = currentOwner
   const previousEffectRun = currentEffectRun
@@ -419,9 +459,15 @@ export function createRoot<T>(fn: (dispose: () => void) => T): T {
 }
 
 export function createUniqueId(): string {
-  if (!currentOwner || currentOwner.disposed || currentOwner.disposing)
+  const owner = currentOwner
+  if (!owner || owner.disposed || owner.disposing)
     throw new Error('createUniqueId requires an active owner')
-  return `b${nextUniqueId++}`
+  const request = requestOf(owner)
+  if (!request) return `b${nextUniqueId++}`
+  let path = ''
+  for (let current = owner; current.parent; current = current.parent)
+    path = `-${current.key ?? current.ordinal}${path}`
+  return `b${request.id}${path}-${owner.childOrdinal++}`
 }
 
 export function onCleanup(fn: () => void): void {
@@ -767,6 +813,8 @@ export function signal<T>(initial: T, options?: SignalOptions<T>): Signal<T> {
     sinkCount: 0,
     name: options?.name,
   }
+  if (development)
+    node.inRequest = Boolean(currentOwner && requestOf(currentOwner))
   const read = (() => {
     track(node as StateNode<unknown>)
     return node.value
@@ -786,6 +834,17 @@ export function signal<T>(initial: T, options?: SignalOptions<T>): Signal<T> {
     node.value = value
     node.version++
     writeVersion++
+    if (
+      development &&
+      activeRequests &&
+      !node.inRequest &&
+      !node.warnedRequest
+    ) {
+      node.warnedRequest = true
+      console.warn(
+        `Signal ${node.name ?? `signal#${node.id}`} was created outside the request and written during server rendering; module-level state is shared across requests.`,
+      )
+    }
     if (development && debugState?.currentRunningEffect) {
       debugState.recentWrites.push(
         `effect#${debugState.currentRunningEffect.id} -> ${node.name ?? `signal#${node.id}`}`,
@@ -1023,6 +1082,7 @@ function createEffect(fn: () => void, tier: 'render' | 'user'): () => void {
     sourceMap: null,
     recycledSource: null,
     trackEpoch: 0,
+    ordinal: owner.childOrdinal++,
     tier,
     queued: false,
     prevQueue: null,
@@ -1073,13 +1133,34 @@ export function untrack<T>(fn: () => T): T {
 export function createInternalOwner(
   kind: OwnerKind,
   mountReady?: () => boolean,
+  key?: string,
+  ordinal?: number,
 ): Owner {
   const parent = ensureCurrentEffectRunOwner()
   if (!parent || parent.disposed)
     throw new Error('Child owner requires a parent')
-  const owner = createOwner(parent, kind)
+  const owner = createOwner(parent, kind, ordinal)
   owner.mountReady = mountReady ?? null
+  if (key !== undefined) owner.key = key
   return owner
+}
+
+/** Reserves the next child ordinal of the current owner, for a slot. */
+export function claimInternalOrdinal(): number {
+  return (currentOwner as Owner).childOrdinal++
+}
+
+/**
+ * Reads the current root's request record, or with an argument attaches one
+ * to the current root (call that directly inside `createRoot`).
+ */
+export function internalRequest(
+  request?: InternalRequest,
+): InternalRequest | undefined {
+  if (!request) return currentOwner ? requestOf(currentOwner) : undefined
+  ;(currentOwner as Owner).request = request
+  if (development) activeRequests++
+  return request
 }
 
 function ownerIsGated(owner: Owner, level: 1 | 2): boolean {

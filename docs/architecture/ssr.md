@@ -79,19 +79,20 @@ The server runs on any runtime with `Promise`, `AbortSignal`, `Headers`, `TextEn
 
 Hydration is positional: the client runs the same setup in the same order and claims nodes as it walks, so static nodes need no markers. Markers delimit the places where the parser would merge or hide structure: every dynamic position, and the root.
 
-| Position                                                                    | Server output                                                                |
-| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Root                                                                        | `<!--benos:ROOTID:1-->` … `<!--/benos:ROOTID-->` then the payload `<script>` |
-| Dynamic text (a plan text slot)                                             | `<!--b-->` text `<!--/b-->`; adjacent static text stays a separate text node |
-| Dynamic child (a plan anchor slot, `Show`, `Switch`, `Dynamic`, boundaries) | `<!--b-->` nodes `<!--/b-->`                                                 |
-| Each `For` item                                                             | `<!--b-->` item nodes `<!--/b-->`, inside the `For` slot's own pair          |
-| Empty value (`null`, `false`, empty array)                                  | `<!--b--><!--/b-->`                                                          |
-| Portal                                                                      | `<!--b--><!--/b-->`; the content is client rendered                          |
-| Dynamic text inside RCDATA (`<title>`, `<textarea>`)                        | The text alone; the single text node is claimed                              |
+| Position                                                                    | Server output                                                                       |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Root                                                                        | `<!--benos:ROOTID:1-->` … `<!--/benos:ROOTID-->` then the payload `<script>`        |
+| Dynamic text (a plan text slot)                                             | `<!--b-->` text `<!--/b-->`; adjacent static text stays a separate text node        |
+| Dynamic child (a plan anchor slot, `Show`, `Switch`, `Dynamic`, boundaries) | `<!--b-->` nodes `<!--/b-->`                                                        |
+| Each `For` item                                                             | `<!--b-->` item nodes `<!--/b-->`, inside the `For` slot's own pair                 |
+| Empty value (`null`, `false`, empty array)                                  | `<!--b--><!----><!--/b-->`: the empty comment is the value's node, as on the client |
+| Portal                                                                      | `<!--b--><!--/b-->`; the content is client rendered                                 |
+| Suspense, RouterOutlet                                                      | Their content, then the control's own empty comment `<!---->`, as on the client     |
+| Dynamic text inside RCDATA (`<title>`, `<textarea>`)                        | The text alone; the single text node is claimed                                     |
 
 The `1` in the root marker is the protocol version. `ROOTID` matches `[A-Za-z0-9_-]{1,32}`; two roots on one page use different IDs. Markers carry no application data. Nesting is by structure, not by IDs: the client knows which pair it is entering because it is mounting that slot. After a claim, the client removes the opening `<!--b-->` and turns the closing `<!--/b-->` into the slot's ordinary trailing marker, then applies the DOM renderer's single-element rule (a range that is exactly one element drops its marker). Hydrated DOM therefore equals client-rendered DOM for the same state, which keeps every later update path identical.
 
-Markers are comments, which the parser accepts inside `<table>`, `<select>`, and foreign content without foster parenting. Whitespace is never emitted between nodes.
+Markers are comments, which the parser accepts inside `<table>`, `<select>`, and foreign content without foster parenting. Whitespace is never emitted between nodes. A plan's dynamic text is a text instruction with a slot; its pair keeps it separate from adjacent static text after parsing.
 
 ## Payload format v1 (**frozen**)
 

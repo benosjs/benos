@@ -19,10 +19,10 @@ export type {
   DirectTemplateDefinition,
   DirectTemplateDescriptor,
 } from './experimental-direct.js'
-export type { TemplatePlan, TemplateScope } from '@benosjs/dom'
+export type { InternalHost, TemplatePlan, TemplateScope } from '@benosjs/dom'
 
 import '@benosjs/dom'
-import type { Child } from '@benosjs/dom'
+import type { Child, InternalHost } from '@benosjs/dom'
 
 const stage = (
   globalThis as typeof globalThis & {
@@ -49,6 +49,7 @@ const control = (
         parent: Node,
         before: Node | null,
         owner: object,
+        host: InternalHost,
       ) => Node[],
     ) => void
   }

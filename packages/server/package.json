@@ -1,0 +1,44 @@
+{
+  "name": "@benosjs/server",
+  "version": "0.5.1",
+  "description": "Server rendering for Benos: renderToString with opt-in data serialization.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/benosjs/benos.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "benos",
+    "ssr",
+    "server rendering",
+    "hydration"
+  ],
+  "homepage": "https://github.com/benosjs/benos#readme",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
+  },
+  "files": [
+    "dist/js",
+    "dist/types"
+  ],
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "development": "./dist/js/index.development.js",
+      "default": "./dist/js/index.production.js"
+    }
+  },
+  "dependencies": {
+    "@benosjs/core": "workspace:*",
+    "@benosjs/dom": "workspace:*"
+  },
+  "devDependencies": {
+    "@benosjs/async": "workspace:*"
+  },
+  "bugs": {
+    "url": "https://github.com/benosjs/benos/issues"
+  }
+}

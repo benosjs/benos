@@ -13,6 +13,7 @@ import {
   runWithOwner,
   setInternalOwnerGate,
 } from '@benosjs/core/internal'
+import { internalRequest } from '@benosjs/core/internal'
 import {
   prepareInternalStage,
   registerInternalControl,
@@ -86,6 +87,10 @@ export function resource<S, T>(
 ): Resource<T> {
   const currentValue = signal<T | undefined>(options?.initialValue)
   const currentState = signal<ResourceState>({ status: 'disabled' })
+  const request = internalRequest()
+  const ssr = options?.ssr
+  // Server and hydrating roots exchange snapshots keyed by codec id and key.
+  const snapshotKey = (key: S): string => `${ssr?.id}\u0000${ssr?.key(key)}`
   let disposed = false
   let generation = 0
   let observedKey: S | false | null | undefined
@@ -94,6 +99,8 @@ export function resource<S, T>(
     controller: AbortController
     token: PendingToken
     resolve: (value: T | undefined) => void
+    key?: S
+    permanent?: boolean
   } | null = null
 
   const close = (request: NonNullable<typeof active>): void => {
@@ -120,19 +127,33 @@ export function resource<S, T>(
     const result = new Promise<T | undefined>((done) => {
       resolve = done
     })
-    const request = { controller, token, resolve }
-    active = request
+    const pending: NonNullable<typeof active> = {
+      controller,
+      token,
+      resolve,
+      key,
+    }
+    active = pending
     currentState.set({ status: 'pending' })
+    if (request?.mode === 'server') {
+      // Without a codec the server never fetches: the boundary stays in
+      // fallback and the client fetches after hydration.
+      if (!ssr) {
+        pending.permanent = true
+        return result
+      }
+      request.track?.(result)
+    }
     let fetched: T | Promise<T>
     try {
       fetched = untrack(() => fetcher(key, { signal: controller.signal }))
     } catch (error) {
-      settle(false, error, id, request)
+      settle(false, error, id, pending)
       return result
     }
     Promise.resolve(fetched).then(
-      (value) => settle(true, value, id, request),
-      (error: unknown) => settle(false, error, id, request),
+      (value) => settle(true, value, id, pending),
+      (error: unknown) => settle(false, error, id, pending),
     )
     return result
   }
@@ -141,9 +162,30 @@ export function resource<S, T>(
     success: boolean,
     outcome: unknown,
     id: number,
-    request: NonNullable<typeof active>,
+    pending: NonNullable<typeof active>,
   ): void => {
-    if (disposed || id !== generation || active !== request) return
+    if (disposed || id !== generation || active !== pending) return
+    if (request?.mode === 'server') {
+      if (success) {
+        try {
+          request.resources.set(
+            snapshotKey(pending.key as S),
+            ssr?.serialize(outcome as T),
+          )
+        } catch (error) {
+          success = false
+          outcome = error
+        }
+      }
+      if (!success) {
+        // A server failure stays pending: nothing is serialized, the boundary
+        // keeps its fallback, and the client fetches again.
+        pending.permanent = true
+        pending.resolve(undefined)
+        request.onError?.(outcome, { phase: 'data' })
+        return
+      }
+    }
     active = null
     batch(() => {
       if (success) {
@@ -151,9 +193,9 @@ export function resource<S, T>(
         currentState.set({ status: 'ready' })
       } else currentState.set({ status: 'failed', error: outcome })
     })
-    request.resolve(success ? (outcome as T) : undefined)
-    for (const listener of request.token.listeners) listener()
-    request.token.listeners.clear()
+    pending.resolve(success ? (outcome as T) : undefined)
+    for (const listener of pending.token.listeners) listener()
+    pending.token.listeners.clear()
   }
 
   const update = (key: S | false | null | undefined): void => {
@@ -163,6 +205,17 @@ export function resource<S, T>(
     if (key === false || key === null || key === undefined) {
       invalidate()
       currentState.set({ status: 'disabled' })
+    } else if (request?.mode === 'hydrate' && ssr) {
+      const snapshot = snapshotKey(key)
+      if (request.resources.has(snapshot)) {
+        const value = ssr.deserialize(request.resources.get(snapshot))
+        request.resources.delete(snapshot)
+        invalidate()
+        batch(() => {
+          currentValue.set(value)
+          currentState.set({ status: 'ready' })
+        })
+      } else void launch(key)
     } else void launch(key)
   }
 
@@ -187,6 +240,10 @@ export function resource<S, T>(
           // Imperative reads have no current owner.
         }
         if (boundary) onCleanup(boundary.observe(active.token))
+        else if (active.permanent && !ssr)
+          throw new Error(
+            'A resource without an ssr codec can only be read inside Suspense during server rendering',
+          )
       }
       return currentValue()
     },
@@ -213,11 +270,9 @@ export function Suspense(_props: SuspenseProps): JSX.Element {
   throw new Error('Suspense requires the Benos DOM renderer')
 }
 
-registerInternalControl(Suspense, (props, parent, before, owner) => {
-  const document = parent instanceof Document ? parent : parent.ownerDocument
-  if (!document) throw new Error('Suspense requires a DOM document')
-  const marker = document.createComment('')
-  parent.insertBefore(marker, before)
+registerInternalControl(Suspense, (props, parent, before, owner, host) => {
+  const marker = host.comment(parent)
+  host.insert(parent, marker, before)
   let disposed = false
   let fallback: ReturnType<typeof prepareInternalStage> | null = null
   let content: ReturnType<typeof prepareInternalStage> | null = null
@@ -281,11 +336,11 @@ registerInternalControl(Suspense, (props, parent, before, owner) => {
           epoch++
           clearTokens()
           fallback = runWithOwner(owner, () =>
-            prepareInternalStage(() => props.fallback as Child, parent),
+            host.stage(() => props.fallback as Child, parent),
           )
           fallback.commit(marker)
           content = runWithOwner(owner, () =>
-            prepareInternalStage(
+            host.stage(
               () =>
                 boundaryContext.Provider({
                   value: boundary,
@@ -334,7 +389,7 @@ registerInternalControl(Suspense, (props, parent, before, owner) => {
       }
       try {
         candidate = runWithOwner(owner, () =>
-          prepareInternalStage(
+          host.stage(
             () =>
               boundaryContext.Provider({
                 value: boundary,
@@ -371,11 +426,11 @@ registerInternalControl(Suspense, (props, parent, before, owner) => {
     candidate?.dispose()
     content?.dispose()
     fallback?.dispose()
-    marker.remove()
+    host.remove(marker)
   })
-  fallback = prepareInternalStage(() => props.fallback as Child, parent)
+  fallback = host.stage(() => props.fallback as Child, parent)
   fallback.commit(marker)
-  content = prepareInternalStage(
+  content = host.stage(
     () =>
       boundaryContext.Provider({
         value: boundary,

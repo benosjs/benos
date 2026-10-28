@@ -37,6 +37,25 @@ jobs:
       - run: pnpm size
       - run: pnpm bench:guard
       - run: pnpm test:browser
+      - run: pnpm test:server-runtime
+
+  server-bun:
+    name: Server on Bun
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.17.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.18.0
+          cache: pnpm
+      - uses: oven-sh/setup-bun@v2
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: bun --version
+      - run: bun scripts/test-server-runtime.mjs
 
   create-benos:
     name: create-benos npm ${{ matrix.npm_major }} (${{ matrix.os }})

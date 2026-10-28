@@ -69,6 +69,11 @@ const checks = [
     ),
     7_168,
   ],
+  [
+    '@benosjs/server (core and DOM external)',
+    await bundledSize(['server'], ['@benosjs/core', '@benosjs/dom']),
+    6_144,
+  ],
 ]
 
 let failed = false

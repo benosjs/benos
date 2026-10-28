@@ -23,6 +23,7 @@ import * as runtime from './runtime.js'
 
 type InternalRegistry = Pick<
   typeof runtime,
+  | 'claimInternalOrdinal'
   | 'createInternalOwner'
   | 'createRenderEffect'
   | 'disposeInternalOwner'
@@ -34,10 +35,12 @@ type InternalRegistry = Pick<
   | 'runWithOwner'
   | 'setInternalErrorHandler'
   | 'setInternalOwnerGate'
+  | 'internalRequest'
 >
 ;(
   globalThis as typeof globalThis & { __benosCoreInternal?: InternalRegistry }
 ).__benosCoreInternal = {
+  claimInternalOrdinal: runtime.claimInternalOrdinal,
   createInternalOwner: runtime.createInternalOwner,
   createRenderEffect: runtime.createRenderEffect,
   disposeInternalOwner: runtime.disposeInternalOwner,
@@ -49,4 +52,5 @@ type InternalRegistry = Pick<
   runWithOwner: runtime.runWithOwner,
   setInternalErrorHandler: runtime.setInternalErrorHandler,
   setInternalOwnerGate: runtime.setInternalOwnerGate,
+  internalRequest: runtime.internalRequest,
 }

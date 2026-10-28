@@ -407,6 +407,19 @@ importers:
         specifier: workspace:*
         version: link:../dom
 
+  packages/server:
+    dependencies:
+      '@benosjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@benosjs/dom':
+        specifier: workspace:*
+        version: link:../dom
+    devDependencies:
+      '@benosjs/async':
+        specifier: workspace:*
+        version: link:../async
+
   packages/vite:
     dependencies:
       '@benosjs/compiler':

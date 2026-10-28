@@ -8,6 +8,7 @@ const packages = [
   'query',
   'forms',
   'router',
+  'server',
   'compiler',
   'vite',
   'eslint-plugin',

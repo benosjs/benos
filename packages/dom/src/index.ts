@@ -7,6 +7,7 @@ import {
   untrack,
 } from '@benosjs/core'
 import {
+  claimInternalOrdinal,
   createInternalOwner,
   createRenderEffect,
   disposeInternalOwner,
@@ -67,6 +68,25 @@ type Descriptor =
 const fragment = Symbol('benos.fragment')
 export const Fragment = fragment
 const controlKinds = new WeakMap<object, ControlKind>()
+/**
+ * Marker, insertion, removal, and staging operations a host gives an internal
+ * control (Suspense, RouterOutlet), so one mount function serves the DOM and
+ * server hosts.
+ */
+export interface InternalHost<N = Node> {
+  comment(parent: N): N
+  insert(parent: N, node: N, before: N | null): void
+  remove(node: N): void
+  stage(
+    renderChild: () => Child,
+    target: N,
+  ): {
+    owner: InternalOwner
+    nodes: N[]
+    commit: (before?: N | null) => void
+    dispose: () => void
+  }
+}
 type InternalControls = WeakMap<
   object,
   (
@@ -74,6 +94,7 @@ type InternalControls = WeakMap<
     parent: Node,
     before: Node | null,
     owner: InternalOwner,
+    host: InternalHost,
   ) => Node[]
 >
 const internalControls = ((
@@ -229,6 +250,8 @@ interface Slot {
   range: DomRange
   initialized: boolean
   value: Child
+  /** The slot's child ordinal under its owner; every branch reuses it. */
+  ordinal: number
 }
 
 type Key = string | symbol
@@ -251,7 +274,7 @@ function rangeConnected(range: DomRange): boolean {
 }
 
 function removeRange(range: DomRange): void {
-  for (const node of range.nodes) node.parentNode?.removeChild(node)
+  for (const node of range.nodes) domHost.remove(node)
 }
 
 function moveRange(range: DomRange, parent: Node, before: Node | null): void {
@@ -303,8 +326,11 @@ function updateSlot(
   disposeMounted(slot.current)
   slot.current = null
   const branch = runWithOwner(owner, () =>
-    createInternalOwner('branch', () =>
-      slot.current ? rangeConnected(slot.current.range) : false,
+    createInternalOwner(
+      'branch',
+      () => (slot.current ? rangeConnected(slot.current.range) : false),
+      undefined,
+      slot.ordinal,
     ),
   )
   try {
@@ -315,7 +341,7 @@ function updateSlot(
       slot.current.range.nodes.length === 1 &&
       slot.current.range.nodes[0]?.nodeType === Node.ELEMENT_NODE
     )
-      slot.marker.parentNode?.removeChild(slot.marker)
+      domHost.remove(slot.marker)
     setSlotRange(slot)
     if (rangeConnected(slot.current.range)) notifyMount(branch)
     else trackMount(branch, slot.current.range)
@@ -330,7 +356,7 @@ function createSlot(
   before: Node | null,
   owner: InternalOwner,
 ): Slot {
-  const marker = ownerDocumentOf(parent).createComment('')
+  const marker = domHost.comment(parent) as Comment
   insert(parent, marker, before)
   const slot: Slot = {
     parent,
@@ -340,12 +366,13 @@ function createSlot(
     range: { nodes: [marker], owner },
     initialized: false,
     value: undefined,
+    ordinal: runWithOwner(owner, claimInternalOrdinal),
   }
   runWithOwner(owner, () =>
     onCleanup(() => {
       disposeMounted(slot.current)
       slot.current = null
-      slot.marker.parentNode?.removeChild(slot.marker)
+      domHost.remove(slot.marker)
       slot.range.nodes = []
     }),
   )
@@ -370,12 +397,12 @@ function mountValue(
     for (const item of values)
       nodes.push(...mountValue(item, parent, before, owner).nodes)
     if (nodes.length > 0) return { nodes, owner }
-    const empty = ownerDocumentOf(parent).createComment('')
+    const empty = domHost.comment(parent)
     insert(parent, empty, before)
     return { nodes: [empty], owner }
   }
   if (value === null || value === undefined || typeof value === 'boolean') {
-    const empty = ownerDocumentOf(parent).createComment('')
+    const empty = domHost.comment(parent)
     insert(parent, empty, before)
     return { nodes: [empty], owner }
   }
@@ -844,7 +871,7 @@ function mountComponent(
     if (internalControl)
       componentRange = {
         nodes: runWithOwner(owner, () =>
-          internalControl(descriptor.props, parent, before, owner),
+          internalControl(descriptor.props, parent, before, owner, domHost),
         ),
         owner,
       }
@@ -1021,7 +1048,16 @@ function mountFor(
       item: unknown,
       index: number,
     ): ForEntry => {
-      const itemOwner = runWithOwner(owner, () => createInternalOwner('branch'))
+      // A keyed item's id segment is its key, so ids survive reordering.
+      const itemOwner = runWithOwner(owner, () =>
+        createInternalOwner(
+          'branch',
+          undefined,
+          typeof key === 'string' || typeof key === 'number'
+            ? `k${encodeURIComponent(key)}`
+            : undefined,
+        ),
+      )
       const entry: ForEntry = {
         key,
         item,
@@ -1058,7 +1094,7 @@ function mountFor(
           entries[0]?.range.nodes.length === 1 &&
           entries[0].range.nodes[0]?.nodeType === Node.ELEMENT_NODE
         if (singleton) {
-          slot.marker.parentNode?.removeChild(slot.marker)
+          domHost.remove(slot.marker)
           slot.range.nodes = entries[0]?.range.nodes ?? []
         } else
           slot.range.nodes = [
@@ -1254,7 +1290,7 @@ function mountPortal(
       if (!nextTarget) return
       const nextChild = props.children as Child
       if (!placeholder.current) {
-        placeholder.marker.parentNode?.removeChild(placeholder.marker)
+        domHost.remove(placeholder.marker)
         placeholder.parent = nextTarget
         placeholder.marker = ownerDocumentOf(nextTarget).createComment('')
         insert(nextTarget, placeholder.marker, null)
@@ -1469,12 +1505,13 @@ function mountTemplate(
           range: { nodes: [marker], owner },
           initialized: false,
           value: undefined,
+          ordinal: claimInternalOrdinal(),
         }
         runWithOwner(owner, () =>
           onCleanup(() => {
             disposeMounted(target.current)
             target.current = null
-            target.marker.parentNode?.removeChild(target.marker)
+            domHost.remove(target.marker)
             target.range.nodes = []
           }),
         )
@@ -1563,11 +1600,12 @@ function mountDirectTemplate(
           range: { nodes: [target], owner },
           initialized: false,
           value: undefined,
+          ordinal: claimInternalOrdinal(),
         }
         onCleanup(() => {
           disposeMounted(slot.current)
           slot.current = null
-          slot.marker.parentNode?.removeChild(slot.marker)
+          domHost.remove(slot.marker)
           slot.range.nodes = []
         })
         createRenderEffect(() => {
@@ -1838,9 +1876,17 @@ function registerInternalControl(
     parent: Node,
     before: Node | null,
     owner: InternalOwner,
+    host: InternalHost,
   ) => Node[],
 ): void {
   internalControls.set(component, mount)
+}
+
+const domHost: InternalHost = {
+  comment: (parent) => ownerDocumentOf(parent).createComment(''),
+  insert,
+  remove: (node) => node.parentNode?.removeChild(node),
+  stage: prepareInternalStage,
 }
 
 ;(
