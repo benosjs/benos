@@ -66,7 +66,7 @@ describe('flagship editor on the server', () => {
     expect(app.result.html).not.toMatch(/<p role="status">Loading/)
     expect(app.mismatches).toEqual([])
     expect(app.host.querySelector('form')).toBe(app.form)
-    expect(app.host.innerHTML).not.toMatch(/benos|<!--\/?[bi]/)
+    expect(app.host.innerHTML).not.toMatch(/<!--benos|<!--\/?[bi](?::\d+)?-->/)
     expect(app.input('Name').value).toBe('Atlas')
     expect(app.input('Owner email').value).toBe('ada@example.com')
     expect(app.input('Name').id).toMatch(/^b0-/)

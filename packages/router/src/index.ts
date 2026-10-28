@@ -553,6 +553,49 @@ export function createRouter(options: {
       resolve = done
       reject = fail
     })
+    // Under a server or hydrating request the root is gated, so the effect
+    // below would never see the resource settle: the loader is awaited
+    // directly, aborted with its root.
+    if (internalRequest()) {
+      const controller = new AbortController()
+      let result: unknown
+      createRoot((disposeRoot) => {
+        dispose = disposeRoot
+        onCleanup(() => {
+          controller.abort()
+          if (settled) return
+          settled = true
+          reject(new Error('Route loader was cancelled'))
+        })
+        try {
+          result = loader({
+            ...input,
+            signal: controller.signal,
+            context: loaderContext,
+          })
+        } catch (error) {
+          result = Promise.reject(error)
+        }
+      })
+      Promise.resolve(result).then(
+        (data) => {
+          if (settled) return
+          settled = true
+          resolve({ data, dispose })
+        },
+        (error: unknown) => {
+          if (settled) return
+          settled = true
+          reject(error)
+        },
+      )
+      return {
+        promise: promise.catch((error: unknown) => {
+          throw new RouteLoadFailure(record, error)
+        }),
+        dispose,
+      }
+    }
     createRoot((disposeRoot) => {
       dispose = disposeRoot
       onCleanup(() => {
