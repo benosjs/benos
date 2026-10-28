@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/dom",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Fine-grained DOM renderer and component runtime for Benos.",
   "repository": {
     "type": "git",

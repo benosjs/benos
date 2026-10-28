@@ -1,6 +1,6 @@
 # S6 — Release preparation for 0.6.0
 
-**Status:** Awaiting approval of the version bump and of opening the pull request. S5 was approved on 2026-10-28 with the same-optimization rule confirmed. The user's words: "Confirm the same-optimization rule and approve S5. Start S6: release preparation for 0.6.0. Stop at the s-s6 checkpoint before any pull request." No pull request has been opened and no version has been bumped.
+**Status:** Approved on 2026-10-28. The user's words: "Approve S6. Bump all thirteen packages to 0.6.0, open the pull request against main, and stop before merging." All thirteen packages are at 0.6.0 and the pull request is open; nothing is merged, tagged, or published. S5 was approved on 2026-10-28 with the same-optimization rule confirmed. The user's words: "Confirm the same-optimization rule and approve S5. Start S6: release preparation for 0.6.0. Stop at the s-s6 checkpoint before any pull request." No pull request has been opened and no version has been bumped.
 
 ## Delivered
 
