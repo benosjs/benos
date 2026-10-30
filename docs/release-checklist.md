@@ -2,16 +2,19 @@
 
 ## Published release state
 
-- Versions `0.2.0` through `0.5.0` are published. Through `0.3.3` this
+- Versions `0.2.0` through `0.5.1` are published. Through `0.3.3` this
   covers the original eight packages: `@benosjs/core`, `@benosjs/dom`,
   `@benosjs/compiler`, `@benosjs/vite`, `@benosjs/eslint-plugin`,
   `@benosjs/primitives`, `benos`, and `create-benos`. From `0.4.0`,
   `@benosjs/async` and `@benosjs/router` are also published, for ten
   packages. From `0.5.0`, `@benosjs/query` and `@benosjs/forms` are also
   published, for twelve packages.
-- Trusted publishing is configured for the original ten packages.
-  `@benosjs/query` and `@benosjs/forms` still need it (see the 0.5.0 section
-  below) before the automated release can publish all twelve.
+- Trusted publishing is configured for `@benosjs/core`, `@benosjs/dom`,
+  `@benosjs/query`, and `@benosjs/forms`. The 0.5.1 automated release
+  published core and dom and then stopped at `@benosjs/async` with
+  `ENEEDAUTH`, so the earlier record that async, router, and the other
+  packages were configured was wrong; the remaining ten were published
+  manually. Configure the rest before relying on the automated release.
 - The optional UI system shipped in 0.2.0: primitives, 19 registry components,
   the `benos` component CLI, and theming.
 - `benos@0.2.0` is deprecated. The 0.2.1 release notes document the launcher
@@ -77,7 +80,7 @@ Before tagging `v0.5.1`, configure trusted publishing for `@benosjs/query` and
 `@benosjs/forms` (step 4 of the 0.5.0 section above). Then follow the
 automated release below. If that configuration is not in place, the `publish`
 job fails at `@benosjs/query`; reject the approval and use the manual
-fallback instead. Date the `0.5.1` section in `CHANGELOG.md` when publishing.
+fallback instead. Published on 2026-10-30: core and dom through the automated release, the other ten manually after the publish job failed at `@benosjs/async` with `ENEEDAUTH`.
 
 ## First publish of `@benosjs/server` (0.6.0)
 

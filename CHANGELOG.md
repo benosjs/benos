@@ -46,7 +46,7 @@ All notable changes to Benos are documented here.
   and `@benosjs/server` 5,898 B (cap 6,144 B), each measured with core and DOM
   external, minified and gzipped.
 
-## [0.5.1] — Unreleased
+## [0.5.1] — 2026-10-30
 
 ### Fixed
 
