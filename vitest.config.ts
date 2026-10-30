@@ -17,6 +17,7 @@ export default defineConfig({
       },
       // The flagship slice is compiled with the Benos plugin.
       'examples/flagship/vitest.config.ts',
+      'examples/flagship/vitest.ssr.config.ts',
     ],
     coverage: {
       provider: 'v8',

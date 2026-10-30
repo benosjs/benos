@@ -272,7 +272,7 @@ The instance does not cancel a save on disposal; `query` already defines that di
 
 **Wiring.** The component receives `id` (the label's `for` target), `name` set to the dotted path, the bound value and change handler, `onBlur` calling `field.blur()`, `invalid` from `field.invalid()`, and `aria-describedby` listing the description id and, only while an error is visible, the error id. The registry `Input` turns `invalid` into `aria-invalid="true"`. The error element is rendered only while there is an error (a `<Show>`), and it has no live-region role: many fields announcing at once is noisy. Instead, a failed submit moves focus to the first invalid field, whose description and error are then read, and the form-level `<p role="alert">{form.error()}</p>` in the flagship announces root and save errors.
 
-**Ids.** Each instance takes a short prefix from a counter (`f1`, `f2`, …) and appends the sanitized path. Ids are unique per document; they are not hydration-stable, which the SSR track must address with a request-scoped seed.
+**Ids.** Each instance takes its prefix from `createUniqueId()` and appends the sanitized path. Ids are unique per document, and under a server or hydrating root they are deterministic, because `createUniqueId` derives them from the owner path ([ssr.md](./ssr.md), 0.6.0).
 
 **Adapters.** An adapter is a small object: the value type it accepts, a function from a field handle to controlled props, where the label goes, and how to focus the control.
 

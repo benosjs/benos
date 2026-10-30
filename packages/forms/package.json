@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/forms",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Forms for Benos: identity-aware editable copies of server data, Standard Schema validation, and mutation binding.",
   "repository": {
     "type": "git",

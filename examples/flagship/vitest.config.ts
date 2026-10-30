@@ -7,6 +7,7 @@ export default defineConfig({
   test: {
     name: 'flagship',
     include: ['tests/**/*.test.tsx'],
+    exclude: ['tests/**/*.ssr.test.tsx'],
     environment: 'happy-dom',
   },
 })

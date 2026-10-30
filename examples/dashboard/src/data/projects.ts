@@ -82,7 +82,7 @@ function respond<T>(
       reject(cancelled())
       return
     }
-    const timer = window.setTimeout(() => {
+    const timer = setTimeout(() => {
       signal.removeEventListener('abort', abort)
       try {
         resolve(work())
@@ -91,7 +91,7 @@ function respond<T>(
       }
     }, delay)
     const abort = () => {
-      window.clearTimeout(timer)
+      clearTimeout(timer)
       reject(cancelled())
     }
     signal.addEventListener('abort', abort, { once: true })

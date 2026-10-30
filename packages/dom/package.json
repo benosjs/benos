@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/dom",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Fine-grained DOM renderer and component runtime for Benos.",
   "repository": {
     "type": "git",
@@ -37,6 +37,11 @@
       "types": "./dist/types/internal.d.ts",
       "development": "./dist/js/internal.development.js",
       "default": "./dist/js/internal.production.js"
+    },
+    "./hydrate": {
+      "types": "./dist/types/hydrate.d.ts",
+      "development": "./dist/js/hydrate.development.js",
+      "default": "./dist/js/hydrate.production.js"
     },
     "./jsx-runtime": {
       "types": "./dist/types/jsx-runtime.d.ts",

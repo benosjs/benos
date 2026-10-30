@@ -1,4 +1,11 @@
-import { batch, computed, onCleanup, signal, untrack } from '@benosjs/core'
+import {
+  batch,
+  computed,
+  createUniqueId,
+  onCleanup,
+  signal,
+  untrack,
+} from '@benosjs/core'
 import type { ReadonlySignal, Signal } from '@benosjs/core'
 import { jsx, mergeProps, Show, splitProps } from '@benosjs/dom'
 import type { Child, Component, JSX } from '@benosjs/dom'
@@ -294,7 +301,8 @@ export function formModel(o: {
     const handle = o.save()
     const match = o.route?.match()
     const read = match ? match.data : (o.source ?? (() => o))
-    const prefix = `f${++forms}-`
+    // Hydration-stable: under a server or hydrating root this is path based.
+    const prefix = `${createUniqueId()}-`
     let disposed = false
     onCleanup(() => (disposed = true))
 
@@ -664,7 +672,6 @@ interface Submission {
   f?: { error: unknown }
 }
 
-let forms = 0
 const FOCUSABLE = 'input,select,textarea,button,[tabindex]'
 
 /** `<form.Field>`: the label, the bound control, the description, and the error. */

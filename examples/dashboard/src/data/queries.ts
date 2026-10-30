@@ -7,14 +7,26 @@ import {
 } from './projects.js'
 import type { Project, ProjectEdit } from './projects.js'
 
+// Both queries opt in to server serialization: a page rendered on the
+// server hydrates with its data already in the cache.
 export const projectsQuery = query({
   fetch: (_, { signal }) => getProjects(signal),
   staleTime: 30_000,
+  ssr: {
+    id: 'projects',
+    serialize: (projects) => projects,
+    deserialize: (raw) => raw as readonly Project[],
+  },
 })
 
 export const projectQuery = query({
   fetch: (id: string, { signal }) => getProject(id, signal),
   staleTime: 30_000,
+  ssr: {
+    id: 'project',
+    serialize: (project) => project,
+    deserialize: (raw) => raw as Project | null,
+  },
 })
 
 export const saveProject = mutation({

@@ -1,11 +1,29 @@
 import '@benosjs/core'
 
+/** Per-root record set by a server or hydrating renderer; see ssr.md. */
+export interface InternalRequest {
+  id: string
+  mode: 'server' | 'hydrate'
+  resources: Map<string, unknown>
+  queries: Map<string, unknown>
+  signal?: AbortSignal
+  track?: (promise: Promise<unknown>) => void
+  onError?: (error: unknown, info: { phase: 'setup' | 'data' }) => void
+  response?: { status: number; headers: Headers }
+  /** Registers work to run when the request root is disposed. */
+  cleanup?: (fn: () => void) => void
+}
+
 interface InternalRegistry {
+  claimInternalOrdinal: () => number
   createInternalOwner: (
     kind: 'root' | 'component' | 'branch' | 'effect-run' | 'boundary',
     mountReady?: () => boolean,
+    key?: string,
+    ordinal?: number,
   ) => unknown
   createRenderEffect: (fn: () => void) => () => void
+  internalRequest: (request?: InternalRequest) => InternalRequest | undefined
   disposeInternalOwner: (owner: unknown) => void
   getInternalProviderOwner: (value: unknown) => unknown
   hasPendingMounts: (owner: unknown) => boolean
@@ -27,11 +45,15 @@ if (!registry) throw new Error('Benos core internal registry is unavailable')
 
 export type InternalOwner = object
 
+export const claimInternalOrdinal = registry.claimInternalOrdinal
 export const createInternalOwner = registry.createInternalOwner as (
   kind: 'root' | 'component' | 'branch' | 'effect-run' | 'boundary',
   mountReady?: () => boolean,
+  key?: string,
+  ordinal?: number,
 ) => InternalOwner
 export const createRenderEffect = registry.createRenderEffect
+export const internalRequest = registry.internalRequest
 export const disposeInternalOwner = registry.disposeInternalOwner
 export const getInternalProviderOwner = registry.getInternalProviderOwner as (
   value: unknown,

@@ -6,7 +6,7 @@
   "dependencies": [
     {
       "name": "@benosjs/forms",
-      "version": "^0.5.0"
+      "version": "^0.6.0"
     }
   ],
   "registryDependencies": [],
@@ -21,7 +21,7 @@
   "minimumBenosVersions": [
     {
       "name": "@benosjs/dom",
-      "version": "0.5.0"
+      "version": "0.6.0"
     }
   ]
 }

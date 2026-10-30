@@ -24,6 +24,27 @@ a paused project is refused by the demo API, which rolls the change back.
 pnpm --filter @benosjs/dashboard dev
 ```
 
+## Server rendering
+
+The same app renders on the server. `src/entry-server.tsx` exports
+`handle(request, template)`, a plain `Request` to `Response` function: it
+creates one router per request on a `memoryHistory` at the request URL,
+renders through `@benosjs/server`, and returns the client build's
+`index.html` with the app in its host, carrying the status the router set
+(`404` for an unknown path) and the serialized project queries. The client
+entry (`src/main.tsx`) hydrates a page that starts with the root marker and
+renders from scratch otherwise, so the dev server keeps working unchanged.
+
+```sh
+pnpm --filter @benosjs/dashboard build && pnpm --filter @benosjs/dashboard build:ssr
+pnpm --filter @benosjs/dashboard serve   # http://127.0.0.1:4175/
+```
+
+`scripts/serve.mjs` is a small `node:http` server (Bun runs it too) that
+serves the client assets and calls the handler for every other GET; a real
+deployment wires `handle` into whatever runtime it uses. Both builds use the
+same compiler optimization, which server rendering requires.
+
 Open `/` for the overview, `/projects` for the project list, and
 `/projects/signals` for a loader-backed detail page rendered inside the projects
 layout. Unknown paths show the not-found view.

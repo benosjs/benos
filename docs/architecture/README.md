@@ -16,7 +16,7 @@ Phase 2 designs (designed now, built later):
 - [Router](./router.md): typed routes, loaders, navigation, focus, and scrolling. Implemented in 0.4.0.
 - [Query](./query.md): typed query cache, mutations, invalidation, retries, optimistic updates, and route loader integration. Implemented for 0.5.0.
 - [Forms](./forms.md): form models, identity-aware editable copies, Standard Schema validation, mutation binding, and accessible fields. Implemented for 0.5.0.
-- [SSR](./ssr.md): server rendering, streaming, serialization, and hydration.
+- [SSR](./ssr.md): server rendering, serialization, and hydration. Implemented for 0.6.0; streaming is deferred to its own track.
 - [Risks](./risks.md): the ten principal technical and adoption risks with mitigation gates.
 
 The Phase 3 kernel and Phase 4 renderer/compiler are implemented and guarded by production-build comparisons in CI. Phase 4 design is documented in [components.md](./components.md), [renderer.md](./renderer.md), and [compiler.md](./compiler.md). Phase 5a development diagnostics and the `@benosjs/eslint-plugin` props rule are implemented; the Phase 2 features remain outside v0.1.

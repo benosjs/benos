@@ -10,7 +10,7 @@ const entry = process.env.DASHBOARD_ENTRY ?? 'app'
 const outputName = entry === 'slice' ? `${framework}-slice` : framework
 const profileBuild = process.env.DASHBOARD_PROFILE === '1'
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   root,
   define: {
     'process.env.NODE_ENV': JSON.stringify(
@@ -47,6 +47,8 @@ export default defineConfig({
           ],
         },
       }),
+  // The server bundle keeps every @benosjs package external and resolves them
+  // from node_modules, so one copy of each runs on the server.
   resolve: {
     dedupe: [
       '@benosjs/core',
@@ -56,24 +58,30 @@ export default defineConfig({
       '@benosjs/query',
       '@benosjs/forms',
     ],
-    alias: [
-      {
-        find: '@benosjs/core/internal',
-        replacement: `${repoRoot}/packages/core/dist/js/internal.development.js`,
-      },
-      {
-        find: '@benosjs/core',
-        replacement: `${repoRoot}/packages/core/dist/js/index.development.js`,
-      },
-      {
-        find: '@benosjs/dom/internal',
-        replacement: `${repoRoot}/packages/dom/dist/js/internal.development.js`,
-      },
-      {
-        find: '@benosjs/dom',
-        replacement: `${repoRoot}/packages/dom/dist/js/index.development.js`,
-      },
-    ],
+    alias: isSsrBuild
+      ? []
+      : [
+          {
+            find: '@benosjs/core/internal',
+            replacement: `${repoRoot}/packages/core/dist/js/internal.development.js`,
+          },
+          {
+            find: '@benosjs/core',
+            replacement: `${repoRoot}/packages/core/dist/js/index.development.js`,
+          },
+          {
+            find: '@benosjs/dom/internal',
+            replacement: `${repoRoot}/packages/dom/dist/js/internal.development.js`,
+          },
+          {
+            find: '@benosjs/dom/hydrate',
+            replacement: `${repoRoot}/packages/dom/dist/js/hydrate.development.js`,
+          },
+          {
+            find: '@benosjs/dom',
+            replacement: `${repoRoot}/packages/dom/dist/js/index.development.js`,
+          },
+        ],
   },
   build: {
     rollupOptions: {
@@ -88,4 +96,4 @@ export default defineConfig({
     minify: profileBuild ? false : 'esbuild',
     sourcemap: true,
   },
-})
+}))

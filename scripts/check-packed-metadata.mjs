@@ -16,6 +16,7 @@ const publishable = [
   'query',
   'router',
   'forms',
+  'server',
   'compiler',
   'vite',
   'eslint-plugin',

@@ -2,7 +2,51 @@
 
 All notable changes to Benos are documented here.
 
-## [0.5.1] — Unreleased
+## [0.6.0] — Unreleased
+
+### Added
+
+- Publish `@benosjs/server` with `renderToString(app, options)`: it renders
+  the same components as the browser on any runtime with Web APIs (Node 20+,
+  Bun, Deno, edge workers), waits for resources and queries that opt in with
+  an `ssr` codec, serializes only their projections into a JSON payload, and
+  returns the HTML with hydration markers, the status the router set (`404`
+  for the not-found view, `302` with `Location` for a redirect), and headers.
+- Add `@benosjs/dom/hydrate` with `hydrate(app, host, options)`: it claims the
+  server's nodes positionally, attaches handlers once, keeps input typed before
+  hydration, runs effects and `onMount` after the claim, keeps claiming until
+  the router's loaders settle, and recovers a mismatch inside the nearest
+  dynamic range, reporting it through `onMismatch`.
+- Add the `ssr` option to `resource()` and `query()`, request-local query
+  caches on the server, payload seeding on the client, and deterministic
+  `createUniqueId()` and form field ids under server and hydrating roots.
+- Render the dashboard example on the server (`entry-server.tsx`,
+  `scripts/serve.mjs`), with the deployment shape in its README, and add the
+  [server rendering guide](docs/ssr.md) and
+  [findings](docs/ssr-findings.md).
+
+### Changed
+
+- Internal controls (`Suspense`, `RouterOutlet`) mount through a host
+  argument, so one implementation serves the DOM and the server. A root
+  created during a request inherits the request. `@benosjs/vite` compiles the
+  SSR environment exactly like the client; the server renders both the plan
+  and the direct template output.
+
+### Changed (registry)
+
+- Raise UI registry dependency ranges to `^0.6.0` and minimum Benos versions
+  to `0.6.0`, and build registry release `0.6.0`. No component changed.
+
+### Sizes
+
+- Core 4,490 B and core + DOM 11,515 B (cap raised to 11,520 B for the
+  hydration seams), query 3,739 B (cap raised to 3,840 B), router 6,897 B,
+  async 1,897 B, forms 2,888 B; `@benosjs/dom/hydrate` 3,158 B (cap 3,328 B)
+  and `@benosjs/server` 5,898 B (cap 6,144 B), each measured with core and DOM
+  external, minified and gzipped.
+
+## [0.5.1] — 2026-10-30
 
 ### Fixed
 

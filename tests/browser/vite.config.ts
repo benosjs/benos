@@ -22,6 +22,8 @@ export default defineConfig({
       '@benosjs/core/internal',
       '@benosjs/dom',
       '@benosjs/dom/internal',
+      '@benosjs/dom/hydrate',
+      '@benosjs/server',
       '@benosjs/async',
       '@benosjs/query',
       '@benosjs/forms',
@@ -45,6 +47,16 @@ export default defineConfig({
         find: '@benosjs/dom/internal',
         replacement: alias(
           '../../packages/dom/dist/js/internal.development.js',
+        ),
+      },
+      {
+        find: '@benosjs/dom/hydrate',
+        replacement: alias('../../packages/dom/dist/js/hydrate.development.js'),
+      },
+      {
+        find: '@benosjs/server',
+        replacement: alias(
+          '../../packages/server/dist/js/index.development.js',
         ),
       },
       {

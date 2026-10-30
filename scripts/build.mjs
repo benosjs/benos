@@ -8,6 +8,7 @@ const packages = [
   'query',
   'forms',
   'router',
+  'server',
   'compiler',
   'vite',
   'eslint-plugin',
@@ -20,7 +21,7 @@ for (const name of packages) {
     name === 'core'
       ? ['index', 'internal']
       : name === 'dom'
-        ? ['index', 'internal', 'jsx-runtime', 'jsx-dev-runtime']
+        ? ['index', 'internal', 'hydrate', 'jsx-runtime', 'jsx-dev-runtime']
         : name === 'primitives'
           ? [
               'accordion',

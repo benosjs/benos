@@ -5,6 +5,7 @@ type TransformHook = (
   this: { warn: (warning: { message: string }) => void },
   code: string,
   id: string,
+  options?: { ssr?: boolean },
 ) => unknown
 
 describe('@benosjs/vite', () => {
@@ -42,5 +43,25 @@ describe('@benosjs/vite', () => {
         ),
       ),
     ).rejects.toThrow(/already-lowered JSX/)
+  })
+
+  it('compiles a server build exactly like the client build', async () => {
+    const plugin = benos({ optimization: 'safe' })
+    const hook = plugin.transform as TransformHook
+    const source =
+      'export const App = (props: { n: number }) => <p class="x">Count: {props.n}</p>'
+    const client = (await hook.call(
+      { warn: () => undefined },
+      source,
+      '/src/App.tsx',
+    )) as { code: string }
+    const server = (await hook.call(
+      { warn: () => undefined },
+      source,
+      '/src/App.tsx',
+      { ssr: true },
+    )) as { code: string }
+    expect(client.code).toContain('__benos_direct')
+    expect(server.code).toBe(client.code)
   })
 })

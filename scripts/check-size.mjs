@@ -6,7 +6,7 @@ async function bundledSize(packages, external = []) {
   const imports = packages
     .map(
       (name, index) =>
-        `export * as package${index} from './packages/${name}/dist/js/index.production.js'`,
+        `export * as package${index} from './packages/${name.split(':')[0]}/dist/js/${name.split(':')[1] ?? 'index'}.production.js'`,
     )
     .join('\n')
 
@@ -33,7 +33,7 @@ async function bundledSize(packages, external = []) {
 
 const checks = [
   ['@benosjs/core', await bundledSize(['core']), 4_608],
-  ['@benosjs/core + @benosjs/dom', await bundledSize(['core', 'dom']), 11_264],
+  ['@benosjs/core + @benosjs/dom', await bundledSize(['core', 'dom']), 11_520],
   [
     '@benosjs/async (core and DOM external)',
     await bundledSize(['async'], ['@benosjs/core', '@benosjs/dom']),
@@ -45,7 +45,7 @@ const checks = [
       ['query'],
       ['@benosjs/core', '@benosjs/dom', '@benosjs/async'],
     ),
-    3_584,
+    3_840,
   ],
   [
     '@benosjs/forms (core, DOM, async, router, and query external)',
@@ -68,6 +68,16 @@ const checks = [
       ['@benosjs/core', '@benosjs/dom', '@benosjs/async'],
     ),
     7_168,
+  ],
+  [
+    '@benosjs/dom/hydrate (core and DOM external)',
+    await bundledSize(['dom:hydrate'], ['@benosjs/core', '@benosjs/dom']),
+    3_328,
+  ],
+  [
+    '@benosjs/server (core and DOM external)',
+    await bundledSize(['server'], ['@benosjs/core', '@benosjs/dom']),
+    6_144,
   ],
 ]
 
