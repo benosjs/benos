@@ -46,6 +46,9 @@ jobs:
       - run: pnpm lint
       - run: pnpm size
       - run: pnpm bench:guard
+      - run: pnpm --filter @benosjs/dashboard build
+      - run: pnpm --filter @benosjs/dashboard build:ssr
+      - run: node scripts/test-dashboard-ssr.mjs
       - run: pnpm test:browser
       - name: Verify registry URLs from this tag
         run: node scripts/check-registry-urls.mjs "$GITHUB_REF_NAME"
