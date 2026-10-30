@@ -50,7 +50,7 @@ bin symlinks and Windows command shims. Users should install a current release.
   ([flagship-integration.md](./architecture/flagship-integration.md)). SSR
   integration follows the SSR module.
 
-## Prepared for 0.6.0
+## Shipped in 0.6.0
 
 - **Server rendering:** `@benosjs/server` and `@benosjs/dom/hydrate` with
   opt-in data serialization, router status codes, and in-place hydration of

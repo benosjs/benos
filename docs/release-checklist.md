@@ -84,8 +84,13 @@ fallback instead. Published on 2026-10-30: core and dom through the automated re
 
 ## First publish of `@benosjs/server` (0.6.0)
 
-**Not done yet.** `@benosjs/server` is new in 0.6.0, so, as with query and
-forms, npm cannot trust-publish its first version. Release 0.6.0 this way:
+**Done on 2026-10-30.** `@benosjs/server` was new in 0.6.0, so, as with query
+and forms, npm could not trust-publish its first version. All thirteen
+packages were published manually in the fallback order. The `v0.6.0` release
+run never reached the publish gate: its verify job failed because the
+release workflow ran the browser suite without building the dashboard, fixed
+afterwards on `main` by building the dashboard client and SSR bundles before
+the suite (the order CI already used). The steps were:
 
 1. Merge the reviewed release change and push the `v0.6.0` tag so the
    verification, browser, and consumer-matrix jobs run.
