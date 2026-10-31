@@ -1,6 +1,6 @@
 # Server rendering and hydration
 
-**Status:** 0.6.0 contract (S1 of the [SSR track](../ssr-plan.md)). This document replaces the Phase 2 design for the parts that ship in 0.6.0: `renderToString` in the new `@benosjs/server` package and `hydrate` in the new `@benosjs/dom/hydrate` entry. Streaming is deferred to its own track; the last section lists what this contract keeps open for it. Everything marked **frozen** is a protocol or user-visible decision that is hard to reverse and must be fixed with paired server/client fixtures before 0.6.0 is released.
+**Status:** 0.6.0 contract (S1 of the [SSR track](../ssr-plan.md)), extended with the 0.7.0 streaming contract (S1 of the [streaming track](../streaming-plan.md)) in the sections from _Streaming_ onwards. This document replaces the Phase 2 design: `renderToString` in `@benosjs/server` and `hydrate` in `@benosjs/dom/hydrate` shipped in 0.6.0; `renderToStream`, out-of-order Suspense patches, progressive hydration, and the server fast path are the 0.7.0 additions. Everything marked **frozen** is a protocol or user-visible decision that is hard to reverse and is fixed with paired server/client fixtures before the release that introduces it.
 
 ## Goals and non-goals
 
@@ -188,6 +188,164 @@ Opt-in serialization and fallback-on-failure are the strictest choices here. The
 
 Marker grammar v1, payload format v1, the public signatures above, opt-in serialization with fallback on failure, positional claiming with slot-scoped recovery, the first-write skip for typed input, server-side gate-1 suppression, creation-ordinal ID paths, `Portal` content as client-only, and one compiler optimization for both builds. Each has a paired server/client fixture.
 
-## Kept open for streaming
+## Streaming (0.7.0 contract)
 
-Markers nest by structure, every boundary is a slot pair, and the payload is per root, so a later `renderToStream` can emit the shell, then a patch per boundary that replaces one pair's contents and appends snapshots to the root's payload, in strict or nonce delivery mode as the Phase 2 design described. The server host serializes a finished tree in 0.6.0; a streaming host serializes eagerly and holds back only pending boundaries. No 0.6.0 output needs to change for that.
+Streaming sends the page in pieces: the **shell** (everything the router needs settled, with every data-bound Suspense boundary as its fallback), then one **patch** per boundary as its opted-in data settles, in settle order, then an **end notice**. The browser shows the shell at once, swaps each boundary's content in as it arrives, and hydrates progressively: `hydrate` may run before the first patch and claims streamed content when it lands. Nothing in marker grammar v1 or payload format v1 changes; the sections below add to them.
+
+### The invariant
+
+**After the last patch has applied, the document between the root markers is byte for byte what `renderToString` produces for the same settled state, and the union of the payload scripts holds the same entries.** Every other rule here serves this one: it is what lets a page that finishes streaming before hydration hydrate through the unchanged 0.6.0 code, and it is the fixture that S3 pins (apply the patches in a DOM, serialize, compare).
+
+### Public surface
+
+```ts
+// @benosjs/server
+export interface StreamOptions extends RenderOptions {
+  /** Stamped on every inline script the stream emits, for CSP. */
+  nonce?: string
+  onError?: (
+    error: unknown,
+    info: { phase: 'setup' | 'data' | 'stream' },
+  ) => void
+}
+export interface StreamResult {
+  status: number // 200, or what the router set; final once this resolves
+  headers: Headers // Location for a router redirect; otherwise empty
+  stream: ReadableStream<Uint8Array> // shell, patches, end notice; UTF-8
+  done: Promise<void> // settles when the stream closes
+}
+export function renderToStream(
+  app: () => JSX.Element,
+  options?: StreamOptions,
+): Promise<StreamResult>
+```
+
+`renderToStream` resolves once the shell is ready: the app has mounted and every promise tracked **for the shell** (the router's initial navigation and its loaders, see _Data_) has settled or the signal has aborted. It rejects, like `renderToString`, on a setup error with no boundary or on abort before the shell; after it resolves, errors no longer reject anything, because the status line has gone out: they close the stream with the end notice and reach `onError` with `phase: 'stream'`. `stream` begins with the shell, already serialized when the promise resolves, so the caller can send headers and the first bytes together. `done` never rejects. The caller owns the HTML template and pipes `stream` between its two halves; `examples/dashboard` shows the pattern on `node:http` and Bun. `renderToString` is unchanged and remains the right call when the page has no streamed boundary or the caller needs the whole document before answering. These signatures are **frozen** with 0.7.0.
+
+```ts
+// @benosjs/dom/hydrate (unchanged signature)
+export function hydrate(
+  app: () => JSX.Element,
+  host: Element | DocumentFragment | ShadowRoot,
+  options?: HydrateOptions,
+): () => void
+```
+
+`hydrate` gains two behaviors and no option: called before the shell has been parsed (the root's closing marker is not yet in `host`), it waits for it and then claims, so a client entry loaded with `async` hydrates as soon as the shell exists; and it takes patches that arrive after it started. Both are described under _Progressive hydration_.
+
+### Shell
+
+The renderer settles in two stages instead of one. The request record's `track(promise, shell?)` gains a second argument: the router passes `true` for its initial navigation (which awaits its loaders), and `renderToStream` awaits only those before serializing the shell; `renderToString` awaits everything, as before. At shell time every Suspense boundary whose content is still staged (its fallback committed, its content held because a tracked, opted-in resource or query is pending) is a **streamed boundary**. The host gives it an **ID** (the shell-order index under the root, written in decimal) and rewrites the committed fallback stage's opening marker from `<!--b:0-->` to `<!--b:0:ID-->`. Nothing else in the shell differs from `renderToString`'s output for the same state, and the shell's payload script holds the snapshots recorded so far. A boundary whose data is not opted in has nothing to wait for and is not streamed: it is a plain fallback in the shell, as in 0.6.0.
+
+The marker extension: `b:N:ID` where `ID` matches `[0-9]+`. The 0.6.0 reader (`isOpen`, `closeOf`, `leftover`, and the ordinal in `claimComment`) accepts `b`, `b:N`; it learns to accept `b:N:ID` and to read the ordinal as the digits between the colons. This is a reader change, not a page change: no 0.6.0 page contains the suffix, and a page that never streams never emits it, so the protocol version stays **1**. The suffix appears only on fallback stages (`N` = 0) of streamed boundaries, and only in the shell and in patched content; it never survives into the applied document, because the patch removes the fallback range.
+
+### Patches
+
+After the shell, the renderer keeps settling in rounds. After each round the host walks its streamed boundaries; one whose content stage has committed (the boundary's `reveal` ran) is serialized as a patch and removed from the pending set. A patch is three or four nodes, written after the shell in the same `stream`:
+
+```html
+<template id="b:ROOTID:ID"><!--b:1-->…content…<!--/b--></template>
+<script type="application/json" data-benos="ROOTID">
+  {"v":1,"r":[…],"q":[…]}
+</script>
+<script nonce="…">
+  __benos_s.p('ROOTID', 'ID')
+</script>
+```
+
+- The template holds exactly the content stage's range as `renderToString` would have serialized it in place: the `<!--b:1-->` … `<!--/b-->` pair and what it contains. Content that itself contains a streamed boundary (nested data) is serialized with that inner boundary as its fallback, marked `<!--b:0:ID2-->`, and the inner boundary joins the pending set; its own patch follows later. Order is settle order, never depth order.
+- The payload script holds only the snapshots recorded since the previous flush (the shell or the last patch). It has the same `data-benos` attribute and format as the root's payload; the client merges every script with that attribute. It is omitted when nothing was recorded.
+- The call script applies the patch through the runtime (below). The first patch is preceded by the runtime's definition, one inline script of about 450 bytes minified; a page whose shell has no streamed boundary never sends it. Every inline script carries `options.nonce` when given. The payload script needs no nonce: `type="application/json"` is not executed.
+- The cumulative payload (shell plus patches) is checked against `maxPayloadBytes` at every flush. Exceeding it after the shell cannot reject the response, so the stream ends with the end notice and `onError` receives the `RangeError` with `phase: 'stream'`; the client fetches the rest. Before the shell it rejects as `renderToString` does.
+- A boundary whose data fails on the server never settles (the resource stays pending with a permanent token, as in 0.6.0), so it gets no patch; the end notice hands it to the client. An `ErrorBoundary` inside streamed content behaves as on the client: its fallback is what the patch carries.
+
+The **end notice** is one call, `__benos_s.e("ROOTID")`, sent when every streamed boundary has been patched, when the renderer's tracked set drains with boundaries still pending (failed or never-settling data), when the signal aborts after the shell, or when the payload limit is exceeded after the shell. Then the stream closes and the root is disposed in `finally`, as today. The runtime marks the root finished so the client stops waiting.
+
+### The runtime
+
+`__benos_s` is one global object per page (the name is **frozen** with 0.7.0; two roots share it). It is defined by the server's inline script, in plain ES2020 that every supported browser runs, and never evaluates application data: it reads node references and the two string arguments only.
+
+- `p(rootId, id)`: locates `<template id="b:ROOTID:ID">` (the call script's previous sibling but one, located by id so placement is free). If a hydration for `rootId` has registered a handler, the runtime hands it the template and returns; otherwise it finds the comment `<!--b:0:ID-->` with a comment walker from `document`, removes it and every node through its matching `<!--/b-->` (counting nested pairs: a comment matching `^b(:|$)` opens, `/b` closes), moves the template's children into that place, and removes the template and the call script. The payload script stays for `hydrate` to read. After this the fallback is gone and the DOM equals the non-streamed page at that boundary, which is the invariant at work.
+- `e(rootId)`: records that the root is finished and tells a registered handler, which turns every boundary still waiting into a client render.
+- A hydration registers `__benos_s[rootId] = { p(template), e() }`-style handlers (the exact shape is internal to `@benosjs/dom/hydrate` and the server string, which ship together). A patch that arrives before registration is applied by the runtime; one that arrives after is applied by hydration.
+
+Patches that arrive after the stream has been fully parsed are impossible; patches that arrive for an already recovered or already disposed boundary are ignored. The runtime adds nothing to the client bundle: it is a string in `@benosjs/server`.
+
+### Progressive hydration
+
+1. **Waiting for the shell.** `hydrate` looks for the root markers under `host`. When the opening marker is present but the closing one is not, the shell is still arriving: it observes `host` for child additions until the closing marker appears, then proceeds exactly as today. When neither marker is present the root is client rendered, as in 0.6.0. The disposer returned meanwhile cancels the wait. A client entry that wants this calls `hydrate` from a script loaded with `async`; a deferred module runs after parsing, which is after the stream, and still works, by the invariant.
+2. **Reading payloads.** `readPayload` reads every `script[type="application/json"][data-benos="ROOTID"]` under the host or document, merges their entries, and drops the scripts. Later patch payloads are merged the same way when a patch is handed to the hydration.
+3. **Streamed boundaries defer.** While claiming, `Suspense` creates its marker through `host.comment`; the hydration's claim of that marker notes the stage pair before it. When that pair is a fallback with an ID (`<!--b:0:ID-->`) and the root is not yet finished, the hydration records `ID` for the marker, and `Suspense` learns it through the request record (`request.pendingOf(marker)`). A streamed boundary then commits its claimed fallback **and does not stage its content**: no owner, no bindings, and no resources are created for it yet, so nothing fetches. It registers a continuation with `request.whenPatched(ID, continue)`. This is the client-side counterpart of opt-in: the data is known to be on its way because the server marked the boundary.
+4. **Applying a patch during hydration.** When the handler receives the template for `ID`: it merges the patch's payload entries into the request's snapshot maps, inserts the template's children (the `<!--b:1-->` pair) before the boundary's marker, after the fallback's range; records the inserted pair as a claimable stage of ordinal 1 for that position; **re-activates the claim cursor** at the pair; and calls the continuation. `Suspense` stages its content as it would have at first: the DOM host's `stage` claims the pair, components run, resources find their snapshots and are born ready, and `reveal` commits the claimed content in place and disposes the fallback. The claim is deactivated when the continuation returns (synchronously; staged content under a request mounts synchronously). The stage owner's gate opens at commit, so the content's user effects and `onMount` run then, as a client-rendered boundary's would. The root's own gate is not involved: it opened when the shell's claim finished, and streamed boundaries are not tracked by the root, so hydration of the shell never waits for them.
+5. **End of stream.** The handler's `e()` runs every registered continuation with no patch: each boundary stages its content as a plain client render (today's missing-payload path), fetching through the resources it creates. A boundary registered after the root is already finished continues immediately the same way.
+6. **Mismatch and recovery.** A claim failure inside a patched range recovers at the nearest slot or, failing that, at the boundary's pair, exactly as today, and a later patch for a recovered boundary is ignored. A patch for an unknown `ID` (a boundary whose claim failed earlier and whose range was client rendered) is dropped. Nothing is leaked: a boundary that never stages before `hydrate`'s disposer runs has created nothing; one that staged is disposed with its owner.
+
+### Server fast path
+
+The 0.6.0 host wraps every dynamic binding (an element attribute getter, a direct template's attribute binding, a child slot, a component's dynamic children) in a render effect so that content staged under a pending boundary shows settled values before serialization. Those effects are what make the server 35–45× slower than Solid: owners, computations, and subscriptions for positions that will never change during the request.
+
+The rule: **a binding is evaluated once, with no owner, effect, or subscription, unless its evaluation read pending data.** The host evaluates the binding's getter under `untrack` with a frame open on the request record; `@benosjs/async` calls `request.pendingRead()` at the point where a resource read observes a pending token (the same place it calls `boundary.observe`), and `@benosjs/query`'s observer does the same through its inner resource. When the frame closes clean, the value is applied once: the attribute is set, the slot mounts the value, no computation exists. When the frame was marked, the host discards that value and creates today's render effect, which re-evaluates the getter and keeps it live until the boundary settles. Only bindings inside pending content pay for reactivity, and they are the ones that need it.
+
+The semantic gap: a binding that read a signal which a later part of setup writes (`const n = signal(1); <p>{n()}</p>; n.set(2)` within one request) shows the final value under an effect and the first value under the fast path. Development keeps the effect for every binding, and when a settled binding's effect re-runs it **does not apply** the new value, reports the binding's path with the message that production evaluates once and the write must move before the read or into an effect, and reapplies nothing. So development and production emit the same HTML and development says why. This costs nothing in core: the hook is a field on the request record. `renderToString` and `renderToStream` share the path.
+
+Eager serialization (writing settled subtrees to the stream without keeping their nodes) is **not** part of S2. S2 measures the binding fast path alone against Solid in `bench:ssr`; if the ratio is still above single digits, S2 reports where the remaining time goes and proposes the next step with the number, rather than building it on speculation.
+
+### Data under streaming
+
+- **Resources** (`@benosjs/async`). Unchanged on the server. A resource inside a streamed boundary is created on the client only when the boundary's continuation runs, which is after its snapshot has arrived, so it seeds as in 0.6.0; a resource inside a boundary that the end notice handed to the client fetches as in 0.6.0. `resource` calls `request.pendingRead?.()` when a read observes a pending token.
+- **Suspense** (`@benosjs/async`). Under a hydrating root, asks `request.pendingOf?.(marker)`; when it returns an ID, defers content as described and registers with `request.whenPatched`. On the server, unchanged: the host reads the stage state.
+- **Queries** (`@benosjs/query`). Unchanged except the pending-read call. Loader-driven queries settle before the shell with the navigation; observer-driven queries inside a boundary stream like resources.
+- **Router** (`@benosjs/router`). Tracks its initial navigation with the shell flag. Status and `Location` are final when `renderToStream` resolves, because the navigation, loaders included, has settled. A redirect streams whatever the app rendered after the redirect committed (usually nothing); callers that want an empty body may ignore `stream` and must still await `done` or cancel the stream so the root is disposed.
+- **Forms**: unchanged.
+
+### Request record additions
+
+```ts
+interface InternalRequest {
+  // 0.6.0 fields unchanged, plus:
+  track?: (promise: Promise<unknown>, shell?: boolean) => void
+  pendingRead?: () => void // server: a binding frame observed pending data
+  pendingOf?: (marker: object) => string | undefined // hydrate: streamed boundary ID
+  whenPatched?: (id: string, next: () => void) => void // hydrate: continuation
+}
+```
+
+Every field is optional and set only by the host that needs it, so core's runtime does not change: the registry already passes the record through. Type-only changes cost no bytes.
+
+### Seams and budgets
+
+| Package     | Change                                                                                                                                                                                                      | Reason                                  | Estimate      |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | ------------- |
+| core        | `InternalRequest` type fields above                                                                                                                                                                         | Hooks for the hosts                     | 0 B           |
+| dom (main)  | None                                                                                                                                                                                                        | Stage IDs are read in the hydrate entry | 0 B           |
+| dom/hydrate | Wait for the closing root marker; merge every payload script; `b:N:ID` in the reader; `pendingOf` and `whenPatched`; the runtime handler; template insertion, stage record, claim re-activation; end notice | Progressive hydration                   | 400–600 B     |
+| async       | `pendingRead` call in the resource read; streamed-boundary deferral in `Suspense`                                                                                                                           | Fast path; deferral                     | 140–200 B     |
+| query       | `pendingRead` through the observer's pending read                                                                                                                                                           | Fast path                               | 15–25 B       |
+| router      | `track(promise, true)` for the initial navigation                                                                                                                                                           | Shell timing                            | 5–10 B        |
+| server      | Binding frames and the development revert; streamed-boundary detection, IDs, patch and payload-delta serialization; `renderToStream`, stream plumbing, abort, end notice; the runtime string                | Fast path; streaming                    | 1,750–2,400 B |
+
+Against the budgets: core 4,490 of 4,608 and core + DOM 11,515 of 11,520 do not move. async 1,897 → about 2,100 of 4,096. query 3,739 → about 3,760 of 3,840. router 6,897 → about 6,905 of 7,168. Two caps must rise:
+
+- **`@benosjs/dom/hydrate`:** 3,158 + 400–600 → up to about 3,760 of 3,328. Proposal: **4,096** (+768).
+- **`@benosjs/server`:** 5,898 + 1,750–2,400 → up to about 8,300 of 6,144. Proposal: **8,448** (+2,304). The runtime string is about a fifth of the growth and is sent to the browser only on pages that stream.
+
+S2 and S3 report the measured numbers; if either lands over its new cap after a savings pass, the step stops and asks.
+
+### Trade-offs and prior art (streaming)
+
+- [SolidStart](https://docs.solidjs.com/solid-start/reference/server/render-to-stream) streams boundaries as `<template>` plus a script that calls `$R`, and hydrates per boundary with `data-hk` IDs. Benos uses the same template-and-script delivery; its boundaries are addressed by a marker suffix because its hydration is positional and needs no per-element IDs.
+- [React](https://react.dev/reference/react-dom/server/renderToReadableStream) marks pending boundaries with `<!--$?-->`, streams hidden `<div>`s and a `$RC` function that moves them, and offers `onShellReady` and `onAllReady`. Benos's promise resolves at shell ready and `done` at all ready; it never renders content into a hidden element, so the applied DOM needs no cleanup.
+- [Qwik](https://qwik.dev/docs/concepts/resumable/) avoids hydration altogether by serializing state and listeners. Benos hydrates and streams, which keeps its runtime small and its data policy opt-in; the cost is that a boundary's interactivity waits for its patch.
+- [Astro](https://docs.astro.build/en/guides/server-islands/) streams server islands as independent requests. Benos streams boundaries inside one response and one request root, so they share the request's caches and IDs.
+
+What Benos does not do in 0.7.0: event replay before hydration, `<head>` streaming, out-of-order delivery of anything but Suspense boundaries, and script-less delivery. The marker suffix, `__benos_s`, the patch shape, and the end notice are frozen with 0.7.0; a shorter dynamic-text marker would be protocol version 2 and is not planned here.
+
+### Test plan before S3 and S4 are complete
+
+1. **Invariant:** for every server fixture that has a streamed boundary, applying the patches in a DOM (happy-dom, with the runtime function executed) and serializing yields the `renderToString` output for the same settled state; the payload union matches. Nested streamed boundaries, two roots, a boundary that fails and is handed to the client, abort mid-stream.
+2. **Shell:** `renderToStream` resolves after the navigation and loaders and before any boundary's data; status 200, 404, and 302 with `Location`; a shell with no streamed boundary emits no runtime and no scripts beyond the payload.
+3. **Patches:** one per boundary in settle order; payload deltas carry only new entries; the cumulative payload cap; nonce on every inline script; `done` settles on close, including after abort; the root is disposed and leaves nothing gated.
+4. **Hydrate-at-end (S3):** a streamed page loaded in Chromium, Firefox, and WebKit with a deferred entry hydrates with zero mismatches through the 0.6.0 claim code.
+5. **Progressive (S4):** `hydrate` before any patch, between patches, and after all patches gives the same DOM, zero mismatches, and no client fetch for a streamed boundary; the end notice triggers exactly one fetch per unresolved boundary; typed input in the shell survives; a patch for a recovered boundary is ignored; no leaked owners or listeners; the `async` entry waits for the shell.
+6. **Fast path (S2):** every existing server fixture produces identical HTML; a binding inside pending content re-renders on settle; a late write warns in development and the HTML equals production's; no owner or computation is created for a settled binding (counted through the development registry); `bench:ssr` reports the ratio against Solid.
+7. Node and Bun for the server suites; the packed `@benosjs/server` imports no `node:` module and the runtime string parses as ES2020.
