@@ -708,6 +708,7 @@ export interface StageRecord {
   target: object
   index: number
   committed: boolean
+  disposed: boolean
   /** The opening `<!--b:N-->` once committed. */
   open: SComment | null
   nodes: () => SNode[]
@@ -760,6 +761,7 @@ function prepareStage(
     target,
     index,
     committed: false,
+    disposed: false,
     open: null,
     nodes: () => range.nodes,
   }
@@ -799,6 +801,7 @@ function prepareStage(
     },
     dispose: () => {
       disposed = true
+      record.disposed = true
       disposeInternalOwner(owner)
     },
   }

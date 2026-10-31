@@ -1,14 +1,15 @@
 /** @jsxImportSource @benosjs/dom */
 
 import { signal } from '@benosjs/core'
-import { Show } from '@benosjs/dom'
+import { Suspense } from '@benosjs/async'
+import { For, Show } from '@benosjs/dom'
 import { formModel } from '@benosjs/forms'
 import { Link } from '@benosjs/router'
 import * as v from 'valibot'
 import { Button } from '../../../../registry/source/components/button.js'
 import { Card } from '../../../../registry/source/components/card.js'
 import { Input } from '../../../../registry/source/components/input.js'
-import { saveProject, toggleStar } from '../data/queries.js'
+import { activityQuery, saveProject, toggleStar } from '../data/queries.js'
 import type { Project } from '../data/projects.js'
 import { projectRoute, projectsRoute } from '../routes/refs.js'
 
@@ -62,6 +63,25 @@ function StarButton(props: { project: () => Project }) {
         {starError()}
       </p>
     </div>
+  )
+}
+
+function RecentActivity(props: { projectId: string }) {
+  const activity = activityQuery(() => props.projectId)
+  return (
+    <ul class="activity-list" aria-label="Recent activity">
+      <For
+        each={activity.read() ?? []}
+        by={(entry) => entry.id}
+        fallback={<li class="form-status">No recent activity.</li>}
+      >
+        {(entry) => (
+          <li>
+            <span class="form-status">{entry().when}</span> {entry().text}
+          </li>
+        )}
+      </For>
+    </ul>
   )
 }
 
@@ -160,6 +180,18 @@ export default function ProjectDetailPage() {
               </Card>
             </div>
             <p class="form-status">Last updated {current().updatedAt}</p>
+            <Card variant="outlined">
+              <span class="form-status">Recent activity</span>
+              <Suspense
+                fallback={
+                  <p class="form-status" role="status">
+                    Loading activity…
+                  </p>
+                }
+              >
+                <RecentActivity projectId={current().id} />
+              </Suspense>
+            </Card>
             <StarButton project={current} />
             <ProjectEditor />
             <Link

@@ -467,3 +467,11 @@ h2 {
 .star {
   color: var(--benos-color-warning, #b7791f);
 }
+
+.activity-list {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}

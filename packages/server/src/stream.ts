@@ -83,11 +83,15 @@ function findStreamed(
   for (const list of byTarget.values()) {
     const fallback = list.find((record) => record.index === 0)
     const content = list.find((record) => record.index === 1)
+    // A held content whose owner is alive is a Suspense boundary waiting for
+    // data; a disposed one is a superseded candidate (an outlet's), not ours.
     if (
       !fallback ||
       !content ||
       !fallback.committed ||
+      fallback.disposed ||
       content.committed ||
+      content.disposed ||
       fallback.streamed !== undefined ||
       !fallback.open
     )

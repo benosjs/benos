@@ -1,11 +1,12 @@
 import { mutation, query } from '@benosjs/query'
 import {
+  getActivity,
   getProject,
   getProjects,
   putProject,
   putProjectStar,
 } from './projects.js'
-import type { Project, ProjectEdit } from './projects.js'
+import type { Activity, Project, ProjectEdit } from './projects.js'
 
 // Both queries opt in to server serialization: a page rendered on the
 // server hydrates with its data already in the cache.
@@ -26,6 +27,18 @@ export const projectQuery = query({
     id: 'project',
     serialize: (project) => project,
     deserialize: (raw) => raw as Project | null,
+  },
+})
+
+// Read inside a Suspense boundary, not by a loader: on a streamed page the
+// shell goes out before it settles and its patch follows.
+export const activityQuery = query({
+  fetch: (id: string, { signal }) => getActivity(id, signal),
+  staleTime: 30_000,
+  ssr: {
+    id: 'activity',
+    serialize: (entries) => entries,
+    deserialize: (raw) => raw as readonly Activity[],
   },
 })
 

@@ -54,7 +54,10 @@ const server = createServer(async (incoming, outgoing) => {
       template,
     )
     outgoing.writeHead(response.status, Object.fromEntries(response.headers))
-    outgoing.end(await response.text())
+    // The body streams: the shell goes out before the slow data settles.
+    if (response.body)
+      for await (const chunk of response.body) outgoing.write(chunk)
+    outgoing.end()
   } catch (error) {
     if (controller.signal.aborted) return
     console.error(error)

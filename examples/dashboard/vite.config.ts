@@ -1,5 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import solid from 'vite-plugin-solid'
 import benos from '@benosjs/vite'
 
@@ -9,6 +9,22 @@ const framework = process.env.DASHBOARD_FRAMEWORK ?? 'benos'
 const entry = process.env.DASHBOARD_ENTRY ?? 'app'
 const outputName = entry === 'slice' ? `${framework}-slice` : framework
 const profileBuild = process.env.DASHBOARD_PROFILE === '1'
+
+/**
+ * The built entry loads `async`: a streamed page's shell is on screen while
+ * its slow boundaries are still arriving, and `hydrate` waits for the shell
+ * itself, so the module may run as soon as it is fetched. The dev server
+ * keeps the deferred script: it never streams.
+ */
+const asyncEntry: Plugin = {
+  name: 'dashboard-async-entry',
+  apply: 'build',
+  transformIndexHtml: {
+    order: 'post',
+    handler: (html) =>
+      html.replace('<script type="module"', '<script type="module" async'),
+  },
+}
 
 export default defineConfig(({ isSsrBuild }) => ({
   root,
@@ -29,6 +45,7 @@ export default defineConfig(({ isSsrBuild }) => ({
             optimization:
               process.env.DASHBOARD_OPTIMIZATION === 'none' ? 'none' : 'safe',
           }),
+          asyncEntry,
         ],
   ...(framework === 'solid'
     ? {}

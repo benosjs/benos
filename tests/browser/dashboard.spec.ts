@@ -57,15 +57,21 @@ test('revisits projects from the query cache without new requests', async ({
   await expect(
     page.getByText('Project ID: signals', { exact: true }),
   ).toBeVisible()
+  // Leaving before the slow activity feed settles would abort its request;
+  // wait for it so the revisit can be served from the cache.
+  await expect(page.getByText('Scheduler batching landed')).toBeVisible()
   await page.getByRole('link', { name: 'All projects', exact: true }).click()
   await expect(page.getByRole('link', { name: /Signal runtime/ })).toBeVisible()
   await page.getByRole('link', { name: /Signal runtime/ }).click()
   await expect(
     page.getByText('Project ID: signals', { exact: true }),
   ).toBeVisible()
+  // The detail page's activity feed is fetched once too; the second visit
+  // serves all three from the cache.
   expect(await requests(page)).toEqual([
     'GET /projects',
     'GET /projects/signals',
+    'GET /projects/signals/activity',
   ])
 })
 
