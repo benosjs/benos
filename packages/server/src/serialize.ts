@@ -76,7 +76,7 @@ function escapeAttribute(value: string): string {
   )
 }
 
-function elementPath(element: SElement): string {
+export function elementPath(element: SElement): string {
   const names: string[] = []
   for (
     let current: SContainer | null = element;

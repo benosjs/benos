@@ -143,6 +143,7 @@ export function resource<S, T>(
         return result
       }
       request.track?.(result)
+      request.pendingCount = (request.pendingCount ?? 0) + 1
     }
     let fetched: T | Promise<T>
     try {
@@ -166,6 +167,7 @@ export function resource<S, T>(
   ): void => {
     if (disposed || id !== generation || active !== pending) return
     if (request?.mode === 'server') {
+      request.pendingCount = (request.pendingCount ?? 1) - 1
       if (success) {
         try {
           // A codec may serialize to undefined to record nothing; the query

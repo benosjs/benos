@@ -7,7 +7,7 @@ import {
   type InternalRequest,
 } from '@benosjs/core/internal'
 import type { Child } from '@benosjs/dom'
-import { mountValue } from './host.js'
+import { mountValue, setTearingDown } from './host.js'
 import { fragment } from './nodes.js'
 import { serializeChildren, validateStructure } from './serialize.js'
 
@@ -176,7 +176,12 @@ export async function renderToString(
     }
   } finally {
     if (aborted) signal?.removeEventListener('abort', aborted)
-    dispose()
+    setTearingDown(true)
+    try {
+      dispose()
+    } finally {
+      setTearingDown(false)
+    }
     for (const fn of cleanups) fn()
   }
 }

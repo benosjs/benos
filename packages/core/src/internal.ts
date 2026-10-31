@@ -12,6 +12,8 @@ export interface InternalRequest {
   response?: { status: number; headers: Headers }
   /** Registers work to run when the request root is disposed. */
   cleanup?: (fn: () => void) => void
+  /** Server: launched, tracked resources still pending (async maintains it). */
+  pendingCount?: number
 }
 
 interface InternalRegistry {

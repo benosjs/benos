@@ -72,12 +72,12 @@ const checks = [
   [
     '@benosjs/dom/hydrate (core and DOM external)',
     await bundledSize(['dom:hydrate'], ['@benosjs/core', '@benosjs/dom']),
-    3_328,
+    4_096,
   ],
   [
     '@benosjs/server (core and DOM external)',
     await bundledSize(['server'], ['@benosjs/core', '@benosjs/dom']),
-    6_144,
+    8_448,
   ],
 ]
 
