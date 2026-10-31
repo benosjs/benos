@@ -26,14 +26,19 @@ pnpm --filter @benosjs/dashboard dev
 
 ## Server rendering
 
-The same app renders on the server. `src/entry-server.tsx` exports
-`handle(request, template)`, a plain `Request` to `Response` function: it
-creates one router per request on a `memoryHistory` at the request URL,
-renders through `@benosjs/server`, and returns the client build's
-`index.html` with the app in its host, carrying the status the router set
-(`404` for an unknown path) and the serialized project queries. The client
-entry (`src/main.tsx`) hydrates a page that starts with the root marker and
-renders from scratch otherwise, so the dev server keeps working unchanged.
+The same app renders on the server, and streams. `src/entry-server.tsx`
+exports `handle(request, template)`, a plain `Request` to `Response`
+function: it creates one router per request on a `memoryHistory` at the
+request URL, renders through `renderToStream` from `@benosjs/server`, and
+returns the client build's `index.html` with the app streaming into its
+host, carrying the status the router set (`404` for an unknown path). The
+shell goes out once the loaders have settled; the project detail's "Recent
+activity" reads a deliberately slow query (600 ms) inside a `Suspense`
+boundary, so its fallback is in the shell and its content follows as a patch
+with its serialized data. The built client entry loads `async` and hydrates
+as soon as the shell exists (`src/main.tsx`); patches that land afterwards
+are claimed in place without a fetch. On the dev server, which never
+streams, the entry renders from scratch as before.
 
 ```sh
 pnpm --filter @benosjs/dashboard build && pnpm --filter @benosjs/dashboard build:ssr
@@ -41,9 +46,11 @@ pnpm --filter @benosjs/dashboard serve   # http://127.0.0.1:4175/
 ```
 
 `scripts/serve.mjs` is a small `node:http` server (Bun runs it too) that
-serves the client assets and calls the handler for every other GET; a real
-deployment wires `handle` into whatever runtime it uses. Both builds use the
-same compiler optimization, which server rendering requires.
+serves the client assets and pipes the handler's streamed body for every
+other GET; a real deployment wires `handle` into whatever runtime it uses.
+Both builds use the same compiler optimization, which server rendering
+requires. `pnpm bench:stream` (from the repository root) times the detail
+page's first byte and settled time against `renderToString`.
 
 Open `/` for the overview, `/projects` for the project list, and
 `/projects/signals` for a loader-backed detail page rendered inside the projects

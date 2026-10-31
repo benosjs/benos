@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/query",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Typed query cache for Benos: shared entries, deduplication, stale refresh, and transient retries.",
   "repository": {
     "type": "git",

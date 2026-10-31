@@ -25,11 +25,20 @@ export interface InternalRequest {
   resources: Map<string, unknown>
   queries: Map<string, unknown>
   signal?: AbortSignal
-  track?: (promise: Promise<unknown>) => void
+  /** `shell` marks work the streamed shell waits for (the router's navigation). */
+  track?: (promise: Promise<unknown>, shell?: boolean) => void
   onError?: (error: unknown, info: { phase: 'setup' | 'data' }) => void
   response?: { status: number; headers: Headers }
   /** Registers work to run when the request root is disposed. */
   cleanup?: (fn: () => void) => void
+  /** Server: launched, tracked resources still pending (async maintains it). */
+  pendingCount?: number
+  /** Hydrate: the streamed-boundary ID of a Suspense marker, if its patch is still to come. */
+  pendingOf?: (marker: object) => string | undefined
+  /** Hydrate: runs `next` when that boundary's patch lands, or at the end of the stream. */
+  whenPatched?: (id: string, next: () => void) => void
+  /** Hydrate: runs `next` when a snapshot with that key lands, or at the end of the stream. */
+  whenSnapshot?: (key: string, next: () => void) => void
 }
 type Producer = StateNode<unknown> | ComputedNode<unknown>
 type Consumer = ComputedNode<unknown> | EffectNode

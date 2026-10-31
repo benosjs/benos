@@ -445,35 +445,43 @@ function entryFor(cache: CacheRecord, k: KeyRecord): Entry {
   if (!entries) cache.entries.set(k.d, (entries = new Map()))
   let e = entries.get(k.h)
   if (!e) {
-    // A hydrating root seeds the entry from the server's payload, fresh now.
-    const request = internalRequest()
-    const ssr = k.d.o.ssr
-    const snapshot = ssr && `${ssr.id}\u0000${k.h}`
-    const seeded =
-      request?.mode === 'hydrate' && snapshot && request.queries.has(snapshot)
-    const value = seeded
-      ? ssr.deserialize(request.queries.get(snapshot))
-      : undefined
-    if (seeded) request.queries.delete(snapshot)
     e = {
       k,
       cache,
-      value: signal<unknown>(value),
-      ready: signal(Boolean(seeded)),
+      value: signal<unknown>(undefined),
+      ready: signal(false),
       fetching: signal(false),
       failed: signal(false),
       error: signal<unknown>(undefined),
       failures: signal(0),
-      at: seeded ? Date.now() : 0,
+      at: 0,
       stale: false,
       g: 0,
       req: null,
       n: 1,
     }
+    // A hydrating root seeds the entry from the server's payload, fresh now.
+    seedEntry(e)
     entries.set(k.h, e)
     release(e)
   }
   return e
+}
+
+/** Seeds an entry from the hydrating request's snapshot, if it has one. */
+function seedEntry(e: Entry): void {
+  const request = internalRequest()
+  const ssr = e.k.d.o.ssr
+  if (request?.mode !== 'hydrate' || !ssr) return
+  const snapshot = `${ssr.id}\u0000${e.k.h}`
+  if (!request.queries.has(snapshot)) return
+  const value = ssr.deserialize(request.queries.get(snapshot))
+  request.queries.delete(snapshot)
+  batch(() => {
+    e.value.set(value)
+    e.ready.set(true)
+  })
+  e.at = Date.now()
 }
 
 /** Applies a write; an optimistic one returns its rollback layer. */
@@ -659,11 +667,22 @@ function observe(d: Definition, source: () => unknown): QueryObserver<unknown> {
     current,
     (e, { signal }) => {
       if (held !== e) hold(e)
+      // A snapshot that arrived with a later patch seeds the entry here.
+      if (!e.ready()) seedEntry(e)
       return e.ready() ? e.value() : join(e, signal)
     },
     // An opted-in query may run on the server; the entry serializes itself.
+    // The codec key is the entry's hash, so under a streaming page the
+    // resource holds for the entry's snapshot instead of fetching.
     d.o.ssr
-      ? { ssr: { id: 'q', key: () => '', serialize: noop, deserialize: noop } }
+      ? {
+          ssr: {
+            id: d.o.ssr.id,
+            key: (e) => e.k.h,
+            serialize: noop,
+            deserialize: noop,
+          },
+        }
       : {},
   )
   const ready = (): Entry | undefined => {

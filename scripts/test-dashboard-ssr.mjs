@@ -1,4 +1,4 @@
-/* global console, process, Request, URL */
+/* global console, process, Request, URL, TextDecoder */
 // Calls the built dashboard's server entry directly on this runtime (Node or
 // Bun) and checks the rendered pages, their status codes, and that the
 // client bundle carries no server renderer. Build the dashboard first:
@@ -23,10 +23,14 @@ async function page(path) {
     new Request(`http://dashboard.test${path}`),
     template,
   )
-  const html = await response.text()
+  // The body streams: collect its chunks as a browser would receive them.
+  const chunks = []
+  const decoder = new TextDecoder()
+  for await (const chunk of response.body) chunks.push(decoder.decode(chunk))
+  const html = chunks.join('')
   // Markers split dynamic text; the checks read the text as a browser would.
   const text = html.replace(/<!--[^>]*-->/g, '').replace(/<[^>]+>/g, '')
-  return { status: response.status, html, text }
+  return { status: response.status, html, text, chunks }
 }
 
 const checks = [
@@ -53,6 +57,37 @@ if (!detail.html.includes('data-benos="0"'))
   )
 if (!detail.html.includes('"project"'))
   throw new Error('/projects/signals: the project query was not serialized')
+// Streaming: the shell carries the activity fallback marked with its ID and
+// goes out before the slow query settles; the patch and the end notice follow.
+const shell = detail.chunks.findIndex((chunk) =>
+  chunk.includes('<!--benos:0:1-->'),
+)
+if (shell === -1) throw new Error('/projects/signals: no shell chunk')
+const body = detail.chunks.slice(shell)
+const streamedId =
+  /<!--b:0:(\d+)--><p class="form-status" role="status">Loading activity/.exec(
+    body[0],
+  )?.[1]
+if (streamedId === undefined)
+  throw new Error('/projects/signals: the shell lacks the streamed fallback')
+if (body[0].includes('Scheduler batching landed'))
+  throw new Error('/projects/signals: the shell waited for the slow query')
+const patch = body.find((chunk) =>
+  chunk.includes(`<template id="b:0:${streamedId}">`),
+)
+if (!patch || !patch.includes('Scheduler batching landed'))
+  throw new Error('/projects/signals: no patch with the activity')
+if (!patch.includes('"activity"'))
+  throw new Error('/projects/signals: the activity query was not serialized')
+if (
+  !detail.chunks[detail.chunks.length - 1].includes('__benos_s.e("0")') &&
+  !detail.chunks[detail.chunks.length - 2]?.includes('__benos_s.e("0")')
+)
+  throw new Error('/projects/signals: no end notice')
+// A page without a streamed boundary is the shell alone.
+const list = await page('/projects')
+if (list.html.includes('__benos_s'))
+  throw new Error('/projects: a page without pending data sent the runtime')
 
 const assets = resolve(dashboard, 'dist/benos/assets')
 for (const file of await readdir(assets)) {

@@ -63,12 +63,21 @@ bin symlinks and Windows command shims. Users should install a current release.
   opt-in data serialization, router status codes, and in-place hydration of
   routed content; the dashboard rendered on the server. See the
   [server rendering guide](./ssr.md) and [findings](./ssr-findings.md).
-  Streaming follows in its own track.
+
+## Prepared for 0.7.0
+
+- **Streaming:** `renderToStream` with out-of-order Suspense patches over the
+  0.6.0 markers and payload, CSP nonces, progressive hydration from an `async`
+  entry, and the server fast path (1,000 rows from 9.1 ms to 4.6–8.6 ms); the
+  dashboard streams its slow activity feed. See the
+  [streaming section of the guide](./ssr.md#stream) and the
+  [findings](./ssr-findings.md#streaming-070).
 
 ## Upcoming framework modules
 
 - **Blocks:** reusable application patterns such as login and dashboard flows,
   built on the router and forms modules.
-- **Streaming:** out-of-order Suspense patches over the 0.6.0 markers and
-  payload, with strict and CSP-nonce delivery.
 - **Devtools:** visualize the reactive graph and explain why a DOM node updated.
+- **Eager server serialization:** write settled subtrees to the stream as
+  strings instead of building nodes, the remaining server-speed item after the
+  0.7.0 fast path.

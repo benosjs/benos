@@ -4,18 +4,20 @@
  * It mirrors the DOM renderer's owner kinds, creation order, and slot
  * ordinals so owner paths (and therefore `createUniqueId`) match the client.
  */
-import { computed, onCleanup, signal, untrack } from '@benosjs/core'
+import { onCleanup, signal, untrack } from '@benosjs/core'
 import {
   claimInternalOrdinal,
   createInternalOwner,
   createRenderEffect,
   disposeInternalOwner,
   getInternalProviderOwner,
+  internalRequest,
   reportInternalError,
   runWithOwner,
   setInternalErrorHandler,
   setInternalOwnerGate,
   type InternalOwner,
+  type InternalRequest,
 } from '@benosjs/core/internal'
 import {
   Dynamic,
@@ -48,6 +50,7 @@ import {
   type SNode,
 } from './nodes.js'
 import {
+  elementPath,
   noscriptElements,
   rawTextElements,
   rcdataElements,
@@ -85,13 +88,69 @@ const internalControls = (
 ).__benosDomControls
 const development = process.env.NODE_ENV !== 'production'
 
+/**
+ * The server fast path. A binding is evaluated once, with no computation or
+ * subscription, unless a tracked resource is still pending in this request:
+ * only a settle can change what a binding shows later, so only bindings
+ * created while something is pending get a render effect. `@benosjs/async`
+ * keeps the request's pending count; a request with no pending resource
+ * never pays for reactivity, and one that settles goes back to evaluating
+ * once. Development keeps every effect so a late write (a signal a
+ * once-evaluated binding read, written afterwards by a component mounted
+ * later) is detected: the second value is refused and reported, so
+ * development HTML equals production HTML.
+ */
+function needsEffect(): boolean {
+  const request = internalRequest()
+  return request !== undefined && (request.pendingCount ?? 0) > 0
+}
+
+function bind<T>(
+  get: () => T,
+  apply: (value: T) => void,
+  where: () => string,
+): void {
+  const initial = untrack(get)
+  apply(initial)
+  const settled = !needsEffect()
+  if (settled && !development) return
+  // Render effects run at the next flush, not at creation, so the effect's
+  // first run is the first chance to see a write made after the binding read.
+  let first = true
+  createRenderEffect(() => {
+    const value = get()
+    if (first) {
+      first = false
+      if (Object.is(value, initial)) return
+    }
+    if (settled) {
+      console.warn(
+        `Benos server fast path: the binding at ${where()} was re-evaluated after a signal it read was written during setup; production evaluates it once and keeps the first value, so this value is ignored. Move the write before the read, or make it an effect.`,
+      )
+      return
+    }
+    apply(value)
+  })
+}
+
+/** Set while the request root is disposed: the tree is already serialized. */
+let tearingDown = false
+export function setTearingDown(value: boolean): void {
+  tearingDown = value
+}
+
+function pathOf(container: SContainer): string {
+  return container.kind === 1 ? elementPath(container) : 'root'
+}
+
 export interface Range {
   nodes: SNode[]
   owner: InternalOwner
 }
 interface Mounted {
   range: Range
-  owner: InternalOwner
+  /** Null for a primitive value, which has no owner of its own. */
+  owner: InternalOwner | null
 }
 interface Slot {
   parent: SContainer
@@ -242,8 +301,8 @@ function emptyComment(parent: SContainer, before: SNode | null): SNode {
 
 function disposeMounted(mounted: Mounted | null): void {
   if (!mounted) return
-  disposeInternalOwner(mounted.owner)
-  for (const node of mounted.range.nodes) remove(node)
+  if (mounted.owner) disposeInternalOwner(mounted.owner)
+  if (!tearingDown) for (const node of mounted.range.nodes) remove(node)
 }
 
 function setSlotRange(slot: Slot): void {
@@ -307,6 +366,16 @@ function updateSlot(
   if (slot.current && slot.initialized && Object.is(slot.value, value)) return
   disposeMounted(slot.current)
   slot.current = null
+  if (typeof value === 'string' || typeof value === 'number') {
+    // A primitive runs no component and claims no id: no branch owner.
+    const node = text(String(value))
+    insert(slot.parent, node, slot.marker.parent ? slot.marker : null)
+    slot.current = { range: { nodes: [node], owner }, owner: null }
+    slot.value = value
+    slot.initialized = true
+    setSlotRange(slot)
+    return
+  }
   const branch = runWithOwner(owner, () =>
     createInternalOwner('branch', () => false, undefined, slot.ordinal),
   )
@@ -413,27 +482,76 @@ const decodeEntities = (text: string): string =>
  * `</tag>`, escaped text, and `<!---->` child anchors; attributes arrive
  * typed, by path, so no attribute parsing is needed.
  */
-function buildSkeleton(html: string, parent: SContainer): SElement {
-  const stack: SContainer[] = [parent]
-  let root: SElement | null = null
+/**
+ * A skeleton is parsed once per template definition into a flat program
+ * (open, close, text, anchor) and replayed per instance: the parse is the
+ * costliest part of mounting a row, and the namespaces it decides depend only
+ * on the skeleton itself, since every instance starts in a fresh fragment.
+ */
+type SkeletonOp =
+  | { kind: 0 }
+  | { kind: 1; tag: string; ns: Namespace }
+  | { kind: 2 }
+  | { kind: 3; data: string }
+const skeletons = new WeakMap<object, SkeletonOp[]>()
+
+function compileSkeleton(html: string): SkeletonOp[] {
+  const ops: SkeletonOp[] = []
+  const namespaces: Namespace[] = ['html']
+  let depth = 0
+  let opened = false
   const tokens = /<!---->|<\/([\w-]+)>|<([\w-]+)>|([^<]+)/g
   for (const match of html.matchAll(tokens)) {
-    const current = stack[stack.length - 1] as SContainer
-    if (match[0] === '<!---->') insert(current, comment(''), null)
-    else if (match[1] !== undefined) stack.pop()
-    else if (match[2] !== undefined) {
-      const node = element(
+    if (match[0] === '<!---->') ops.push({ kind: 0 })
+    else if (match[1] !== undefined) {
+      ops.push({ kind: 2 })
+      namespaces.pop()
+      depth--
+    } else if (match[2] !== undefined) {
+      const ns = namespaceFor(
         match[2],
-        namespaceFor(match[2], parentNamespace(current)),
+        namespaces[namespaces.length - 1] as Namespace,
       )
-      insert(current, node, null)
-      root ??= node
-      stack.push(node)
-    } else insert(current, text(decodeEntities(match[3] ?? '')), null)
+      ops.push({ kind: 1, tag: match[2], ns })
+      namespaces.push(ns === 'html' ? 'html' : ns)
+      depth++
+      opened = true
+    } else ops.push({ kind: 3, data: decodeEntities(match[3] ?? '') })
   }
-  if (!root || stack.length !== 1)
+  if (!opened || depth !== 0)
     throw new Error('Invalid Benos direct template skeleton')
-  return root
+  return ops
+}
+
+function buildSkeleton(
+  definition: { html: string },
+  parent: SContainer,
+  before: SNode | null,
+): { root: SElement; nodes: SNode[] } {
+  let ops = skeletons.get(definition)
+  if (!ops) skeletons.set(definition, (ops = compileSkeleton(definition.html)))
+  const target = before?.parent ?? parent
+  let current: SContainer = target
+  let root: SElement | null = null
+  const nodes: SNode[] = []
+  for (const op of ops) {
+    let node: SNode
+    if (op.kind === 2) {
+      current = current.parent as SContainer
+      continue
+    } else if (op.kind === 0) node = comment('')
+    else if (op.kind === 1) node = element(op.tag, op.ns)
+    else node = text(op.data)
+    if (current === target) {
+      insert(target, node, before)
+      nodes.push(node)
+    } else insert(current, node, null)
+    if (op.kind === 1) {
+      root ??= node as SElement
+      current = node as SElement
+    }
+  }
+  return { root: root as SElement, nodes }
 }
 
 function mountDirectTemplate(
@@ -442,18 +560,15 @@ function mountDirectTemplate(
   before: SNode | null,
   owner: InternalOwner,
 ): Range {
-  const holder = fragment()
-  const root = buildSkeleton(descriptor.definition.html, holder)
+  const { root, nodes } = buildSkeleton(descriptor.definition, parent, before)
   for (const attribute of descriptor.definition.attributes) {
     const target = nodeAtPath(root, attribute.path)
     if (target.kind === 1) applyOneProp(target, attribute.name, attribute.value)
   }
-  const nodes = moveChildren(holder, before?.parent ?? parent, before)
   const range: Range = { nodes, owner }
+  // No per-range cleanup: the slot or stage that disposes a branch removes
+  // its range's nodes, and a nested element leaves with its parent.
   runWithOwner(owner, () => {
-    onCleanup(() => {
-      for (const node of range.nodes) remove(node)
-    })
     // Targets resolve before any anchor becomes a pair, which shifts siblings.
     const targets = descriptor.definition.bindings.map((binding) =>
       nodeAtPath(root, binding.path),
@@ -462,12 +577,10 @@ function mountDirectTemplate(
       const target = targets[index] as SNode
       if (binding.kind === 'attribute') {
         if (target.kind === 1)
-          createRenderEffect(() =>
-            applyOneProp(
-              target,
-              binding.name ?? '',
-              binding.get(descriptor.values),
-            ),
+          bind(
+            () => binding.get(descriptor.values),
+            (value) => applyOneProp(target, binding.name ?? '', value),
+            () => elementPath(target),
           )
       } else if (binding.kind === 'child') {
         const container = target.kind === 8 ? target.parent : null
@@ -496,12 +609,14 @@ function mountDirectTemplate(
           remove(close)
           slot.range.nodes = []
         })
-        createRenderEffect(() => {
-          const value = binding.get(descriptor.values) as Child
-          updateSlot(slot, value, owner, (branch, at) =>
-            createChildMount(value, container, at, branch),
-          )
-        })
+        bind(
+          () => binding.get(descriptor.values) as Child,
+          (value) =>
+            updateSlot(slot, value, owner, (branch, at) =>
+              createChildMount(value, container, at, branch),
+            ),
+          () => pathOf(container),
+        )
       }
       // Events attach on the client only.
     })
@@ -521,10 +636,7 @@ function mountElement(
   )
   insert(parent, node, before)
   const range: Range = { nodes: [node], owner }
-  runWithOwner(owner, () => {
-    onCleanup(() => remove(node))
-    applyProps(node, descriptor.props, owner)
-  })
+  runWithOwner(owner, () => applyProps(node, descriptor.props, owner))
   return range
 }
 
@@ -540,36 +652,33 @@ function applyProps(
   for (const key of keys) {
     if (key === 'children' || key === 'key' || key === 'ref' || isEvent(key))
       continue
-    const update = () => applyOneProp(target, key, props[key])
     if (isGetter(props, key))
-      runWithOwner(owner, () => createRenderEffect(update))
-    else update()
+      runWithOwner(owner, () =>
+        bind(
+          () => props[key],
+          (value) => applyOneProp(target, key, value),
+          () => elementPath(target),
+        ),
+      )
+    else applyOneProp(target, key, props[key])
   }
   if (Object.prototype.hasOwnProperty.call(props, 'children')) {
     if (!isGetter(props, 'children')) {
-      const range = mountValue(
-        readProp(props, 'children') as Child,
-        target,
-        null,
-        owner,
-      )
-      runWithOwner(owner, () =>
-        onCleanup(() => {
-          for (const node of range.nodes) remove(node)
-        }),
-      )
+      mountValue(readProp(props, 'children') as Child, target, null, owner)
       return
     }
     rejectDynamicContent(target, 'children')
     const slot = createSlot(target, null, owner)
     runWithOwner(owner, () =>
-      createRenderEffect(() => {
-        const value = props.children as Child
-        updateSlot(slot, value, owner, (branch, at) => ({
-          range: mountValue(value, target, at, branch),
-          owner: branch,
-        }))
-      }),
+      bind(
+        () => props.children as Child,
+        (value) =>
+          updateSlot(slot, value, owner, (branch, at) => ({
+            range: mountValue(value, target, at, branch),
+            owner: branch,
+          })),
+        () => elementPath(target),
+      ),
     )
   }
 }
@@ -589,6 +698,29 @@ function rejectDynamicContent(parent: SContainer, what: string): void {
  * with the stage that produced it.
  */
 const stageCounts = new WeakMap<object, number>()
+
+/**
+ * Every stage a request prepares, in creation order, so the streaming
+ * renderer can find a boundary whose fallback (ordinal 0) is committed while
+ * its content (ordinal 1) is still held: a streamed boundary.
+ */
+export interface StageRecord {
+  target: object
+  index: number
+  committed: boolean
+  disposed: boolean
+  /** The opening `<!--b:N-->` once committed. */
+  open: SComment | null
+  nodes: () => SNode[]
+  /** Set by the streaming renderer once the fallback carries its ID. */
+  streamed?: string
+}
+const stageRecords = new WeakMap<InternalRequest, StageRecord[]>()
+export function stagesOf(request: InternalRequest): StageRecord[] {
+  let list = stageRecords.get(request)
+  if (!list) stageRecords.set(request, (list = []))
+  return list
+}
 
 const serverHost: InternalHost = {
   comment: (parent) => {
@@ -624,6 +756,16 @@ function prepareStage(
   const index = stageCounts.get(target) ?? 0
   stageCounts.set(target, index + 1)
   setInternalOwnerGate(owner, 1)
+  const request = internalRequest()
+  const record: StageRecord = {
+    target,
+    index,
+    committed: false,
+    disposed: false,
+    open: null,
+    nodes: () => range.nodes,
+  }
+  if (request) stagesOf(request).push(record)
   let range: Range
   try {
     range = runWithOwner(owner, () =>
@@ -653,10 +795,13 @@ function prepareStage(
       range.nodes = [open, ...moveChildren(holder, parent, before), close]
       insert(parent, close, before)
       committed = true
+      record.committed = true
+      record.open = open
       setInternalOwnerGate(owner, 0)
     },
     dispose: () => {
       disposed = true
+      record.disposed = true
       disposeInternalOwner(owner)
     },
   }
@@ -670,7 +815,7 @@ function mountComponent(
 ): Range {
   const internalControl = internalControls?.get(descriptor.component)
   const fn = descriptor.component as unknown
-  let componentRange: Range = { nodes: [], owner: parentOwner }
+  let componentRange: Range
   const owner = runWithOwner(parentOwner, () =>
     createInternalOwner('component', () => false),
   )
@@ -711,11 +856,6 @@ function mountComponent(
         mountValue(output, parent, before, owner),
       )
     }
-    runWithOwner(owner, () =>
-      onCleanup(() => {
-        for (const node of componentRange.nodes) remove(node)
-      }),
-    )
     return componentRange
   } catch (error) {
     try {
@@ -735,23 +875,23 @@ function mountShow(
 ): Range {
   rejectDynamicContent(parent, 'children')
   const slot = createSlot(parent, before, owner)
-  runWithOwner(owner, () => {
-    const when = computed(() => props.when)
-    const present = computed(() => {
-      const value = when()
-      return value !== null && value !== undefined && value !== false
-    })
-    createRenderEffect(() => {
-      const child = present() ? props.children : props.fallback
-      const value =
-        typeof child === 'function'
-          ? (child as (value: () => unknown) => Child)(when)
+  runWithOwner(owner, () =>
+    bind(
+      () => {
+        const when = props.when
+        const present = when !== null && when !== undefined && when !== false
+        const child = present ? props.children : props.fallback
+        return typeof child === 'function'
+          ? (child as (value: () => unknown) => Child)(() => props.when)
           : (child as Child)
-      updateSlot(slot, value, owner, (branch, at) =>
-        createChildMount(value, parent, at, branch),
-      )
-    })
-  })
+      },
+      (value) =>
+        updateSlot(slot, value, owner, (branch, at) =>
+          createChildMount(value, parent, at, branch),
+        ),
+      () => pathOf(parent),
+    ),
+  )
   return slot.range
 }
 
@@ -789,77 +929,81 @@ function mountFor(
   }
   runWithOwner(owner, () => {
     onCleanup(clear)
-    createRenderEffect(() => {
-      const source = props.each
-      const items = Array.isArray(source) ? source : []
-      const by =
-        typeof props.by === 'function'
-          ? (props.by as (value: unknown) => unknown)
-          : null
-      clear()
-      if (items.length === 0) {
-        const value = props.fallback as Child
-        updateSlot(slot, value, owner, (branch, at) =>
-          createChildMount(value, parent, at, branch),
-        )
-        return
-      }
-      disposeMounted(slot.current)
-      slot.current = null
-      slot.initialized = false
-      const seen = new Set<unknown>()
-      items.forEach((item, position) => {
-        const key = by ? by(item) : item
-        const keyed =
-          (typeof key === 'string' || typeof key === 'number') && !seen.has(key)
-        seen.add(key)
-        const itemOwner = runWithOwner(owner, () =>
-          createInternalOwner(
-            'branch',
-            () => false,
-            keyed
-              ? `k${encodeURIComponent(key as string | number)}`
-              : undefined,
-          ),
-        )
-        const entry: ForEntry = {
-          owner: itemOwner,
-          open: comment('i'),
-          close: comment('/i'),
-          nodes: [],
-          item,
+    bind(
+      () => props.each,
+      (source) => {
+        const items = Array.isArray(source) ? source : []
+        const by =
+          typeof props.by === 'function'
+            ? (props.by as (value: unknown) => unknown)
+            : null
+        clear()
+        if (items.length === 0) {
+          const value = props.fallback as Child
+          updateSlot(slot, value, owner, (branch, at) =>
+            createChildMount(value, parent, at, branch),
+          )
+          return
         }
-        insert(parent, entry.open, slot.marker)
-        insert(parent, entry.close, slot.marker)
-        let child!: Child
-        runWithOwner(itemOwner, () => {
-          child =
-            typeof props.children === 'function'
-              ? (
-                  props.children as (
-                    item: () => unknown,
-                    index: () => number,
-                  ) => Child
-                )(
-                  () =>
-                    by ? (entry.value ??= signal(entry.item))() : entry.item,
-                  () => (entry.index ??= signal(position))(),
-                )
-              : (props.children as Child)
+        disposeMounted(slot.current)
+        slot.current = null
+        slot.initialized = false
+        const seen = new Set<unknown>()
+        items.forEach((item, position) => {
+          const key = by ? by(item) : item
+          const keyed =
+            (typeof key === 'string' || typeof key === 'number') &&
+            !seen.has(key)
+          seen.add(key)
+          const itemOwner = runWithOwner(owner, () =>
+            createInternalOwner(
+              'branch',
+              () => false,
+              keyed
+                ? `k${encodeURIComponent(key as string | number)}`
+                : undefined,
+            ),
+          )
+          const entry: ForEntry = {
+            owner: itemOwner,
+            open: comment('i'),
+            close: comment('/i'),
+            nodes: [],
+            item,
+          }
+          insert(parent, entry.open, slot.marker)
+          insert(parent, entry.close, slot.marker)
+          let child!: Child
+          runWithOwner(itemOwner, () => {
+            child =
+              typeof props.children === 'function'
+                ? (
+                    props.children as (
+                      item: () => unknown,
+                      index: () => number,
+                    ) => Child
+                  )(
+                    () =>
+                      by ? (entry.value ??= signal(entry.item))() : entry.item,
+                    () => (entry.index ??= signal(position))(),
+                  )
+                : (props.children as Child)
+          })
+          entry.nodes = mountValue(child, parent, entry.close, itemOwner).nodes
+          entries.push(entry)
         })
-        entry.nodes = mountValue(child, parent, entry.close, itemOwner).nodes
-        entries.push(entry)
-      })
-      slot.range.nodes = [
-        ...(slot.open ? [slot.open] : []),
-        ...entries.flatMap((entry) => [
-          entry.open,
-          ...entry.nodes,
-          entry.close,
-        ]),
-        slot.marker,
-      ]
-    })
+        slot.range.nodes = [
+          ...(slot.open ? [slot.open] : []),
+          ...entries.flatMap((entry) => [
+            entry.open,
+            ...entry.nodes,
+            entry.close,
+          ]),
+          slot.marker,
+        ]
+      },
+      () => pathOf(parent),
+    )
   })
   return slot.range
 }
@@ -887,24 +1031,27 @@ function mountSwitch(
     Array.isArray(children) ? (children.flat(Infinity) as Child[]) : [children]
   ).filter(isMatchDescriptor)
   runWithOwner(owner, () =>
-    createRenderEffect(() => {
-      let selected: ComponentDescriptor | undefined
-      for (const match of matches) {
-        const when = match.props.when
-        if (when !== null && when !== undefined && when !== false) {
-          selected = match
-          break
+    bind(
+      () => {
+        let selected: ComponentDescriptor | undefined
+        for (const match of matches) {
+          const when = match.props.when
+          if (when !== null && when !== undefined && when !== false) {
+            selected = match
+            break
+          }
         }
-      }
-      const child = selected ? selected.props.children : props.fallback
-      const value =
-        typeof child === 'function'
+        const child = selected ? selected.props.children : props.fallback
+        return typeof child === 'function'
           ? (child as () => Child)()
           : (child as Child)
-      updateSlot(slot, value, owner, (branch, at) =>
-        createChildMount(value, parent, at, branch),
-      )
-    }),
+      },
+      (value) =>
+        updateSlot(slot, value, owner, (branch, at) =>
+          createChildMount(value, parent, at, branch),
+        ),
+      () => pathOf(parent),
+    ),
   )
   return slot.range
 }
@@ -919,32 +1066,35 @@ function mountDynamic(
   const slot = createSlot(parent, before, owner)
   let current: unknown
   runWithOwner(owner, () =>
-    createRenderEffect(() => {
-      const component = props.component
-      if (Object.is(component, current)) return
-      current = component
-      const nextProps: Props = Object.create(
-        Object.getPrototypeOf(props) as object | null,
-      ) as Props
-      Object.defineProperties(
-        nextProps,
-        Object.getOwnPropertyDescriptors(props),
-      )
-      delete nextProps.component
-      const value =
-        typeof component === 'string'
-          ? jsx(component, nextProps)
-          : component
-            ? ({
-                kind: 'component',
-                component: component as Component,
-                props: nextProps,
-              } as unknown as Child)
-            : null
-      updateSlot(slot, value, owner, (branch, at) =>
-        createChildMount(value, parent, at, branch),
-      )
-    }),
+    bind(
+      () => props.component,
+      (component) => {
+        if (Object.is(component, current)) return
+        current = component
+        const nextProps: Props = Object.create(
+          Object.getPrototypeOf(props) as object | null,
+        ) as Props
+        Object.defineProperties(
+          nextProps,
+          Object.getOwnPropertyDescriptors(props),
+        )
+        delete nextProps.component
+        const value =
+          typeof component === 'string'
+            ? jsx(component, nextProps)
+            : component
+              ? ({
+                  kind: 'component',
+                  component: component as Component,
+                  props: nextProps,
+                } as unknown as Child)
+              : null
+        updateSlot(slot, value, owner, (branch, at) =>
+          createChildMount(value, parent, at, branch),
+        )
+      },
+      () => pathOf(parent),
+    ),
   )
   return slot.range
 }
@@ -1052,21 +1202,26 @@ function mountTemplate(
   const nodes = moveChildren(holder, before?.parent ?? parent, before)
   const range: Range = { nodes, owner }
   runWithOwner(owner, () => {
-    onCleanup(() => {
-      for (const node of range.nodes) remove(node)
-    })
     descriptor.setup({
       attr(slot, name, get) {
         const target = slots[slot]
         if (target?.kind === 1)
-          createRenderEffect(() => applyOneProp(target, name, get()))
+          bind(
+            get,
+            (value) => applyOneProp(target, name, value),
+            () => elementPath(target),
+          )
       },
       text(slot, get) {
         const node = slots[slot]
         if (node?.kind === 3)
-          createRenderEffect(() => {
-            node.data = String(get())
-          })
+          bind(
+            get,
+            (value) => {
+              node.data = String(value)
+            },
+            () => (node.parent ? pathOf(node.parent) : 'root'),
+          )
       },
       child(slot, get) {
         const marker = slots[slot]
@@ -1088,12 +1243,14 @@ function mountTemplate(
           remove(target.marker)
           target.range.nodes = []
         })
-        createRenderEffect(() => {
-          const value = get()
-          updateSlot(target, value, owner, (branch, at) =>
-            createChildMount(value, target.parent, at, branch),
-          )
-        })
+        bind(
+          () => get() as Child,
+          (value) =>
+            updateSlot(target, value, owner, (branch, at) =>
+              createChildMount(value, target.parent, at, branch),
+            ),
+          () => pathOf(target.parent),
+        )
       },
       event() {
         // Events attach on the client only.

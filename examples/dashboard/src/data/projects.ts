@@ -108,6 +108,42 @@ export function getProjects(signal: AbortSignal): Promise<readonly Project[]> {
   )
 }
 
+export interface Activity {
+  id: string
+  when: string
+  text: string
+}
+
+const activity: Record<string, readonly Activity[]> = {
+  signals: [
+    { id: 'a1', when: '2026-10-14', text: 'Scheduler batching landed.' },
+    { id: 'a2', when: '2026-10-11', text: 'Computed caching audited.' },
+    { id: 'a3', when: '2026-10-08', text: 'Ownership docs rewritten.' },
+  ],
+  renderer: [
+    { id: 'b1', when: '2026-10-12', text: 'Keyed list diff tightened.' },
+  ],
+  router: [{ id: 'c1', when: '2026-10-15', text: 'Loader retries shipped.' }],
+  registry: [],
+}
+
+/**
+ * The slow call: 600 ms, three times a normal request. A page that waits for
+ * it blocks on the slowest data; a streamed page sends everything else first
+ * and patches the activity in when it arrives.
+ */
+export function getActivity(
+  id: string,
+  signal: AbortSignal,
+): Promise<readonly Activity[]> {
+  return respond(
+    `GET /projects/${id}/activity`,
+    signal,
+    () => (activity[id] ?? []).map((entry) => ({ ...entry })),
+    600,
+  )
+}
+
 export function getProject(
   id: string,
   signal: AbortSignal,

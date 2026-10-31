@@ -6,6 +6,7 @@ declare global {
     __dashboardHydration?: {
       serverRendered: boolean
       mismatches: unknown[]
+      duration: number
     }
     __dashboardRequests?: string[]
   }

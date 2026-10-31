@@ -315,6 +315,18 @@ See the [forms guide](./forms.md) for examples.
   default `"0"`) distinguishes roots on one page. `onError(error, { phase })`
   receives setup and data errors. `maxPayloadBytes` (default 1 MiB) bounds the
   payload; exceeding it rejects with a `RangeError`.
+- `renderToStream(app, { ...RenderOptions, nonce? })` resolves, once the
+  router's navigation and loaders have settled, to
+  `{ status, headers, stream, done }`: `stream` is a
+  `ReadableStream<Uint8Array>` carrying the shell (every waiting `Suspense`
+  boundary as its fallback), then one patch per boundary as its opted-in data
+  settles, then an end notice; `done` settles when the stream closes and never
+  rejects. `status` and `headers` are final when the promise resolves. `nonce`
+  is stamped on every inline script. Before the shell, abort and setup errors
+  reject as for `renderToString`; after it, errors end the stream and reach
+  `onError` with `phase: 'stream'`. After the last patch the document equals
+  `renderToString`'s. A page without a waiting boundary streams as the shell
+  alone.
 - Only a `resource` or `query` with an `ssr` codec is awaited and serialized,
   as `[id, key, serialize(value)]`; the rest render their fallback. Uses only
   Web APIs. See the [server rendering guide](./ssr.md).
@@ -328,7 +340,10 @@ See the [forms guide](./forms.md) for examples.
   loaders) settles. `onMismatch` receives
   `{ rootId, path, expected, actual, recovered }` when a range or the root is
   client rendered instead. `payload` overrides the `<script data-benos>`
-  lookup.
+  lookup. On a streamed page it waits for the shell when called before it
+  exists (load the entry with `async`), claims each patch as it lands, and
+  holds data that is still on its way instead of fetching it until the stream
+  ends.
 
 ## `@benosjs/compiler`
 

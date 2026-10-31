@@ -1030,7 +1030,7 @@ export function createRouter(options: {
         // A server or hydrating request waits for the loaders; the server
         // also learns the response status from the outcome.
         const request = internalRequest()
-        request?.track?.(initial)
+        request?.track?.(initial, true)
         void initial.then((result) => {
           const response = request?.response
           if (!response) return

@@ -76,7 +76,7 @@ function escapeAttribute(value: string): string {
   )
 }
 
-function elementPath(element: SElement): string {
+export function elementPath(element: SElement): string {
   const names: string[] = []
   for (
     let current: SContainer | null = element;
@@ -124,6 +124,13 @@ export function validateStructure(root: SContainer): void {
 export function serializeChildren(parent: SContainer): string {
   let out = ''
   for (let node = parent.first; node; node = node.next) out += serialize(node)
+  return out
+}
+
+/** Serializes a range of sibling nodes, for a streamed boundary's patch. */
+export function serializeNodes(nodes: readonly SNode[]): string {
+  let out = ''
+  for (const node of nodes) out += serialize(node)
   return out
 }
 

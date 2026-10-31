@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/primitives",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Accessible Zag.js machine adapters for Benos UI primitives.",
   "repository": {
     "type": "git",

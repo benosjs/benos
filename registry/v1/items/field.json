@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "release": "0.6.0",
+  "release": "0.7.0",
   "name": "field",
   "type": "registry:style",
   "title": "Field",
@@ -8,13 +8,13 @@
   "dependencies": [
     {
       "name": "@benosjs/forms",
-      "version": "^0.6.0"
+      "version": "^0.7.0"
     }
   ],
   "minimumBenosVersions": [
     {
       "name": "@benosjs/dom",
-      "version": "0.6.0"
+      "version": "0.7.0"
     }
   ],
   "registryDependencies": [],

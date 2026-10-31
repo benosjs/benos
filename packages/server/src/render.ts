@@ -7,8 +7,8 @@ import {
   type InternalRequest,
 } from '@benosjs/core/internal'
 import type { Child } from '@benosjs/dom'
-import { mountValue } from './host.js'
-import { fragment } from './nodes.js'
+import { mountValue, setTearingDown } from './host.js'
+import { fragment, type SFragment } from './nodes.js'
 import { serializeChildren, validateStructure } from './serialize.js'
 
 export interface RenderOptions {
@@ -34,7 +34,7 @@ export interface RenderResult {
 const development = process.env.NODE_ENV !== 'production'
 
 /** JSON that is inert inside `<script>`, with the values checked. */
-function stringifyPayload(value: unknown, label: () => string): string {
+export function stringifyPayload(value: unknown, label: () => string): string {
   const seen = new Set<object>()
   const check = (item: unknown): void => {
     if (item === null) return
@@ -69,12 +69,16 @@ function stringifyPayload(value: unknown, label: () => string): string {
   )
 }
 
-function snapshotEntries(
+/** Snapshot entries from `skip` onwards: a stream flushes only new ones. */
+export function snapshotEntries(
   map: Map<string, unknown>,
   what: string,
+  skip = 0,
 ): [string, string, unknown][] {
   const entries: [string, string, unknown][] = []
+  let index = 0
   for (const [composite, value] of map) {
+    if (index++ < skip) continue
     const separator = composite.indexOf('\u0000')
     const id = composite.slice(0, separator)
     // Each value is checked on its own so the error names the id.
@@ -84,16 +88,35 @@ function snapshotEntries(
   return entries
 }
 
-export async function renderToString(
+/**
+ * One request's render: the root tree, the request record, the promises the
+ * request tracks (all of them, and the subset the streamed shell waits for),
+ * and disposal. `renderToString` and `renderToStream` share it.
+ */
+export interface Session {
+  rootId: string
+  root: SFragment
+  request: InternalRequest
+  response: { status: number; headers: Headers }
+  pending: Set<Promise<unknown>>
+  shell: Set<Promise<unknown>>
+  signal: AbortSignal | undefined
+  /** Rejects with the abort reason; never resolves. */
+  abortion: Promise<never>
+  dispose(): void
+}
+
+export function beginRequest(
   app: () => Child,
-  options: RenderOptions = {},
-): Promise<RenderResult> {
+  options: RenderOptions,
+): Session {
   const rootId = options.rootId ?? '0'
   if (!/^[A-Za-z0-9_-]{1,32}$/.test(rootId))
     throw new Error(`Invalid rootId ${JSON.stringify(rootId)}`)
   const signal = options.signal
   if (signal?.aborted) throw signal.reason
   const pending = new Set<Promise<unknown>>()
+  const shell = new Set<Promise<unknown>>()
   const cleanups: Array<() => void> = []
   const response = { status: 200, headers: new Headers() }
   const request: InternalRequest = {
@@ -102,10 +125,12 @@ export async function renderToString(
     resources: new Map(),
     queries: new Map(),
     response,
-    track(promise) {
+    track(promise, forShell) {
       pending.add(promise)
+      if (forShell) shell.add(promise)
       const done = (): void => {
         pending.delete(promise)
+        shell.delete(promise)
       }
       promise.then(done, done)
     },
@@ -116,11 +141,24 @@ export async function renderToString(
   if (signal) request.signal = signal
   if (options.onError) request.onError = options.onError
   const root = fragment()
-  let dispose = (): void => undefined
+  let disposeRoot = (): void => undefined
   let aborted: (() => void) | null = null
+  let disposed = false
+  const dispose = (): void => {
+    if (disposed) return
+    disposed = true
+    if (aborted) signal?.removeEventListener('abort', aborted)
+    setTearingDown(true)
+    try {
+      disposeRoot()
+    } finally {
+      setTearingDown(false)
+    }
+    for (const fn of cleanups) fn()
+  }
   try {
     createRoot((done) => {
-      dispose = done
+      disposeRoot = done
       internalRequest(request)
       const rootOwner = createInternalOwner('component', () => false)
       // Gate 1 holds user effects and onMount for the request's whole life;
@@ -137,46 +175,86 @@ export async function renderToString(
         throw error
       }
     })
-    const abortion = new Promise<never>((_, reject) => {
-      aborted = () => reject(signal?.reason)
-      signal?.addEventListener('abort', aborted, { once: true })
-    })
-    // The race below surfaces the rejection; this keeps it from being
-    // reported as unhandled when the render finishes first.
-    abortion.catch(() => undefined)
-    // Settle in rounds: a microtask lets Suspense reveal, then every tracked
-    // promise is awaited; a settled resource can track more.
-    for (;;) {
-      await Promise.resolve()
-      if (signal?.aborted) throw signal.reason
-      if (pending.size === 0) break
-      await Promise.race([Promise.allSettled([...pending]), abortion])
-    }
-    if (development) validateStructure(root)
-    const html = serializeChildren(root)
-    const r = snapshotEntries(request.resources, 'resource')
-    const q = snapshotEntries(request.queries, 'query')
+  } catch (error) {
+    dispose()
+    throw error
+  }
+  const abortion = new Promise<never>((_, reject) => {
+    aborted = () => reject(signal?.reason)
+    signal?.addEventListener('abort', aborted, { once: true })
+  })
+  // Races surface the rejection; this keeps it from being reported as
+  // unhandled when a render finishes first.
+  abortion.catch(() => undefined)
+  return {
+    rootId,
+    root,
+    request,
+    response,
+    pending,
+    shell,
+    signal,
+    abortion,
+    dispose,
+  }
+}
+
+/**
+ * Settles in rounds: a microtask lets Suspense reveal, then every promise in
+ * `set` is awaited; a settled resource can track more. Rejects on abort.
+ */
+export async function settle(
+  session: Session,
+  set: Set<Promise<unknown>>,
+): Promise<void> {
+  for (;;) {
+    await Promise.resolve()
+    if (session.signal?.aborted) throw session.signal.reason
+    if (set.size === 0) return
+    await Promise.race([Promise.allSettled([...set]), session.abortion])
+  }
+}
+
+export function payloadScript(rootId: string, payload: string): string {
+  return payload
+    ? `<script type="application/json" data-benos="${rootId}">${payload}</script>`
+    : ''
+}
+
+export function checkPayloadSize(bytes: number, limit: number): void {
+  if (bytes > limit)
+    throw new RangeError(
+      `Payload is ${bytes} bytes, over the ${limit} byte limit`,
+    )
+}
+
+export async function renderToString(
+  app: () => Child,
+  options: RenderOptions = {},
+): Promise<RenderResult> {
+  const session = beginRequest(app, options)
+  try {
+    await settle(session, session.pending)
+    if (development) validateStructure(session.root)
+    const html = serializeChildren(session.root)
+    const r = snapshotEntries(session.request.resources, 'resource')
+    const q = snapshotEntries(session.request.queries, 'query')
     let payload = ''
-    let script = ''
     if (r.length || q.length) {
       payload = stringifyPayload({ v: 1, r, q }, () => 'payload')
-      const bytes = new TextEncoder().encode(payload).byteLength
-      const limit = options.maxPayloadBytes ?? 1_048_576
-      if (bytes > limit)
-        throw new RangeError(
-          `Payload is ${bytes} bytes, over the ${limit} byte limit`,
-        )
-      script = `<script type="application/json" data-benos="${rootId}">${payload}</script>`
+      checkPayloadSize(
+        new TextEncoder().encode(payload).byteLength,
+        options.maxPayloadBytes ?? 1_048_576,
+      )
     }
+    const { rootId } = session
     return {
-      html: `<!--benos:${rootId}:1-->${html}<!--/benos:${rootId}-->${script}`,
+      html: `<!--benos:${rootId}:1-->${html}<!--/benos:${rootId}-->${payloadScript(rootId, payload)}`,
       payload,
-      status: response.status,
-      headers: response.headers,
+      status: session.response.status,
+      headers: session.response.headers,
     }
   } finally {
-    if (aborted) signal?.removeEventListener('abort', aborted)
-    dispose()
-    for (const fn of cleanups) fn()
+    session.dispose()
   }
 }
