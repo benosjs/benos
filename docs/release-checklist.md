@@ -101,7 +101,10 @@ the suite (the order CI already used). The steps were:
    as the other packages.
 5. Set the date of the `0.6.0` section in `CHANGELOG.md`.
 
-From 0.6.1 on, use the automated release for all thirteen packages.
+From 0.6.1 on, use the automated release for all thirteen packages. Trusted
+publishing was configured for every package on 2026-10-31, so 0.7.0 is the
+first release expected to run end to end through the workflow: tag, verify,
+approve the `publish` job, done.
 
 ## Automated release (default for future versions)
 

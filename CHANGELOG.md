@@ -2,6 +2,55 @@
 
 All notable changes to Benos are documented here.
 
+## [0.7.0] — Unreleased
+
+### Added
+
+- Add `renderToStream(app, options)` to `@benosjs/server`: it resolves once
+  the router's loaders have settled, to `{ status, headers, stream, done }`,
+  and streams the shell with every waiting `Suspense` boundary as its
+  fallback, then one patch per boundary as its opted-in data settles (a
+  `<template>` with the content, a payload script with only the new
+  snapshots, and a call to a self-removing inline runtime), then an end
+  notice. After the last patch the document is byte for byte what
+  `renderToString` produces. `nonce` stamps every inline script; errors after
+  the shell reach `onError` with `phase: 'stream'`.
+- Hydrate progressively: `hydrate` waits for the shell when called before it
+  exists (load the entry with `async`), merges every payload script, takes the
+  patches that land after it started and claims their content in place, and
+  holds a resource or query whose snapshot is still on its way instead of
+  fetching it. The end notice, or the end of parsing without one, releases
+  everything to the ordinary client path.
+- Stream the dashboard example: its project detail reads a deliberately slow
+  activity query inside `Suspense`; the shell arrives in about 100 ms where the
+  whole page took about 700 ms (`pnpm bench:stream`). The
+  [server rendering guide](docs/ssr.md) and [findings](docs/ssr-findings.md)
+  cover streaming.
+
+### Changed
+
+- Server rendering is faster: a binding is evaluated once, with no computation,
+  unless a tracked resource is pending in the request; template skeletons are
+  compiled once per definition and built in place; cleanup closures that
+  duplicated range removal are gone; a primitive slot value gets no owner.
+  The 1,000-row benchmark went from 9.1 ms to 4.6–8.6 ms (17–23× Solid, from
+  35–45×). Development keeps an effect per binding to refuse and report a
+  write made after a binding read, so its HTML equals production's.
+- Marker grammar v1 gains one extension: a streamed boundary's fallback is
+  marked `<!--b:0:ID-->`. The protocol version stays 1; every 0.6.0 page is
+  unchanged and still hydrates.
+- The request record gains `track(promise, shell?)` (the router flags its
+  initial navigation), `pendingCount`, `pendingOf`, `whenPatched`, and
+  `whenSnapshot`; all optional, no core runtime change.
+
+### Sizes
+
+- `@benosjs/server` 7,668 B (cap raised to 8,448 B for streaming and the fast
+  path) and `@benosjs/dom/hydrate` 3,962 B (cap raised to 4,096 B for
+  progressive hydration), each measured with core and DOM external; async
+  2,084 B (+187), query 3,744 B (+5), router 6,899 B (+2); core 4,490 B,
+  core + DOM 11,515 B, and forms 2,888 B unchanged, minified and gzipped.
+
 ## [0.6.0] — 2026-10-30
 
 ### Added
