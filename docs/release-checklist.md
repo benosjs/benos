@@ -104,7 +104,9 @@ the suite (the order CI already used). The steps were:
 From 0.6.1 on, use the automated release for all thirteen packages. Trusted
 publishing was configured for every package on 2026-10-31, so 0.7.0 is the
 first release expected to run end to end through the workflow: tag, verify,
-approve the `publish` job, done.
+approve the `publish` job, done. It did, on 2026-10-31: every verification
+and consumer job passed and the `publish` job released all thirteen packages
+with provenance and no manual step.
 
 ## Automated release (default for future versions)
 

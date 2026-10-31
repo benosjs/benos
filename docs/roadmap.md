@@ -1,6 +1,6 @@
 # Benos roadmap
 
-Versions 0.2.0 through 0.6.0 are published. The phase plan and completed work live in
+Versions 0.2.0 through 0.7.0 are published. The phase plan and completed work live in
 [plan.md](./plan.md); this roadmap tracks shipped optional modules and upcoming
 framework work.
 
@@ -64,7 +64,7 @@ bin symlinks and Windows command shims. Users should install a current release.
   routed content; the dashboard rendered on the server. See the
   [server rendering guide](./ssr.md) and [findings](./ssr-findings.md).
 
-## Prepared for 0.7.0
+## Shipped in 0.7.0
 
 - **Streaming:** `renderToStream` with out-of-order Suspense patches over the
   0.6.0 markers and payload, CSP nonces, progressive hydration from an `async`

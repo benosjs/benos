@@ -2,7 +2,7 @@
 
 All notable changes to Benos are documented here.
 
-## [0.7.0] — Unreleased
+## [0.7.0] — 2026-10-31
 
 ### Added
 
