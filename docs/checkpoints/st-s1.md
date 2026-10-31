@@ -1,6 +1,6 @@
 # ST-S1 — Streaming design documents
 
-**Status:** Awaiting review. S0 was approved on 2026-10-31. The user's words: "Approve S0, start S1". No implementation code was written.
+**Status:** Approved on 2026-10-31 with all eleven decisions. The user's words: "Approve S1, start S2". S0 was approved on 2026-10-31. The user's words: "Approve S0, start S1". No implementation code was written.
 
 ## Delivered
 
