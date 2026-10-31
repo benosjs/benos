@@ -1,6 +1,6 @@
 # ST-S3 — `renderToStream` and patches
 
-**Status:** Awaiting review. S2 was approved on 2026-10-31 with the rule as built. The user's words: "Approve S2, start S3".
+**Status:** Approved on 2026-10-31. The user's words: "Approve S3, start S4". S2 was approved on 2026-10-31 with the rule as built. The user's words: "Approve S2, start S3".
 
 ## Delivered
 
