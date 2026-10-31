@@ -2,15 +2,15 @@
 
 ## Current status
 
-| Sub-step                             | Status                   |
-| ------------------------------------ | ------------------------ |
-| S0 — Plan                            | Written; awaiting review |
-| S1 — Design documents                | Not started              |
-| S2 — Server fast path                | Not started              |
-| S3 — `renderToStream` and patches    | Not started              |
-| S4 — Progressive hydration           | Not started              |
-| S5 — Validation app and measurements | Not started              |
-| S6 — Release preparation for 0.7.0   | Not started              |
+| Sub-step                             | Status                        |
+| ------------------------------------ | ----------------------------- |
+| S0 — Plan                            | Complete; approved 2026-10-31 |
+| S1 — Design documents                | In progress                   |
+| S2 — Server fast path                | Not started                   |
+| S3 — `renderToStream` and patches    | Not started                   |
+| S4 — Progressive hydration           | Not started                   |
+| S5 — Validation app and measurements | Not started                   |
+| S6 — Release preparation for 0.7.0   | Not started                   |
 
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.6.0): **streaming server rendering**. A server-rendered page starts with the shell and its Suspense fallbacks, each boundary's content follows as its opted-in data settles, and the browser hydrates progressively, claiming streamed content as it arrives. The track also pays down the server render cost that 0.6.0 measured at 35–45× Solid.
 
@@ -124,4 +124,4 @@ Guide (`docs/ssr.md` gains streaming), API reference, CHANGELOG, size report, fu
 
 ## 5. Your Immediate Task
 
-S0 is written. Stop for approval. On approval, start S1 and stop at the `st-s1` checkpoint.
+S0 is approved (2026-10-31). The user's words: "Approve S0, start S1". Start S1: extend `ssr.md` with the streaming contract and stop at the `st-s1` checkpoint.
