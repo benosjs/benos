@@ -82,10 +82,19 @@ function isComment(
   return node?.nodeType === COMMENT && (node as Comment).data === data
 }
 
+/** `b`, `b:N`, or `b:N:ID` (a streamed boundary's fallback, 0.7.0). */
 function isOpen(node: Node | null | undefined): node is Comment {
   return (
-    node?.nodeType === COMMENT && /^b(?::\d+)?$/.test((node as Comment).data)
+    node?.nodeType === COMMENT &&
+    /^b(?::\d+(?::\d+)?)?$/.test((node as Comment).data)
   )
+}
+
+/** The stage ordinal N of a `b:N` or `b:N:ID` marker. */
+function stageIndex(open: Comment): number {
+  const data = open.data
+  const end = data.indexOf(':', 2)
+  return Number(end === -1 ? data.slice(2) : data.slice(2, end))
 }
 
 /** The `<!--/b-->` that closes `open`, skipping nested pairs. */
@@ -171,7 +180,7 @@ function createClaimer(
   const recovered = new WeakSet<Node>()
   /** Elements the server rendered; their first attribute write is skipped. */
   const claimedElements = new WeakSet<Node>()
-  const leftover = /^(?:\/?[bi]|b:\d+)$/
+  const leftover = /^(?:\/?[bi]|b:\d+(?::\d+)?)$/
   const stages = new WeakMap<
     Node,
     {
@@ -369,7 +378,7 @@ function createClaimer(
         pair = {
           open: next as Comment,
           close,
-          index: Number((next as Comment).data.slice(2)),
+          index: stageIndex(next as Comment),
         }
         next = close.nextSibling
       }

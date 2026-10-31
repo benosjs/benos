@@ -127,6 +127,13 @@ export function serializeChildren(parent: SContainer): string {
   return out
 }
 
+/** Serializes a range of sibling nodes, for a streamed boundary's patch. */
+export function serializeNodes(nodes: readonly SNode[]): string {
+  let out = ''
+  for (const node of nodes) out += serialize(node)
+  return out
+}
+
 function serialize(node: SNode): string {
   if (node.kind === 3) return escapeText(node.data)
   if (node.kind === 8) return `<!--${node.data}-->`

@@ -7,7 +7,8 @@ export interface InternalRequest {
   resources: Map<string, unknown>
   queries: Map<string, unknown>
   signal?: AbortSignal
-  track?: (promise: Promise<unknown>) => void
+  /** `shell` marks work the streamed shell waits for (the router's navigation). */
+  track?: (promise: Promise<unknown>, shell?: boolean) => void
   onError?: (error: unknown, info: { phase: 'setup' | 'data' }) => void
   response?: { status: number; headers: Headers }
   /** Registers work to run when the request root is disposed. */

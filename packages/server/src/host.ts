@@ -17,6 +17,7 @@ import {
   setInternalErrorHandler,
   setInternalOwnerGate,
   type InternalOwner,
+  type InternalRequest,
 } from '@benosjs/core/internal'
 import {
   Dynamic,
@@ -698,6 +699,28 @@ function rejectDynamicContent(parent: SContainer, what: string): void {
  */
 const stageCounts = new WeakMap<object, number>()
 
+/**
+ * Every stage a request prepares, in creation order, so the streaming
+ * renderer can find a boundary whose fallback (ordinal 0) is committed while
+ * its content (ordinal 1) is still held: a streamed boundary.
+ */
+export interface StageRecord {
+  target: object
+  index: number
+  committed: boolean
+  /** The opening `<!--b:N-->` once committed. */
+  open: SComment | null
+  nodes: () => SNode[]
+  /** Set by the streaming renderer once the fallback carries its ID. */
+  streamed?: string
+}
+const stageRecords = new WeakMap<InternalRequest, StageRecord[]>()
+export function stagesOf(request: InternalRequest): StageRecord[] {
+  let list = stageRecords.get(request)
+  if (!list) stageRecords.set(request, (list = []))
+  return list
+}
+
 const serverHost: InternalHost = {
   comment: (parent) => {
     stageCounts.set(parent, 0)
@@ -732,6 +755,15 @@ function prepareStage(
   const index = stageCounts.get(target) ?? 0
   stageCounts.set(target, index + 1)
   setInternalOwnerGate(owner, 1)
+  const request = internalRequest()
+  const record: StageRecord = {
+    target,
+    index,
+    committed: false,
+    open: null,
+    nodes: () => range.nodes,
+  }
+  if (request) stagesOf(request).push(record)
   let range: Range
   try {
     range = runWithOwner(owner, () =>
@@ -761,6 +793,8 @@ function prepareStage(
       range.nodes = [open, ...moveChildren(holder, parent, before), close]
       insert(parent, close, before)
       committed = true
+      record.committed = true
+      record.open = open
       setInternalOwnerGate(owner, 0)
     },
     dispose: () => {

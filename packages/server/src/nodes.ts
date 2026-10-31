@@ -29,7 +29,8 @@ export interface SText extends Linked {
 
 export interface SComment extends Linked {
   readonly kind: 8
-  readonly data: string
+  /** Mutable: a streamed boundary's fallback marker gains its ID at shell time. */
+  data: string
 }
 
 export interface SFragment {
