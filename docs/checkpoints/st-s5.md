@@ -1,6 +1,6 @@
 # ST-S5 — Validation app and measurements
 
-**Status:** Awaiting review. S4 was approved on 2026-10-31. The user's words: "Approve S4, start S5".
+**Status:** Approved on 2026-10-31. The user's words: "Approve S5, start S6". S4 was approved on 2026-10-31. The user's words: "Approve S4, start S5".
 
 ## Delivered
 
