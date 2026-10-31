@@ -1,6 +1,6 @@
 # ST-S4 — Progressive hydration
 
-**Status:** Awaiting review. S3 was approved on 2026-10-31. The user's words: "Approve S3, start S4".
+**Status:** Approved on 2026-10-31. The user's words: "Approve S4, start S5". S3 was approved on 2026-10-31. The user's words: "Approve S3, start S4".
 
 ## Delivered
 

@@ -2,15 +2,15 @@
 
 ## Current status
 
-| Sub-step                             | Status                                                                                      |
-| ------------------------------------ | ------------------------------------------------------------------------------------------- |
-| S0 — Plan                            | Complete; approved 2026-10-31                                                               |
-| S1 — Design documents                | Complete; approved, checkpoint in [`docs/checkpoints/st-s1.md`](checkpoints/st-s1.md)       |
-| S2 — Server fast path                | Complete; approved, checkpoint in [`docs/checkpoints/st-s2.md`](checkpoints/st-s2.md)       |
-| S3 — `renderToStream` and patches    | Complete; approved, checkpoint in [`docs/checkpoints/st-s3.md`](checkpoints/st-s3.md)       |
-| S4 — Progressive hydration           | Written; awaiting review, checkpoint in [`docs/checkpoints/st-s4.md`](checkpoints/st-s4.md) |
-| S5 — Validation app and measurements | Not started                                                                                 |
-| S6 — Release preparation for 0.7.0   | Not started                                                                                 |
+| Sub-step                             | Status                                                                                |
+| ------------------------------------ | ------------------------------------------------------------------------------------- |
+| S0 — Plan                            | Complete; approved 2026-10-31                                                         |
+| S1 — Design documents                | Complete; approved, checkpoint in [`docs/checkpoints/st-s1.md`](checkpoints/st-s1.md) |
+| S2 — Server fast path                | Complete; approved, checkpoint in [`docs/checkpoints/st-s2.md`](checkpoints/st-s2.md) |
+| S3 — `renderToStream` and patches    | Complete; approved, checkpoint in [`docs/checkpoints/st-s3.md`](checkpoints/st-s3.md) |
+| S4 — Progressive hydration           | Complete; approved, checkpoint in [`docs/checkpoints/st-s4.md`](checkpoints/st-s4.md) |
+| S5 — Validation app and measurements | In progress                                                                           |
+| S6 — Release preparation for 0.7.0   | Not started                                                                           |
 
 You are the lead architect for the next Benos track (`@benosjs/*`, currently v0.6.0): **streaming server rendering**. A server-rendered page starts with the shell and its Suspense fallbacks, each boundary's content follows as its opted-in data settles, and the browser hydrates progressively, claiming streamed content as it arrives. The track also pays down the server render cost that 0.6.0 measured at 35–45× Solid.
 
@@ -124,4 +124,4 @@ Guide (`docs/ssr.md` gains streaming), API reference, CHANGELOG, size report, fu
 
 ## 5. Your Immediate Task
 
-S0 is approved (2026-10-31). The user's words: "Approve S0, start S1". S1 is approved (2026-10-31) with all eleven decisions. The user's words: "Approve S1, start S2". S2 is approved (2026-10-31) with the rule as built; eager serialization is a recorded follow-up, not an S2b. The user's words: "Approve S2, start S3". S3 is approved (2026-10-31). The user's words: "Approve S3, start S4". S4 is written; see [`docs/checkpoints/st-s4.md`](checkpoints/st-s4.md). Stop for approval before S5.
+S0 is approved (2026-10-31). The user's words: "Approve S0, start S1". S1 is approved (2026-10-31) with all eleven decisions. The user's words: "Approve S1, start S2". S2 is approved (2026-10-31) with the rule as built; eager serialization is a recorded follow-up, not an S2b. The user's words: "Approve S2, start S3". S3 is approved (2026-10-31). The user's words: "Approve S3, start S4". S4 is approved (2026-10-31). The user's words: "Approve S4, start S5". Start S5: the validation app and measurements. Stop at the `st-s5` checkpoint.
