@@ -1,6 +1,6 @@
 # ST-S2 — Server fast path
 
-**Status:** Awaiting review. S1 was approved on 2026-10-31 with all eleven decisions. The user's words: "Approve S1, start S2".
+**Status:** Approved on 2026-10-31 with the rule as built and S3 next (eager serialization stays a follow-up). The user's words: "Approve S2, start S3". S1 was approved on 2026-10-31 with all eleven decisions. The user's words: "Approve S1, start S2".
 
 ## Delivered
 
