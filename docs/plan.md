@@ -1,6 +1,6 @@
 # Benos build plan
 
-This document is the source of truth for Benos scope and phase status. The master prompt establishes the initial architecture; this plan records the approved execution order and later corrections. Work stops at each checkpoint for review. As of v0.2.2, all eight packages are published and the optional UI system is complete and shipped. Later package releases still require explicit approval.
+This document is the source of truth for Benos scope and phase status. The master prompt establishes the initial architecture; this plan records the approved execution order and later corrections. Work stops at each checkpoint for review. As of 0.6.0, all thirteen packages are published; the optional UI system and the async, router, query, forms, and server-rendering modules are complete and shipped. Later package releases still require explicit approval.
 
 ## Phase 0 — Workspace — complete
 
@@ -114,12 +114,10 @@ Write the type-level sketch required by risk 1 in `risks.md`: one typed declarat
 
 ## Current release and next scope
 
-Versions 0.2.0 through 0.5.0 are published. The optional UI system is complete and shipped: primitives, the source-owned component registry, `benos init/add/list/diff/update`, and theming are part of the released product. 0.4.0 shipped async resources and the router ([router-async-plan.md](./router-async-plan.md)); 0.5.0 shipped query, forms, and the flagship integration as executable code ([query-plan.md](./query-plan.md), [forms-plan.md](./forms-plan.md)).
+Versions 0.2.0 through 0.6.0 are published. The optional UI system is complete and shipped: primitives, the source-owned component registry, `benos init/add/list/diff/update`, and theming are part of the released product. 0.4.0 shipped async resources and the router ([router-async-plan.md](./router-async-plan.md)); 0.5.0 shipped query, forms, and the flagship integration as executable code ([query-plan.md](./query-plan.md), [forms-plan.md](./forms-plan.md)); 0.5.1 made the `benos` CLI read its registry index from its own release tag ([registry-pin-plan.md](./registry-pin-plan.md)); 0.6.0 shipped server rendering and hydration ([ssr-plan.md](./ssr-plan.md)).
 
-Upcoming framework work is blocks, SSR, and devtools. The sortable table's production initial render is the leading performance item: recorded workloads are roughly 2× Solid (2.46× at 10,000 rows and 2.72× at 5,000 rows); sorting is much closer.
-
-The top CLI follow-up for the next patch is reading the default registry index from the CLI's own release tag (benosjs/benos#20).
+Upcoming framework work is streaming, blocks, and devtools. The sortable table's production initial render is the leading performance item: recorded workloads are roughly 2× Solid (2.46× at 10,000 rows and 2.72× at 5,000 rows); sorting is much closer.
 
 ## Scope boundary
 
-Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. The router, async resources, Suspense, and transitions shipped in 0.4.0; query, forms, and the flagship integration shipped in 0.5.0. Blocks, SSR/hydration, devtools, and React interop remain upcoming unless a later approved plan changes this document.
+Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. The router, async resources, Suspense, and transitions shipped in 0.4.0; query, forms, and the flagship integration shipped in 0.5.0; string server rendering and hydration shipped in 0.6.0. Streaming, blocks, devtools, and React interop remain upcoming unless a later approved plan changes this document.

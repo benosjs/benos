@@ -1,6 +1,6 @@
 # Benos roadmap
 
-Versions 0.2.0 through 0.5.0 are published. The phase plan and completed work live in
+Versions 0.2.0 through 0.6.0 are published. The phase plan and completed work live in
 [plan.md](./plan.md); this roadmap tracks shipped optional modules and upcoming
 framework work.
 
@@ -50,6 +50,13 @@ bin symlinks and Windows command shims. Users should install a current release.
   ([flagship-integration.md](./architecture/flagship-integration.md)). SSR
   integration follows the SSR module.
 
+## Shipped in 0.5.1
+
+- **Registry pin:** the `benos` CLI reads the default UI registry index from
+  its own release tag instead of `main`, so a release merged before it is
+  published cannot break published CLIs
+  ([registry-pin-plan.md](./registry-pin-plan.md)).
+
 ## Shipped in 0.6.0
 
 - **Server rendering:** `@benosjs/server` and `@benosjs/dom/hydrate` with
@@ -65,9 +72,3 @@ bin symlinks and Windows command shims. Users should install a current release.
 - **Streaming:** out-of-order Suspense patches over the 0.6.0 markers and
   payload, with strict and CSP-nonce delivery.
 - **Devtools:** visualize the reactive graph and explain why a DOM node updated.
-
-## Next CLI patch
-
-- Read the default UI registry index from the CLI's own release tag instead
-  of `main`, so a release merged before it is published cannot break
-  published CLIs (benosjs/benos#20).
