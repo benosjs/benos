@@ -118,32 +118,28 @@ function describe(node: Node | null): string {
   return `element <${(node as Element).localName}>`
 }
 
+/**
+ * Merges every payload script for the root (the shell's and each patch's)
+ * into the request's maps and drops the scripts; a streamed page calls it
+ * again when a patch lands.
+ */
 function readPayload(
   host: ParentNode,
   rootId: string,
   override: string | undefined,
-): { resources: Map<string, unknown>; queries: Map<string, unknown> } {
-  const resources = new Map<string, unknown>()
-  const queries = new Map<string, unknown>()
-  let text = override
-  if (text === undefined) {
+  resources: Map<string, unknown>,
+  queries: Map<string, unknown>,
+): void {
+  const texts: string[] = []
+  if (override !== undefined) texts.push(override)
+  else {
     const selector = `script[type="application/json"][data-benos="${rootId}"]`
-    const script =
-      host.querySelector(selector) ??
-      (host as Node).ownerDocument?.querySelector(selector) ??
-      null
-    text = script?.textContent ?? undefined
-    if (script) drop(script)
+    const scope = (host as Node).ownerDocument ?? host
+    for (const script of scope.querySelectorAll(selector)) {
+      texts.push(script.textContent ?? '')
+      drop(script)
+    }
   }
-  if (text === undefined) return { resources, queries }
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(text)
-  } catch {
-    return { resources, queries }
-  }
-  const payload = parsed as { v?: unknown; r?: unknown; q?: unknown }
-  if (!payload || payload.v !== 1) return { resources, queries }
   const fill = (entries: unknown, into: Map<string, unknown>): void => {
     if (!Array.isArray(entries)) return
     for (const entry of entries) {
@@ -156,9 +152,18 @@ function readPayload(
         into.set(`${entry[0]}\u0000${entry[1]}`, entry[2])
     }
   }
-  fill(payload.r, resources)
-  fill(payload.q, queries)
-  return { resources, queries }
+  for (const text of texts) {
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(text)
+    } catch {
+      continue
+    }
+    const payload = parsed as { v?: unknown; r?: unknown; q?: unknown }
+    if (!payload || payload.v !== 1) continue
+    fill(payload.r, resources)
+    fill(payload.q, queries)
+  }
 }
 
 /**
@@ -174,8 +179,14 @@ function createClaimer(
   claim: Claim
   cursor: WeakMap<Node, Node | null>
   sweep(nodes: Node[]): void
+  /** The streamed-boundary ID noted on a claimed control marker. */
+  streamedId(marker: Node): string | undefined
+  /** Registers a patched content pair so the next stage under `parent` claims it. */
+  addStage(parent: Node, open: Comment, close: Comment): void
 } {
   const cursor = new WeakMap<Node, Node | null>()
+  /** Control markers whose preceding fallback pair carried `b:0:ID`. */
+  const streamedMarkers = new WeakMap<Node, string>()
   /** Keys whose remainder was client rendered; later claims there are silent. */
   const recovered = new WeakSet<Node>()
   /** Elements the server rendered; their first attribute write is skipped. */
@@ -389,6 +400,10 @@ function createClaimer(
         let list = stages.get(parent)
         if (!list) stages.set(parent, (list = []))
         list.push({ ...pair, count: 0, claimed: false })
+        const data = pair.open.data
+        const id = data.indexOf(':', 2)
+        if (pair.index === 0 && id !== -1)
+          streamedMarkers.set(next, data.slice(id + 1))
       }
       return next
     }
@@ -587,15 +602,34 @@ function createClaimer(
     }
   }
 
-  return { claim, cursor, sweep }
+  return {
+    claim,
+    cursor,
+    sweep,
+    streamedId: (marker) => streamedMarkers.get(marker),
+    addStage(parent, open, close) {
+      let list = stages.get(parent)
+      if (!list) stages.set(parent, (list = []))
+      // The fallback stage was already requested under this control, so the
+      // content stage is the second request: ordinal 1.
+      list.push({ open, close, index: 1, count: 1, claimed: false })
+    },
+  }
 }
 
-export function hydrate(
-  app: () => Child,
-  host: Element | DocumentFragment | ShadowRoot,
-  options: HydrateOptions = {},
-): () => void {
-  const rootId = options.rootId ?? '0'
+interface StreamStore {
+  h: Record<
+    string,
+    | { p(id: string, template: HTMLTemplateElement): void; e(): void }
+    | undefined
+  >
+  d: Record<string, 1>
+}
+
+function findRootMarkers(
+  host: ParentNode,
+  rootId: string,
+): { open: Comment | null; close: Comment | null } {
   let open: Comment | null = null
   let close: Comment | null = null
   for (let node = host.firstChild; node; node = node.nextSibling) {
@@ -607,6 +641,55 @@ export function hydrate(
       break
     }
   }
+  return { open, close }
+}
+
+export function hydrate(
+  app: () => Child,
+  host: Element | DocumentFragment | ShadowRoot,
+  options: HydrateOptions = {},
+): () => void {
+  const rootId = options.rootId ?? '0'
+  const document = host.ownerDocument as Document
+  // A streamed page may still be arriving: wait for the shell's closing
+  // marker (or for parsing to end), then claim as usual.
+  if (
+    !findRootMarkers(host, rootId).close &&
+    document.readyState === 'loading'
+  ) {
+    let dispose: (() => void) | null = null
+    let cancelled = false
+    const observer = new MutationObserver(() => tryStart())
+    const tryStart = (): void => {
+      if (cancelled || dispose) return
+      if (
+        !findRootMarkers(host, rootId).close &&
+        document.readyState === 'loading'
+      )
+        return
+      observer.disconnect()
+      document.removeEventListener('DOMContentLoaded', tryStart)
+      dispose = begin(app, host, options)
+    }
+    observer.observe(host, { childList: true })
+    document.addEventListener('DOMContentLoaded', tryStart)
+    return () => {
+      cancelled = true
+      observer.disconnect()
+      document.removeEventListener('DOMContentLoaded', tryStart)
+      dispose?.()
+    }
+  }
+  return begin(app, host, options)
+}
+
+function begin(
+  app: () => Child,
+  host: Element | DocumentFragment | ShadowRoot,
+  options: HydrateOptions,
+): () => void {
+  const rootId = options.rootId ?? '0'
+  const { open, close } = findRootMarkers(host, rootId)
   const versioned = open?.data === `benos:${rootId}:1`
   if (open && close && !versioned) {
     // A different protocol: discard the server markup and client render.
@@ -632,7 +715,34 @@ export function hydrate(
       )
     options.onMismatch?.(info)
   }
-  const { resources, queries } = readPayload(host, rootId, options.payload)
+  const resources = new Map<string, unknown>()
+  const queries = new Map<string, unknown>()
+  readPayload(host, rootId, options.payload, resources, queries)
+  // The streaming runtime lives on the host's window; a hydration registers
+  // there to take patches that arrive after it started.
+  const view = (host.ownerDocument?.defaultView ??
+    globalThis) as typeof globalThis & {
+    __benos_s?: StreamStore
+  }
+  const store = (view.__benos_s ??= { h: {}, d: {} })
+  // Patches can still arrive only while the document is parsing and the
+  // root has not sent its end notice; otherwise nothing waits.
+  const ownerDocument = host.ownerDocument as Document
+  let finished =
+    Boolean(store.d[rootId]) || ownerDocument.readyState !== 'loading'
+  const markers = new Map<string, Node>()
+  const continuations = new Map<string, () => void>()
+  const received = new Map<string, HTMLTemplateElement>()
+  /** Resources and queries holding for a snapshot that may still arrive. */
+  let waiters: Array<[string, () => void]> = []
+  const notifySnapshots = (all: boolean): void => {
+    const due = waiters.filter(
+      ([key]) => all || resources.has(key) || queries.has(key),
+    )
+    waiters = all ? [] : waiters.filter((waiter) => !due.includes(waiter))
+    for (const [, next] of due) next()
+  }
+  let claimActive = false
   // Loaders and opted-in data the app starts are awaited before the claim
   // ends, so routed content that commits after them can still claim.
   const pending = new Set<Promise<unknown>>()
@@ -648,8 +758,94 @@ export function hydrate(
       }
       promise.then(done, done)
     },
+    pendingOf(marker) {
+      if (finished) return undefined
+      const id = claimer.streamedId(marker as Node)
+      if (id !== undefined) markers.set(id, marker as Node)
+      return id
+    },
+    whenSnapshot(key, next) {
+      if (finished || disposed) return next()
+      waiters.push([key, next])
+    },
+    whenPatched(id, next) {
+      if (finished) return next()
+      const template = received.get(id)
+      if (template) {
+        received.delete(id)
+        applyPatch(id, template, next)
+      } else continuations.set(id, next)
+    },
   }
   const claimer = createClaimer(rootId, host, options.onMismatch)
+  /** Inserts a patch's content pair before its boundary's marker and claims it. */
+  const applyPatch = (
+    id: string,
+    template: HTMLTemplateElement,
+    next: () => void,
+  ): void => {
+    const marker = markers.get(id)
+    markers.delete(id)
+    readPayload(host, rootId, undefined, resources, queries)
+    notifySnapshots(false)
+    const nodes = Array.from(template.content.childNodes)
+    const first = nodes[0]
+    const last = nodes[nodes.length - 1]
+    const parent = marker?.parentNode
+    if (
+      disposed ||
+      !parent ||
+      !isOpen(first) ||
+      stageIndex(first) !== 1 ||
+      !isComment(last, '/b')
+    ) {
+      template.remove()
+      if (!disposed) next()
+      return
+    }
+    parent.insertBefore(template.content, marker as Node)
+    template.remove()
+    claimer.addStage(parent, first, last)
+    const wasActive = claimActive
+    if (!wasActive) registry.setClaim(claimer.claim)
+    try {
+      next()
+    } finally {
+      if (!wasActive) registry.setClaim(null)
+    }
+    claimer.sweep(nodes.filter((node) => node.isConnected))
+  }
+  store.h[rootId] = {
+    p(id, template) {
+      if (disposed) {
+        template.remove()
+        return
+      }
+      const next = continuations.get(id)
+      if (!next) {
+        received.set(id, template)
+        return
+      }
+      continuations.delete(id)
+      applyPatch(id, template, next)
+    },
+    e: () => finishStream(),
+  }
+  /** The end notice, or the end of parsing without one: nothing more comes. */
+  function finishStream(): void {
+    if (finished) return
+    finished = true
+    ownerDocument.removeEventListener('DOMContentLoaded', finishStream)
+    readPayload(host, rootId, undefined, resources, queries)
+    const waiting = [...continuations.values()]
+    continuations.clear()
+    received.clear()
+    if (disposed) return
+    notifySnapshots(true)
+    for (const next of waiting) next()
+  }
+  if (!finished)
+    ownerDocument.addEventListener('DOMContentLoaded', finishStream)
   let disposeRoot = (): void => undefined
   let disposed = false
   let rootRange: { nodes: Node[] } = { nodes: [] }
@@ -669,6 +865,7 @@ export function hydrate(
       if (claimable) {
         claimer.cursor.set(close as Comment, (open as Comment).nextSibling)
         registry.setClaim(claimer.claim)
+        claimActive = true
       }
       let output!: Child
       runWithOwner(rootOwner, () => {
@@ -689,6 +886,7 @@ export function hydrate(
   }
   const finish = (): void => {
     registry.setClaim(null)
+    claimActive = false
     if (disposed) return
     if (claimable) {
       const rest = claimer.cursor.get(close as Comment)
@@ -728,6 +926,8 @@ export function hydrate(
   }
   return () => {
     disposed = true
+    store.h[rootId] = undefined
+    ownerDocument.removeEventListener('DOMContentLoaded', finishStream)
     disposeRoot()
   }
 }

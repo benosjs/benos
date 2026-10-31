@@ -49,13 +49,17 @@ const development = process.env.NODE_ENV !== 'production'
  * The browser runtime, defined once before the first patch. `p` swaps a
  * pending boundary's fallback range for the patch's content; a hydration
  * that has registered a handler for the root takes the patch instead. `e`
- * marks the root finished. Plain ES2020; it evaluates no application data.
+ * marks the root finished. A hydration that starts first creates the store
+ * without `p` and `e`, so the runtime fills them in on whatever object it
+ * finds. Plain ES2020; it evaluates no application data.
  */
 export const RUNTIME =
-  'self.__benos_s||(self.__benos_s={h:{},d:{},p(r,i){var t=document.getElementById("b:"+r+":"+i),h=this.h[r];if(!t)return;if(h)return h.p(i,t);' +
+  '(function(){var s=self.__benos_s||(self.__benos_s={h:{},d:{}});if(!s.p){' +
+  's.p=function(r,i){var t=document.getElementById("b:"+r+":"+i),h=s.h[r];if(!t)return;if(h)return h.p(i,t);' +
   'var w=document.createTreeWalker(document,128),c,o=null;for(;(c=w.nextNode());)if(c.data=="b:0:"+i){o=c;break}' +
   'if(o){var d=0,n=o,x;for(;;){x=n.nextSibling;if(n!==o&&n.nodeType==8){if(/^b(:|$)/.test(n.data))d++;else if(n.data=="/b"&&!d--){n.remove();break}}n.remove();if(!x)break;n=x}' +
-  'x&&x.parentNode.insertBefore(t.content,x)}t.remove()},e(r){this.d[r]=1;var h=this.h[r];h&&h.e()}});' +
+  'x&&x.parentNode.insertBefore(t.content,x)}t.remove()};' +
+  's.e=function(r){s.d[r]=1;var h=s.h[r];h&&h.e()}}})();' +
   'document.currentScript&&document.currentScript.remove()'
 
 interface Streamed {
@@ -191,13 +195,12 @@ export async function renderToStream(
         flushPatches()
         if ([...streamed.values()].every((entry) => entry.emitted)) break
         if (session.pending.size === 0) break
+        // Wake when any tracked promise settles: each boundary patches on
+        // its own, so a round must not wait for all of them.
         try {
-          await Promise.race([
-            Promise.allSettled([...session.pending]),
-            session.abortion,
-          ])
+          await Promise.race([...session.pending, session.abortion])
         } catch {
-          break
+          if (session.signal?.aborted) break
         }
       }
     } catch (error) {

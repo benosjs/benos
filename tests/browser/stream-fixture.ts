@@ -11,7 +11,7 @@ import { renderToStream, renderToString } from '@benosjs/server'
 declare global {
   interface Window {
     __benosStream: {
-      run(mode: 'end' | 'fail'): Promise<{
+      run(mode: 'end' | 'before' | 'wait' | 'fail'): Promise<{
         chunks: number
         shellText: string
         finalText: string
@@ -97,8 +97,20 @@ window.__benosStream = {
     const iframe = document.createElement('iframe')
     document.body.append(iframe)
     const doc = iframe.contentDocument as Document
+    const mismatches: HydrationMismatch[] = []
+    let hydrated = false
+    let clientFetchesBefore = 0
+    const startHydration = (): void => {
+      hydrated = true
+      clientFetchesBefore = fetches
+      hydrate(app, doc.getElementById('app') as HTMLElement, {
+        onMismatch: (info) => mismatches.push(info),
+      })
+    }
     doc.open()
     doc.write('<!doctype html><html><body><div id="app">')
+    // 'wait': the entry ran before the shell arrived; hydrate waits for it.
+    if (mode === 'wait') startHydration()
     let chunks = 0
     let shellText = ''
     for (;;) {
@@ -109,7 +121,11 @@ window.__benosStream = {
       doc.write(chunk)
       if (chunks === 1) {
         shellText = (doc.getElementById('app') as HTMLElement).textContent ?? ''
-        // The first chunk is on the page while the data is still pending.
+        // 'before': hydrate while the data is still pending on the server.
+        if (mode === 'before') {
+          startHydration()
+          await new Promise((done) => setTimeout(done, 20))
+        }
         if (!fail) pendingResolve?.({ name: 'Ada', secret: 'hunter2' })
       }
     }
@@ -132,9 +148,7 @@ window.__benosStream = {
     fetches = stringFetches
     // The server could not settle the data; the client can.
     fail = false
-    const mismatches: HydrationMismatch[] = []
-    const before = fetches
-    hydrate(app, host, { onMismatch: (info) => mismatches.push(info) })
+    if (!hydrated) startHydration()
     await new Promise((done) => setTimeout(done, 20))
     if (mode === 'fail') pendingResolve?.({ name: 'Client', secret: '' })
     await new Promise((done) => setTimeout(done, 20))
@@ -148,8 +162,8 @@ window.__benosStream = {
       reference,
       streamedHtml,
       mismatches,
-      fetches: before,
-      clientFetches: fetches - before,
+      fetches: clientFetchesBefore,
+      clientFetches: fetches - clientFetchesBefore,
       count: host.querySelector('#count')?.textContent ?? '',
       templates: doc.querySelectorAll('template').length,
       scripts: doc.querySelectorAll('script:not([type="application/json"])')

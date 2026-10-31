@@ -39,3 +39,31 @@ test('a boundary the server could not settle is handed to the client', async ({
   expect(state.finalText).toContain('Client')
   expect(state.count).toBe('Count: 2')
 })
+
+test('hydrating while the stream is still arriving claims the patch when it lands', async ({
+  page,
+}) => {
+  await open(page)
+  const state = await page.evaluate(() => window.__benosStream.run('before'))
+  expect(state.chunks).toBe(3)
+  // Hydrated mid-stream: nothing fetched, the patched content was claimed.
+  expect(state.clientFetches).toBe(0)
+  expect(state.mismatches).toEqual([])
+  expect(state.finalText).toContain('Ada')
+  // Hydrated before the capture, so markers are gone: the invariant itself
+  // is checked by the hydrate-at-end test above.
+  expect(state.templates).toBe(0)
+  expect(state.count).toBe('Count: 2')
+})
+
+test('hydrate called before the shell exists waits for it', async ({
+  page,
+}) => {
+  await open(page)
+  const state = await page.evaluate(() => window.__benosStream.run('wait'))
+  expect(state.chunks).toBe(3)
+  expect(state.clientFetches).toBe(0)
+  expect(state.mismatches).toEqual([])
+  expect(state.finalText).toContain('Ada')
+  expect(state.count).toBe('Count: 2')
+})

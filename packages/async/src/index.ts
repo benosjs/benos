@@ -209,17 +209,48 @@ export function resource<S, T>(
       invalidate()
       currentState.set({ status: 'disabled' })
     } else if (request?.mode === 'hydrate' && ssr) {
-      const snapshot = snapshotKey(key)
-      if (request.resources.has(snapshot)) {
-        const value = ssr.deserialize(request.resources.get(snapshot))
-        request.resources.delete(snapshot)
-        invalidate()
-        batch(() => {
-          currentValue.set(value)
-          currentState.set({ status: 'ready' })
-        })
-      } else void launch(key)
+      if (!seed(key)) {
+        // While the page is still streaming, the snapshot may arrive with a
+        // later patch: hold instead of fetching.
+        if (request.whenSnapshot) hold(key)
+        else void launch(key)
+      }
     } else void launch(key)
+  }
+
+  /** Seeds from the request's snapshot for `key`, if there is one. */
+  const seed = (key: S): boolean => {
+    const snapshot = snapshotKey(key)
+    if (!request || !ssr || !request.resources.has(snapshot)) return false
+    const value = ssr.deserialize(request.resources.get(snapshot))
+    request.resources.delete(snapshot)
+    invalidate()
+    batch(() => {
+      currentValue.set(value)
+      currentState.set({ status: 'ready' })
+    })
+    return true
+  }
+
+  /** Pending without a fetch until the snapshot lands or the stream ends. */
+  const hold = (key: S): void => {
+    invalidate()
+    const id = generation
+    const pending: NonNullable<typeof active> = {
+      controller: new AbortController(),
+      token: { listeners: new Set() },
+      resolve: () => undefined,
+      key,
+    }
+    active = pending
+    currentState.set({ status: 'pending' })
+    request?.whenSnapshot?.(snapshotKey(key), () => {
+      if (disposed || id !== generation || active !== pending) return
+      if (seed(key)) {
+        for (const listener of pending.token.listeners) listener()
+        pending.token.listeners.clear()
+      } else void launch(key)
+    })
   }
 
   onCleanup(() => {
@@ -438,15 +469,28 @@ registerInternalControl(Suspense, (props, parent, before, owner, host) => {
   })
   fallback = host.stage(() => props.fallback as Child, parent)
   fallback.commit(marker)
-  content = host.stage(
-    () =>
-      boundaryContext.Provider({
-        value: boundary,
-        children: props.children,
-      }) as Child,
-    parent,
-  )
-  queueMicrotask(reveal)
+  const stageContent = (): void => {
+    content = host.stage(
+      () =>
+        boundaryContext.Provider({
+          value: boundary,
+          children: props.children,
+        }) as Child,
+      parent,
+    )
+    queueMicrotask(reveal)
+  }
+  // A streamed boundary (its fallback marked with an ID while hydrating)
+  // stages nothing until its patch lands: its data is on the way, so no
+  // resource is created and nothing fetches. The end of the stream runs the
+  // continuation without a patch, which is the ordinary client path.
+  const request = internalRequest()
+  const streamed = request?.pendingOf?.(marker)
+  if (streamed !== undefined && request?.whenPatched)
+    request.whenPatched(streamed, () => {
+      if (!disposed) runWithOwner(owner, stageContent)
+    })
+  else stageContent()
   return [marker]
 })
 

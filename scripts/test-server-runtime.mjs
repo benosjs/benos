@@ -135,7 +135,7 @@ if (html !== expected || status !== 200) {
   )
     problems.push(`shell: ${chunks[0]}`)
   if (
-    !chunks[1]?.startsWith('<script nonce="n1">self.__benos_s||') ||
+    !chunks[1]?.startsWith('<script nonce="n1">(function(){var s=self.__benos_s||') ||
     !chunks[1].includes(
       '<template id="b:0:0"><!--b:1--><b><!--b-->Ada<!--/b--></b><!--/b--></template>',
     ) ||
