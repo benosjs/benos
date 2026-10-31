@@ -1,6 +1,6 @@
 # ST-S6 — Release preparation for 0.7.0
 
-**Status:** Awaiting review. S5 was approved on 2026-10-31. The user's words: "Approve S5, start S6". No pull request has been opened and no version has been bumped.
+**Status:** Approved on 2026-10-31. The user's words: "Approve S6, bump to 0.7.0". All thirteen packages are bumped to 0.7.0 and the pull request is open; nothing is merged, tagged, or published. S5 was approved on 2026-10-31. The user's words: "Approve S5, start S6". No pull request has been opened and no version has been bumped.
 
 ## Delivered
 

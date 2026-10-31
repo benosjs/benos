@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/router",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Typed routes and navigation for Benos.",
   "repository": {
     "type": "git",

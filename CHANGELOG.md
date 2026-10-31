@@ -43,6 +43,11 @@ All notable changes to Benos are documented here.
   initial navigation), `pendingCount`, `pendingOf`, `whenPatched`, and
   `whenSnapshot`; all optional, no core runtime change.
 
+### Changed (registry)
+
+- Raise UI registry dependency ranges to `^0.7.0` and minimum Benos versions
+  to `0.7.0`, and build registry release `0.7.0`. No component changed.
+
 ### Sizes
 
 - `@benosjs/server` 7,668 B (cap raised to 8,448 B for streaming and the fast
