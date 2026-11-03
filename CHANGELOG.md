@@ -2,6 +2,18 @@
 
 All notable changes to Benos are documented here.
 
+## [0.7.1] — Unreleased
+
+### Fixed
+
+- Pin the starter's `vitest` to 5.1.0. vitest 5.1.0 (published 2026-11-02)
+  made npm 10 crash with `Cannot read properties of null (reading
+'edgesOut')` while resolving the peers of the starter's previous pin,
+  5.0.5, so `npm create benos@latest` failed under npm 10, the version Node 22
+  bundles. npm 11 was not affected. No package code changed; all thirteen
+  packages move to 0.7.1 together because a release publishes them as one
+  version.
+
 ## [0.7.0] — 2026-10-31
 
 ### Added

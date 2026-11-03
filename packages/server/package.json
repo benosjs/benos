@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/server",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Server rendering for Benos: renderToString with opt-in data serialization.",
   "repository": {
     "type": "git",

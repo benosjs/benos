@@ -1,6 +1,6 @@
 {
   "name": "@benosjs/async",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Owned async resources and Suspense for Benos.",
   "repository": {
     "type": "git",
