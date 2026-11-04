@@ -1645,26 +1645,50 @@ function mountDirectTemplate(
           )
       } else if (binding.kind === 'child') {
         if (!(target instanceof Comment) || !target.parentNode) continue
-        const slot: Slot = {
-          parent: target.parentNode,
-          marker: target,
-          after: target.nextSibling,
-          current: null,
-          range: { nodes: [target], owner },
-          initialized: false,
-          value: undefined,
-          ordinal: claimInternalOrdinal(),
+        const ordinal = claimInternalOrdinal()
+        // A string or number stays a bare Text node before the placeholder,
+        // with no slot, branch, or cleanup; any other value removes the text
+        // and builds an ordinary slot on the placeholder. Hydration claims
+        // server markers, so it starts with the slot.
+        let text: Text | null = null
+        let slot: Slot | null = null
+        const toSlot = (): Slot => {
+          const created: Slot = {
+            parent: target.parentNode as Node,
+            marker: target,
+            after: target.nextSibling,
+            current: null,
+            range: { nodes: [target], owner },
+            initialized: false,
+            value: undefined,
+            ordinal,
+          }
+          runWithOwner(owner, () =>
+            onCleanup(() => {
+              disposeMounted(created.current)
+              created.current = null
+              domHost.remove(created.marker)
+              created.range.nodes = []
+            }),
+          )
+          return created
         }
-        onCleanup(() => {
-          disposeMounted(slot.current)
-          slot.current = null
-          domHost.remove(slot.marker)
-          slot.range.nodes = []
-        })
+        if (claimed) slot = toSlot()
         createRenderEffect(() => {
           const value = binding.get(descriptor.values) as Child
-          updateSlot(slot, value, owner, (branch, at) =>
-            createChildMount(value, slot.parent, at, branch),
+          if (!slot) {
+            if (typeof value === 'string' || typeof value === 'number') {
+              if (text) text.data = String(value)
+              else
+                target.before((text = document.createTextNode(String(value))))
+              return
+            }
+            text?.remove()
+            slot = toSlot()
+          }
+          const current = slot
+          updateSlot(current, value, owner, (branch, at) =>
+            createChildMount(value, current.parent, at, branch),
           )
         })
       } else if (binding.kind === 'event') {

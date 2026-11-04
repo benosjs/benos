@@ -428,6 +428,58 @@ describe('hydrate', () => {
     expect(host.innerHTML).toBe('<p class="x">Count: 3<!----></p>')
   })
 
+  it('hydrates text rows of a direct template and then creates client rows in the same list', async () => {
+    type Row = { id: number; label: string }
+    const rows = signal<Row[]>([
+      { id: 1, label: 'one' },
+      { id: 2, label: 'two' },
+    ])
+    const row = (item: () => Row) =>
+      directTemplate(
+        {
+          id: 'text-row',
+          html: '<li><!----></li>',
+          attributes: [],
+          bindings: [
+            {
+              kind: 'child',
+              path: [0],
+              namespace: 'html',
+              get: (values) => (values[0] as () => Row)().label,
+            },
+          ],
+        },
+        [item],
+      )
+    const app = () =>
+      jsx('ul', {
+        children: jsx(For, {
+          get each() {
+            return rows()
+          },
+          by: (item: Row) => item.id,
+          children: row,
+        }),
+      })
+    const host = await serve(app)
+    const first = host.querySelector('li')
+    roots.push(hydrate(app, host))
+    expect(host.querySelector('li')).toBe(first)
+    rows.set([
+      { id: 1, label: 'uno' },
+      { id: 2, label: 'two' },
+      { id: 3, label: 'three' },
+    ])
+    expect(host.querySelector('li')).toBe(first)
+    expect(host.textContent).toBe('unotwothree')
+    rows.set([
+      { id: 3, label: 'drei' },
+      { id: 1, label: 'eins' },
+    ])
+    expect(host.textContent).toBe('dreieins')
+    expect(shape(host)).toBe(clientShape(app))
+  })
+
   it('hydrates two roots on one page and client renders portal content', async () => {
     const target = document.createElement('div')
     document.body.append(target)

@@ -738,6 +738,71 @@ describe('@benosjs/compiler', () => {
     expect(runBehaviorFixture(none.code)).toEqual(runBehaviorFixture(safe.code))
   })
 
+  it('keeps a dynamic child moving between text and nodes identical for none and safe optimization', () => {
+    const source =
+      'export const App = (props) => <main><p>{props.value()}</p><b>{props.count()}</b><ErrorBoundary fallback={(error) => <em>{error.message}</em>}><i>{props.risky()}</i></ErrorBoundary></main>'
+    const run = (optimization: 'none' | 'safe') => {
+      const { code } = transformJsx(source, {
+        filename: 'fixtures/text-mode.tsx',
+        development: true,
+        optimization,
+      })
+      document.body.replaceChildren()
+      const module = evaluate(
+        code,
+        { ...domRuntime, ...domInternalRuntime } as Record<string, unknown>,
+        { ErrorBoundary: domRuntime.ErrorBoundary },
+      )
+      const value = signal<Child>('a')
+      const count = signal(0)
+      const risky = signal('fine')
+      const steps: string[] = []
+      const dispose = render(
+        () =>
+          (module.App as (props: Record<string, unknown>) => Child)({
+            value,
+            count,
+            risky: () => {
+              const next = risky()
+              if (next === 'throw') throw new Error('later failure')
+              return next
+            },
+          }),
+        document.body,
+      )
+      steps.push(document.body.innerHTML)
+      for (const next of [
+        1,
+        '',
+        domRuntime.jsx('u', { children: 'element' }),
+        'text again',
+        ['c', 'd'],
+        null,
+        false,
+        'e',
+        0,
+      ] as Child[]) {
+        value.set(next)
+        steps.push(document.body.innerHTML)
+      }
+      count.set(5)
+      steps.push(document.body.innerHTML)
+      risky.set('throw')
+      steps.push(document.body.innerHTML)
+      dispose()
+      steps.push(document.body.innerHTML)
+      return { code, steps }
+    }
+    const none = run('none')
+    const safe = run('safe')
+    expect(safe.code).toContain('__benos_direct_template')
+    expect(safe.steps).toEqual(none.steps)
+    expect(none.steps[3]).toContain('<u>element</u>')
+    expect(none.steps[5]).toContain('cd')
+    expect(none.steps.at(-2)).toContain('<em>later failure')
+    expect(none.steps.at(-1)).toBe('')
+  })
+
   it('runs a compiled component fixture on the DOM host', () => {
     const result = transformJsx(behaviorFixture, {
       filename: 'fixtures/App.tsx',

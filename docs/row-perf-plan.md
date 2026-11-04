@@ -47,7 +47,7 @@ Targets are goals, not results to force. If a target cannot be reached without b
 
 ### Size caps
 
-Current production sizes (minified + gzip): core 4,490 / 4,608; core + DOM 11,515 / 11,520; hydrate 3,962 / 4,096; server 7,668 / 8,448. Core + DOM has 5 bytes left, so most changes must pay for themselves. A cap increase may be **proposed** with the exact byte cost of each change, its measured gain, and the alternative considered; the decision is the user's. Application bundle size (dashboard and gallery builds) is measured too, since generated code per template can grow while the runtime shrinks.
+Production sizes at the start (minified + gzip): core 4,490 / 4,608; core + DOM 11,515 / 11,520; hydrate 3,962 / 4,096; server 7,688 / 8,448. At RP-7b the core + DOM cap was raised to **12,032 B** for this track (the user's words: "Approve, raise cap"); every change still reports its bytes beside its measured gain. A cap increase may be **proposed** with the exact byte cost of each change, its measured gain, and the alternative considered; the decision is the user's. Application bundle size (dashboard and gallery builds) is measured too, since generated code per template can grow while the runtime shrinks.
 
 ---
 

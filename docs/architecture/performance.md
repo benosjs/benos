@@ -51,7 +51,9 @@ What does not change: the text binding keeps one render effect, so tracking, sch
 
 **Disposal.** A text-mode binding registers no cleanup: its Text node sits inside the template's root element and leaves with it, and it owns no branch. An upgraded binding registers the slot cleanup at upgrade, on the template's owner (not the effect's run owner); like today's, it runs during that owner's disposal, after its child owners and before the template's range removal.
 
-**Tests.** Text to text, text to element, text to array, text to `null` and back, element to text; numbers and empty strings; a binding that throws on its first or a later run; disposal before and after an upgrade; keyed moves of rows with text bindings; hydration of a page and then client-created rows in the same list; DOM output identical to today except the removed markers; all compiler fixtures in `none` and `safe`; allocation counts per row.
+**Tests.** Text to text, text to element, text to array, text to `null` and back, element to text; numbers and empty strings; a binding that throws on its first or a later run; disposal before and after an upgrade; keyed moves of rows with text bindings; hydration of a page and then client-created rows in the same list; DOM output identical to today; all compiler fixtures in `none` and `safe`; allocation counts per row.
+
+**Implemented (RP-7c-1), with one change from the design: the marker stays.** Text mode inserts the Text node _before_ the placeholder and keeps the placeholder, so the DOM is byte-identical to before. Removing the marker conflicted with three existing contracts: the compiler suite requires `none` and `safe` to produce the same DOM (and `none` builds ordinary slots, which keep the marker); a hydration test fixes the hydrated DOM of a direct template with the marker; and the progressive-hydration suite requires a hydrated page to match a fresh client render exactly. Dropping the marker everywhere would need those test expectations changed, which this track's rules forbid without a decision. The allocation saving does not depend on it. Measured: +72 B core + DOM; retained objects per benchmark row 95.5 → 73.5, owners 4 → 2; table row 143.8 → 112.9, owners 5 → 2; binding setup on create 1k 10.5 → 6.7 ms; disposal calls on clear 15 → 5 per row. Full tables in [RP-7c-1](../checkpoints/rp-7c-1.md).
 
 ### 2. Bulk DOM removal on clear and full replace
 
@@ -110,7 +112,7 @@ Internal render effects stop building the disposer closure that `createEffect` r
 
 Each candidate is implemented and measured alone, in rank order, with the RP-7a set: the nine operations interleaved against all four frameworks, the table matrix, retained allocations per row, the CPU categories, and GC for Benos against Solid. A candidate stays only with a repeatable gain and no regression beyond noise; otherwise it is reverted and recorded.
 
-Core + DOM is at 11,515 of 11,520 bytes, so even candidate 1 does not fit. **Decision needed:** raise the core + DOM cap for this track, by 512 B to 12,032 B, with every step reporting its exact bytes beside its measured gain, as the 0.3.0 track did. Core (4,490 of 4,608) likely absorbs candidates 3, 4, 6, and 7 without a change. Hydrate and server bundles are not expected to move; they are reported at each step.
+Core + DOM was at 11,515 of 11,520 bytes, so even candidate 1 did not fit. **Decided at RP-7b:** the core + DOM cap is 12,032 B (+512) for this track, with every step reporting its exact bytes beside its measured gain, as the 0.3.0 track did. Core (4,490 of 4,608) likely absorbs candidates 3, 4, 6, and 7 without a change. Hydrate and server bundles are not expected to move; they are reported at each step.
 
 ## Record of the 0.3.0 track
 
