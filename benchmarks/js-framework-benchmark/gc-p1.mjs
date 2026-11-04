@@ -43,9 +43,21 @@ function serve(root, port) {
     server.listen(port, '127.0.0.1', () => resolveServer(server))
   })
 }
+// alloc-p1.mjs builds `app-benos-safe` (compiled rows) and the Solid apps;
+// older builds named the compiled app `app-benos`. P1_GC_APP and
+// P1_GC_TABLE_APP pick other builds, such as `app-solid` and
+// `app-table-solid`, for a comparison.
+const rowApp =
+  process.env.P1_GC_APP ??
+  (existsSync(resolve(buildRoot, 'app-benos-safe'))
+    ? 'app-benos-safe'
+    : 'app-benos')
 const servers = [
-  await serve(resolve(buildRoot, 'app-benos'), 4381),
-  await serve(resolve(buildRoot, 'app-table-benos'), 4382),
+  await serve(resolve(buildRoot, rowApp), 4381),
+  await serve(
+    resolve(buildRoot, process.env.P1_GC_TABLE_APP ?? 'app-table-benos'),
+    4382,
+  ),
 ]
 const workloads = [
   { name: 'create-1k', port: 4381, click: 'run', expected: 1000 },
