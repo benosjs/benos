@@ -1,18 +1,21 @@
 # Benos roadmap
 
-Versions 0.2.0 through 0.7.0 are published. The phase plan and completed work live in
+Versions 0.2.0 through 0.7.1 are published. The phase plan and completed work live in
 [plan.md](./plan.md); this roadmap tracks shipped optional modules and upcoming
 framework work.
 
-## Top framework performance item
+## Next: Phase 7 and Phase 8
 
-- Reduce per-row JavaScript allocations on initial render. The latest
-  production trace measures generic row creation at about 1.4× Solid. The
-  registry table now retains 44.2 plain objects, 19.0 arrays, and 19.0
-  closures per row versus Solid's 10.1, 2.0, and 7.0. Continue reducing
-  per-row allocations without regressing the nine-operation suite. See
-  [benchmarks/README.md](../benchmarks/README.md) for the protocol, spreads,
-  and allocation profile.
+- **Phase 7, row creation at Solid's level:** creating, replacing, and clearing
+  rows is the remaining gap (about 1.4× Solid at 0.3.0, 2.07× for clear, and
+  1.64–1.74× for the sortable table's mount). The registry table retains 44.2
+  plain objects, 19.0 arrays, and 19.0 closures per row versus Solid's 10.1,
+  2.0, and 7.0. Targets and steps are in [plan.md](./plan.md#phase-7--row-creation-at-solids-level--planned);
+  the protocol and history are in [benchmarks/README.md](../benchmarks/README.md).
+- **Phase 8, Benos devtools:** a browser extension for the reactive graph,
+  live values, and why a DOM node updated, with panels for the router, query,
+  forms, async, and server-rendered pages. Steps are in
+  [plan.md](./plan.md#phase-8--benos-devtools--planned).
 
 ## Shipped in v0.2.x
 
@@ -77,7 +80,6 @@ bin symlinks and Windows command shims. Users should install a current release.
 
 - **Blocks:** reusable application patterns such as login and dashboard flows,
   built on the router and forms modules.
-- **Devtools:** visualize the reactive graph and explain why a DOM node updated.
 - **Eager server serialization:** write settled subtrees to the stream as
   strings instead of building nodes, the remaining server-speed item after the
-  0.7.0 fast path.
+  0.7.0 fast path (server rendering is still 17–23× slower than Solid's).

@@ -112,12 +112,92 @@ Write the type-level sketch required by risk 1 in `risks.md`: one typed declarat
 - Include the minimal scripts and JSX configuration needed for a first render, and keep router, forms, query, SSR, UI primitives, and other out-of-scope modules out of the generated starter.
 - Recheck npm name and scope availability immediately before publication; publishing remains explicitly deferred until approval.
 
+## Phase 7 — Row creation at Solid's level — planned
+
+Close the remaining initial-render gap with Solid. The 0.3.0 performance track ([perf-plan.md](./perf-plan.md)) took creation from about 1.6× to about 1.4× Solid with compiled direct output and lazy owners; this phase goes after the rest. The brief will be `docs/row-perf-plan.md`, with checkpoints `docs/checkpoints/rp-<step>.md`.
+
+**Goal.** On the js-framework-benchmark operations, Benos's median is at or below Solid's, or within 5% with overlapping spreads, under the interleaved production protocol in `benchmarks/README.md`:
+
+| Workload                                   | Last recorded (0.3.0) | Target                              |
+| ------------------------------------------ | --------------------: | ----------------------------------- |
+| Create 1,000 rows                          |                 1.39× | ≤ 1.05×                             |
+| Replace 1,000 rows                         |                 1.40× | ≤ 1.05×                             |
+| Create 10,000 rows                         |                 1.36× | ≤ 1.05×                             |
+| Append 1,000 rows                          |                 1.22× | ≤ 1.05×                             |
+| Clear rows                                 |                 2.07× | ≤ 1.10×                             |
+| Sortable table initial mount (5k and 10k)  |            1.64–1.74× | ≤ 1.15×                             |
+| Retained objects, arrays, closures per row |        44.2 / 19 / 19 | within 1.5× of Solid's 10.1 / 2 / 7 |
+| Update, select, swap, remove, sort         |            0.94–1.44× | no regression                       |
+
+Targets are goals, not results to force: each step reports the honest number, and a target that cannot be reached without breaking a rule below is reported as such.
+
+**Rules.**
+
+- No public API change and no change to the guarantees in `docs/architecture/`; every existing test passes unchanged. Anything that would need one is raised before it is built.
+- Server rendering, streaming, and hydration keep working byte for byte: the server output, markers, and the hydration claim are covered by the existing SSR and streaming suites, and the client and server outputs keep coming from one compiler analysis.
+- `optimization: 'none'` and `'safe'` keep identical behavior; development and production builds behave the same minus diagnostics.
+- The kernel guard stays within 2× Preact. Any size-cap increase is proposed with its byte cost, its measured gain, and the alternative considered; you decide.
+- Benchmark adapters and registry components stay idiomatic user code. Every result table includes every row with median and spread.
+
+### 7a — Baseline and attribution
+
+Re-measure on the current release (0.7.x), since async, router, SSR, and streaming have landed since the last record: all nine operations, the sortable table, and the retained per-row profile against Solid. Attribute creation and clear time by category (template cloning, slot location, binding setup, owners, effects, events, insertion, disposal, garbage collection). No optimization code.
+
+### 7b — Design
+
+Write the candidate changes into `docs/architecture/performance.md`, ranked by expected gain, each with its byte cost, semantic risk, effect on hydration and the server output, and test plan. Candidates to evaluate, not conclusions: bindings that settle after their first run allocate no effect node; owners created only for rows that register cleanups or context; event handlers stored on the element without per-row records; compiled slot paths without intermediate arrays; batched disposal and range removal on clear and replace.
+
+### 7c — Implement in increments
+
+One approved change at a time, each followed by the full measurement set, its byte cost, and its allocation change. Keep only changes with a measured, repeatable gain; revert the rest and record why.
+
+### 7d — Verification and release preparation
+
+Full verification on three browsers and three operating systems, `benchmarks/README.md` updated with the final comparison against Solid, Svelte, Vue, and React, CHANGELOG, and a pull request. Stop before merging.
+
+## Phase 8 — Benos devtools — planned
+
+A browser extension that shows what a running Benos app is doing: the reactive graph, live values, and why a DOM node updated. React DevTools cannot do this for Benos, because it inspects components that re-render, while Benos components run once and individual signals update individual nodes. The brief will be `docs/devtools-plan.md`, with checkpoints `docs/checkpoints/dt-<step>.md`.
+
+**Rules.**
+
+- Production bundles are byte-for-byte unchanged: the instrumentation exists only in development builds, and the size checks prove it.
+- Instrumentation goes through a development-only hook in `@benosjs/core` and `@benosjs/dom` (raised before it is added, as a change to core). With no devtools attached, development builds pay at most a flag check per graph operation, measured with the kernel benchmark in development mode.
+- The extension only reads and displays; editing a signal's value from the panel is a development aid behind an explicit action. It sends nothing off the machine.
+- Chrome and Firefox, Manifest V3. Publishing to the Chrome Web Store and Firefox Add-ons needs your developer accounts and is your step.
+
+### 8a — Design
+
+Write `docs/architecture/devtools.md`: the hook's events (node created, read, written, ran, disposed; owner tree; DOM node to binding), the message protocol between the page and the extension, how source locations are recorded (the compiler already has them for source maps), the cost in development builds, and the panel designs. Decide the package layout (`@benosjs/devtools` for the in-page agent, plus the extension).
+
+### 8b — Development hook and in-page agent
+
+The hook in core and DOM, and the agent that keeps a model of the graph and the owner tree. Tests for every event against the kernel's own graph inspection, and the proof that production output did not change.
+
+### 8c — Inspector panel
+
+The extension with an element picker (click the page, see the owner, bindings, and the signals each binding reads), the owner tree, and live values. Playwright tests that load the extension in Chromium.
+
+### 8d — "Why did this update?" and the recorder
+
+Record a session; for any DOM update, show the chain back to the write and its source line. Highlight updates on the page. Report counts and time per computation, effects still alive after their owner left (leaks), and repeated writes in one flush.
+
+### 8e — Module panels
+
+Router (current route, params, loaders), query (cache entries, staleness, in-flight requests), forms (field state and validation), async (pending resources and Suspense boundaries), and server-rendered pages (which boundaries streamed and hydrated).
+
+### 8f — Validation and release preparation
+
+Use the devtools on the dashboard and record what they found in `docs/devtools-findings.md`, documentation, CHANGELOG, a pull request, and the extension packages ready for store submission. Stop before merging.
+
 ## Current release and next scope
 
 Versions 0.2.0 through 0.7.0 are published. The optional UI system is complete and shipped: primitives, the source-owned component registry, `benos init/add/list/diff/update`, and theming are part of the released product. 0.4.0 shipped async resources and the router ([router-async-plan.md](./router-async-plan.md)); 0.5.0 shipped query, forms, and the flagship integration as executable code ([query-plan.md](./query-plan.md), [forms-plan.md](./forms-plan.md)); 0.5.1 made the `benos` CLI read its registry index from its own release tag ([registry-pin-plan.md](./registry-pin-plan.md)); 0.6.0 shipped server rendering and hydration ([ssr-plan.md](./ssr-plan.md)); 0.7.0 shipped streaming, progressive hydration, and the server fast path ([streaming-plan.md](./streaming-plan.md)).
 
-Upcoming framework work is blocks, devtools, and eager server serialization. The sortable table's production initial render is the leading performance item: recorded workloads are roughly 2× Solid (2.46× at 10,000 rows and 2.72× at 5,000 rows); sorting is much closer.
+0.7.1 pinned the starter's Vitest so `npm create benos` installs under npm 10.
+
+Next is Phase 7, row creation at Solid's level, then Phase 8, the devtools. Blocks and eager server serialization remain upcoming after them.
 
 ## Scope boundary
 
-Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. The router, async resources, Suspense, and transitions shipped in 0.4.0; query, forms, and the flagship integration shipped in 0.5.0; string server rendering and hydration shipped in 0.6.0; streaming shipped in 0.7.0. Blocks, devtools, and React interop remain upcoming unless a later approved plan changes this document.
+Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. The router, async resources, Suspense, and transitions shipped in 0.4.0; query, forms, and the flagship integration shipped in 0.5.0; string server rendering and hydration shipped in 0.6.0; streaming shipped in 0.7.0. Phases 7 and 8 are planned: row creation performance and the devtools. Blocks, eager server serialization, and React interop remain upcoming unless a later approved plan changes this document.
