@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   batch,
+  computed,
   createContext,
   effect,
   getContext,
@@ -1126,6 +1127,149 @@ describe('@benosjs/dom', () => {
     items.set([])
     expect(cleaned).toEqual(['a', 'b', 'c'])
     expect(document.querySelectorAll('li')).toHaveLength(0)
+  })
+
+  it('runs a row component lifecycle and context lookup through keyed moves', async () => {
+    const Theme = createContext('none')
+    const items = signal([{ id: 1 }, { id: 2 }, { id: 3 }])
+    const log: string[] = []
+    function Row(props: { id: number }) {
+      const theme = getContext(Theme)
+      onMount(() => log.push(`mount ${props.id}`))
+      onCleanup(() => log.push(`cleanup ${props.id}`))
+      return jsx('li', { children: `${props.id}:${theme}` })
+    }
+    const dispose = render(
+      () =>
+        jsx(Theme.Provider, {
+          value: 'dark',
+          children: jsx('ul', {
+            children: jsx(For, {
+              get each() {
+                return items()
+              },
+              by: (item: { id: number }) => item.id,
+              children: (item: () => { id: number }) =>
+                jsx(Row, { id: item().id }),
+            }),
+          }),
+        }),
+      document.body,
+    )
+    roots.push(dispose)
+    const text = () =>
+      [...document.querySelectorAll('li')].map((li) => li.textContent)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(text()).toEqual(['1:dark', '2:dark', '3:dark'])
+    expect(log).toEqual(['mount 1', 'mount 2', 'mount 3'])
+    const [first, , third] = document.querySelectorAll('li')
+    log.length = 0
+    items.set([{ id: 3 }, { id: 1 }, { id: 4 }])
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(text()).toEqual(['3:dark', '1:dark', '4:dark'])
+    expect([...document.querySelectorAll('li')].slice(0, 2)).toEqual([
+      third,
+      first,
+    ])
+    expect(log).toEqual(['cleanup 2', 'mount 4'])
+    log.length = 0
+    dispose()
+    expect([...log].sort()).toEqual(['cleanup 1', 'cleanup 3', 'cleanup 4'])
+  })
+
+  it('keeps what an item function creates alive until its row leaves', () => {
+    const items = signal(['a', 'b'])
+    const source = signal(1)
+    let runs = 0
+    function Row(props: { label: string; value: () => number }) {
+      return jsx('li', {
+        get children() {
+          return `${props.label}${props.value()}`
+        },
+      })
+    }
+    roots.push(
+      render(
+        () =>
+          jsx(For, {
+            get each() {
+              return items()
+            },
+            children: (item: () => string) => {
+              const doubled = computed(() => {
+                runs++
+                return source() * 2
+              })
+              return jsx(Row, { label: item(), value: doubled })
+            },
+          }),
+        document.body,
+      ),
+    )
+    expect(document.body.textContent).toBe('a2b2')
+    source.set(2)
+    expect(document.body.textContent).toBe('a4b4')
+    items.set(['a'])
+    const settled = runs
+    source.set(3)
+    expect(document.body.textContent).toBe('a6')
+    expect(runs).toBe(settled + 1)
+  })
+
+  it('routes row errors to a boundary inside the row or around the list', () => {
+    const items = signal([1, 2])
+    const failing = signal(0)
+    function Risky(props: { id: number }) {
+      return jsx('b', {
+        get children() {
+          if (failing() === props.id) throw new Error(`row ${props.id}`)
+          return String(props.id)
+        },
+      })
+    }
+    function Guarded(props: { id: number }) {
+      return jsx('li', {
+        children: jsx(ErrorBoundary, {
+          fallback: (error: unknown) =>
+            jsx('i', { children: (error as Error).message }),
+          children: jsx(Risky, { id: props.id }),
+        }),
+      })
+    }
+    function Bare(props: { id: number }) {
+      return jsx('li', { children: jsx(Risky, { id: props.id + 10 }) })
+    }
+    roots.push(
+      render(
+        () =>
+          jsx(ErrorBoundary, {
+            fallback: (error: unknown) =>
+              jsx('p', { children: (error as Error).message }),
+            children: jsx('ul', {
+              children: [
+                jsx(For, {
+                  get each() {
+                    return items()
+                  },
+                  children: (id: () => number) => jsx(Guarded, { id: id() }),
+                }),
+                jsx(For, {
+                  get each() {
+                    return items()
+                  },
+                  children: (id: () => number) => jsx(Bare, { id: id() }),
+                }),
+              ],
+            }),
+          }),
+        document.body,
+      ),
+    )
+    expect(document.body.textContent).toBe('121112')
+    failing.set(2)
+    expect(document.body.textContent).toBe('1row 21112')
+    failing.set(12)
+    expect(document.body.textContent).toBe('row 12')
   })
 
   it('warns once when a Provider value changes without remounting its subtree', () => {

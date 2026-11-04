@@ -1,6 +1,6 @@
 # Initial-render allocation design
 
-**Status (2026-11-04):** Phase 7 ([row-perf-plan.md](../row-perf-plan.md)) is implementing its design one candidate at a time; candidates 1 and 2 are done ([RP-7c-1](../checkpoints/rp-7c-1.md), [RP-7c-2](../checkpoints/rp-7c-2.md)). The next section is its design; the sections after it are the 0.3.0 track's record and stay as history.
+**Status (2026-11-04):** Phase 7 ([row-perf-plan.md](../row-perf-plan.md)) is implementing its design one candidate at a time; candidates 1–3 are done ([RP-7c-1](../checkpoints/rp-7c-1.md), [RP-7c-2](../checkpoints/rp-7c-2.md), [RP-7c-3](../checkpoints/rp-7c-3.md)). The next section is its design; the sections after it are the 0.3.0 track's record and stay as history.
 
 ## Phase 7 design — row creation at Solid's level
 
@@ -76,6 +76,8 @@ A row like `{(row) => <Row row={row} />}` creates two owners: the item owner (ke
 **Risk.** The id equality is the contract to protect: a test renders keyed and unkeyed rows that call `createUniqueId` at several depths on the server and on the client and compares them, before and after. Core gains one internal setter for an owner's kind, mount readiness, and key.
 
 **Tests.** The id comparison above; `onMount` and `onCleanup` inside the row component; context lookup from inside a row; error boundaries inside rows; keyed moves; an item function that creates a computed before returning the component (two owners kept); control-flow children (`<Show>` as the item) keep two owners.
+
+**Implemented (RP-7c-3), with one change from the design: no new setter.** The existing internal `createInternalOwner` takes a `reuse` argument instead. With it, the call converts and returns the current owner when that owner is still empty. A setter needed its own entry in core's internal registry, whose names survive minification; this form is +50 B core and +77 B core + DOM, against +54 and +92. The id test ran first and passes before and after, and all 24 server and hydration ids of a variant with object-keyed rows are identical before and after. Measured: one owner per benchmark row instead of two, 75 B less retained per row (the design's −4 objects overestimated; the owner is one object), and half the owner-creation work. In an interleaved run against 7c-2, clear is about 0.2 ms faster (1.52 → 1.48× Solid), create 1,000 rows' median is 1 ms lower but not established, and the rest is unchanged. The table rows are written inline, not as components, so this candidate does not reach them. Full tables in [RP-7c-3](../checkpoints/rp-7c-3.md).
 
 ### 4. Keyed item and index state without signal closures
 

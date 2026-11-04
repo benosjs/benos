@@ -415,6 +415,7 @@ function mountValue(
   before: Node | null,
   owner: InternalOwner,
   providerHandled = false,
+  share = false,
 ): DomRange {
   const providerOwner = providerHandled ? null : getInternalProviderOwner(value)
   if (providerOwner)
@@ -449,7 +450,7 @@ function mountValue(
   if (descriptor.kind === 'element')
     return mountElement(descriptor, parent, before, owner)
   if (descriptor.kind === 'component')
-    return mountComponent(descriptor, parent, before, owner)
+    return mountComponent(descriptor, parent, before, owner, share)
   if (descriptor.kind === 'template')
     return mountTemplate(descriptor, parent, before, owner)
   return mountDirectTemplate(descriptor, parent, before, owner)
@@ -896,12 +897,20 @@ function mountComponent(
   parent: Node,
   before: Node | null,
   parentOwner: InternalOwner,
+  share?: boolean,
 ): DomRange {
   const kind = controlKinds.get(descriptor.component)
   const internalControl = internalControls.get(descriptor.component)
   let componentRange: DomRange = { nodes: [], owner: parentOwner }
+  // A list item's owner that is still empty becomes the component's owner.
   const owner = runWithOwner(parentOwner, () =>
-    createInternalOwner('component', () => rangeConnected(componentRange)),
+    createInternalOwner(
+      'component',
+      () => rangeConnected(componentRange),
+      undefined,
+      undefined,
+      share && !kind && !internalControl,
+    ),
   )
   try {
     if (internalControl)
@@ -1119,7 +1128,14 @@ function mountFor(
               )(entry.getItem, entry.getIndex)
             : (props.children as Child)
       })
-      entry.range = mountValue(child, parent, slot.marker, itemOwner)
+      entry.range = mountValue(
+        child,
+        parent,
+        slot.marker,
+        itemOwner,
+        false,
+        true,
+      )
       return entry
     }
     const commitEntries = (next: ForEntry[]): void => {

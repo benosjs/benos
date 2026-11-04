@@ -30,6 +30,7 @@ interface InternalRegistry {
     mountReady?: () => boolean,
     key?: string,
     ordinal?: number,
+    reuse?: boolean,
   ) => unknown
   createRenderEffect: (fn: () => void) => () => void
   internalRequest: (request?: InternalRequest) => InternalRequest | undefined
@@ -60,6 +61,7 @@ export const createInternalOwner = registry.createInternalOwner as (
   mountReady?: () => boolean,
   key?: string,
   ordinal?: number,
+  reuse?: boolean,
 ) => InternalOwner
 export const createRenderEffect = registry.createRenderEffect
 export const internalRequest = registry.internalRequest

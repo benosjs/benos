@@ -1146,10 +1146,19 @@ export function createInternalOwner(
   mountReady?: () => boolean,
   key?: string,
   ordinal?: number,
+  reuse?: boolean,
 ): Owner {
   const parent = ensureCurrentEffectRunOwner()
   if (!parent || parent.disposed)
     throw new Error('Child owner requires a parent')
+  // A list item's owner that is still empty becomes its component's owner,
+  // with the id segment that owner would have had (`k5` → `k5-0`).
+  if (reuse && !parent.hasResources && !parent.childOrdinal) {
+    parent.kind = kind
+    parent.mountReady = mountReady ?? null
+    parent.key = `${parent.key ?? parent.ordinal}-0`
+    return parent
+  }
   const owner = createOwner(parent, kind, ordinal)
   owner.mountReady = mountReady ?? null
   if (key !== undefined) owner.key = key
