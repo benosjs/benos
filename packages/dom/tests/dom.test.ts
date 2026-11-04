@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  batch,
   createContext,
   effect,
   getContext,
@@ -922,6 +923,209 @@ describe('@benosjs/dom', () => {
       before[0],
       before[2],
     ])
+  })
+
+  it('replaces and clears a list between siblings and cleans each row up after it leaves', () => {
+    const items = signal(['a', 'b'])
+    const external = signal(0)
+    const log: string[] = []
+    const clicks: string[] = []
+    let reads = 0
+    function Label(props: { id: string }) {
+      onCleanup(() => log.push(`label ${props.id}`))
+      return jsx('b', {
+        get children() {
+          reads++
+          return `${props.id}${external()}`
+        },
+      })
+    }
+    function Row(props: { id: string }) {
+      let row!: HTMLLIElement
+      onCleanup(() => log.push(`row ${props.id} last`))
+      onCleanup(() =>
+        log.push(`row ${props.id} ${row.parentNode ? 'attached' : 'detached'}`),
+      )
+      return jsx('li', {
+        ref: (element: HTMLLIElement) => {
+          row = element
+        },
+        onClick: () => clicks.push(props.id),
+        children: jsx(Label, { id: props.id }),
+      })
+    }
+    roots.push(
+      render(
+        () =>
+          jsx('ul', {
+            children: [
+              jsx('li', { children: 'head' }),
+              jsx(For, {
+                get each() {
+                  return items()
+                },
+                children: (id: () => string) => jsx(Row, { id: id() }),
+              }),
+              jsx('li', { children: 'foot' }),
+            ],
+          }),
+        document.body,
+      ),
+    )
+    const list = document.querySelector('ul') as HTMLUListElement
+    const text = () => [...list.children].map((li) => li.textContent)
+    const elements = () =>
+      [...list.childNodes].filter((node) => node.nodeType !== Node.COMMENT_NODE)
+    const [head, , , foot] = list.children
+    const first = [...list.children].slice(1, 3)
+    const deleteContents = vi.spyOn(Range.prototype, 'deleteContents')
+
+    items.set(['c', 'd'])
+    expect(text()).toEqual(['head', 'c0', 'd0', 'foot'])
+    expect(log).toEqual([
+      'label a',
+      'row a detached',
+      'row a last',
+      'label b',
+      'row b detached',
+      'row b last',
+    ])
+    expect(first.every((li) => li.parentNode === null)).toBe(true)
+    const second = [...list.children].slice(1, 3)
+
+    log.length = 0
+    items.set([])
+    expect(elements()).toEqual([head, foot])
+    expect(log).toEqual([
+      'label c',
+      'row c detached',
+      'row c last',
+      'label d',
+      'row d detached',
+      'row d last',
+    ])
+    expect(second.every((li) => li.parentNode === null)).toBe(true)
+    expect(deleteContents).toHaveBeenCalledTimes(2)
+
+    const settled = reads
+    external.set(1)
+    expect(reads).toBe(settled)
+    document.body.append(...first, ...second)
+    for (const li of [...first, ...second])
+      li.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+    expect(clicks).toEqual([])
+  })
+
+  it('removes portal content and cancels pending mounts of rows that are replaced or cleared', async () => {
+    const items = signal(['a', 'b'])
+    const target = document.createElement('div')
+    document.body.append(target)
+    const host = document.createElement('div')
+    const mounted: string[] = []
+    function Row(props: { id: string }) {
+      onMount(() => {
+        mounted.push(props.id)
+      })
+      return jsx('p', {
+        children: [
+          props.id,
+          jsx(Portal, {
+            mount: target,
+            children: jsx('i', { children: props.id }),
+          }),
+        ],
+      })
+    }
+    roots.push(
+      render(
+        () =>
+          jsx(For, {
+            get each() {
+              return items()
+            },
+            children: (id: () => string) => jsx(Row, { id: id() }),
+          }),
+        host,
+      ),
+    )
+    expect(target.textContent).toBe('ab')
+    items.set(['c'])
+    expect(host.textContent).toBe('c')
+    expect(target.textContent).toBe('c')
+    document.body.append(host)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(mounted).toEqual(['c'])
+    items.set([])
+    expect(host.textContent).toBe('')
+    expect(target.textContent).toBe('')
+  })
+
+  it('cleans each row up once when a list inside Show is cleared as the Show closes', () => {
+    const items = signal(['a', 'b'])
+    const open = signal(true)
+    const cleaned: string[] = []
+    function Row(props: { id: string }) {
+      onCleanup(() => cleaned.push(props.id))
+      return jsx('li', { children: props.id })
+    }
+    roots.push(
+      render(
+        () =>
+          jsx('ul', {
+            children: jsx(Show, {
+              get when() {
+                return open()
+              },
+              children: jsx(For, {
+                get each() {
+                  return items()
+                },
+                children: (id: () => string) => jsx(Row, { id: id() }),
+              }),
+            }),
+          }),
+        document.body,
+      ),
+    )
+    batch(() => {
+      items.set([])
+      open.set(false)
+    })
+    expect(cleaned).toEqual(['a', 'b'])
+    expect(document.querySelectorAll('li')).toHaveLength(0)
+  })
+
+  it('runs every row cleanup when one throws during a clear inside an ErrorBoundary', () => {
+    const items = signal(['a', 'b', 'c'])
+    const cleaned: string[] = []
+    function Row(props: { id: string }) {
+      onCleanup(() => cleaned.push(props.id))
+      onCleanup(() => {
+        if (props.id === 'b') throw new Error('cleanup b')
+      })
+      return jsx('li', { children: props.id })
+    }
+    roots.push(
+      render(
+        () =>
+          jsx(ErrorBoundary, {
+            fallback: (error: unknown) =>
+              jsx('p', { children: (error as Error).message }),
+            children: jsx('ul', {
+              children: jsx(For, {
+                get each() {
+                  return items()
+                },
+                children: (id: () => string) => jsx(Row, { id: id() }),
+              }),
+            }),
+          }),
+        document.body,
+      ),
+    )
+    items.set([])
+    expect(cleaned).toEqual(['a', 'b', 'c'])
+    expect(document.querySelectorAll('li')).toHaveLength(0)
   })
 
   it('warns once when a Provider value changes without remounting its subtree', () => {

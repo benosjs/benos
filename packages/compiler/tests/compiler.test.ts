@@ -1,9 +1,10 @@
 // @vitest-environment happy-dom
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   createRoot,
   effect,
+  onCleanup,
   signal,
 } from '../../dom/node_modules/@benosjs/core'
 import { For, Show, render, type Child } from '../../dom/src/index.js'
@@ -801,6 +802,84 @@ describe('@benosjs/compiler', () => {
     expect(none.steps[5]).toContain('cd')
     expect(none.steps.at(-2)).toContain('<em>later failure')
     expect(none.steps.at(-1)).toBe('')
+  })
+
+  it('replaces and clears compiled rows identically for none and safe optimization', () => {
+    const source = `const Row = (props) => {
+  const id = props.row().id
+  props.cleanup(() => props.log(id))
+  return <tr class={props.row().id === props.selected() ? 'on' : ''}><td>{props.row().id}</td><td><a onClick={() => props.pick(id)}>{props.row().label}</a></td></tr>
+}
+export const App = (props) => <table><tbody><For each={props.rows()} by={(row) => row.id}>{(row) => <Row row={row} selected={props.selected} cleanup={props.cleanup} log={props.log} pick={props.pick} />}</For></tbody></table>`
+    const run = (optimization: 'none' | 'safe') => {
+      const { code } = transformJsx(source, {
+        filename: 'fixtures/rows.tsx',
+        development: true,
+        optimization,
+      })
+      document.body.replaceChildren()
+      const module = evaluate(
+        code,
+        { ...domRuntime, ...domInternalRuntime } as Record<string, unknown>,
+        { For },
+      )
+      const rows = signal([
+        { id: 1, label: 'one' },
+        { id: 2, label: 'two' },
+      ])
+      const selected = signal(1)
+      const log: number[] = []
+      const picks: number[] = []
+      const steps: string[] = []
+      const dispose = render(
+        () =>
+          (module.App as (props: Record<string, unknown>) => Child)({
+            rows,
+            selected,
+            cleanup: onCleanup,
+            log: (id: number) => log.push(id),
+            pick: (id: number) => picks.push(id),
+          }),
+        document.body,
+      )
+      steps.push(document.body.innerHTML)
+      const first = [...document.querySelectorAll('tr')]
+      rows.set([
+        { id: 3, label: 'three' },
+        { id: 4, label: 'four' },
+      ])
+      steps.push(document.body.innerHTML)
+      const second = [...document.querySelectorAll('tr')]
+      rows.set([])
+      steps.push(document.body.innerHTML)
+      selected.set(3)
+      document.body.append(...first, ...second)
+      for (const link of document.querySelectorAll('a'))
+        link.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      dispose()
+      document.body.replaceChildren()
+      return {
+        code,
+        steps,
+        log,
+        picks,
+        detached: [...first, ...second].map((row) => row.className),
+      }
+    }
+    const none = run('none')
+    const deleteContents = vi.spyOn(Range.prototype, 'deleteContents')
+    const safe = run('safe')
+    const bulkRemovals = deleteContents.mock.calls.length
+    deleteContents.mockRestore()
+    expect(safe.code).toContain('__benos_direct_template')
+    expect(safe.steps).toEqual(none.steps)
+    expect(safe.log).toEqual([1, 2, 3, 4])
+    expect(none.log).toEqual([1, 2, 3, 4])
+    expect(safe.picks).toEqual([])
+    expect(none.picks).toEqual([])
+    expect(safe.detached).toEqual(none.detached)
+    expect(none.steps[2]).not.toContain('<tr')
+    expect(bulkRemovals).toBe(2)
   })
 
   it('runs a compiled component fixture on the DOM host', () => {

@@ -1,0 +1,198 @@
+{
+  "protocol": "js-framework-benchmark CPU operations 01-09",
+  "browser": "153.0.8010.12",
+  "node": "v26.10.0",
+  "platform": "darwin arm64",
+  "measurement": "Chrome trace click-to-paint duration (commit/layout fallback)",
+  "traceCategories": [
+    "blink.user_timing",
+    "devtools.timeline",
+    "disabled-by-default-devtools.timeline"
+  ],
+  "rounds": 11,
+  "warmups": 2,
+  "operations": [
+    "01_run1k",
+    "02_replace1k",
+    "09_clear1k"
+  ],
+  "frameworks": {
+    "benos": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 35.128,
+        "minMs": 33.443,
+        "maxMs": 37.927,
+        "samplesMs": [
+          35.398,
+          37.927,
+          34.959,
+          35.513,
+          33.789,
+          36.187,
+          34.875,
+          34.803,
+          36.684,
+          35.128,
+          33.443
+        ]
+      },
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 34.232,
+        "minMs": 33.864,
+        "maxMs": 35.992,
+        "samplesMs": [
+          34.232,
+          34.228,
+          34.189,
+          34.34,
+          34.755,
+          34.228,
+          34.103,
+          33.864,
+          35.992,
+          35.031,
+          34.234
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 3.965,
+        "minMs": 1.871,
+        "maxMs": 5.038,
+        "samplesMs": [
+          4.048,
+          3.853,
+          4.029,
+          3.88,
+          3.869,
+          5.038,
+          4.05,
+          1.892,
+          3.965,
+          1.871,
+          4.022
+        ]
+      }
+    },
+    "benos7c1": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 35.214,
+        "minMs": 33.643,
+        "maxMs": 36.317,
+        "samplesMs": [
+          33.643,
+          36.317,
+          36.225,
+          34.95,
+          35.399,
+          35.628,
+          34.889,
+          35.214,
+          34.8,
+          34.069,
+          35.824
+        ]
+      },
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 35.24,
+        "minMs": 34.647,
+        "maxMs": 38.152,
+        "samplesMs": [
+          35.311,
+          35.096,
+          38.152,
+          35.036,
+          35.24,
+          35.91,
+          34.755,
+          34.746,
+          36.138,
+          34.647,
+          36.36
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 4.599,
+        "minMs": 2.257,
+        "maxMs": 5.298,
+        "samplesMs": [
+          4.557,
+          4.529,
+          4.599,
+          4.523,
+          5.298,
+          4.653,
+          4.626,
+          4.78,
+          2.257,
+          4.917,
+          4.526
+        ]
+      }
+    },
+    "solid": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 25.552,
+        "minMs": 25.198,
+        "maxMs": 30.342,
+        "samplesMs": [
+          28.699,
+          26.513,
+          25.807,
+          25.552,
+          25.198,
+          25.545,
+          25.406,
+          25.446,
+          30.342,
+          26.008,
+          25.5
+        ]
+      },
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 25.676,
+        "minMs": 24.746,
+        "maxMs": 26.993,
+        "samplesMs": [
+          25.113,
+          26.993,
+          25.656,
+          26.094,
+          25.718,
+          25.676,
+          24.746,
+          25.56,
+          25.892,
+          25.735,
+          25.511
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 2.611,
+        "minMs": 2.485,
+        "maxMs": 3.003,
+        "samplesMs": [
+          2.872,
+          2.54,
+          2.611,
+          2.546,
+          3.003,
+          2.791,
+          2.585,
+          2.524,
+          2.485,
+          2.642,
+          2.616
+        ]
+      }
+    }
+  }
+}

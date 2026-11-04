@@ -1004,6 +1004,24 @@ function sameKey(a: unknown, b: unknown): boolean {
   return Object.is(a, b)
 }
 
+// Removes a list's rows with one Range when they sit together right before
+// `end`. Anything it skips is still removed row by row after disposal.
+function removeRows(entries: ForEntry[], end: Node): void {
+  const first = entries[0]?.range.nodes[0]
+  const nodes = entries[entries.length - 1]?.range.nodes ?? []
+  const last = nodes[nodes.length - 1]
+  if (
+    !first ||
+    first.parentNode !== end.parentNode ||
+    last?.nextSibling !== end
+  )
+    return
+  const range = ownerDocumentOf(first).createRange()
+  range.setStartBefore(first)
+  range.setEndAfter(last)
+  range.deleteContents()
+}
+
 function lisIndices(values: number[]): Set<number> {
   const tails: number[] = []
   const previous = new Array<number>(values.length).fill(-1)
@@ -1064,21 +1082,6 @@ function mountFor(
       seenKeys.add(mapped)
       return key
     })
-    if (items.length === 0 && entries.length > 0) {
-      const entryNodes = entries.flatMap((entry) => entry.range.nodes)
-      const fillsParent =
-        slot.marker.parentNode === parent &&
-        parent.lastChild === slot.marker &&
-        parent.childNodes.length === entryNodes.length + 1
-      if (fillsParent) {
-        for (const entry of entries) disposeInternalOwner(entry.owner)
-        parent.textContent = ''
-        entries = []
-        slot.range.nodes = []
-        renderFallback()
-        return
-      }
-    }
     const createEntry = (
       key: unknown,
       item: unknown,
@@ -1184,8 +1187,12 @@ function mountFor(
       }
       next.push(createEntry(key, items[index], index))
     }
+    // When no old row is kept, they leave the DOM in one operation before
+    // they are disposed, so their own removal cleanups find them detached.
+    if (used.size === 0)
+      removeRows(entries, next[0]?.range.nodes[0] ?? slot.marker)
     for (const entry of entries)
-      if (!used.has(entry) && !next.includes(entry)) {
+      if (!used.has(entry)) {
         disposeInternalOwner(entry.owner)
         removeRange(entry.range)
       }
