@@ -120,6 +120,15 @@ The existing tests passed unchanged; the only test edit is the addition.
 1. **Candidate 5:** keep only the component skip (my recommendation), keep both halves, or revert both.
 2. **Still open from RP-7c-4:** core's cap for candidates 6 and 7 (core has 21 B left), and whether to fix the `computed` finding.
 
+## Decision applied
+
+On 2026-11-05 the user chose to keep the component skip only. The user's words: "Keep component skip". The event consolidation is dropped: `packages/dom/src/index.ts` is 7c-4's code plus the 7-line component skip in `mountComponent`, and the delegated-event code, including `installDelegated`'s per-event removal closure, is exactly as in 7c-4. The event half stays in history in commit `4e93cce`.
+
+- **Size:** core + DOM 11,751 B (+18 over 7c-4); core unchanged at 4,587.
+- **Allocation (this exact code, `rp-7c-5-component-only-allocation-2026-11-05.json`):** benchmark row 67.5 retained objects and 2,477 B, against 68.5 and 2,499; disposal makes one call fewer per row on clear and replace.
+- **Tests:** 56 files and 587 tests, 534 browser tests, lint, typecheck, and doc examples all pass. The new compiled event test stays; it now guards the restored per-event cleanup in both modes and in a shadow root.
+- **Times are not re-measured for this half alone.** The machine was at load averages of 10 to 27 from macOS background jobs after its restart. The A/B above measured both halves together at about 1% at most, and this half is a subset of that change. RP-7d re-measures everything on one machine state.
+
 ## Next
 
-On approval: apply the decision on candidate 5, then either RP-7c-6, if core's cap allows it, or a stop to re-plan. After five candidates, creating rows is about 1.28–1.32× Solid on a quiet machine, against the RP-7b projection of 1.15–1.25× for all seven.
+Candidate 5's decision is applied (above). What comes next depends on core's cap: candidates 6 and 7 do not fit in core's 21 B, so either the cap rises for this track, or the track stops at candidate 5 and goes to RP-7d verification. After five candidates, creating rows is about 1.28–1.32× Solid on a quiet machine, against the RP-7b projection of 1.15–1.25× for all seven.

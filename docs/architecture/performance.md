@@ -97,7 +97,7 @@ A template instance registers a cleanup to remove its range; its component regis
 
 **Tests.** Handler replacement, multiple handlers on one element, bubbling and `stopPropagation`, native and delegated order, shadow roots, disposal removing handlers so a retained element no longer dispatches, the hub removing its root listener after the last handler.
 
-**Implemented (RP-7c-5), with two changes from the design.** Event targets are recorded at setup instead of found again by path, because since RP-7c-1 a text binding inserts a node that can shift paths. And the component recognizes a template output from its descriptor, not from a flag on every template range, which table cells would have paid for. Measured separately: the component skip is +18 B for −1 object and −1 disposal call per row; the event consolidation is +97 B for −2 objects per row (two delegated events). Neither moves times beyond about 1% in an interleaved run. Full tables in [RP-7c-5](../checkpoints/rp-7c-5.md).
+**Implemented (RP-7c-5), with two changes from the design.** Event targets are recorded at setup instead of found again by path, because since RP-7c-1 a text binding inserts a node that can shift paths. And the component recognizes a template output from its descriptor, not from a flag on every template range, which table cells would have paid for. Measured separately: the component skip is +18 B for −1 object and −1 disposal call per row; the event consolidation is +97 B for −2 objects per row (two delegated events). Neither moves times beyond about 1% in an interleaved run. The user kept the component skip only (+18 B core + DOM); the event consolidation is dropped. Full tables in [RP-7c-5](../checkpoints/rp-7c-5.md).
 
 ### 6. Owned computations without a `Set`
 
