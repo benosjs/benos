@@ -1,6 +1,6 @@
 # Initial-render allocation design
 
-**Status (2026-11-04):** Phase 7 ([row-perf-plan.md](../row-perf-plan.md)) is implementing its design one candidate at a time; candidates 1–4 are done ([RP-7c-1](../checkpoints/rp-7c-1.md), [RP-7c-2](../checkpoints/rp-7c-2.md), [RP-7c-3](../checkpoints/rp-7c-3.md), [RP-7c-4](../checkpoints/rp-7c-4.md)). The next section is its design; the sections after it are the 0.3.0 track's record and stay as history.
+**Status (2026-11-04):** Phase 7 ([row-perf-plan.md](../row-perf-plan.md)) is implementing its design one candidate at a time; candidates 1–5 are done ([RP-7c-1](../checkpoints/rp-7c-1.md), [RP-7c-2](../checkpoints/rp-7c-2.md), [RP-7c-3](../checkpoints/rp-7c-3.md), [RP-7c-4](../checkpoints/rp-7c-4.md), [RP-7c-5](../checkpoints/rp-7c-5.md)). The next section is its design; the sections after it are the 0.3.0 track's record and stay as history.
 
 ## Phase 7 design — row creation at Solid's level
 
@@ -96,6 +96,8 @@ A template instance registers a cleanup to remove its range; its component regis
 **Design.** A direct template instance registers one cleanup that removes its delegated events (found again through the binding paths it already has) and its range, and `mountComponent` skips its own removal when the range belongs to a template that already removes it. Native-listener events and runtime JSX keep today's per-event cleanup. Dispatch, ordering, `currentTarget`, batching, and the root listener's reference counting do not change.
 
 **Tests.** Handler replacement, multiple handlers on one element, bubbling and `stopPropagation`, native and delegated order, shadow roots, disposal removing handlers so a retained element no longer dispatches, the hub removing its root listener after the last handler.
+
+**Implemented (RP-7c-5), with two changes from the design.** Event targets are recorded at setup instead of found again by path, because since RP-7c-1 a text binding inserts a node that can shift paths. And the component recognizes a template output from its descriptor, not from a flag on every template range, which table cells would have paid for. Measured separately: the component skip is +18 B for −1 object and −1 disposal call per row; the event consolidation is +97 B for −2 objects per row (two delegated events). Neither moves times beyond about 1% in an interleaved run. Full tables in [RP-7c-5](../checkpoints/rp-7c-5.md).
 
 ### 6. Owned computations without a `Set`
 

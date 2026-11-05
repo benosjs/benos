@@ -597,7 +597,7 @@ function installDelegated(
   element: Element,
   name: string,
   getHandler: EventHandlerGetter,
-): () => void {
+): EventHub {
   const root = rootFor(element)
   const hub = getHub(root)
   let byElement = hub.byType.get(name)
@@ -649,22 +649,32 @@ function installDelegated(
     hub.listeners.set(name, listener)
     root.addEventListener(name, listener)
   }
-  return () => {
-    const handlers = byElement?.get(element)
-    if (handlers === getHandler) byElement?.delete(element)
-    else if (Array.isArray(handlers)) {
-      const index = handlers.lastIndexOf(getHandler)
-      if (index !== -1) handlers.splice(index, 1)
-      if (handlers.length === 0) byElement?.delete(element)
-      else if (handlers.length === 1)
-        byElement?.set(element, handlers[0] as EventHandlerGetter)
-    }
-    if (byElement?.size === 0) hub.byType.delete(name)
-    if (!hub.byType.has(name)) {
-      const listener = hub.listeners.get(name)
-      if (listener) root.removeEventListener(name, listener)
-      hub.listeners.delete(name)
-    }
+  return hub
+}
+
+// Removes one handler, or with none given every handler the element has for
+// the event, and the root listener once no element has one.
+function removeDelegated(
+  hub: EventHub,
+  element: Element,
+  name: string,
+  getHandler?: EventHandlerGetter,
+): void {
+  const byElement = hub.byType.get(name)
+  const handlers = byElement?.get(element)
+  if (!getHandler || handlers === getHandler) byElement?.delete(element)
+  else if (Array.isArray(handlers)) {
+    const index = handlers.lastIndexOf(getHandler)
+    if (index !== -1) handlers.splice(index, 1)
+    if (handlers.length === 0) byElement?.delete(element)
+    else if (handlers.length === 1)
+      byElement?.set(element, handlers[0] as EventHandlerGetter)
+  }
+  if (byElement?.size === 0) hub.byType.delete(name)
+  if (!hub.byType.has(name)) {
+    const listener = hub.listeners.get(name)
+    if (listener) hub.root.removeEventListener(name, listener)
+    hub.listeners.delete(name)
   }
 }
 
@@ -675,8 +685,8 @@ function installEventSlot(
   capture: boolean,
 ): void {
   if (delegatedEvents.has(name) && !capture) {
-    const remove = installDelegated(element, name, getHandler)
-    onCleanup(remove)
+    const hub = installDelegated(element, name, getHandler)
+    onCleanup(() => removeDelegated(hub, element, name, getHandler))
     return
   }
   const listener: EventListener = (event) =>
@@ -896,6 +906,7 @@ function mountComponent(
   const kind = controlKinds.get(descriptor.component)
   const internalControl = internalControls.get(descriptor.component)
   let componentRange: DomRange = { nodes: [], owner: parentOwner }
+  let output: Child
   // A list item's owner that is still empty becomes the component's owner.
   const owner = runWithOwner(parentOwner, () =>
     createInternalOwner(
@@ -923,7 +934,6 @@ function mountComponent(
         owner,
       )
     else {
-      let output!: Child
       runWithOwner(owner, () => {
         output = untrack(() => descriptor.component(descriptor.props) as Child)
       })
@@ -931,7 +941,12 @@ function mountComponent(
         mountValue(output, parent, before, owner),
       )
     }
-    runWithOwner(owner, () => onCleanup(() => removeRange(componentRange)))
+    // A direct template's own cleanup on this owner already removes its range.
+    if (
+      (output as Descriptor | null | undefined)?.kind !== 'direct-template' ||
+      componentRange.owner !== owner
+    )
+      runWithOwner(owner, () => onCleanup(() => removeRange(componentRange)))
     if (rangeConnected(componentRange)) notifyMount(owner)
     else trackMount(owner, componentRange)
     return componentRange
@@ -1646,8 +1661,19 @@ function mountDirectTemplate(
   }
   if (fragment) insert(parent, fragment, before)
   const range: DomRange = { nodes, owner }
+  // The delegated events' hub, then each event's element and name.
+  let events: [EventHub, ...(Element | string)[]] | undefined
   runWithOwner(owner, () => {
-    onCleanup(() => removeRange(range))
+    // One cleanup removes the instance's delegated events and its nodes.
+    onCleanup(() => {
+      for (let index = 1; events && index < events.length; index += 2)
+        removeDelegated(
+          events[0],
+          events[index] as Element,
+          events[index + 1] as string,
+        )
+      removeRange(range)
+    })
     for (const binding of descriptor.definition.bindings) {
       const target = at(binding.path)
       if (binding.kind === 'attribute') {
@@ -1709,13 +1735,13 @@ function mountDirectTemplate(
           )
         })
       } else if (binding.kind === 'event') {
-        if (target instanceof Element)
-          installEventSlot(
-            target,
-            binding.name ?? '',
-            () => binding.get(descriptor.values),
-            binding.capture ?? false,
-          )
+        if (!(target instanceof Element)) continue
+        const name = binding.name ?? ''
+        const get = () => binding.get(descriptor.values)
+        if (delegatedEvents.has(name) && !binding.capture) {
+          const hub = installDelegated(target, name, get)
+          ;(events ??= [hub]).push(target, name)
+        } else installEventSlot(target, name, get, binding.capture ?? false)
       }
     }
   })

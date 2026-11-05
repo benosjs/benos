@@ -1,0 +1,712 @@
+{
+  "protocol": "js-framework-benchmark CPU operations 01-09",
+  "browser": "153.0.8010.12",
+  "node": "v26.10.0",
+  "platform": "darwin arm64",
+  "measurement": "Chrome trace click-to-paint duration (commit/layout fallback)",
+  "traceCategories": [
+    "blink.user_timing",
+    "devtools.timeline",
+    "disabled-by-default-devtools.timeline"
+  ],
+  "rounds": 7,
+  "warmups": 2,
+  "operations": [
+    "01_run1k",
+    "02_replace1k",
+    "03_update1k",
+    "04_select1k",
+    "05_swap1k",
+    "06_remove1k",
+    "07_create10k",
+    "08_append1k",
+    "09_clear1k"
+  ],
+  "frameworks": {
+    "benos": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 34.296,
+        "minMs": 33.494,
+        "maxMs": 39.757,
+        "samplesMs": [
+          33.777,
+          34.296,
+          36.018,
+          39.757,
+          34.444,
+          33.494,
+          33.582
+        ]
+      },
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 33.422,
+        "minMs": 32.873,
+        "maxMs": 38.997,
+        "samplesMs": [
+          33.216,
+          33.422,
+          34.446,
+          33.457,
+          38.997,
+          32.873,
+          33.187
+        ]
+      },
+      "03_update1k": {
+        "label": "partial update",
+        "medianMs": 12.868,
+        "minMs": 12.304,
+        "maxMs": 13.102,
+        "samplesMs": [
+          13.102,
+          12.955,
+          12.868,
+          13.059,
+          12.472,
+          12.621,
+          12.304
+        ]
+      },
+      "04_select1k": {
+        "label": "select row",
+        "medianMs": 0.991,
+        "minMs": 0.935,
+        "maxMs": 1.238,
+        "samplesMs": [
+          1.238,
+          1.017,
+          0.935,
+          0.942,
+          0.99,
+          0.991,
+          0.993
+        ]
+      },
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 3.579,
+        "minMs": 3.511,
+        "maxMs": 3.632,
+        "samplesMs": [
+          3.538,
+          3.617,
+          3.579,
+          3.511,
+          3.624,
+          3.632,
+          3.56
+        ]
+      },
+      "06_remove1k": {
+        "label": "remove row",
+        "medianMs": 4.508,
+        "minMs": 4.424,
+        "maxMs": 4.532,
+        "samplesMs": [
+          4.515,
+          4.492,
+          4.469,
+          4.511,
+          4.532,
+          4.424,
+          4.508
+        ]
+      },
+      "07_create10k": {
+        "label": "create many rows",
+        "medianMs": 300.842,
+        "minMs": 298.648,
+        "maxMs": 315.709,
+        "samplesMs": [
+          303.617,
+          300.665,
+          300.842,
+          298.648,
+          302.168,
+          298.779,
+          315.709
+        ]
+      },
+      "08_append1k": {
+        "label": "append rows to large table",
+        "medianMs": 41.359,
+        "minMs": 41.013,
+        "maxMs": 41.931,
+        "samplesMs": [
+          41.367,
+          41.529,
+          41.013,
+          41.2,
+          41.359,
+          41.931,
+          41.25
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 3.717,
+        "minMs": 3.686,
+        "maxMs": 3.784,
+        "samplesMs": [
+          3.759,
+          3.717,
+          3.718,
+          3.692,
+          3.691,
+          3.784,
+          3.686
+        ]
+      }
+    },
+    "solid": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 26.152,
+        "minMs": 25.173,
+        "maxMs": 27.985,
+        "samplesMs": [
+          27.985,
+          25.384,
+          26.492,
+          26.566,
+          26.152,
+          25.173,
+          25.349
+        ]
+      },
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 25.685,
+        "minMs": 25.115,
+        "maxMs": 26.443,
+        "samplesMs": [
+          25.577,
+          25.491,
+          25.115,
+          25.953,
+          26.085,
+          26.443,
+          25.685
+        ]
+      },
+      "03_update1k": {
+        "label": "partial update",
+        "medianMs": 13.803,
+        "minMs": 13.409,
+        "maxMs": 13.975,
+        "samplesMs": [
+          13.962,
+          13.894,
+          13.975,
+          13.803,
+          13.467,
+          13.409,
+          13.461
+        ]
+      },
+      "04_select1k": {
+        "label": "select row",
+        "medianMs": 0.821,
+        "minMs": 0.793,
+        "maxMs": 0.888,
+        "samplesMs": [
+          0.888,
+          0.793,
+          0.828,
+          0.821,
+          0.809,
+          0.802,
+          0.848
+        ]
+      },
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 2.762,
+        "minMs": 2.695,
+        "maxMs": 2.791,
+        "samplesMs": [
+          2.791,
+          2.728,
+          2.764,
+          2.762,
+          2.731,
+          2.695,
+          2.769
+        ]
+      },
+      "06_remove1k": {
+        "label": "remove row",
+        "medianMs": 4.199,
+        "minMs": 4.176,
+        "maxMs": 4.534,
+        "samplesMs": [
+          4.534,
+          4.328,
+          4.199,
+          4.189,
+          4.353,
+          4.198,
+          4.176
+        ]
+      },
+      "07_create10k": {
+        "label": "create many rows",
+        "medianMs": 235.269,
+        "minMs": 232.828,
+        "maxMs": 238.67,
+        "samplesMs": [
+          238.67,
+          232.828,
+          232.946,
+          235.377,
+          237.027,
+          235.269,
+          234.519
+        ]
+      },
+      "08_append1k": {
+        "label": "append rows to large table",
+        "medianMs": 35.124,
+        "minMs": 34.442,
+        "maxMs": 37.61,
+        "samplesMs": [
+          35.594,
+          34.442,
+          35.124,
+          37.61,
+          35.04,
+          35.093,
+          36.806
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 2.523,
+        "minMs": 2.487,
+        "maxMs": 2.561,
+        "samplesMs": [
+          2.555,
+          2.561,
+          2.542,
+          2.523,
+          2.487,
+          2.522,
+          2.499
+        ]
+      }
+    },
+    "svelte": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 28.58,
+        "minMs": 27.896,
+        "maxMs": 30.327,
+        "samplesMs": [
+          29.386,
+          28.58,
+          27.896,
+          28.85,
+          28.433,
+          30.327,
+          28.075
+        ]
+      },
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 27.921,
+        "minMs": 27.676,
+        "maxMs": 29.512,
+        "samplesMs": [
+          27.921,
+          27.881,
+          27.728,
+          27.676,
+          29.512,
+          28.142,
+          28.029
+        ]
+      },
+      "03_update1k": {
+        "label": "partial update",
+        "medianMs": 14.722,
+        "minMs": 12.961,
+        "maxMs": 22.957,
+        "samplesMs": [
+          22.727,
+          14.722,
+          22.957,
+          20.817,
+          12.961,
+          13.059,
+          13.564
+        ]
+      },
+      "04_select1k": {
+        "label": "select row",
+        "medianMs": 1.284,
+        "minMs": 1.18,
+        "maxMs": 1.571,
+        "samplesMs": [
+          1.417,
+          1.224,
+          1.571,
+          1.284,
+          1.18,
+          1.342,
+          1.225
+        ]
+      },
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 4.256,
+        "minMs": 4.161,
+        "maxMs": 22.57,
+        "samplesMs": [
+          4.264,
+          4.256,
+          4.188,
+          22.57,
+          4.192,
+          4.161,
+          22.39
+        ]
+      },
+      "06_remove1k": {
+        "label": "remove row",
+        "medianMs": 5.841,
+        "minMs": 5.741,
+        "maxMs": 22.586,
+        "samplesMs": [
+          22.586,
+          5.897,
+          5.869,
+          5.767,
+          5.741,
+          5.811,
+          5.841
+        ]
+      },
+      "07_create10k": {
+        "label": "create many rows",
+        "medianMs": 244.719,
+        "minMs": 242.968,
+        "maxMs": 250.451,
+        "samplesMs": [
+          247.416,
+          250.451,
+          244.719,
+          244.636,
+          243.468,
+          246.209,
+          242.968
+        ]
+      },
+      "08_append1k": {
+        "label": "append rows to large table",
+        "medianMs": 36.469,
+        "minMs": 36.114,
+        "maxMs": 45.166,
+        "samplesMs": [
+          36.469,
+          36.114,
+          36.587,
+          45.166,
+          36.409,
+          36.447,
+          37.162
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 3.308,
+        "minMs": 3.233,
+        "maxMs": 3.392,
+        "samplesMs": [
+          3.345,
+          3.27,
+          3.233,
+          3.308,
+          3.272,
+          3.374,
+          3.392
+        ]
+      }
+    },
+    "vue": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 29.97,
+        "minMs": 29.73,
+        "maxMs": 30.882,
+        "samplesMs": [
+          30.565,
+          29.928,
+          29.923,
+          30.073,
+          30.882,
+          29.97,
+          29.73
+        ]
+      },
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 29.501,
+        "minMs": 27.211,
+        "maxMs": 30.185,
+        "samplesMs": [
+          29.746,
+          29.501,
+          27.427,
+          30.185,
+          29.842,
+          27.752,
+          27.211
+        ]
+      },
+      "03_update1k": {
+        "label": "partial update",
+        "medianMs": 24.208,
+        "minMs": 18.851,
+        "maxMs": 24.797,
+        "samplesMs": [
+          24.652,
+          24.587,
+          24.208,
+          24.797,
+          21.125,
+          18.851,
+          24.051
+        ]
+      },
+      "04_select1k": {
+        "label": "select row",
+        "medianMs": 19.588,
+        "minMs": 18.479,
+        "maxMs": 25.037,
+        "samplesMs": [
+          18.997,
+          25.037,
+          19.571,
+          23.788,
+          23.56,
+          18.479,
+          19.588
+        ]
+      },
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 19.618,
+        "minMs": 18.481,
+        "maxMs": 24.318,
+        "samplesMs": [
+          18.754,
+          19.618,
+          24.033,
+          19.653,
+          24.318,
+          18.481,
+          19.603
+        ]
+      },
+      "06_remove1k": {
+        "label": "remove row",
+        "medianMs": 21.165,
+        "minMs": 20.542,
+        "maxMs": 25.543,
+        "samplesMs": [
+          20.758,
+          25.543,
+          24.123,
+          21.27,
+          20.905,
+          20.542,
+          21.165
+        ]
+      },
+      "07_create10k": {
+        "label": "create many rows",
+        "medianMs": 261.178,
+        "minMs": 259.896,
+        "maxMs": 273.823,
+        "samplesMs": [
+          263.866,
+          259.896,
+          260.003,
+          261.178,
+          273.823,
+          260.999,
+          264.378
+        ]
+      },
+      "08_append1k": {
+        "label": "append rows to large table",
+        "medianMs": 40.521,
+        "minMs": 38.54,
+        "maxMs": 46.488,
+        "samplesMs": [
+          40.366,
+          40.449,
+          38.54,
+          42.38,
+          40.521,
+          40.724,
+          46.488
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 3.432,
+        "minMs": 3.386,
+        "maxMs": 6.398,
+        "samplesMs": [
+          3.432,
+          6.398,
+          3.465,
+          3.459,
+          3.386,
+          3.399,
+          3.417
+        ]
+      }
+    },
+    "react": {
+      "01_run1k": {
+        "label": "create rows",
+        "medianMs": 30.473,
+        "minMs": 30.088,
+        "maxMs": 30.799,
+        "samplesMs": [
+          30.799,
+          30.662,
+          30.798,
+          30.342,
+          30.088,
+          30.473,
+          30.262
+        ]
+      },
+      "02_replace1k": {
+        "label": "replace all rows",
+        "medianMs": 31.862,
+        "minMs": 31.074,
+        "maxMs": 36.376,
+        "samplesMs": [
+          31.533,
+          31.969,
+          31.468,
+          31.862,
+          36.376,
+          32.179,
+          31.074
+        ]
+      },
+      "03_update1k": {
+        "label": "partial update",
+        "medianMs": 16.371,
+        "minMs": 16.077,
+        "maxMs": 18.091,
+        "samplesMs": [
+          18.091,
+          16.369,
+          16.28,
+          16.077,
+          17.024,
+          16.914,
+          16.371
+        ]
+      },
+      "04_select1k": {
+        "label": "select row",
+        "medianMs": 7.056,
+        "minMs": 5.985,
+        "maxMs": 7.913,
+        "samplesMs": [
+          7.056,
+          6.879,
+          5.985,
+          7.285,
+          7.913,
+          7.289,
+          6.451
+        ]
+      },
+      "05_swap1k": {
+        "label": "swap rows",
+        "medianMs": 26.347,
+        "minMs": 26.073,
+        "maxMs": 29.155,
+        "samplesMs": [
+          26.154,
+          26.347,
+          26.073,
+          26.42,
+          26.416,
+          26.286,
+          29.155
+        ]
+      },
+      "06_remove1k": {
+        "label": "remove row",
+        "medianMs": 9.92,
+        "minMs": 9.491,
+        "maxMs": 11.519,
+        "samplesMs": [
+          11.519,
+          9.491,
+          9.575,
+          9.92,
+          9.716,
+          9.997,
+          9.943
+        ]
+      },
+      "07_create10k": {
+        "label": "create many rows",
+        "medianMs": 488.776,
+        "minMs": 481.647,
+        "maxMs": 545.306,
+        "samplesMs": [
+          486.42,
+          492.711,
+          488.776,
+          545.306,
+          527.943,
+          485.122,
+          481.647
+        ]
+      },
+      "08_append1k": {
+        "label": "append rows to large table",
+        "medianMs": 43.139,
+        "minMs": 39.562,
+        "maxMs": 44.531,
+        "samplesMs": [
+          42.449,
+          44.531,
+          39.562,
+          43.278,
+          43.139,
+          42.998,
+          44.52
+        ]
+      },
+      "09_clear1k": {
+        "label": "clear rows",
+        "medianMs": 4.445,
+        "minMs": 4.397,
+        "maxMs": 4.531,
+        "samplesMs": [
+          4.509,
+          4.441,
+          4.52,
+          4.429,
+          4.397,
+          4.445,
+          4.531
+        ]
+      }
+    }
+  }
+}

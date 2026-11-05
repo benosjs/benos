@@ -882,6 +882,100 @@ export const App = (props) => <table><tbody><For each={props.rows()} by={(row) =
     expect(bulkRemovals).toBe(2)
   })
 
+  it('dispatches and removes compiled event handlers identically for none and safe optimization', () => {
+    const source = `const Row = (props) => (
+  <div onClick={() => props.log('div')}>
+    <button onClick={props.handler()} on:click={() => props.log('second')} onClickCapture={() => props.log('capture')} onMouseEnter={() => props.log('enter')}>{props.label}</button>
+    <span onClick={(event) => { props.log('span'); event.stopPropagation() }}>stop</span>
+  </div>
+)
+export const App = (props) => <section onClick={() => props.log('section')}>{props.show() ? <Row handler={props.handler} label="go" log={props.log} /> : null}</section>`
+    const run = (optimization: 'none' | 'safe', host: Element | ShadowRoot) => {
+      const { code } = transformJsx(source, {
+        filename: 'fixtures/events.tsx',
+        development: true,
+        optimization,
+      })
+      const module = evaluate(code, {
+        ...domRuntime,
+        ...domInternalRuntime,
+      } as Record<string, unknown>)
+      const log: string[] = []
+      const show = signal(true)
+      const handler = signal<() => void>(() => log.push('first'))
+      const root = host.getRootNode() as Document | ShadowRoot
+      const removed = vi.spyOn(root, 'removeEventListener')
+      const dispose = render(
+        () =>
+          (module.App as (props: Record<string, unknown>) => Child)({
+            show,
+            handler,
+            log: (entry: string) => log.push(entry),
+          }),
+        host,
+      )
+      const click = (node: Element | null) =>
+        node?.dispatchEvent(
+          new MouseEvent('click', { bubbles: true, composed: true }),
+        )
+      const button = host.querySelector('button')
+      click(button)
+      button?.dispatchEvent(new MouseEvent('mouseenter'))
+      click(host.querySelector('span'))
+      handler.set(() => log.push('replaced'))
+      click(button)
+      log.push('|')
+      show.set(false)
+      expect(host.querySelector('button')).toBeNull()
+      if (button) host.append(button)
+      click(button)
+      button?.dispatchEvent(new MouseEvent('mouseenter'))
+      click(host.querySelector('section'))
+      dispose()
+      const clickListenerRemoved = removed.mock.calls.some(
+        ([name]) => name === 'click',
+      )
+      removed.mockRestore()
+      return { code, log, clickListenerRemoved }
+    }
+    document.body.replaceChildren()
+    const none = run('none', document.body)
+    document.body.replaceChildren()
+    const safe = run('safe', document.body)
+    expect(safe.code).toContain('__benos_direct_template')
+    expect(safe.log).toEqual(none.log)
+    expect(none.log).toEqual([
+      'capture',
+      'first',
+      'second',
+      'div',
+      'section',
+      'enter',
+      'span',
+      'capture',
+      'replaced',
+      'second',
+      'div',
+      'section',
+      '|',
+      'section',
+    ])
+    expect(safe.clickListenerRemoved).toBe(true)
+    expect(none.clickListenerRemoved).toBe(true)
+
+    document.body.replaceChildren()
+    const shadowHost = document.createElement('div')
+    document.body.append(shadowHost)
+    const shadowNone = run('none', shadowHost.attachShadow({ mode: 'open' }))
+    const otherHost = document.createElement('div')
+    document.body.append(otherHost)
+    const shadowSafe = run('safe', otherHost.attachShadow({ mode: 'open' }))
+    expect(shadowSafe.log).toEqual(shadowNone.log)
+    expect(shadowSafe.log).toEqual(none.log)
+    expect(shadowSafe.clickListenerRemoved).toBe(true)
+    document.body.replaceChildren()
+  })
+
   it('runs a compiled component fixture on the DOM host', () => {
     const result = transformJsx(behaviorFixture, {
       filename: 'fixtures/App.tsx',
