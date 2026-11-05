@@ -1177,6 +1177,56 @@ describe('@benosjs/dom', () => {
     expect([...log].sort()).toEqual(['cleanup 1', 'cleanup 3', 'cleanup 4'])
   })
 
+  it('re-runs only the rows whose keyed item or index changed', () => {
+    type Item = { id: number; label: string }
+    const a = { id: 1, label: 'a' }
+    const b = { id: 2, label: 'b' }
+    const c = { id: 3, label: 'c' }
+    const items = signal<Item[]>([a, b, c])
+    const runs: Record<number, number> = {}
+    roots.push(
+      render(
+        () =>
+          jsx(For, {
+            get each() {
+              return items()
+            },
+            by: (item: Item) => item.id,
+            children: (item: () => Item, index: () => number) =>
+              jsx('li', {
+                get children() {
+                  const current = item()
+                  runs[current.id] = (runs[current.id] ?? 0) + 1
+                  return `${index()}:${current.label}`
+                },
+              }),
+          }),
+        document.body,
+      ),
+    )
+    const text = () =>
+      [...document.querySelectorAll('li')].map((li) => li.textContent)
+    expect(runs).toEqual({ 1: 1, 2: 1, 3: 1 })
+    const [first, second, third] = document.querySelectorAll('li')
+
+    const renamed = { id: 2, label: 'B' }
+    items.set([a, renamed, c])
+    expect(text()).toEqual(['0:a', '1:B', '2:c'])
+    expect(runs).toEqual({ 1: 1, 2: 2, 3: 1 })
+
+    items.set([a, renamed, c])
+    expect(runs).toEqual({ 1: 1, 2: 2, 3: 1 })
+
+    items.set([c, renamed, a])
+    expect(text()).toEqual(['0:c', '1:B', '2:a'])
+    expect(runs).toEqual({ 1: 2, 2: 2, 3: 2 })
+    expect([...document.querySelectorAll('li')]).toEqual([third, second, first])
+
+    items.set([renamed, a])
+    expect(text()).toEqual(['0:B', '1:a'])
+    expect(runs).toEqual({ 1: 3, 2: 3, 3: 2 })
+  })
+
   it('keeps what an item function creates alive until its row leaves', () => {
     const items = signal(['a', 'b'])
     const source = signal(1)

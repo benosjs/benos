@@ -1,11 +1,4 @@
-import {
-  batch,
-  computed,
-  createRoot,
-  onCleanup,
-  signal,
-  untrack,
-} from '@benosjs/core'
+import { batch, computed, createRoot, onCleanup, untrack } from '@benosjs/core'
 import {
   claimInternalOrdinal,
   createInternalOwner,
@@ -13,6 +6,7 @@ import {
   disposeInternalOwner,
   getInternalProviderOwner,
   hasPendingMounts,
+  internalState,
   notifyMount,
   reportInternalError,
   runWithOwner,
@@ -993,8 +987,8 @@ interface ForEntry {
   key: unknown
   item: unknown
   position: number
-  index?: ReturnType<typeof signal<number>>
-  value?: ReturnType<typeof signal<unknown>>
+  index?: (value?: number, write?: boolean) => number
+  value?: (value?: unknown, write?: boolean) => unknown
   getItem: () => unknown
   getIndex: () => number
   owner: InternalOwner
@@ -1111,8 +1105,8 @@ function mountFor(
         item,
         position: index,
         getItem: () =>
-          by ? (entry.value ??= signal(entry.item))() : entry.item,
-        getIndex: () => (entry.index ??= signal(entry.position))(),
+          by ? (entry.value ??= internalState(entry.item))() : entry.item,
+        getIndex: () => (entry.index ??= internalState(entry.position))(),
         owner: itemOwner,
         range: { nodes: [], owner: itemOwner },
       }
@@ -1175,8 +1169,8 @@ function mountFor(
           const entry = next[nextIndex] as ForEntry
           entry.item = items[nextIndex]
           entry.position = nextIndex
-          entry.value?.set(items[nextIndex])
-          entry.index?.set(nextIndex)
+          entry.value?.(items[nextIndex], true)
+          entry.index?.(nextIndex, true)
         }
         commitEntries(next)
         return
@@ -1196,8 +1190,8 @@ function mountFor(
         used.add(previous)
         previous.item = items[index]
         previous.position = index
-        previous.value?.set(items[index])
-        previous.index?.set(index)
+        previous.value?.(items[index], true)
+        previous.index?.(index, true)
         next.push(previous)
         continue
       }

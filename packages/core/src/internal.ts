@@ -38,6 +38,7 @@ interface InternalRegistry {
   getInternalProviderOwner: (value: unknown) => unknown
   hasPendingMounts: (owner: unknown) => boolean
   hasInternalGatedRender: (owner: unknown) => boolean
+  internalState: <T>(initial: T) => (value?: T, write?: boolean) => T
   notifyMount: (owner: unknown) => void
   reportInternalError: (error: unknown) => void
   runWithOwner: <T>(owner: unknown, fn: () => T) => T
@@ -71,6 +72,7 @@ export const getInternalProviderOwner = registry.getInternalProviderOwner as (
 ) => InternalOwner | null
 export const hasPendingMounts = registry.hasPendingMounts
 export const hasInternalGatedRender = registry.hasInternalGatedRender
+export const internalState = registry.internalState
 export const notifyMount = registry.notifyMount
 export const reportInternalError = registry.reportInternalError
 export const runWithOwner = registry.runWithOwner

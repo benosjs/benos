@@ -1,6 +1,6 @@
 # Initial-render allocation design
 
-**Status (2026-11-04):** Phase 7 ([row-perf-plan.md](../row-perf-plan.md)) is implementing its design one candidate at a time; candidates 1–3 are done ([RP-7c-1](../checkpoints/rp-7c-1.md), [RP-7c-2](../checkpoints/rp-7c-2.md), [RP-7c-3](../checkpoints/rp-7c-3.md)). The next section is its design; the sections after it are the 0.3.0 track's record and stay as history.
+**Status (2026-11-04):** Phase 7 ([row-perf-plan.md](../row-perf-plan.md)) is implementing its design one candidate at a time; candidates 1–4 are done ([RP-7c-1](../checkpoints/rp-7c-1.md), [RP-7c-2](../checkpoints/rp-7c-2.md), [RP-7c-3](../checkpoints/rp-7c-3.md), [RP-7c-4](../checkpoints/rp-7c-4.md)). The next section is its design; the sections after it are the 0.3.0 track's record and stay as history.
 
 ## Phase 7 design — row creation at Solid's level
 
@@ -86,6 +86,8 @@ A keyed `<For>` creates a `signal` for the item (`by` rows can receive a new obj
 **Design.** Core exposes internal state helpers (create, read with tracking, write with notification) that `signal()` itself is built on, so the write path is shared rather than duplicated. `<For>` stores the state node on the entry and reads it from `getItem` and `getIndex`. The public `signal()` API, its equality, version limit, and development warnings are unchanged.
 
 **Tests.** Item updates under a stable key re-run only that row's bindings; index updates on moves; equality skips; the kernel guard.
+
+**Implemented (RP-7c-4).** Core's internal `internalState(initial)` returns one function: `state()` reads with tracking and `state(value, true)` writes. It and `signal()` share `createState` and `writeState`, so equality, the version limit, the guards, and the development warnings are not duplicated. A first version chose between reading and writing by `arguments.length`; that can allocate per call in V8's lower tiers, and "update every 10th" measured 1.09× Solid with it. The explicit flag removed that (0.93×) and is 12 B smaller. Measured: +47 B core, +46 B core + DOM; −4 retained objects and −137 B per benchmark row, no signal per row, about 7% less collection on a 10,000-row table mount. The step's time measurements ran on a loaded machine and show no change beyond the noise. Full tables in [RP-7c-4](../checkpoints/rp-7c-4.md).
 
 ### 5. One teardown per template instance
 
