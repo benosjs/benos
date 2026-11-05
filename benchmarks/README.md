@@ -1423,3 +1423,148 @@ and allocation data are in [`sortable-table-before-optimization-2026-10-11.json`
 [`sortable-table-after-optimization-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-after-optimization-2026-10-11.json),
 [`sortable-table-after-optimization-repeat-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-after-optimization-repeat-2026-10-11.json),
 and [`sortable-table-optimized-allocation-2026-10-11.json`](./js-framework-benchmark/results/sortable-table-optimized-allocation-2026-10-11.json).
+
+## Phase 7 row-creation comparison (2026-11-05)
+
+Phase 7 ([row-perf-plan.md](../docs/row-perf-plan.md), checkpoints
+`docs/checkpoints/rp-*.md`) changed five things in `@benosjs/core` and
+`@benosjs/dom`: dynamic text in compiled templates without a slot, bulk
+removal on clear and full replace, one owner per list row, item and index
+state without signal closures, and one removal per component that returns a
+compiled template. This comparison supersedes the 0.3.0 release-candidate
+comparison above.
+
+Node 26.10.0, Chromium 153.0.8010.12, macOS arm64, production builds. Each
+timing run started with the machine's one-minute load average below 3 and no
+other process above half a core. Times are milliseconds, median
+[minimum–maximum].
+
+### 0.7.1 against Phase 7, interleaved
+
+The 0.7.1 build (commit `dfb132d`) and the Phase 7 build ran in the same
+rounds as Solid: two warmups, eleven measured rounds, framework order rotated
+by round.
+
+| Workload           |          0.7.1 (ms) |        Phase 7 (ms) |          Solid (ms) | 0.7.1 / Solid | Phase 7 / Solid | Phase 7 / 0.7.1 |
+| ------------------ | ------------------: | ------------------: | ------------------: | ------------: | --------------: | --------------: |
+| Create 1,000 rows  |    33.6 [33.2–35.0] |    33.1 [32.0–33.5] |    24.6 [24.3–25.8] |         1.37× |           1.35× |           0.98× |
+| Replace 1,000 rows |    35.3 [35.0–36.2] |    32.3 [31.4–33.4] |    25.2 [25.0–25.4] |         1.40× |           1.28× |           0.91× |
+| Update every 10th  |    12.6 [12.5–15.9] |    12.5 [12.4–21.2] |    13.4 [13.3–13.6] |         0.94× |           0.93× |           0.99× |
+| Select one row     |       1.3 [1.2–1.3] |       1.0 [1.0–1.0] |       0.8 [0.8–1.0] |         1.55× |           1.23× |           0.79× |
+| Swap rows          |       3.8 [3.6–4.2] |       3.6 [3.5–3.7] |       2.7 [2.7–2.8] |         1.37× |           1.30× |           0.94× |
+| Remove one row     |       4.6 [4.6–4.7] |       4.5 [4.4–5.0] |       4.2 [4.1–4.2] |         1.10× |           1.07× |           0.97× |
+| Create 10,000 rows | 318.0 [313.8–328.6] | 299.2 [296.5–303.6] | 233.7 [233.1–237.5] |         1.36× |           1.28× |           0.94× |
+| Append 1,000 rows  |    42.6 [42.2–44.5] |    41.4 [41.1–43.7] |    34.7 [34.5–35.2] |         1.23× |           1.19× |           0.97× |
+| Clear rows         |       5.1 [5.1–5.3] |       3.7 [3.6–3.9] |       2.5 [2.5–2.5] |         2.06× |           1.48× |           0.72× |
+
+Every operation is as fast or faster: clear by 28%, select by 21%, replace by
+9%, and creating 10,000 rows by 6%. Creating 1,000 rows moved least (2%). No
+operation regressed.
+
+### All frameworks
+
+Two warmups, seven measured rounds, interleaved, the Chrome trace
+click-to-paint boundary. The last column is 0.7.1's ratio from the Phase 7
+baseline run (2026-11-04).
+
+| Workload           |          Benos (ms) |          Solid (ms) |         Svelte (ms) |            Vue (ms) |          React (ms) | Benos / Solid | 0.7.1 / Solid |
+| ------------------ | ------------------: | ------------------: | ------------------: | ------------------: | ------------------: | ------------: | ------------: |
+| Create 1,000 rows  |    33.3 [31.9–33.5] |    24.6 [24.3–24.7] |    27.1 [26.1–27.7] |    29.2 [27.9–30.0] |    29.3 [29.2–30.2] |         1.35× |         1.40× |
+| Replace 1,000 rows |    32.4 [32.2–33.3] |    25.1 [25.0–25.7] |    26.9 [26.7–27.6] |    28.7 [26.3–30.5] |    31.0 [30.4–31.3] |         1.29× |         1.35× |
+| Update every 10th  |    12.6 [12.4–21.8] |    13.4 [13.3–14.4] |    13.0 [13.0–13.6] |    22.7 [21.8–24.9] |    17.2 [17.0–17.8] |         0.94× |         0.96× |
+| Select one row     |       1.0 [0.9–1.0] |       0.8 [0.8–0.9] |       1.2 [1.2–1.3] |    23.6 [19.2–23.6] |       8.9 [8.2–9.2] |         1.23× |         1.48× |
+| Swap rows          |      3.6 [3.5–17.5] |       2.8 [2.7–3.4] |       4.2 [4.1–4.4] |    20.8 [17.1–20.9] |    26.1 [25.9–27.6] |         1.32× |         1.39× |
+| Remove one row     |       4.5 [4.4–4.5] |       4.2 [4.1–4.2] |      5.7 [5.7–22.4] |    22.4 [20.7–22.6] |    10.6 [10.0–10.9] |         1.07× |         1.14× |
+| Create 10,000 rows | 301.9 [297.8–305.1] | 234.7 [232.5–236.1] | 244.7 [242.7–246.0] | 261.9 [260.0–270.1] | 506.5 [502.9–554.6] |         1.29× |         1.38× |
+| Append 1,000 rows  |    41.2 [41.0–42.3] |    34.8 [34.7–36.0] |    36.4 [36.1–47.4] |    41.0 [38.7–47.2] |    40.1 [39.7–42.1] |         1.18× |         1.22× |
+| Clear rows         |       3.7 [3.7–3.9] |       2.5 [2.5–2.6] |       3.3 [3.3–8.4] |       3.4 [3.4–7.8] |       4.5 [4.4–4.7] |         1.45× |         2.06× |
+
+Benos is the fastest of the five on the partial update. It is faster than
+Svelte, Vue, and React on select, swap, and remove, and faster than React on
+creating 10,000 rows (by 40%) and on clear. Against Solid, creating rows is
+about 1.3× and clear 1.45×. Raw data is in
+[`rp-7d-nine-2026-11-05.json`](./js-framework-benchmark/results/rp-7d-nine-2026-11-05.json)
+and [`rp-7d-ab-2026-11-05.json`](./js-framework-benchmark/results/rp-7d-ab-2026-11-05.json).
+
+### Sortable table: 0.7.1 against Phase 7, interleaved
+
+The registry table and the handwritten Benos table, each at 0.7.1 and at
+Phase 7, ran in the same rounds as the handwritten Solid table: two warmups,
+seven rounds, order reversed every round.
+
+| Columns | Rows |      Registry 0.7.1 |    Registry Phase 7 |   Handwritten 0.7.1 | Handwritten Phase 7 |               Solid | Registry 0.7.1 / Solid | Registry Phase 7 / Solid |
+| ------: | ---: | ------------------: | ------------------: | ------------------: | ------------------: | ------------------: | ---------------------: | -----------------------: |
+|       2 |   5k |  104.0 [98.8–174.0] |   98.7 [95.1–134.4] |  108.5 [99.3–128.2] |   99.0 [96.1–171.3] |    60.6 [56.4–86.7] |                  1.72× |                    1.63× |
+|       2 |  10k | 227.5 [197.4–330.3] | 203.2 [184.2–276.4] | 215.0 [197.8–236.1] | 217.3 [180.9–231.1] | 122.7 [104.2–159.5] |                  1.85× |                    1.66× |
+|       3 |   5k | 145.5 [138.1–170.7] | 127.8 [115.6–168.4] | 139.2 [128.4–168.6] | 124.5 [115.3–145.5] |    74.9 [71.0–91.9] |                  1.94× |                    1.71× |
+|       3 |  10k | 296.6 [258.4–335.0] | 281.7 [246.2–365.5] | 262.3 [257.5–360.7] | 249.8 [232.9–354.7] | 153.2 [144.7–207.4] |                  1.94× |                    1.84× |
+|       5 |   5k | 225.3 [207.1–268.7] | 216.7 [196.5–253.2] | 212.3 [202.7–237.7] | 210.2 [191.4–264.9] | 141.2 [124.8–154.0] |                  1.60× |                    1.53× |
+|       5 |  10k | 476.1 [422.8–531.6] | 440.9 [401.7–514.8] | 480.1 [423.7–512.9] | 432.9 [389.1–475.7] | 277.2 [240.6–287.2] |                  1.72× |                    1.59× |
+|       8 |   5k | 371.2 [333.9–402.4] | 375.3 [305.6–426.0] | 365.0 [339.0–484.2] | 349.2 [302.7–386.7] | 241.9 [212.3–254.4] |                  1.53× |                    1.55× |
+|       8 |  10k | 770.9 [715.4–919.1] | 748.8 [698.7–908.5] | 781.4 [737.9–991.0] | 783.4 [683.3–853.2] | 489.0 [434.8–625.2] |                  1.58× |                    1.53× |
+
+The geometric mean of Phase 7 / 0.7.1 over the eight mounts is 0.94 for the
+registry table and 0.95 for the handwritten one; the table's spreads are wide,
+so single cells are indicative. Sort is unchanged overall (geometric mean
+1.00); one cell, 3 columns at 10k, moved from 1.10× to 1.29× Solid with
+overlapping spreads. Raw data is in
+[`rp-7d-table-ab-2026-11-05.json`](./js-framework-benchmark/results/rp-7d-table-ab-2026-11-05.json).
+
+### Retained allocations per row
+
+Heap-snapshot deltas per row after creating rows (`alloc-p1.mjs`).
+
+| Build                     | Owners | Signals | Plain objects | Arrays | Closures | Retained JS objects | Retained JS bytes |
+| ------------------------- | -----: | ------: | ------------: | -----: | -------: | ------------------: | ----------------: |
+| Benos row, 0.7.1          |      4 |       1 |          53.0 |   16.0 |     25.0 |                95.5 |             3,408 |
+| Benos row, Phase 7        |      1 |       0 |          40.0 |    8.0 |     18.0 |                67.5 |             2,477 |
+| Solid row                 |      1 |       0 |          11.0 |    6.0 |      8.0 |                26.5 |               913 |
+| Registry table row, 0.7.1 |      5 |       1 |          67.2 |   40.0 |     34.0 |               143.8 |             4,673 |
+| Registry table row, Ph. 7 |      2 |       0 |          50.2 |   28.0 |     28.0 |               109.4 |             3,597 |
+| Solid table row           |      1 |       0 |          24.1 |    6.0 |     12.0 |                43.8 |             1,504 |
+
+A benchmark row retains 29% fewer objects and 27% fewer bytes than at 0.7.1;
+it still retains 2.5× Solid's objects.
+
+### Garbage collection
+
+Main-thread collection in the profiling build, 0.7.1 and Phase 7 measured back
+to back twice in one session (the two runs' medians):
+
+| Workload        |         0.7.1 |       Phase 7 | Solid (2026-11-04) |
+| --------------- | ------------: | ------------: | -----------------: |
+| Create 1k       |     2.4 / 2.0 |     2.0 / 2.2 |                1.1 |
+| Replace 1k      |     2.2 / 2.1 |     1.7 / 1.9 |                0.5 |
+| Clear 1k        |     0.8 / 0.7 |     0.0 / 0.0 |                0.0 |
+| Create 10k      | 138.9 / 139.2 |  101.5 / 94.3 |               39.1 |
+| Replace 10k     |   14.9 / 14.5 |   18.5 / 18.1 |                2.7 |
+| Table mount 5k  | 110.3 / 108.3 |   85.2 / 92.0 |                3.7 |
+| Table mount 10k | 320.9 / 328.8 | 203.2 / 202.2 |               46.6 |
+
+Collection fell by about 30% creating 10,000 rows and 37% mounting the
+10,000-row table; replacing 10,000 rows collects about 3.6 ms more. GC numbers
+taken in different sessions differ by more than these effects, which is why
+only back-to-back runs are compared here.
+
+### Kernel guard and sizes
+
+`pnpm bench:guard` (median of seven harness runs, each five timed samples),
+0.7.1 and Phase 7 back to back:
+
+| Workload                            | 0.7.1 Benos (ms) | Phase 7 Benos (ms) | Phase 7 Preact (ms) | Phase 7 ratio |
+| ----------------------------------- | ---------------: | -----------------: | ------------------: | ------------: |
+| Signal read                         |             6.22 |               6.02 |                4.78 |         1.26× |
+| 20-deep computed chain write + read |             6.52 |               6.19 |                3.96 |         1.57× |
+| 200-effect fanout write             |             2.20 |               2.07 |                1.14 |         1.80× |
+| Dynamic dependency switch           |             3.72 |               3.49 |                2.02 |         1.73× |
+| Repeated equal write                |             0.73 |               0.70 |                0.65 |         1.06× |
+
+The kernel stays under the 2× Preact guard on all five workloads; the shared
+signal write path Phase 7 introduced did not slow it.
+
+Package sizes, minified and gzipped: core 4,490 → 4,587 / 4,608 bytes; core
+plus DOM 11,515 → 11,751 / 12,032 (the core + DOM cap was raised from 11,520
+for this phase); hydrate 3,962 and server 7,688, unchanged. Application
+bundles grow by the runtime's increase only, since generated code is
+unchanged: the dashboard's JavaScript 43,002 → 43,220 bytes gzipped (+218), the
+UI gallery's 85,163 → 85,443 (+280).

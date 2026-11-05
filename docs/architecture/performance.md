@@ -1,6 +1,6 @@
 # Initial-render allocation design
 
-**Status (2026-11-04):** Phase 7 ([row-perf-plan.md](../row-perf-plan.md)) is implementing its design one candidate at a time; candidates 1–5 are done ([RP-7c-1](../checkpoints/rp-7c-1.md), [RP-7c-2](../checkpoints/rp-7c-2.md), [RP-7c-3](../checkpoints/rp-7c-3.md), [RP-7c-4](../checkpoints/rp-7c-4.md), [RP-7c-5](../checkpoints/rp-7c-5.md)). The next section is its design; the sections after it are the 0.3.0 track's record and stay as history.
+**Status (2026-11-05):** Phase 7 ([row-perf-plan.md](../row-perf-plan.md)) is implemented and in review. Candidates 1–4 were kept, candidate 5 in part (its component skip), and candidates 6 and 7 were not built because they need core bytes beyond its cap; the final comparison is in [RP-7d](../checkpoints/rp-7d.md). The next section is the design with what each candidate measured; the sections after it are the 0.3.0 track's record and stay as history.
 
 ## Phase 7 design — row creation at Solid's level
 

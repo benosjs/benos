@@ -2,6 +2,32 @@
 
 All notable changes to Benos are documented here.
 
+## [0.7.2] — Unreleased
+
+### Improved
+
+- Render a compiled template's dynamic text that stays a string or number as a
+  bare text node, without the slot, branch owner, and cleanup a changing child
+  needs; a value of any other kind switches to the ordinary slot. The DOM
+  output is unchanged.
+- Remove a `<For>` list's rows with one DOM range operation when a clear or a
+  replace keeps none of them, before disposing them, and drop a scan that made
+  a full replace quadratic in the row count.
+- Give a `<For>` row that returns a plain component one owner instead of two,
+  with the same `createUniqueId` values on the server and in hydration.
+- Keep a keyed `<For>` row's item and index in internal state instead of a
+  public signal, sharing `signal()`'s write path.
+- Register one removal, not two, for a component whose output is a compiled
+  template.
+- Together, against 0.7.1 in an interleaved run: clear 28% faster (2.06× →
+  1.48× Solid), select 21%, replace 9% (1.40× → 1.28×), creating 10,000 rows
+  6% (1.36× → 1.28×), and the sortable table's mount about 6%; creating 1,000
+  rows is 1.37× → 1.35× Solid. A benchmark row retains 67.5 objects instead of
+  95.5 and one owner instead of four, and collection falls about 30% when
+  creating 10,000 rows. No operation regressed. Core grows by 97 bytes and
+  core plus DOM by 236 bytes, minified and gzipped. Tables are in
+  `benchmarks/README.md`.
+
 ## [0.7.1] — 2026-11-03
 
 ### Fixed
