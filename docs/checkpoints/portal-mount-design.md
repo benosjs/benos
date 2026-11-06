@@ -95,3 +95,86 @@ Same protocol as Phase 7. `run.mjs` was copied to a temporary script that served
 | Clear rows         | 3.7 [3.7–3.8]       | 3.7 [3.7–4.0]       | 2.5 [2.5–2.6]       |      0.990 |
 
 No operation moved beyond its own spread. The two builds' samples for creating 1,000 rows overlap completely (main 32.2–34.3, fix 32.0–34.5), as do those for 10,000 rows and for clear. The temporary script and the saved build were deleted. The raw JSON was not committed.
+
+## Performance follow-up: the sortable table's mount
+
+The user asked for the table cost to be removed before merging: "Fix the cost first" (relayed by the session that started this one). That session measured 2f14adf at 1.03–1.07 × main on the registry `SortableTable`'s initial render (geomean of 8 cells), with sort and the nine-operation row benchmark unchanged.
+
+**Where it came from.** Each table row is a `<tr>` whose child is `columns.map(...)`: an array of `<td>` templates in a direct template's child slot. In 2f14adf, every array became a range with a per-instance getter, and `updateSlot` then read the branch's nodes three times (the singleton check twice, then `rangeConnected`), each read rebuilding the list with `flatMap`. Every slot was also an object literal holding a range object with its own getter closure. The row benchmark's rows are single templates, so they never reached either path.
+
+**Change.** This replaces the getter objects described under "Implementation":
+
+- `Slot` is a class and is its own range, with the `nodes` getter on its prototype. A slot no longer allocates a separate range object or a getter closure. `createSlot`, a template's child slot, and a direct template's child slot construct it; `slot.range` is gone.
+- `RangeList` (a class with a prototype getter) is used only for an array or template that holds a slot (`Slot` or `RangeList`). An array of plain ranges keeps one list, built by the same loop as on main. A template whose only top-level node is a slot anchor (the compiler's `dynamicChild`) uses the slot itself as its range.
+- `updateSlot`, `ensureSlotMarker`, and the text fast path read a range's nodes once.
+
+**Table mount**, interleaved (main f394480, this change, and 2f14adf in the same rounds; 2 warmups, 7 rounds, order reversed each round; harness and saved builds from the `benos-row-perf` worktree). Each run started at a 1-minute load below 3 with no process above 50% CPU, but load rose during the runs (to 4.6, 8.3, and 9.0 at the end), so single cells are noisy.
+
+Run 1, initial render (ms):
+
+| Cell               | main                | this change         | 2f14adf             | change / main | 2f14adf / main |
+| ------------------ | ------------------- | ------------------- | ------------------- | ------------: | -------------: |
+| 2 columns × 5,000  | 112.3 [98.3–121.0]  | 111.8 [86.8–134.4]  | 111.6 [105.4–170.0] |         0.996 |          0.994 |
+| 2 columns × 10,000 | 223.9 [209.9–286.7] | 219.3 [202.5–311.9] | 222.8 [206.5–254.1] |         0.979 |          0.995 |
+| 3 columns × 5,000  | 133.4 [124.8–185.0] | 140.0 [121.6–183.6] | 145.3 [135.0–174.0] |         1.049 |          1.089 |
+| 3 columns × 10,000 | 284.3 [267.6–302.7] | 279.8 [250.9–441.6] | 296.3 [274.5–345.1] |         0.984 |          1.042 |
+| 5 columns × 5,000  | 214.1 [199.0–238.4] | 217.1 [198.3–232.6] | 229.1 [205.5–245.7] |         1.014 |          1.070 |
+| 5 columns × 10,000 | 473.5 [427.7–494.7] | 451.4 [412.8–570.1] | 458.3 [412.8–548.8] |         0.953 |          0.968 |
+| 8 columns × 5,000  | 389.0 [321.1–443.3] | 361.6 [318.6–442.3] | 391.7 [330.9–455.3] |         0.930 |          1.007 |
+| 8 columns × 10,000 | 762.0 [631.5–848.2] | 776.9 [685.7–885.2] | 803.4 [665.6–979.0] |         1.020 |          1.054 |
+| **Geomean**        |                     |                     |                     |     **0.990** |      **1.027** |
+
+Sort geomean: this change / main 0.882, 2f14adf / main 0.909.
+
+Run 2, initial render (ms):
+
+| Cell               | main                | this change         | 2f14adf             | change / main | 2f14adf / main |
+| ------------------ | ------------------- | ------------------- | ------------------- | ------------: | -------------: |
+| 2 columns × 5,000  | 126.5 [102.4–259.8] | 108.1 [98.4–320.3]  | 132.8 [118.1–168.2] |         0.855 |          1.050 |
+| 2 columns × 10,000 | 219.6 [200.4–289.3] | 224.8 [216.6–460.8] | 237.1 [215.3–267.4] |         1.024 |          1.080 |
+| 3 columns × 5,000  | 150.2 [133.0–179.9] | 148.3 [134.1–220.1] | 155.9 [141.8–184.2] |         0.987 |          1.038 |
+| 3 columns × 10,000 | 286.4 [252.4–331.6] | 285.2 [261.5–328.8] | 302.0 [266.9–340.5] |         0.996 |          1.054 |
+| 5 columns × 5,000  | 232.4 [211.9–479.2] | 246.9 [218.3–253.8] | 252.6 [227.2–311.3] |         1.062 |          1.087 |
+| 5 columns × 10,000 | 467.7 [413.0–681.0] | 485.5 [456.2–592.0] | 501.2 [437.1–657.2] |         1.038 |          1.072 |
+| 8 columns × 5,000  | 375.7 [357.7–479.0] | 402.4 [349.1–533.1] | 399.5 [364.2–423.0] |         1.071 |          1.063 |
+| 8 columns × 10,000 | 796.1 [748.0–897.0] | 820.7 [730.7–889.3] | 807.3 [716.2–856.5] |         1.031 |          1.014 |
+| **Geomean**        |                     |                     |                     |     **1.006** |      **1.057** |
+
+Sort geomean: this change / main 1.071, 2f14adf / main 1.028.
+
+Run 3, initial render (ms):
+
+| Cell               | main                 | this change          | 2f14adf              | change / main | 2f14adf / main |
+| ------------------ | -------------------- | -------------------- | -------------------- | ------------: | -------------: |
+| 2 columns × 5,000  | 114.1 [101.2–190.7]  | 112.9 [105.1–171.0]  | 135.5 [113.4–292.4]  |         0.989 |          1.188 |
+| 2 columns × 10,000 | 235.1 [221.4–403.4]  | 226.4 [215.1–583.8]  | 275.5 [223.4–529.9]  |         0.963 |          1.172 |
+| 3 columns × 5,000  | 151.1 [143.4–216.8]  | 141.3 [132.6–162.6]  | 174.0 [142.2–220.5]  |         0.935 |          1.152 |
+| 3 columns × 10,000 | 326.2 [271.5–402.2]  | 319.0 [260.9–330.7]  | 343.6 [263.8–447.3]  |         0.978 |          1.053 |
+| 5 columns × 5,000  | 239.6 [206.5–264.8]  | 248.7 [201.4–319.7]  | 251.8 [211.1–350.2]  |         1.038 |          1.051 |
+| 5 columns × 10,000 | 472.0 [423.2–504.5]  | 505.8 [445.4–564.4]  | 480.0 [459.7–598.4]  |         1.072 |          1.017 |
+| 8 columns × 5,000  | 385.0 [338.4–527.7]  | 357.2 [333.6–392.3]  | 366.8 [358.3–426.2]  |         0.928 |          0.953 |
+| 8 columns × 10,000 | 880.1 [760.8–1002.6] | 814.8 [764.2–1188.8] | 833.5 [712.4–1133.7] |         0.926 |          0.947 |
+| **Geomean**        |                      |                      |                      |     **0.977** |      **1.063** |
+
+Sort geomean: this change / main 0.998, 2f14adf / main 1.007.
+
+Over the three runs, this change ÷ main is 0.990, 1.006, and 0.977, and 2f14adf ÷ main is 1.027, 1.057, and 1.063 in the same rounds. Sort ÷ main is 0.882, 1.071, and 0.998. The 1.071 comes from the run whose load reached 8.3, where 8 columns × 10,000 rows spread over 565–1,077 ms. Sort uses no new code on its path, and `<For>` no longer copies every row's nodes on each commit.
+
+**Row benchmark**, interleaved against the saved Phase 7 build (73c3a1d, the same DOM as main) with Solid; 2 warmups, 7 rounds, Chromium 153:
+
+| Operation          | Phase 7             | this change         | Solid               | change / Phase 7 |
+| ------------------ | ------------------- | ------------------- | ------------------- | ---------------: |
+| Create 1,000 rows  | 34.7 [33.5–35.2]    | 33.6 [33.2–35.3]    | 25.7 [25.4–28.3]    |            0.968 |
+| Replace 1,000 rows | 33.7 [33.4–34.2]    | 34.0 [33.6–34.7]    | 25.6 [24.8–26.3]    |            1.007 |
+| Update every 10th  | 13.3 [13.0–17.4]    | 13.2 [13.0–13.4]    | 14.1 [14.0–15.2]    |            0.991 |
+| Select one row     | 1.2 [1.1–13.0]      | 1.1 [1.0–22.2]      | 0.9 [0.8–1.1]       |            0.974 |
+| Swap rows          | 3.8 [3.7–4.1]       | 3.7 [3.7–23.2]      | 3.0 [2.9–3.0]       |            0.967 |
+| Remove one row     | 4.8 [4.6–5.0]       | 4.6 [4.4–5.5]       | 4.4 [4.3–6.5]       |            0.956 |
+| Create 10,000 rows | 311.8 [305.9–321.3] | 309.2 [306.2–326.0] | 241.5 [239.5–244.2] |            0.992 |
+| Append 1,000 rows  | 43.6 [42.7–47.6]    | 42.9 [42.4–53.0]    | 36.3 [35.7–37.2]    |            0.986 |
+| Clear rows         | 3.9 [3.8–4.1]       | 3.9 [1.9–4.0]       | 2.6 [2.5–2.7]       |            0.991 |
+| **Geomean**        |                     |                     |                     |        **0.981** |
+
+**Sizes:** core + DOM 11,854 / 12,032 B: 107 B more than main (11,747), and 130 B more than 2f14adf (11,724), from the two classes and the check that picks a plain list. Core is 4,583 B. `dom/hydrate` (3,962), server (7,696), and async (2,084) are unchanged.
+
+**Checks on this change:** `pnpm build`, `pnpm test` (56 files, 595 tests), `pnpm lint`, `pnpm typecheck:types`, `pnpm size`, the dashboard `build` and `build:ssr`, and `pnpm test:browser` (534 passed). The temporary runners and saved candidate builds were removed from `benos-row-perf` afterwards, and the raw JSON was not committed.
