@@ -28,6 +28,14 @@ All notable changes to Benos are documented here.
   core plus DOM by 236 bytes, minified and gzipped. Tables are in
   `benchmarks/README.md`.
 
+### Fixed
+
+- A `<For>` row whose first read of its keyed item, or of its index, happens
+  inside a `computed` now renders. It threw "signal cannot run during computed
+  evaluation" and rendered nothing, as it did in 0.7.1, because the row's state
+  is created on that first read. Creating a signal inside a computed is still
+  an error.
+
 ## [0.7.1] — 2026-11-03
 
 ### Fixed
