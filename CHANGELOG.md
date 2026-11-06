@@ -28,6 +28,21 @@ All notable changes to Benos are documented here.
   core plus DOM by 236 bytes, minified and gzipped. Tables are in
   `benchmarks/README.md`.
 
+### Fixed
+
+- Run `onMount` for a component whose output holds a control that changes its
+  nodes after it mounts. Examples: `[<p/>, <Portal mount={target}>…</Portal>]`,
+  a fragment holding a `<Show>` or `<For>` whose content is one element, a
+  compiled `{expr}` child that renders one element, and a `<For>` whose row is
+  a `<Portal>`. `onMount` never ran for these, in an attached host or in a
+  detached one attached later, as in 0.7.1: the component's range copied the
+  control's nodes, and the control then removed its marker or moved it into
+  the portal's target. Ranges now read their children's nodes when needed, so
+  a keyed `<For>` row of that shape also moves with all of its nodes.
+- Run `onMount` for a component whose output is a `<Portal>` into a detached
+  target once the target is attached. It was lost when the host was already
+  in the document.
+
 ## [0.7.1] — 2026-11-03
 
 ### Fixed

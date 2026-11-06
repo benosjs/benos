@@ -229,6 +229,10 @@ function namespaceFor(
 }
 
 interface DomRange {
+  /**
+   * Read when needed and never kept: a range that holds other ranges builds
+   * this list on each read, because theirs change after it is created.
+   */
   nodes: Node[]
   owner: InternalOwner
 }
@@ -248,6 +252,8 @@ interface Slot {
   value: Child
   /** The slot's child ordinal under its owner; every branch reuses it. */
   ordinal: number
+  /** A list's rows, which stand in for `current` while it has any. */
+  rows?: ForEntry[] | undefined
 }
 
 type Key = string | symbol
@@ -309,11 +315,6 @@ function disposeMounted(mounted: Mounted | null): void {
   removeRange(mounted.range)
 }
 
-function setSlotRange(slot: Slot): void {
-  const nodes = slot.current?.range.nodes ?? []
-  slot.range.nodes = slot.marker.parentNode ? [...nodes, slot.marker] : nodes
-}
-
 function ensureSlotMarker(slot: Slot): void {
   if (slot.marker.parentNode) return
   const last = slot.range.nodes[slot.range.nodes.length - 1]
@@ -364,13 +365,52 @@ function updateSlot(
       slot.current.range.nodes[0]?.nodeType === Node.ELEMENT_NODE
     )
       domHost.remove(slot.marker)
-    setSlotRange(slot)
     if (rangeConnected(slot.current.range)) notifyMount(branch)
     else trackMount(branch, slot.current.range)
   } catch (error) {
     disposeInternalOwner(branch)
     throw error
   }
+}
+
+// A slot's range lists its branch (or a list's rows), then its marker while
+// the marker is in the DOM. Parents keep the range object, and its nodes
+// change after they are built: the first render is deferred, a singleton
+// branch drops the marker, and a portal moves into its target.
+function newSlot(
+  parent: Node,
+  marker: Comment,
+  owner: InternalOwner,
+  ordinal: number,
+): Slot {
+  const slot: Slot = {
+    parent,
+    marker,
+    after: marker.nextSibling,
+    current: null,
+    range: {
+      get nodes() {
+        const nodes =
+          slot.current?.range.nodes ??
+          slot.rows?.flatMap((row) => row.range.nodes) ??
+          []
+        return slot.marker.parentNode ? [...nodes, slot.marker] : nodes
+      },
+      owner,
+    },
+    initialized: false,
+    value: undefined,
+    ordinal,
+  }
+  runWithOwner(owner, () =>
+    onCleanup(() => {
+      disposeMounted(slot.current)
+      slot.current = null
+      slot.rows = undefined
+      domHost.remove(slot.marker)
+    }),
+  )
+  return slot
 }
 
 function createSlot(
@@ -382,25 +422,12 @@ function createSlot(
     (claim?.('marker', parent, before) as Comment | undefined) ??
     (domHost.comment(parent) as Comment)
   insert(parent, marker, before)
-  const slot: Slot = {
+  return newSlot(
     parent,
     marker,
-    after: marker.nextSibling,
-    current: null,
-    range: { nodes: [marker], owner },
-    initialized: false,
-    value: undefined,
-    ordinal: runWithOwner(owner, claimInternalOrdinal),
-  }
-  runWithOwner(owner, () =>
-    onCleanup(() => {
-      disposeMounted(slot.current)
-      slot.current = null
-      domHost.remove(slot.marker)
-      slot.range.nodes = []
-    }),
+    owner,
+    runWithOwner(owner, claimInternalOrdinal),
   )
-  return slot
 }
 
 function mountValue(
@@ -418,10 +445,15 @@ function mountValue(
   if (Array.isArray(value)) {
     const values = value.flat(Infinity) as Child[]
     if (values.length === 1) return mountValue(values[0], parent, before, owner)
-    const nodes: Node[] = []
-    for (const item of values)
-      nodes.push(...mountValue(item, parent, before, owner).nodes)
-    if (nodes.length > 0) return { nodes, owner }
+    // Like a slot's range, this reads its items' ranges on each access.
+    const ranges = values.map((item) => mountValue(item, parent, before, owner))
+    const range: DomRange = {
+      get nodes() {
+        return ranges.flatMap((item) => item.nodes)
+      },
+      owner,
+    }
+    if (range.nodes.length > 0) return range
     const empty = domHost.comment(parent, before)
     insert(parent, empty, before)
     return { nodes: [empty], owner }
@@ -829,13 +861,9 @@ function applyProps(
   }
 }
 
-interface ComponentInstance {
-  owner: InternalOwner
-  range: DomRange
-}
 interface ObserverRecord {
   observer: MutationObserver
-  pending: Set<ComponentInstance>
+  pending: Map<InternalOwner, DomRange>
 }
 const observers = new WeakMap<Document, ObserverRecord>()
 
@@ -849,19 +877,16 @@ function trackMount(owner: InternalOwner, range: DomRange): void {
   if (!document) return
   let record = observers.get(document)
   if (!record) {
-    const pending = new Set<ComponentInstance>()
+    const pending = new Map<InternalOwner, DomRange>()
     const observer = new MutationObserver(() => {
-      for (const instance of [...pending]) {
-        if (
-          !hasPendingMounts(instance.owner) ||
-          instance.range.nodes.length === 0
-        ) {
-          pending.delete(instance)
+      for (const [waiting, waitingRange] of [...pending]) {
+        if (!hasPendingMounts(waiting) || waitingRange.nodes.length === 0) {
+          pending.delete(waiting)
           continue
         }
-        if (rangeConnected(instance.range)) {
-          notifyMount(instance.owner)
-          if (!hasPendingMounts(instance.owner)) pending.delete(instance)
+        if (rangeConnected(waitingRange)) {
+          notifyMount(waiting)
+          if (!hasPendingMounts(waiting)) pending.delete(waiting)
         }
       }
       if (pending.size === 0) {
@@ -873,11 +898,11 @@ function trackMount(owner: InternalOwner, range: DomRange): void {
     observers.set(document, record)
     observer.observe(document, { childList: true, subtree: true })
   }
-  const instance = { owner, range }
-  record.pending.add(instance)
+  if (record.pending.has(owner)) return
+  record.pending.set(owner, range)
   runWithOwner(owner, () =>
     onCleanup(() => {
-      record?.pending.delete(instance)
+      record?.pending.delete(owner)
       if (record?.pending.size === 0) {
         record.observer.disconnect()
         observers.delete(document)
@@ -898,10 +923,15 @@ function mountComponent(
   let componentRange: DomRange = { nodes: [], owner: parentOwner }
   let output: Child
   // A list item's owner that is still empty becomes the component's owner.
-  const owner = runWithOwner(parentOwner, () =>
+  const owner: InternalOwner = runWithOwner(parentOwner, () =>
     createInternalOwner(
       'component',
-      () => rangeConnected(componentRange),
+      // A job queued while the range was connected can find it detached when
+      // it runs (a portal moved into a detached target); the observer then
+      // waits for it, as it does for a detached host.
+      (): boolean =>
+        rangeConnected(componentRange) ||
+        (trackMount(owner, componentRange), false),
       undefined,
       undefined,
       share && !kind && !internalControl,
@@ -1138,24 +1168,16 @@ function mountFor(
       return entry
     }
     const commitEntries = (next: ForEntry[]): void => {
-      entries = next
+      entries = slot.rows = next
       disposeMounted(slot.current)
       slot.current = null
       if (entries.length === 0) renderFallback()
-      else {
-        const singleton =
-          entries.length === 1 &&
-          entries[0]?.range.nodes.length === 1 &&
-          entries[0].range.nodes[0]?.nodeType === Node.ELEMENT_NODE
-        if (singleton) {
-          domHost.remove(slot.marker)
-          slot.range.nodes = entries[0]?.range.nodes ?? []
-        } else
-          slot.range.nodes = [
-            ...entries.flatMap((entry) => entry.range.nodes),
-            slot.marker,
-          ]
-      }
+      else if (
+        entries.length === 1 &&
+        entries[0]?.range.nodes.length === 1 &&
+        entries[0].range.nodes[0]?.nodeType === Node.ELEMENT_NODE
+      )
+        domHost.remove(slot.marker)
     }
     if (items.length + 1 === entries.length) {
       let index = 0
@@ -1352,7 +1374,6 @@ function mountPortal(
         placeholder.parent = nextTarget
         placeholder.marker = ownerDocumentOf(nextTarget).createComment('')
         insert(nextTarget, placeholder.marker, null)
-        placeholder.range.nodes = [placeholder.marker]
         updateSlot(placeholder, nextChild, owner, (branch, at) =>
           createChildMount(nextChild, nextTarget, at, branch),
         )
@@ -1520,6 +1541,8 @@ function templatePrototype(
   return prototype
 }
 
+const topSlots = new WeakMap<Node, Slot>()
+
 function mountTemplate(
   descriptor: TemplateDescriptor,
   parent: Node,
@@ -1545,7 +1568,7 @@ function mountTemplate(
       slots[slot] = nodeAtPath(fragment, path)
     insert(parent, fragment, before)
   }
-  const range: DomRange = { nodes, owner }
+  let range: DomRange = { nodes, owner }
   runWithOwner(owner, () => {
     onCleanup(() => removeRange(range))
     descriptor.setup({
@@ -1564,24 +1587,24 @@ function mountTemplate(
       child(slot, get) {
         const marker = slots[slot]
         if (!(marker instanceof Comment) || !marker.parentNode) return
-        const target: Slot = {
-          parent: marker.parentNode,
+        const target = newSlot(
+          marker.parentNode,
           marker,
-          after: marker.nextSibling,
-          current: null,
-          range: { nodes: [marker], owner },
-          initialized: false,
-          value: undefined,
-          ordinal: claimInternalOrdinal(),
-        }
-        runWithOwner(owner, () =>
-          onCleanup(() => {
-            disposeMounted(target.current)
-            target.current = null
-            domHost.remove(target.marker)
-            target.range.nodes = []
-          }),
+          owner,
+          claimInternalOrdinal(),
         )
+        // A top-level slot stands in for its marker in the template's range.
+        if (nodes.includes(marker)) {
+          topSlots.set(marker, target)
+          range = {
+            get nodes() {
+              return nodes.flatMap(
+                (node) => topSlots.get(node)?.range.nodes ?? node,
+              )
+            },
+            owner,
+          }
+        }
         runWithOwner(owner, () =>
           createRenderEffect(() => {
             const value = get()
@@ -1674,27 +1697,8 @@ function mountDirectTemplate(
         // server markers, so it starts with the slot.
         let text: Text | null = null
         let slot: Slot | null = null
-        const toSlot = (): Slot => {
-          const created: Slot = {
-            parent: target.parentNode as Node,
-            marker: target,
-            after: target.nextSibling,
-            current: null,
-            range: { nodes: [target], owner },
-            initialized: false,
-            value: undefined,
-            ordinal,
-          }
-          runWithOwner(owner, () =>
-            onCleanup(() => {
-              disposeMounted(created.current)
-              created.current = null
-              domHost.remove(created.marker)
-              created.range.nodes = []
-            }),
-          )
-          return created
-        }
+        const toSlot = (): Slot =>
+          newSlot(target.parentNode as Node, target, owner, ordinal)
         if (claimed) slot = toSlot()
         createRenderEffect(() => {
           const value = binding.get(descriptor.values) as Child
@@ -1901,8 +1905,11 @@ export function render(
   let rootRange: DomRange = { nodes: [], owner: undefined as never }
   createRoot((dispose: () => void) => {
     disposeRoot = dispose
-    const rootOwner = createInternalOwner('component', () =>
-      rangeConnected(rootRange),
+    // Watched again when not ready, as a component's owner is.
+    const rootOwner: InternalOwner = createInternalOwner(
+      'component',
+      (): boolean =>
+        rangeConnected(rootRange) || (trackMount(rootOwner, rootRange), false),
     )
     let output!: Child
     runWithOwner(rootOwner, () => {
@@ -1957,10 +1964,7 @@ function prepareInternalStage(
     commit(before = null) {
       if (disposed) throw new Error('Staged branch is disposed')
       if (committed) return
-      if (fragment) {
-        range.nodes = Array.from(fragment.childNodes)
-        moveRange(range, before?.parentNode ?? target, before)
-      }
+      if (fragment) insert(before?.parentNode ?? target, fragment, before)
       committed = true
       setInternalOwnerGate(owner, 0)
       notifyMount(owner)
