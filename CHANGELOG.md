@@ -35,6 +35,12 @@ All notable changes to Benos are documented here.
   evaluation" and rendered nothing, as it did in 0.7.1, because the row's state
   is created on that first read. Creating a signal inside a computed is still
   an error.
+- Give a server-rendered `<For>` row with no string or number key (an object
+  item without `by`, a `by` that returns an object, or a duplicate key) the
+  same `createUniqueId` values that hydration gives it. The server's numbering
+  of such rows was off by one from hydration's when `each` was ready at once,
+  or when it already held rows while a resource was pending. Ids of string-
+  and number-keyed rows are unchanged.
 
 ## [0.7.1] — 2026-11-03
 

@@ -955,6 +955,10 @@ function mountFor(
             (typeof key === 'string' || typeof key === 'number') &&
             !seen.has(key)
           seen.add(key)
+          // A row takes the ordinal hydration gives it: the client claims its
+          // slot, then its reconcile effect, then its rows. Rows without a
+          // string or number key use it as their id segment, and a server
+          // effect, created before or after the rows, then takes slot + 1 too.
           const itemOwner = runWithOwner(owner, () =>
             createInternalOwner(
               'branch',
@@ -962,6 +966,7 @@ function mountFor(
               keyed
                 ? `k${encodeURIComponent(key as string | number)}`
                 : undefined,
+              slot.ordinal + 2 + position,
             ),
           )
           const entry: ForEntry = {

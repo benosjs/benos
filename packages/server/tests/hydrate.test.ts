@@ -482,14 +482,21 @@ describe('hydrate', () => {
                 children: jsx(Row, { label: item() }),
               }),
           }),
+          // Object items without `by` have no key, so their rows' id segment
+          // comes from creation order.
+          list({
+            each: [{ label: 'o1' }, { label: 'o2' }],
+            children: (row: () => { label: string }) =>
+              jsx(Row, { label: row().label }),
+          }),
         ],
       })
     const host = await serve(app)
     const serverIds = [...host.querySelectorAll('[data-id]')].map((node) =>
       node.getAttribute('data-id'),
     )
-    expect(serverIds).toHaveLength(18)
-    expect(new Set(serverIds).size).toBe(18)
+    expect(serverIds).toHaveLength(24)
+    expect(new Set(serverIds).size).toBe(24)
     expect(serverIds.some((id) => id?.includes('-k1-0-'))).toBe(true)
     expect(serverIds.some((id) => id?.includes('-kx-0-'))).toBe(true)
     ids.length = 0
@@ -498,6 +505,65 @@ describe('hydrate', () => {
     expect(seen).toEqual([])
     // A `<Show>` inside a row creates its ids later while hydrating.
     expect([...ids].sort()).toEqual([...serverIds].sort())
+  })
+
+  it('gives unkeyed list rows the same unique ids when the list arrives from a resource', async () => {
+    const codec = {
+      id: 'rows',
+      key: () => 'all',
+      serialize: (value: unknown[]) => value,
+      deserialize: (value: unknown) => value as unknown[],
+    }
+    // An object and a duplicate key have no id key; 'd' keys its first row.
+    const rows: unknown[] = [{ label: 'o1' }, 'd', 'd']
+    // The server renders the list once while the resource is pending, then
+    // again in its effect once it resolves.
+    for (const pending of [[], [{ label: 'wait' }]]) {
+      const ids: string[] = []
+      const app = () => {
+        const data = resource(
+          () => 1,
+          () => Promise.resolve(rows),
+          {
+            ssr: codec,
+          },
+        )
+        return jsx(Suspense, {
+          fallback: 'loading',
+          children: jsx(
+            () =>
+              jsx('ul', {
+                children: jsx(For, {
+                  get each() {
+                    return data.read() ?? pending
+                  },
+                  children: () => {
+                    const id = createUniqueId()
+                    ids.push(id)
+                    return jsx('li', { 'data-id': id })
+                  },
+                }),
+              }),
+            {},
+          ),
+        })
+      }
+      const host = await serve(app)
+      const serverIds = [...host.querySelectorAll('[data-id]')].map((node) =>
+        node.getAttribute('data-id'),
+      )
+      expect(serverIds).toHaveLength(3)
+      expect(serverIds[1]).toContain('-kd-0')
+      ids.length = 0
+      const seen: HydrationMismatch[] = mismatches()
+      roots.push(hydrate(app, host, { onMismatch: (info) => seen.push(info) }))
+      await Promise.resolve()
+      await Promise.resolve()
+      expect(seen).toEqual([])
+      expect(ids).toEqual(serverIds)
+      roots.pop()?.()
+      host.remove()
+    }
   })
 
   it('hydrates text rows of a direct template and then creates client rows in the same list', async () => {
