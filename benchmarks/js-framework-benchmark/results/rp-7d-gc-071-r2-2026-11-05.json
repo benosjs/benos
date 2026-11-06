@@ -1,0 +1,2315 @@
+{
+  "protocol": {
+    "browser": "Chromium tracing",
+    "warmups": 2,
+    "rounds": 7,
+    "categories": "v8,disabled-by-default-v8.gc,disabled-by-default-v8.gc_stats",
+    "aggregation": "per-thread union of complete GC trace events; nested intervals counted once; main-thread time reported separately from total GC CPU across renderer threads"
+  },
+  "summary": {
+    "create-1k": {
+      "mainThreadMedianMs": 2.009,
+      "mainThreadSpreadMs": [
+        1.821,
+        2.094
+      ],
+      "allThreadsCpuMedianMs": 5.417,
+      "allThreadsCpuSpreadMs": [
+        5.093,
+        6.262999999999999
+      ],
+      "medianMainThreadEvents": 76,
+      "samples": [
+        {
+          "gcMainThreadMs": 2.094,
+          "gcAllThreadsCpuMs": 6.262999999999999,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 2.094,
+              "eventCount": 76
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.521,
+              "eventCount": 8
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.399,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.933,
+              "eventCount": 5
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.316,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 1.99,
+          "gcAllThreadsCpuMs": 5.093,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 1.99,
+              "eventCount": 77
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.362,
+              "eventCount": 8
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.186,
+              "eventCount": 8
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.555,
+              "eventCount": 3
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 1.821,
+          "gcAllThreadsCpuMs": 5.295999999999999,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 1.821,
+              "eventCount": 73
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.336,
+              "eventCount": 8
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.258,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.587,
+              "eventCount": 5
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.294,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 2.028,
+          "gcAllThreadsCpuMs": 5.417,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 2.028,
+              "eventCount": 77
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.417,
+              "eventCount": 8
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.812,
+              "eventCount": 5
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.85,
+              "eventCount": 5
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.31,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 1.915,
+          "gcAllThreadsCpuMs": 5.6450000000000005,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 1.915,
+              "eventCount": 77
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.387,
+              "eventCount": 8
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.233,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.823,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.287,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 2.085,
+          "gcAllThreadsCpuMs": 5.865,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 2.085,
+              "eventCount": 76
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.514,
+              "eventCount": 8
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.357,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.909,
+              "eventCount": 5
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 2.009,
+          "gcAllThreadsCpuMs": 5.167,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 2.009,
+              "eventCount": 74
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.441,
+              "eventCount": 8
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.501,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.216,
+              "eventCount": 8
+            }
+          ]
+        }
+      ]
+    },
+    "replace-1k": {
+      "mainThreadMedianMs": 2.106,
+      "mainThreadSpreadMs": [
+        2.028,
+        33.529
+      ],
+      "allThreadsCpuMedianMs": 8.503,
+      "allThreadsCpuSpreadMs": [
+        7.4399999999999995,
+        58.10900000000001
+      ],
+      "medianMainThreadEvents": 45,
+      "samples": [
+        {
+          "gcMainThreadMs": 2.106,
+          "gcAllThreadsCpuMs": 8.503,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 2.106,
+              "eventCount": 46
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.551,
+              "eventCount": 7
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.731,
+              "eventCount": 5
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.222,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.343,
+              "eventCount": 4
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.55,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 2.111,
+          "gcAllThreadsCpuMs": 8.701,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 2.111,
+              "eventCount": 45
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.585,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.744,
+              "eventCount": 5
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.253,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.4,
+              "eventCount": 4
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.608,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 2.118,
+          "gcAllThreadsCpuMs": 7.694000000000001,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 2.118,
+              "eventCount": 45
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.598,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.538,
+              "eventCount": 7
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.317,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.123,
+              "eventCount": 2
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 2.069,
+          "gcAllThreadsCpuMs": 9.091999999999999,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 2.069,
+              "eventCount": 45
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.76,
+              "eventCount": 4
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.518,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.383,
+              "eventCount": 4
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.241,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.594,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.527,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 2.028,
+          "gcAllThreadsCpuMs": 7.4399999999999995,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 2.028,
+              "eventCount": 45
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.53,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.418,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.259,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.205,
+              "eventCount": 2
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 2.052,
+          "gcAllThreadsCpuMs": 7.612999999999999,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 2.052,
+              "eventCount": 43
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.539,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.794,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.408,
+              "eventCount": 4
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.252,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.568,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 33.529,
+          "gcAllThreadsCpuMs": 58.10900000000001,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 33.529,
+              "eventCount": 244
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 3.414,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 4.634,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 2.245,
+              "eventCount": 11
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 3.067,
+              "eventCount": 15
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 4.244,
+              "eventCount": 12
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 3.462,
+              "eventCount": 4
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 3.514,
+              "eventCount": 7
+            }
+          ]
+        }
+      ]
+    },
+    "clear-1k": {
+      "mainThreadMedianMs": 0.717,
+      "mainThreadSpreadMs": [
+        0.637,
+        1.728
+      ],
+      "allThreadsCpuMedianMs": 1.902,
+      "allThreadsCpuSpreadMs": [
+        1.599,
+        6.964
+      ],
+      "medianMainThreadEvents": 22,
+      "samples": [
+        {
+          "gcMainThreadMs": 0.637,
+          "gcAllThreadsCpuMs": 1.599,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 0.637,
+              "eventCount": 21
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.098,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.219,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.231,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.272,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.142,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 0.678,
+          "gcAllThreadsCpuMs": 1.902,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 0.678,
+              "eventCount": 22
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.097,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.317,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.367,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.267,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.176,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 0.718,
+          "gcAllThreadsCpuMs": 1.866,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 0.718,
+              "eventCount": 24
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.333,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.255,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.25,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.256,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.054,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 0.676,
+          "gcAllThreadsCpuMs": 1.7329999999999999,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 0.676,
+              "eventCount": 23
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.298,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.319,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.25,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.19,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 1.728,
+          "gcAllThreadsCpuMs": 6.964,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 1.728,
+              "eventCount": 21
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.071,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.364,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.291,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.237,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.218,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.055,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 0.717,
+          "gcAllThreadsCpuMs": 1.949,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 0.717,
+              "eventCount": 22
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.091,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.338,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.336,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.251,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.216,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 0.735,
+          "gcAllThreadsCpuMs": 2.035,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 0.735,
+              "eventCount": 22
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.368,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.066,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.299,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.287,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.28,
+              "eventCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    "create-10k": {
+      "mainThreadMedianMs": 139.171,
+      "mainThreadSpreadMs": [
+        134.01,
+        164.866
+      ],
+      "allThreadsCpuMedianMs": 324.767,
+      "allThreadsCpuSpreadMs": [
+        312.14399999999995,
+        343.23600000000005
+      ],
+      "medianMainThreadEvents": 864,
+      "samples": [
+        {
+          "gcMainThreadMs": 139.171,
+          "gcAllThreadsCpuMs": 326.15900000000005,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 139.171,
+              "eventCount": 853
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 32.667,
+              "eventCount": 42
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 32.993,
+              "eventCount": 52
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 29.744,
+              "eventCount": 27
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 30.319,
+              "eventCount": 45
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 19.564,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 19.704,
+              "eventCount": 19
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 18.817,
+              "eventCount": 21
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.957,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.223,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 139.996,
+          "gcAllThreadsCpuMs": 324.767,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 139.996,
+              "eventCount": 867
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 32.749,
+              "eventCount": 46
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 24.945,
+              "eventCount": 38
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 25.012,
+              "eventCount": 35
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 22.684,
+              "eventCount": 26
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 28.248,
+              "eventCount": 28
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 26.012,
+              "eventCount": 16
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 23.647,
+              "eventCount": 13
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.474,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 164.866,
+          "gcAllThreadsCpuMs": 343.23600000000005,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 164.866,
+              "eventCount": 850
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 34.291,
+              "eventCount": 38
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 20.286,
+              "eventCount": 36
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 18.478,
+              "eventCount": 39
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 29.7,
+              "eventCount": 25
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 30.109,
+              "eventCount": 25
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 27.269,
+              "eventCount": 14
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 14.656,
+              "eventCount": 20
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 2.118,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.463,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 137.448,
+          "gcAllThreadsCpuMs": 312.14399999999995,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 137.448,
+              "eventCount": 864
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 32.855,
+              "eventCount": 45
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 33.016,
+              "eventCount": 42
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 30.626,
+              "eventCount": 37
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 16.998,
+              "eventCount": 27
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 17.582,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 14.146,
+              "eventCount": 23
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 25.835,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.847,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.791,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 134.01,
+          "gcAllThreadsCpuMs": 313.5899999999999,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 134.01,
+              "eventCount": 865
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 24.655,
+              "eventCount": 39
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 26.953,
+              "eventCount": 53
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 28.464,
+              "eventCount": 48
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 19.25,
+              "eventCount": 28
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 27.659,
+              "eventCount": 23
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 24.626,
+              "eventCount": 26
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 23.693,
+              "eventCount": 23
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 2.162,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 2.118,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 141.344,
+          "gcAllThreadsCpuMs": 325.554,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 141.344,
+              "eventCount": 851
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 28.152,
+              "eventCount": 25
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 26.808,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 31.388,
+              "eventCount": 39
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 24.481,
+              "eventCount": 49
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 22.233,
+              "eventCount": 47
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 29.108,
+              "eventCount": 23
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 18.473,
+              "eventCount": 16
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.822,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.745,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 134.295,
+          "gcAllThreadsCpuMs": 314.092,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 134.295,
+              "eventCount": 864
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 24.363,
+              "eventCount": 40
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 31.206,
+              "eventCount": 36
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 22.266,
+              "eventCount": 47
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 23.657,
+              "eventCount": 38
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 26.696,
+              "eventCount": 39
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 24.567,
+              "eventCount": 16
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 24.762,
+              "eventCount": 17
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 2.28,
+              "eventCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    "replace-10k": {
+      "mainThreadMedianMs": 14.527,
+      "mainThreadSpreadMs": [
+        13.42,
+        15.588
+      ],
+      "allThreadsCpuMedianMs": 89.364,
+      "allThreadsCpuSpreadMs": [
+        82.233,
+        95.859
+      ],
+      "medianMainThreadEvents": 50,
+      "samples": [
+        {
+          "gcMainThreadMs": 15.588,
+          "gcAllThreadsCpuMs": 95.859,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 15.588,
+              "eventCount": 51
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 13.879,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 13.527,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.566,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.609,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.591,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.592,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.507,
+              "eventCount": 2
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 14.469,
+          "gcAllThreadsCpuMs": 88.112,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 14.469,
+              "eventCount": 46
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.664,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.629,
+              "eventCount": 7
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.695,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.724,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.677,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.639,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.615,
+              "eventCount": 3
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 15.146,
+          "gcAllThreadsCpuMs": 92.33699999999999,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 15.146,
+              "eventCount": 50
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 13.11,
+              "eventCount": 7
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 13.114,
+              "eventCount": 7
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.081,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.205,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.374,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.246,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.061,
+              "eventCount": 4
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 14.527,
+          "gcAllThreadsCpuMs": 89.364,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 14.527,
+              "eventCount": 51
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.577,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.651,
+              "eventCount": 7
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.814,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.875,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.936,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.135,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.849,
+              "eventCount": 2
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 14.092,
+          "gcAllThreadsCpuMs": 86.448,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 14.092,
+              "eventCount": 47
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.234,
+              "eventCount": 7
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.207,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.67,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.569,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.571,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.555,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.55,
+              "eventCount": 2
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 13.42,
+          "gcAllThreadsCpuMs": 82.233,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 13.42,
+              "eventCount": 53
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 11.697,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 11.562,
+              "eventCount": 7
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.144,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.046,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.375,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 9.035,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 8.954,
+              "eventCount": 3
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 14.944,
+          "gcAllThreadsCpuMs": 91.44900000000001,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 14.944,
+              "eventCount": 50
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.935,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.955,
+              "eventCount": 6
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.171,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.056,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.035,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.248,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 10.105,
+              "eventCount": 2
+            }
+          ]
+        }
+      ]
+    },
+    "clear-10k": {
+      "mainThreadMedianMs": 0,
+      "mainThreadSpreadMs": [
+        0,
+        0
+      ],
+      "allThreadsCpuMedianMs": 0,
+      "allThreadsCpuSpreadMs": [
+        0,
+        0
+      ],
+      "medianMainThreadEvents": 0,
+      "samples": [
+        {
+          "gcMainThreadMs": 0,
+          "gcAllThreadsCpuMs": 0,
+          "threadDurations": []
+        },
+        {
+          "gcMainThreadMs": 0,
+          "gcAllThreadsCpuMs": 0,
+          "threadDurations": []
+        },
+        {
+          "gcMainThreadMs": 0,
+          "gcAllThreadsCpuMs": 0,
+          "threadDurations": []
+        },
+        {
+          "gcMainThreadMs": 0,
+          "gcAllThreadsCpuMs": 0,
+          "threadDurations": []
+        },
+        {
+          "gcMainThreadMs": 0,
+          "gcAllThreadsCpuMs": 0,
+          "threadDurations": []
+        },
+        {
+          "gcMainThreadMs": 0,
+          "gcAllThreadsCpuMs": 0,
+          "threadDurations": []
+        },
+        {
+          "gcMainThreadMs": 0,
+          "gcAllThreadsCpuMs": 0,
+          "threadDurations": []
+        }
+      ]
+    },
+    "table-mount-5000": {
+      "mainThreadMedianMs": 108.283,
+      "mainThreadSpreadMs": [
+        101.535,
+        111.845
+      ],
+      "allThreadsCpuMedianMs": 251.947,
+      "allThreadsCpuSpreadMs": [
+        244.712,
+        265.706
+      ],
+      "medianMainThreadEvents": 390,
+      "samples": [
+        {
+          "gcMainThreadMs": 111.845,
+          "gcAllThreadsCpuMs": 247.879,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 111.845,
+              "eventCount": 335
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 25.332,
+              "eventCount": 47
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 25.551,
+              "eventCount": 37
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 22.39,
+              "eventCount": 20
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 15.381,
+              "eventCount": 33
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 21.304,
+              "eventCount": 19
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.653,
+              "eventCount": 20
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.723,
+              "eventCount": 14
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.7,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 110.706,
+          "gcAllThreadsCpuMs": 251.947,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 110.706,
+              "eventCount": 371
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 27.063,
+              "eventCount": 36
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 27.076,
+              "eventCount": 39
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 23.698,
+              "eventCount": 17
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 14.651,
+              "eventCount": 35
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 13.265,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 2.005,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 20.643,
+              "eventCount": 11
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.001,
+              "eventCount": 13
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.839,
+              "eventCount": 2
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 108.283,
+          "gcAllThreadsCpuMs": 265.706,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 108.283,
+              "eventCount": 397
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 27.98,
+              "eventCount": 40
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 27.926,
+              "eventCount": 37
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 18.638,
+              "eventCount": 17
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 19.798,
+              "eventCount": 34
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 24.283,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 16.274,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 20.227,
+              "eventCount": 9
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.577,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.72,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 101.535,
+          "gcAllThreadsCpuMs": 247.233,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 101.535,
+              "eventCount": 397
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 20.362,
+              "eventCount": 38
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 26.393,
+              "eventCount": 31
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 17.615,
+              "eventCount": 20
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 23.305,
+              "eventCount": 34
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 16.223,
+              "eventCount": 17
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 19.187,
+              "eventCount": 12
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 18.876,
+              "eventCount": 8
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 3.737,
+              "eventCount": 5
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 107.813,
+          "gcAllThreadsCpuMs": 262.42,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 107.813,
+              "eventCount": 399
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 27.106,
+              "eventCount": 39
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 27.71,
+              "eventCount": 41
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 19.066,
+              "eventCount": 20
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 19.603,
+              "eventCount": 36
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 22.388,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 15.967,
+              "eventCount": 15
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 20.572,
+              "eventCount": 12
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.416,
+              "eventCount": 2
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.779,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 111.274,
+          "gcAllThreadsCpuMs": 244.712,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 111.274,
+              "eventCount": 342
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 17.173,
+              "eventCount": 44
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 25.267,
+              "eventCount": 39
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 22.392,
+              "eventCount": 20
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 14.054,
+              "eventCount": 30
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 21.577,
+              "eventCount": 15
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 12.065,
+              "eventCount": 14
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.787,
+              "eventCount": 1
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 20.123,
+              "eventCount": 17
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 108.066,
+          "gcAllThreadsCpuMs": 264.87899999999996,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 108.066,
+              "eventCount": 390
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 27.518,
+              "eventCount": 36
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 22.241,
+              "eventCount": 41
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 18.108,
+              "eventCount": 19
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 25.884,
+              "eventCount": 32
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 23.284,
+              "eventCount": 16
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 15.265,
+              "eventCount": 12
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 21.847,
+              "eventCount": 16
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.66,
+              "eventCount": 3
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 1.006,
+              "eventCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    "table-mount-10000": {
+      "mainThreadMedianMs": 328.752,
+      "mainThreadSpreadMs": [
+        268.023,
+        381.808
+      ],
+      "allThreadsCpuMedianMs": 612.764,
+      "allThreadsCpuSpreadMs": [
+        536.481,
+        646.1050000000001
+      ],
+      "medianMainThreadEvents": 887,
+      "samples": [
+        {
+          "gcMainThreadMs": 315.794,
+          "gcAllThreadsCpuMs": 627.0109999999999,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 315.794,
+              "eventCount": 895
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 45.496,
+              "eventCount": 40
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 54.209,
+              "eventCount": 35
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 48.452,
+              "eventCount": 32
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 48.947,
+              "eventCount": 21
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 46.896,
+              "eventCount": 26
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 32.92,
+              "eventCount": 11
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 33.618,
+              "eventCount": 11
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.679,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 381.808,
+          "gcAllThreadsCpuMs": 646.1050000000001,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 381.808,
+              "eventCount": 875
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 45.653,
+              "eventCount": 66
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 46.149,
+              "eventCount": 55
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 30.418,
+              "eventCount": 48
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 40.84,
+              "eventCount": 27
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 40.343,
+              "eventCount": 31
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 30.719,
+              "eventCount": 22
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 29.354,
+              "eventCount": 26
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.821,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 362.9,
+          "gcAllThreadsCpuMs": 640.248,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 362.9,
+              "eventCount": 887
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 34.712,
+              "eventCount": 59
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 47.572,
+              "eventCount": 69
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 41.969,
+              "eventCount": 50
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 37.809,
+              "eventCount": 29
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 42.84,
+              "eventCount": 30
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 42.274,
+              "eventCount": 29
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 29.191,
+              "eventCount": 27
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.981,
+              "eventCount": 2
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 362.057,
+          "gcAllThreadsCpuMs": 612.764,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 362.057,
+              "eventCount": 880
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 46.196,
+              "eventCount": 57
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 45.528,
+              "eventCount": 73
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 41.815,
+              "eventCount": 55
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 40.868,
+              "eventCount": 35
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 26.088,
+              "eventCount": 33
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 25.562,
+              "eventCount": 22
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 24.179,
+              "eventCount": 30
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.471,
+              "eventCount": 2
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 328.752,
+          "gcAllThreadsCpuMs": 589.419,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 328.752,
+              "eventCount": 887
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 38.439,
+              "eventCount": 66
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 36.926,
+              "eventCount": 64
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 34.824,
+              "eventCount": 56
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 42.674,
+              "eventCount": 29
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 33.189,
+              "eventCount": 26
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 33.966,
+              "eventCount": 25
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 39.842,
+              "eventCount": 22
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.807,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 268.023,
+          "gcAllThreadsCpuMs": 536.481,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 268.023,
+              "eventCount": 917
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 37.712,
+              "eventCount": 48
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 39.071,
+              "eventCount": 70
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 41.414,
+              "eventCount": 49
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 33.013,
+              "eventCount": 32
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 39.054,
+              "eventCount": 32
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 39.073,
+              "eventCount": 39
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 38.295,
+              "eventCount": 40
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.826,
+              "eventCount": 1
+            }
+          ]
+        },
+        {
+          "gcMainThreadMs": 326.693,
+          "gcAllThreadsCpuMs": 600.9519999999999,
+          "threadDurations": [
+            {
+              "thread": "CrRendererMain",
+              "gcMs": 326.693,
+              "eventCount": 884
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 47.591,
+              "eventCount": 46
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 46.883,
+              "eventCount": 37
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 34.672,
+              "eventCount": 24
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 35.289,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 41.711,
+              "eventCount": 13
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 37.699,
+              "eventCount": 16
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 29.821,
+              "eventCount": 18
+            },
+            {
+              "thread": "ThreadPoolForegroundWorker",
+              "gcMs": 0.593,
+              "eventCount": 1
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

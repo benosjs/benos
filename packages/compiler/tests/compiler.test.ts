@@ -1,9 +1,10 @@
 // @vitest-environment happy-dom
 import { TraceMap, originalPositionFor } from '@jridgewell/trace-mapping'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   createRoot,
   effect,
+  onCleanup,
   signal,
 } from '../../dom/node_modules/@benosjs/core'
 import { For, Show, render, type Child } from '../../dom/src/index.js'
@@ -736,6 +737,243 @@ describe('@benosjs/compiler', () => {
     expect(none.code).toContain('__benos_dynamic_child')
     expect(safe.code).toContain('__benos_direct_template')
     expect(runBehaviorFixture(none.code)).toEqual(runBehaviorFixture(safe.code))
+  })
+
+  it('keeps a dynamic child moving between text and nodes identical for none and safe optimization', () => {
+    const source =
+      'export const App = (props) => <main><p>{props.value()}</p><b>{props.count()}</b><ErrorBoundary fallback={(error) => <em>{error.message}</em>}><i>{props.risky()}</i></ErrorBoundary></main>'
+    const run = (optimization: 'none' | 'safe') => {
+      const { code } = transformJsx(source, {
+        filename: 'fixtures/text-mode.tsx',
+        development: true,
+        optimization,
+      })
+      document.body.replaceChildren()
+      const module = evaluate(
+        code,
+        { ...domRuntime, ...domInternalRuntime } as Record<string, unknown>,
+        { ErrorBoundary: domRuntime.ErrorBoundary },
+      )
+      const value = signal<Child>('a')
+      const count = signal(0)
+      const risky = signal('fine')
+      const steps: string[] = []
+      const dispose = render(
+        () =>
+          (module.App as (props: Record<string, unknown>) => Child)({
+            value,
+            count,
+            risky: () => {
+              const next = risky()
+              if (next === 'throw') throw new Error('later failure')
+              return next
+            },
+          }),
+        document.body,
+      )
+      steps.push(document.body.innerHTML)
+      for (const next of [
+        1,
+        '',
+        domRuntime.jsx('u', { children: 'element' }),
+        'text again',
+        ['c', 'd'],
+        null,
+        false,
+        'e',
+        0,
+      ] as Child[]) {
+        value.set(next)
+        steps.push(document.body.innerHTML)
+      }
+      count.set(5)
+      steps.push(document.body.innerHTML)
+      risky.set('throw')
+      steps.push(document.body.innerHTML)
+      dispose()
+      steps.push(document.body.innerHTML)
+      return { code, steps }
+    }
+    const none = run('none')
+    const safe = run('safe')
+    expect(safe.code).toContain('__benos_direct_template')
+    expect(safe.steps).toEqual(none.steps)
+    expect(none.steps[3]).toContain('<u>element</u>')
+    expect(none.steps[5]).toContain('cd')
+    expect(none.steps.at(-2)).toContain('<em>later failure')
+    expect(none.steps.at(-1)).toBe('')
+  })
+
+  it('replaces and clears compiled rows identically for none and safe optimization', () => {
+    const source = `const Row = (props) => {
+  const id = props.row().id
+  props.cleanup(() => props.log(id))
+  return <tr class={props.row().id === props.selected() ? 'on' : ''}><td>{props.row().id}</td><td><a onClick={() => props.pick(id)}>{props.row().label}</a></td></tr>
+}
+export const App = (props) => <table><tbody><For each={props.rows()} by={(row) => row.id}>{(row) => <Row row={row} selected={props.selected} cleanup={props.cleanup} log={props.log} pick={props.pick} />}</For></tbody></table>`
+    const run = (optimization: 'none' | 'safe') => {
+      const { code } = transformJsx(source, {
+        filename: 'fixtures/rows.tsx',
+        development: true,
+        optimization,
+      })
+      document.body.replaceChildren()
+      const module = evaluate(
+        code,
+        { ...domRuntime, ...domInternalRuntime } as Record<string, unknown>,
+        { For },
+      )
+      const rows = signal([
+        { id: 1, label: 'one' },
+        { id: 2, label: 'two' },
+      ])
+      const selected = signal(1)
+      const log: number[] = []
+      const picks: number[] = []
+      const steps: string[] = []
+      const dispose = render(
+        () =>
+          (module.App as (props: Record<string, unknown>) => Child)({
+            rows,
+            selected,
+            cleanup: onCleanup,
+            log: (id: number) => log.push(id),
+            pick: (id: number) => picks.push(id),
+          }),
+        document.body,
+      )
+      steps.push(document.body.innerHTML)
+      const first = [...document.querySelectorAll('tr')]
+      rows.set([
+        { id: 3, label: 'three' },
+        { id: 4, label: 'four' },
+      ])
+      steps.push(document.body.innerHTML)
+      const second = [...document.querySelectorAll('tr')]
+      rows.set([])
+      steps.push(document.body.innerHTML)
+      selected.set(3)
+      document.body.append(...first, ...second)
+      for (const link of document.querySelectorAll('a'))
+        link.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      dispose()
+      document.body.replaceChildren()
+      return {
+        code,
+        steps,
+        log,
+        picks,
+        detached: [...first, ...second].map((row) => row.className),
+      }
+    }
+    const none = run('none')
+    const deleteContents = vi.spyOn(Range.prototype, 'deleteContents')
+    const safe = run('safe')
+    const bulkRemovals = deleteContents.mock.calls.length
+    deleteContents.mockRestore()
+    expect(safe.code).toContain('__benos_direct_template')
+    expect(safe.steps).toEqual(none.steps)
+    expect(safe.log).toEqual([1, 2, 3, 4])
+    expect(none.log).toEqual([1, 2, 3, 4])
+    expect(safe.picks).toEqual([])
+    expect(none.picks).toEqual([])
+    expect(safe.detached).toEqual(none.detached)
+    expect(none.steps[2]).not.toContain('<tr')
+    expect(bulkRemovals).toBe(2)
+  })
+
+  it('dispatches and removes compiled event handlers identically for none and safe optimization', () => {
+    const source = `const Row = (props) => (
+  <div onClick={() => props.log('div')}>
+    <button onClick={props.handler()} on:click={() => props.log('second')} onClickCapture={() => props.log('capture')} onMouseEnter={() => props.log('enter')}>{props.label}</button>
+    <span onClick={(event) => { props.log('span'); event.stopPropagation() }}>stop</span>
+  </div>
+)
+export const App = (props) => <section onClick={() => props.log('section')}>{props.show() ? <Row handler={props.handler} label="go" log={props.log} /> : null}</section>`
+    const run = (optimization: 'none' | 'safe', host: Element | ShadowRoot) => {
+      const { code } = transformJsx(source, {
+        filename: 'fixtures/events.tsx',
+        development: true,
+        optimization,
+      })
+      const module = evaluate(code, {
+        ...domRuntime,
+        ...domInternalRuntime,
+      } as Record<string, unknown>)
+      const log: string[] = []
+      const show = signal(true)
+      const handler = signal<() => void>(() => log.push('first'))
+      const root = host.getRootNode() as Document | ShadowRoot
+      const removed = vi.spyOn(root, 'removeEventListener')
+      const dispose = render(
+        () =>
+          (module.App as (props: Record<string, unknown>) => Child)({
+            show,
+            handler,
+            log: (entry: string) => log.push(entry),
+          }),
+        host,
+      )
+      const click = (node: Element | null) =>
+        node?.dispatchEvent(
+          new MouseEvent('click', { bubbles: true, composed: true }),
+        )
+      const button = host.querySelector('button')
+      click(button)
+      button?.dispatchEvent(new MouseEvent('mouseenter'))
+      click(host.querySelector('span'))
+      handler.set(() => log.push('replaced'))
+      click(button)
+      log.push('|')
+      show.set(false)
+      expect(host.querySelector('button')).toBeNull()
+      if (button) host.append(button)
+      click(button)
+      button?.dispatchEvent(new MouseEvent('mouseenter'))
+      click(host.querySelector('section'))
+      dispose()
+      const clickListenerRemoved = removed.mock.calls.some(
+        ([name]) => name === 'click',
+      )
+      removed.mockRestore()
+      return { code, log, clickListenerRemoved }
+    }
+    document.body.replaceChildren()
+    const none = run('none', document.body)
+    document.body.replaceChildren()
+    const safe = run('safe', document.body)
+    expect(safe.code).toContain('__benos_direct_template')
+    expect(safe.log).toEqual(none.log)
+    expect(none.log).toEqual([
+      'capture',
+      'first',
+      'second',
+      'div',
+      'section',
+      'enter',
+      'span',
+      'capture',
+      'replaced',
+      'second',
+      'div',
+      'section',
+      '|',
+      'section',
+    ])
+    expect(safe.clickListenerRemoved).toBe(true)
+    expect(none.clickListenerRemoved).toBe(true)
+
+    document.body.replaceChildren()
+    const shadowHost = document.createElement('div')
+    document.body.append(shadowHost)
+    const shadowNone = run('none', shadowHost.attachShadow({ mode: 'open' }))
+    const otherHost = document.createElement('div')
+    document.body.append(otherHost)
+    const shadowSafe = run('safe', otherHost.attachShadow({ mode: 'open' }))
+    expect(shadowSafe.log).toEqual(shadowNone.log)
+    expect(shadowSafe.log).toEqual(none.log)
+    expect(shadowSafe.clickListenerRemoved).toBe(true)
+    document.body.replaceChildren()
   })
 
   it('runs a compiled component fixture on the DOM host', () => {

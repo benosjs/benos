@@ -1,5 +1,129 @@
 # Initial-render allocation design
 
+**Status (2026-11-05):** Phase 7 ([row-perf-plan.md](../row-perf-plan.md)) is implemented and in review. Candidates 1–4 were kept, candidate 5 in part (its component skip), and candidates 6 and 7 were not built because they need core bytes beyond its cap; the final comparison is in [RP-7d](../checkpoints/rp-7d.md). The next section is the design with what each candidate measured; the sections after it are the 0.3.0 track's record and stay as history.
+
+## Phase 7 design — row creation at Solid's level
+
+### What the 0.7.1 baseline says
+
+[RP-7a](../checkpoints/rp-7a.md) measured 0.7.1: creating, replacing, and appending rows is 1.22–1.40× Solid, clear is 2.06×, and the sortable table mounts at 1.55–1.92×. A compiled benchmark row retains 95.5 JavaScript objects (3.4 KB) against Solid's 26.5 (0.9 KB). At 10,000 rows the extra garbage collection is the dominant part of the gap; at 1,000 rows the gap is CPU in binding setup. Both come from what one row allocates, so every candidate below removes per-row records, and each is judged by retained objects, GC, and the trace times together.
+
+This is what one benchmark row allocates today, read from the code and matched against the retained-allocation sites:
+
+| Part of the row                            | Retained JS objects | What                                                                                                                                                                                      |
+| ------------------------------------------ | ------------------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<For>` entry                              |                   5 | entry record, `getItem` and `getIndex` closures, key segment string, item owner                                                                                                           |
+| Keyed item signal                          |                   6 | state node, `read`, `readonly`, `set`, `update`, the `readonly` getter (plus a `WeakMap` entry)                                                                                           |
+| `<Row row={row} />` descriptor             |                   3 | descriptor, props with a getter, the `jsx` props copy                                                                                                                                     |
+| `Row` component                            |                   5 | component owner, `mountReady` closure, component range, its cleanup closure, the owner's cleanup array                                                                                    |
+| Direct template instance                   |               8 + 2 | descriptor, `values` array and its closure, node array, `at` closure, range, removal cleanup; the owner's `computations` set and its backing store                                        |
+| Attribute binding (`class`, `data-remove`) |         3 or 4 each | effect closure, effect node, one or two dependency edges                                                                                                                                  |
+| Dynamic text (`id`, `label`)               |             13 each | slot record, slot range and node array, slot cleanup, effect closure and node, edge, branch owner and its `mountReady`, mounted record, branch range and node array, a second range array |
+| Delegated event (two `onClick`)            |              3 each | getter closure, map entry, removal closure                                                                                                                                                |
+
+Dynamic text is the largest single cost: 26 of a row's objects for two strings, plus two comment markers in the DOM. Solid creates one text node and one computation for each.
+
+### Candidates, ranked
+
+| Rank | Candidate                                                             | Retained objects per row (of 95.5) | Other effect                                            | Estimated size: core / DOM | Risk                             |
+| ---: | --------------------------------------------------------------------- | ---------------------------------: | ------------------------------------------------------- | -------------------------- | -------------------------------- |
+|    1 | Text bindings in direct templates without a slot                      |                          about −20 | −2 DOM nodes, −2 owners, ~−10 disposal calls per row    | 0 / +60 to +120 B          | Low to medium                    |
+|    2 | Bulk DOM removal on clear and full replace                            |                                  0 | clear and replace stop removing rows one node at a time | 0 / +20 to +50 B           | Low                              |
+|    3 | A `<For>` item's owner doubles as its component's owner               |                           about −4 | −1 owner, −2 disposal calls per row                     | +15 to +30 / +40 to +80 B  | Medium (ids must not change)     |
+|    4 | Keyed item and index state without signal closures                    |                           about −5 | also removes the `WeakMap` entry                        | +20 to +50 / −10 to +10 B  | Low                              |
+|    5 | One teardown per template instance                                    |                           about −3 | fewer cleanup calls on clear and replace                | 0 / −20 to +40 B           | Medium (event cleanup semantics) |
+|    6 | Owned computations without a `Set`                                    |                           about −2 | about −120 B per owner with effects                     | +30 to +60 / 0 B           | Medium (disposal order)          |
+|    7 | Small items: no disposer for internal render effects; lazy `readonly` |          −1 retained, −4 transient | less GC on create                                       | +5 to +15 / +5 B           | Low                              |
+
+Together, about −35 retained objects per row, from 95.5 to roughly 60, a little over a third. The byte estimates are hypotheses; each implementation step reports exact sizes. Estimates overlap where helpers are shared, so they do not add up exactly; the total is likely +150 to +400 B on core + DOM.
+
+**Honest expectation.** A third fewer retained objects should cut the 10,000-row GC substantially and the 1,000-row binding time by a similar share; a reasonable projection is creation at about 1.15–1.25× Solid and clear near 1.2–1.4×, not the ≤ 1.05× target. What would remain after these: the item entry and its accessors, the component descriptor and props copy, and the per-binding effect records Solid also has. Whether to go further is decided after the first four are measured, with numbers instead of projections.
+
+### 1. Text bindings in direct templates without a slot
+
+A compiled template marks each dynamic child with a `<!---->` placeholder. Today every such binding builds a full slot before knowing its value: slot record, range, cleanup, then on the first run a branch owner, mounted record, and branch range, and it keeps the placeholder as a marker after the text. All of that exists so the value can later become elements or a list; a binding whose value stays a string or number never uses it.
+
+**Design.** A direct template's child binding starts in _text mode_. Its render effect evaluates the value; if it is a string or number, it creates a Text node, replaces the placeholder with it, and keeps the Text in the effect's closure. Later string or number values write `data` on that node only when it changed. The first time the value is anything else (an element, an array, `null`, a boolean), the binding _upgrades_: it inserts a marker comment where the text is, removes the text, builds the ordinary slot under the template's owner, and from then on behaves exactly as today. A binding whose first value is not text builds the slot immediately, as today.
+
+What does not change: the text binding keeps one render effect, so tracking, scheduling order, and error routing are the same; a Text node is reused across text values, as [renderer.md](./renderer.md) requires; empty values still leave an insertion marker (that path is the slot); and no owner or id ordinal is consumed, because a text value never had children (the server host already skips the branch owner for primitive slots, since 0.7.0).
+
+**Hydration and server output.** Unchanged. While the hydration claim is active, child bindings take today's slot path, so a hydrated page keeps the server's markers and claims them as now; text mode applies to templates created on the client. The server host is a separate renderer and is not touched.
+
+**Disposal.** A text-mode binding registers no cleanup: its Text node sits inside the template's root element and leaves with it, and it owns no branch. An upgraded binding registers the slot cleanup at upgrade, on the template's owner (not the effect's run owner); like today's, it runs during that owner's disposal, after its child owners and before the template's range removal.
+
+**Tests.** Text to text, text to element, text to array, text to `null` and back, element to text; numbers and empty strings; a binding that throws on its first or a later run; disposal before and after an upgrade; keyed moves of rows with text bindings; hydration of a page and then client-created rows in the same list; DOM output identical to today; all compiler fixtures in `none` and `safe`; allocation counts per row.
+
+**Implemented (RP-7c-1), with one change from the design: the marker stays.** Text mode inserts the Text node _before_ the placeholder and keeps the placeholder, so the DOM is byte-identical to before. Removing the marker conflicted with three existing contracts: the compiler suite requires `none` and `safe` to produce the same DOM (and `none` builds ordinary slots, which keep the marker); a hydration test fixes the hydrated DOM of a direct template with the marker; and the progressive-hydration suite requires a hydrated page to match a fresh client render exactly. Dropping the marker everywhere would need those test expectations changed, which this track's rules forbid without a decision. The allocation saving does not depend on it. Measured: +72 B core + DOM; retained objects per benchmark row 95.5 → 73.5, owners 4 → 2; table row 143.8 → 112.9, owners 5 → 2; binding setup on create 1k 10.5 → 6.7 ms; disposal calls on clear 15 → 5 per row. Full tables in [RP-7c-1](../checkpoints/rp-7c-1.md).
+
+### 2. Bulk DOM removal on clear and full replace
+
+`<For>`'s clear path already ends with `parent.textContent = ''` when the list fills its parent, but it disposes the rows first, and each row's cleanups remove its nodes one at a time (the row, then each slot's text and marker inside it), so the bulk clear finds almost nothing left. Replace disposes and removes the old rows one by one.
+
+What a row's cleanup observes today matters here. A component registers its range removal after the component function ran, so in the reverse cleanup order it runs _before_ the user's `onCleanup`: a row's own cleanup already sees its nodes detached. (A direct template's removal is likewise registered after the user's cleanups.)
+
+**Design.** Remove first, then dispose. Clear writes `parent.textContent = ''` and then disposes the rows; full replace (no key reused, the old rows contiguous) creates the new rows as today, removes the old rows' span with one `Range.deleteContents()`, and then disposes them. The renderer's own removal cleanups find their nodes already detached and do no DOM work. Each row's cleanup still sees its own nodes detached, as today, and cleanups still run depth-first in reverse order. The one difference: a row's cleanup no longer sees _later_ rows of the same list still attached, since the whole list leaves at once. No documented behavior covers that, and this design records it.
+
+**Tests.** Cleanups run depth-first in reverse order and see their row detached; an error in one cleanup does not stop the others; clear and replace release listeners, subscriptions, and refs; a list that does not fill its parent (siblings before or after) still removes only its own nodes; a list inside a `<Show>` that is disposed during the clear; portals inside rows (their nodes live elsewhere and are still removed by their own cleanup); disposal before mount cancels mount jobs.
+
+**Implemented (RP-7c-2), with two changes from the design.** First, the fast clear path never ran in the compiled benchmark: a compiled `<tbody>{list}</tbody>` ends with the list's marker _and_ the template's placeholder, so the list never "fills its parent", and clear took the per-row path. Rather than reorder that path, it is gone: whenever no old row is kept (clear, or a replace that reuses no key), the old rows' span is removed with one `Range.deleteContents()`, checked by its first node's parent and its last node's next sibling (the first new row, or the list's marker), and the rows are disposed after it. A span that fails the check, such as a row whose node list went stale, is removed row by row as before; the per-row removal still runs after disposal in every case and finds nothing left when the Range took the rows. Second, the old-row loop no longer calls `next.includes(entry)`, which could never be true there and made a full replace quadratic. Measured: +23 B core + DOM; in an interleaved run against 7c-1, clear 4.6 → 4.0 ms (1.76 → 1.52× Solid) and replace 35.2 → 34.2 ms (1.37 → 1.33×), with creation unchanged. A Chromium micro-benchmark showed why the gain is modest: removing 1,000 rows costs about the same whether done row by row, by Range, or by `textContent`, so most of clear's remaining gap is disposal JavaScript, which candidates 3, 5, and 6 target. Full tables in [RP-7c-2](../checkpoints/rp-7c-2.md).
+
+### 3. A `<For>` item's owner doubles as its component's owner
+
+A row like `{(row) => <Row row={row} />}` creates two owners: the item owner (keyed `k<id>`) and the `Row` component owner below it (ordinal 0). The item owner holds nothing else.
+
+**Design.** When the item function returns a plain component descriptor and the item owner is still empty (no child owner, computation, cleanup, or claimed ordinal), the component mounts into the item owner instead of a new one: the owner becomes kind `component` with the component's mount readiness, and its id segment gains the component's `-0` (`k<id>-0` for a string or number key, `<ordinal>-0` otherwise). `createUniqueId` builds ids from these segments, so every id inside the row is the same string as before (`…-k5-0-…`), and the server host, which still creates two owners, produces the same ids. Items that are not a single plain component, or whose function created anything, keep two owners.
+
+**Risk.** The id equality is the contract to protect: a test renders keyed and unkeyed rows that call `createUniqueId` at several depths on the server and on the client and compares them, before and after. Core gains one internal setter for an owner's kind, mount readiness, and key.
+
+**Tests.** The id comparison above; `onMount` and `onCleanup` inside the row component; context lookup from inside a row; error boundaries inside rows; keyed moves; an item function that creates a computed before returning the component (two owners kept); control-flow children (`<Show>` as the item) keep two owners.
+
+**Implemented (RP-7c-3), with one change from the design: no new setter.** The existing internal `createInternalOwner` takes a `reuse` argument instead. With it, the call converts and returns the current owner when that owner is still empty. A setter needed its own entry in core's internal registry, whose names survive minification; this form is +50 B core and +77 B core + DOM, against +54 and +92. The id test ran first and passes before and after, and all 24 server and hydration ids of a variant with object-keyed rows are identical before and after. Measured: one owner per benchmark row instead of two, 75 B less retained per row (the design's −4 objects overestimated; the owner is one object), and half the owner-creation work. In an interleaved run against 7c-2, clear is about 0.2 ms faster (1.52 → 1.48× Solid), create 1,000 rows' median is 1 ms lower but not established, and the rest is unchanged. The table rows are written inline, not as components, so this candidate does not reach them. Full tables in [RP-7c-3](../checkpoints/rp-7c-3.md).
+
+### 4. Keyed item and index state without signal closures
+
+A keyed `<For>` creates a `signal` for the item (`by` rows can receive a new object for the same key) and, when read, another for the index. A public `signal()` builds five closures for its API. The renderer only needs to read and write the value.
+
+**Design.** Core exposes internal state helpers (create, read with tracking, write with notification) that `signal()` itself is built on, so the write path is shared rather than duplicated. `<For>` stores the state node on the entry and reads it from `getItem` and `getIndex`. The public `signal()` API, its equality, version limit, and development warnings are unchanged.
+
+**Tests.** Item updates under a stable key re-run only that row's bindings; index updates on moves; equality skips; the kernel guard.
+
+**Implemented (RP-7c-4).** Core's internal `internalState(initial)` returns one function: `state()` reads with tracking and `state(value, true)` writes. It and `signal()` share `createState` and `writeState`, so equality, the version limit, the guards, and the development warnings are not duplicated. A first version chose between reading and writing by `arguments.length`; that can allocate per call in V8's lower tiers, and "update every 10th" measured 1.09× Solid with it. The explicit flag removed that (0.93×) and is 12 B smaller. Measured: +47 B core, +46 B core + DOM; −4 retained objects and −137 B per benchmark row, no signal per row, about 7% less collection on a 10,000-row table mount. The step's time measurements ran on a loaded machine and show no change beyond the noise. Full tables in [RP-7c-4](../checkpoints/rp-7c-4.md).
+
+### 5. One teardown per template instance
+
+A template instance registers a cleanup to remove its range; its component registers another for the same range; each delegated event registers a removal closure and keeps a map entry.
+
+**Design.** A direct template instance registers one cleanup that removes its delegated events (found again through the binding paths it already has) and its range, and `mountComponent` skips its own removal when the range belongs to a template that already removes it. Native-listener events and runtime JSX keep today's per-event cleanup. Dispatch, ordering, `currentTarget`, batching, and the root listener's reference counting do not change.
+
+**Tests.** Handler replacement, multiple handlers on one element, bubbling and `stopPropagation`, native and delegated order, shadow roots, disposal removing handlers so a retained element no longer dispatches, the hub removing its root listener after the last handler.
+
+**Implemented (RP-7c-5), with two changes from the design.** Event targets are recorded at setup instead of found again by path, because since RP-7c-1 a text binding inserts a node that can shift paths. And the component recognizes a template output from its descriptor, not from a flag on every template range, which table cells would have paid for. Measured separately: the component skip is +18 B for −1 object and −1 disposal call per row; the event consolidation is +97 B for −2 objects per row (two delegated events). Neither moves times beyond about 1% in an interleaved run. The user kept the component skip only (+18 B core + DOM); the event consolidation is dropped. Full tables in [RP-7c-5](../checkpoints/rp-7c-5.md).
+
+### 6. Owned computations without a `Set`
+
+An owner that owns an effect allocates a `Set` for its computations. Effect and computed nodes can instead link into a list on their owner (two fields on the node), with the same insertion order, O(1) removal when an effect detaches, and disposal in the same order as the `Set`'s iteration.
+
+**Tests.** Disposal order of computations relative to children and cleanups; detaching a dependency-free effect; a computation disposed during its owner's disposal; the kernel guard and kernel benchmark.
+
+### 7. Small items
+
+Internal render effects stop building the disposer closure that `createEffect` returns, since the renderer never calls it (the public `effect` keeps it). `signal()` creates its `readonly` view the first time `.readonly()` is called. Both are invisible to callers.
+
+### Considered and not proposed
+
+- **Pass the index accessor only when the item function declares two parameters** (Solid's approach): a function written with rest parameters or `arguments` would silently receive no index. Not worth the risk for one closure per row.
+- **Share `signal` methods through `this`**: `const { set } = count` and `onClick={count.set}` would break. A public behavior change.
+- **Promote source-free bindings** (0.3.0 candidate 5): the measured bindings all read signals, so nothing would be removed.
+- **Split the owner record** into a lean record and rarely used fields: with candidates 1 and 3, a row has one owner, so the saving is small.
+
+### Measurement and size plan
+
+Each candidate is implemented and measured alone, in rank order, with the RP-7a set: the nine operations interleaved against all four frameworks, the table matrix, retained allocations per row, the CPU categories, and GC for Benos against Solid. A candidate stays only with a repeatable gain and no regression beyond noise; otherwise it is reverted and recorded.
+
+Core + DOM was at 11,515 of 11,520 bytes, so even candidate 1 did not fit. **Decided at RP-7b:** the core + DOM cap is 12,032 B (+512) for this track, with every step reporting its exact bytes beside its measured gain, as the 0.3.0 track did. Core (4,490 of 4,608) likely absorbs candidates 3, 4, 6, and 7 without a change. Hydrate and server bundles are not expected to move; they are reported at each step.
+
+## Record of the 0.3.0 track
+
 **Status (2026-10-11):** P3 direct compiler output is integrated into the standard `safe` optimization, and effect-run owners now materialize lazily. The approved limits are 4,608 bytes for core and 11,264 bytes for core + DOM. Direct numeric slot indexing and direct native templates are retained after behavior tests and production measurements. No public API or documented runtime semantics have changed.
 
 ## Goal and measured baseline

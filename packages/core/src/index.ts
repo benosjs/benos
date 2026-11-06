@@ -30,6 +30,7 @@ type InternalRegistry = Pick<
   | 'getInternalProviderOwner'
   | 'hasPendingMounts'
   | 'hasInternalGatedRender'
+  | 'internalState'
   | 'notifyMount'
   | 'reportInternalError'
   | 'runWithOwner'
@@ -47,6 +48,7 @@ type InternalRegistry = Pick<
   getInternalProviderOwner: runtime.getInternalProviderOwner,
   hasPendingMounts: runtime.hasPendingMounts,
   hasInternalGatedRender: runtime.hasInternalGatedRender,
+  internalState: runtime.internalState,
   notifyMount: runtime.notifyMount,
   reportInternalError: runtime.reportInternalError,
   runWithOwner: runtime.runWithOwner,

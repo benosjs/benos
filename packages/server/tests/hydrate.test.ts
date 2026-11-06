@@ -428,6 +428,130 @@ describe('hydrate', () => {
     expect(host.innerHTML).toBe('<p class="x">Count: 3<!----></p>')
   })
 
+  it('gives list rows the same unique ids on the server and in hydration', async () => {
+    const ids: string[] = []
+    const take = () => {
+      const id = createUniqueId()
+      ids.push(id)
+      return id
+    }
+    function Inner() {
+      return jsx('i', { 'data-id': take() })
+    }
+    function Row(props: { label: string }) {
+      const id = take()
+      return jsx('li', {
+        'data-id': id,
+        children: [
+          props.label,
+          jsx(Inner, {}),
+          jsx(Show, { when: true, children: jsx(Inner, {}) }),
+        ],
+      })
+    }
+    const list = (props: Record<string, unknown>) =>
+      jsx('ul', { children: jsx(For, props) })
+    const app = () =>
+      jsx('div', {
+        children: [
+          list({
+            each: [
+              { id: 1, label: 'a' },
+              { id: 2, label: 'b' },
+            ],
+            by: (row: { id: number }) => row.id,
+            children: (row: () => { label: string }) =>
+              jsx(Row, { label: row().label }),
+          }),
+          list({
+            each: ['x', 'y'],
+            children: (item: () => string) => jsx(Row, { label: item() }),
+          }),
+          list({
+            each: ['busy'],
+            children: (item: () => string) => {
+              onCleanup(() => {})
+              return jsx(Row, { label: item() })
+            },
+          }),
+          list({
+            each: ['shown'],
+            children: (item: () => string) =>
+              jsx(Show, {
+                when: true,
+                children: jsx(Row, { label: item() }),
+              }),
+          }),
+        ],
+      })
+    const host = await serve(app)
+    const serverIds = [...host.querySelectorAll('[data-id]')].map((node) =>
+      node.getAttribute('data-id'),
+    )
+    expect(serverIds).toHaveLength(18)
+    expect(new Set(serverIds).size).toBe(18)
+    expect(serverIds.some((id) => id?.includes('-k1-0-'))).toBe(true)
+    expect(serverIds.some((id) => id?.includes('-kx-0-'))).toBe(true)
+    ids.length = 0
+    const seen: HydrationMismatch[] = mismatches()
+    roots.push(hydrate(app, host, { onMismatch: (info) => seen.push(info) }))
+    expect(seen).toEqual([])
+    // A `<Show>` inside a row creates its ids later while hydrating.
+    expect([...ids].sort()).toEqual([...serverIds].sort())
+  })
+
+  it('hydrates text rows of a direct template and then creates client rows in the same list', async () => {
+    type Row = { id: number; label: string }
+    const rows = signal<Row[]>([
+      { id: 1, label: 'one' },
+      { id: 2, label: 'two' },
+    ])
+    const row = (item: () => Row) =>
+      directTemplate(
+        {
+          id: 'text-row',
+          html: '<li><!----></li>',
+          attributes: [],
+          bindings: [
+            {
+              kind: 'child',
+              path: [0],
+              namespace: 'html',
+              get: (values) => (values[0] as () => Row)().label,
+            },
+          ],
+        },
+        [item],
+      )
+    const app = () =>
+      jsx('ul', {
+        children: jsx(For, {
+          get each() {
+            return rows()
+          },
+          by: (item: Row) => item.id,
+          children: row,
+        }),
+      })
+    const host = await serve(app)
+    const first = host.querySelector('li')
+    roots.push(hydrate(app, host))
+    expect(host.querySelector('li')).toBe(first)
+    rows.set([
+      { id: 1, label: 'uno' },
+      { id: 2, label: 'two' },
+      { id: 3, label: 'three' },
+    ])
+    expect(host.querySelector('li')).toBe(first)
+    expect(host.textContent).toBe('unotwothree')
+    rows.set([
+      { id: 3, label: 'drei' },
+      { id: 1, label: 'eins' },
+    ])
+    expect(host.textContent).toBe('dreieins')
+    expect(shape(host)).toBe(clientShape(app))
+  })
+
   it('hydrates two roots on one page and client renders portal content', async () => {
     const target = document.createElement('div')
     document.body.append(target)

@@ -9,9 +9,35 @@ import {
 import {
   inspectInternalComputed,
   inspectInternalSignal,
+  internalState,
 } from '../src/runtime.js'
 
 describe('optimized graph invariants', () => {
+  it('reads, writes, and guards internal renderer state like a signal', () => {
+    const state = internalState<unknown>(1)
+    const seen: unknown[] = []
+    const dispose = createRoot((disposeRoot) => {
+      effect(() => {
+        seen.push(state())
+      })
+      return disposeRoot
+    })
+    expect(seen).toEqual([1])
+    expect(state(2, true)).toBe(2)
+    state(2, true)
+    state(Number.NaN, true)
+    state(Number.NaN, true)
+    state(undefined, true)
+    expect(seen).toEqual([1, 2, Number.NaN, undefined])
+    expect(state()).toBeUndefined()
+    const writer = computed(() => state(3, true))
+    expect(() => writer()).toThrow(
+      'signal.set cannot run during computed evaluation',
+    )
+    expect(state()).toBeUndefined()
+    dispose()
+  })
+
   it('reuses detached edges across repeated branch changes without retaining old subscribers', () => {
     const choose = signal(true)
     const left = signal(1)

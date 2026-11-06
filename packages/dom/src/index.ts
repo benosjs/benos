@@ -1,11 +1,4 @@
-import {
-  batch,
-  computed,
-  createRoot,
-  onCleanup,
-  signal,
-  untrack,
-} from '@benosjs/core'
+import { batch, computed, createRoot, onCleanup, untrack } from '@benosjs/core'
 import {
   claimInternalOrdinal,
   createInternalOwner,
@@ -13,6 +6,7 @@ import {
   disposeInternalOwner,
   getInternalProviderOwner,
   hasPendingMounts,
+  internalState,
   notifyMount,
   reportInternalError,
   runWithOwner,
@@ -415,6 +409,7 @@ function mountValue(
   before: Node | null,
   owner: InternalOwner,
   providerHandled = false,
+  share = false,
 ): DomRange {
   const providerOwner = providerHandled ? null : getInternalProviderOwner(value)
   if (providerOwner)
@@ -449,7 +444,7 @@ function mountValue(
   if (descriptor.kind === 'element')
     return mountElement(descriptor, parent, before, owner)
   if (descriptor.kind === 'component')
-    return mountComponent(descriptor, parent, before, owner)
+    return mountComponent(descriptor, parent, before, owner, share)
   if (descriptor.kind === 'template')
     return mountTemplate(descriptor, parent, before, owner)
   return mountDirectTemplate(descriptor, parent, before, owner)
@@ -896,12 +891,21 @@ function mountComponent(
   parent: Node,
   before: Node | null,
   parentOwner: InternalOwner,
+  share?: boolean,
 ): DomRange {
   const kind = controlKinds.get(descriptor.component)
   const internalControl = internalControls.get(descriptor.component)
   let componentRange: DomRange = { nodes: [], owner: parentOwner }
+  let output: Child
+  // A list item's owner that is still empty becomes the component's owner.
   const owner = runWithOwner(parentOwner, () =>
-    createInternalOwner('component', () => rangeConnected(componentRange)),
+    createInternalOwner(
+      'component',
+      () => rangeConnected(componentRange),
+      undefined,
+      undefined,
+      share && !kind && !internalControl,
+    ),
   )
   try {
     if (internalControl)
@@ -920,7 +924,6 @@ function mountComponent(
         owner,
       )
     else {
-      let output!: Child
       runWithOwner(owner, () => {
         output = untrack(() => descriptor.component(descriptor.props) as Child)
       })
@@ -928,7 +931,12 @@ function mountComponent(
         mountValue(output, parent, before, owner),
       )
     }
-    runWithOwner(owner, () => onCleanup(() => removeRange(componentRange)))
+    // A direct template's own cleanup on this owner already removes its range.
+    if (
+      (output as Descriptor | null | undefined)?.kind !== 'direct-template' ||
+      componentRange.owner !== owner
+    )
+      runWithOwner(owner, () => onCleanup(() => removeRange(componentRange)))
     if (rangeConnected(componentRange)) notifyMount(owner)
     else trackMount(owner, componentRange)
     return componentRange
@@ -984,8 +992,8 @@ interface ForEntry {
   key: unknown
   item: unknown
   position: number
-  index?: ReturnType<typeof signal<number>>
-  value?: ReturnType<typeof signal<unknown>>
+  index?: (value?: number, write?: boolean) => number
+  value?: (value?: unknown, write?: boolean) => unknown
   getItem: () => unknown
   getIndex: () => number
   owner: InternalOwner
@@ -1002,6 +1010,24 @@ function mapKey(value: unknown): unknown {
 }
 function sameKey(a: unknown, b: unknown): boolean {
   return Object.is(a, b)
+}
+
+// Removes a list's rows with one Range when they sit together right before
+// `end`. Anything it skips is still removed row by row after disposal.
+function removeRows(entries: ForEntry[], end: Node): void {
+  const first = entries[0]?.range.nodes[0]
+  const nodes = entries[entries.length - 1]?.range.nodes ?? []
+  const last = nodes[nodes.length - 1]
+  if (
+    !first ||
+    first.parentNode !== end.parentNode ||
+    last?.nextSibling !== end
+  )
+    return
+  const range = ownerDocumentOf(first).createRange()
+  range.setStartBefore(first)
+  range.setEndAfter(last)
+  range.deleteContents()
 }
 
 function lisIndices(values: number[]): Set<number> {
@@ -1064,21 +1090,6 @@ function mountFor(
       seenKeys.add(mapped)
       return key
     })
-    if (items.length === 0 && entries.length > 0) {
-      const entryNodes = entries.flatMap((entry) => entry.range.nodes)
-      const fillsParent =
-        slot.marker.parentNode === parent &&
-        parent.lastChild === slot.marker &&
-        parent.childNodes.length === entryNodes.length + 1
-      if (fillsParent) {
-        for (const entry of entries) disposeInternalOwner(entry.owner)
-        parent.textContent = ''
-        entries = []
-        slot.range.nodes = []
-        renderFallback()
-        return
-      }
-    }
     const createEntry = (
       key: unknown,
       item: unknown,
@@ -1099,8 +1110,8 @@ function mountFor(
         item,
         position: index,
         getItem: () =>
-          by ? (entry.value ??= signal(entry.item))() : entry.item,
-        getIndex: () => (entry.index ??= signal(entry.position))(),
+          by ? (entry.value ??= internalState(entry.item))() : entry.item,
+        getIndex: () => (entry.index ??= internalState(entry.position))(),
         owner: itemOwner,
         range: { nodes: [], owner: itemOwner },
       }
@@ -1116,7 +1127,14 @@ function mountFor(
               )(entry.getItem, entry.getIndex)
             : (props.children as Child)
       })
-      entry.range = mountValue(child, parent, slot.marker, itemOwner)
+      entry.range = mountValue(
+        child,
+        parent,
+        slot.marker,
+        itemOwner,
+        false,
+        true,
+      )
       return entry
     }
     const commitEntries = (next: ForEntry[]): void => {
@@ -1156,8 +1174,8 @@ function mountFor(
           const entry = next[nextIndex] as ForEntry
           entry.item = items[nextIndex]
           entry.position = nextIndex
-          entry.value?.set(items[nextIndex])
-          entry.index?.set(nextIndex)
+          entry.value?.(items[nextIndex], true)
+          entry.index?.(nextIndex, true)
         }
         commitEntries(next)
         return
@@ -1177,15 +1195,19 @@ function mountFor(
         used.add(previous)
         previous.item = items[index]
         previous.position = index
-        previous.value?.set(items[index])
-        previous.index?.set(index)
+        previous.value?.(items[index], true)
+        previous.index?.(index, true)
         next.push(previous)
         continue
       }
       next.push(createEntry(key, items[index], index))
     }
+    // When no old row is kept, they leave the DOM in one operation before
+    // they are disposed, so their own removal cleanups find them detached.
+    if (used.size === 0)
+      removeRows(entries, next[0]?.range.nodes[0] ?? slot.marker)
     for (const entry of entries)
-      if (!used.has(entry) && !next.includes(entry)) {
+      if (!used.has(entry)) {
         disposeInternalOwner(entry.owner)
         removeRange(entry.range)
       }
@@ -1645,26 +1667,50 @@ function mountDirectTemplate(
           )
       } else if (binding.kind === 'child') {
         if (!(target instanceof Comment) || !target.parentNode) continue
-        const slot: Slot = {
-          parent: target.parentNode,
-          marker: target,
-          after: target.nextSibling,
-          current: null,
-          range: { nodes: [target], owner },
-          initialized: false,
-          value: undefined,
-          ordinal: claimInternalOrdinal(),
+        const ordinal = claimInternalOrdinal()
+        // A string or number stays a bare Text node before the placeholder,
+        // with no slot, branch, or cleanup; any other value removes the text
+        // and builds an ordinary slot on the placeholder. Hydration claims
+        // server markers, so it starts with the slot.
+        let text: Text | null = null
+        let slot: Slot | null = null
+        const toSlot = (): Slot => {
+          const created: Slot = {
+            parent: target.parentNode as Node,
+            marker: target,
+            after: target.nextSibling,
+            current: null,
+            range: { nodes: [target], owner },
+            initialized: false,
+            value: undefined,
+            ordinal,
+          }
+          runWithOwner(owner, () =>
+            onCleanup(() => {
+              disposeMounted(created.current)
+              created.current = null
+              domHost.remove(created.marker)
+              created.range.nodes = []
+            }),
+          )
+          return created
         }
-        onCleanup(() => {
-          disposeMounted(slot.current)
-          slot.current = null
-          domHost.remove(slot.marker)
-          slot.range.nodes = []
-        })
+        if (claimed) slot = toSlot()
         createRenderEffect(() => {
           const value = binding.get(descriptor.values) as Child
-          updateSlot(slot, value, owner, (branch, at) =>
-            createChildMount(value, slot.parent, at, branch),
+          if (!slot) {
+            if (typeof value === 'string' || typeof value === 'number') {
+              if (text) text.data = String(value)
+              else
+                target.before((text = document.createTextNode(String(value))))
+              return
+            }
+            text?.remove()
+            slot = toSlot()
+          }
+          const current = slot
+          updateSlot(current, value, owner, (branch, at) =>
+            createChildMount(value, current.parent, at, branch),
           )
         })
       } else if (binding.kind === 'event') {

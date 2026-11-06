@@ -811,7 +811,7 @@ function notifySinks(source: Producer): void {
   }
 }
 
-export function signal<T>(initial: T, options?: SignalOptions<T>): Signal<T> {
+function createState<T>(initial: T, options?: SignalOptions<T>): StateNode<T> {
   rejectComputedSideEffect('signal')
   const node: StateNode<T> = {
     kind: 'state',
@@ -826,6 +826,38 @@ export function signal<T>(initial: T, options?: SignalOptions<T>): Signal<T> {
   }
   if (development)
     node.inRequest = Boolean(currentOwner && requestOf(currentOwner))
+  return node
+}
+
+function writeState<T>(node: StateNode<T>, value: T): void {
+  rejectComputedSideEffect('signal.set')
+  if (node.equals !== false && node.equals(node.value, value)) return
+  if (
+    node.version === Number.MAX_SAFE_INTEGER ||
+    writeVersion === Number.MAX_SAFE_INTEGER
+  )
+    throw new Error('Signal version limit reached')
+  node.value = value
+  node.version++
+  writeVersion++
+  if (development && activeRequests && !node.inRequest && !node.warnedRequest) {
+    node.warnedRequest = true
+    console.warn(
+      `Signal ${node.name ?? `signal#${node.id}`} was created outside the request and written during server rendering; module-level state is shared across requests.`,
+    )
+  }
+  if (development && debugState?.currentRunningEffect) {
+    debugState.recentWrites.push(
+      `effect#${debugState.currentRunningEffect.id} -> ${node.name ?? `signal#${node.id}`}`,
+    )
+    if (debugState.recentWrites.length > 8) debugState.recentWrites.shift()
+  }
+  notifySinks(node as StateNode<unknown>)
+  maybeFlush()
+}
+
+export function signal<T>(initial: T, options?: SignalOptions<T>): Signal<T> {
+  const node = createState(initial, options)
   const read = (() => {
     track(node as StateNode<unknown>)
     return node.value
@@ -834,44 +866,30 @@ export function signal<T>(initial: T, options?: SignalOptions<T>): Signal<T> {
     track(node as StateNode<unknown>)
     return node.value
   }) as ReadonlySignal<T>
-  read.set = (value) => {
-    rejectComputedSideEffect('signal.set')
-    if (node.equals !== false && node.equals(node.value, value)) return
-    if (
-      node.version === Number.MAX_SAFE_INTEGER ||
-      writeVersion === Number.MAX_SAFE_INTEGER
-    )
-      throw new Error('Signal version limit reached')
-    node.value = value
-    node.version++
-    writeVersion++
-    if (
-      development &&
-      activeRequests &&
-      !node.inRequest &&
-      !node.warnedRequest
-    ) {
-      node.warnedRequest = true
-      console.warn(
-        `Signal ${node.name ?? `signal#${node.id}`} was created outside the request and written during server rendering; module-level state is shared across requests.`,
-      )
-    }
-    if (development && debugState?.currentRunningEffect) {
-      debugState.recentWrites.push(
-        `effect#${debugState.currentRunningEffect.id} -> ${node.name ?? `signal#${node.id}`}`,
-      )
-      if (debugState.recentWrites.length > 8) debugState.recentWrites.shift()
-    }
-    notifySinks(node as StateNode<unknown>)
-    maybeFlush()
-  }
+  read.set = (value) => writeState(node, value)
   read.update = (fn) => {
     rejectComputedSideEffect('signal.update')
-    read.set(fn(node.value))
+    writeState(node, fn(node.value))
   }
   read.readonly = () => readonly
   inspectedSignals.set(read, node as StateNode<unknown>)
   return read
+}
+
+/**
+ * State for a renderer that needs no signal API: the returned function reads
+ * the value, tracked, and with `write` set writes `value` first, as `set`
+ * does.
+ */
+export function internalState<T>(
+  initial: T,
+): (value?: T, write?: boolean) => T {
+  const node = createState(initial)
+  return (value, write) => {
+    if (write) writeState(node, value as T)
+    else track(node as StateNode<unknown>)
+    return node.value
+  }
 }
 
 export function computed<T>(fn: () => T): ReadonlySignal<T> {
@@ -1146,10 +1164,19 @@ export function createInternalOwner(
   mountReady?: () => boolean,
   key?: string,
   ordinal?: number,
+  reuse?: boolean,
 ): Owner {
   const parent = ensureCurrentEffectRunOwner()
   if (!parent || parent.disposed)
     throw new Error('Child owner requires a parent')
+  // A list item's owner that is still empty becomes its component's owner,
+  // with the id segment that owner would have had (`k5` → `k5-0`).
+  if (reuse && !parent.hasResources && !parent.childOrdinal) {
+    parent.kind = kind
+    parent.mountReady = mountReady ?? null
+    parent.key = `${parent.key ?? parent.ordinal}-0`
+    return parent
+  }
   const owner = createOwner(parent, kind, ordinal)
   owner.mountReady = mountReady ?? null
   if (key !== undefined) owner.key = key

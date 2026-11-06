@@ -112,9 +112,9 @@ Write the type-level sketch required by risk 1 in `risks.md`: one typed declarat
 - Include the minimal scripts and JSX configuration needed for a first render, and keep router, forms, query, SSR, UI primitives, and other out-of-scope modules out of the generated starter.
 - Recheck npm name and scope availability immediately before publication; publishing remains explicitly deferred until approval.
 
-## Phase 7 — Row creation at Solid's level — planned
+## Phase 7 — Row creation at Solid's level — implemented, in review
 
-Close the remaining initial-render gap with Solid. The 0.3.0 performance track ([perf-plan.md](./perf-plan.md)) took creation from about 1.6× to about 1.4× Solid with compiled direct output and lazy owners; this phase goes after the rest. The brief will be `docs/row-perf-plan.md`, with checkpoints `docs/checkpoints/rp-<step>.md`.
+Close the remaining initial-render gap with Solid. The 0.3.0 performance track ([perf-plan.md](./perf-plan.md)) took creation from about 1.6× to about 1.4× Solid with compiled direct output and lazy owners; this phase goes after the rest. The brief is [row-perf-plan.md](./row-perf-plan.md), with checkpoints `docs/checkpoints/rp-<step>.md`.
 
 **Goal.** On the js-framework-benchmark operations, Benos's median is at or below Solid's, or within 5% with overlapping spreads, under the interleaved production protocol in `benchmarks/README.md`:
 
@@ -131,6 +131,22 @@ Close the remaining initial-render gap with Solid. The 0.3.0 performance track (
 
 Targets are goals, not results to force: each step reports the honest number, and a target that cannot be reached without breaking a rule below is reported as such.
 
+**Outcome (RP-7d, 2026-11-05).** Five changes kept, measured against 0.7.1 in the same interleaved rounds ([benchmarks/README.md](../benchmarks/README.md#phase-7-row-creation-comparison-2026-11-05), [RP-7d](./checkpoints/rp-7d.md)):
+
+| Workload                                                 | 0.7.1          | Phase 7        | Target                       | Met |
+| -------------------------------------------------------- | -------------- | -------------- | ---------------------------- | --- |
+| Create 1,000 rows                                        | 1.37×          | 1.35×          | ≤ 1.05×                      | No  |
+| Replace 1,000 rows                                       | 1.40×          | 1.28×          | ≤ 1.05×                      | No  |
+| Create 10,000 rows                                       | 1.36×          | 1.28×          | ≤ 1.05×                      | No  |
+| Append 1,000 rows                                        | 1.23×          | 1.19×          | ≤ 1.05×                      | No  |
+| Clear rows                                               | 2.06×          | 1.48×          | ≤ 1.10×                      | No  |
+| Sortable table mount (registry)                          | 1.53–1.94×     | 1.53–1.84×     | ≤ 1.15×                      | No  |
+| Retained objects / arrays / closures, registry table row | 67.2 / 40 / 34 | 50.2 / 28 / 28 | ≤ 1.5× Solid's 24.1 / 6 / 12 | No  |
+| Update, select, swap, remove, sort                       | 0.94–1.55×     | 0.93–1.30×     | no regression                | Yes |
+| Kernel guard                                             | ≤ 1.84× Preact | ≤ 1.81× Preact | ≤ 2× Preact                  | Yes |
+
+Every operation got faster or held, with no regression beyond the spreads (one table sort cell, 3 columns at 10k, moved 1.10 → 1.29× with overlapping spreads; sort is unchanged overall), but the creation targets were not reached. The design ([performance.md](./architecture/performance.md)) projected 1.15–1.25× for all seven candidates; five were kept, and the last two need core bytes beyond its cap, so the phase stopped there. What remains is per-row records Solid does not create at all (a component descriptor and its props copy, the list entry and its accessors, a template instance's values array). Closing it needs a different design, not more of these increments. The retained-allocation row uses this phase's heap-snapshot method, so it is not comparable with the 0.3.0 figures in the goal table.
+
 **Rules.**
 
 - No public API change and no change to the guarantees in `docs/architecture/`; every existing test passes unchanged. Anything that would need one is raised before it is built.
@@ -139,19 +155,19 @@ Targets are goals, not results to force: each step reports the honest number, an
 - The kernel guard stays within 2× Preact. Any size-cap increase is proposed with its byte cost, its measured gain, and the alternative considered; you decide.
 - Benchmark adapters and registry components stay idiomatic user code. Every result table includes every row with median and spread.
 
-### 7a — Baseline and attribution
+### 7a — Baseline and attribution — complete
 
 Re-measure on the current release (0.7.x), since async, router, SSR, and streaming have landed since the last record: all nine operations, the sortable table, and the retained per-row profile against Solid. Attribute creation and clear time by category (template cloning, slot location, binding setup, owners, effects, events, insertion, disposal, garbage collection). No optimization code.
 
-### 7b — Design
+### 7b — Design — complete
 
 Write the candidate changes into `docs/architecture/performance.md`, ranked by expected gain, each with its byte cost, semantic risk, effect on hydration and the server output, and test plan. Candidates to evaluate, not conclusions: bindings that settle after their first run allocate no effect node; owners created only for rows that register cleanups or context; event handlers stored on the element without per-row records; compiled slot paths without intermediate arrays; batched disposal and range removal on clear and replace.
 
-### 7c — Implement in increments
+### 7c — Implement in increments — complete
 
 One approved change at a time, each followed by the full measurement set, its byte cost, and its allocation change. Keep only changes with a measured, repeatable gain; revert the rest and record why.
 
-### 7d — Verification and release preparation
+### 7d — Verification and release preparation — in review
 
 Full verification on three browsers and three operating systems, `benchmarks/README.md` updated with the final comparison against Solid, Svelte, Vue, and React, CHANGELOG, and a pull request. Stop before merging.
 
@@ -196,7 +212,7 @@ Versions 0.2.0 through 0.7.0 are published. The optional UI system is complete a
 
 0.7.1 pinned the starter's Vitest so `npm create benos` installs under npm 10.
 
-Next is Phase 7, row creation at Solid's level, then Phase 8, the devtools. Blocks and eager server serialization remain upcoming after them.
+Phase 7, row creation at Solid's level, is implemented and in review; next is Phase 8, the devtools. Blocks and eager server serialization remain upcoming after them.
 
 ## Scope boundary
 

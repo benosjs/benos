@@ -6,12 +6,14 @@ framework work.
 
 ## Next: Phase 7 and Phase 8
 
-- **Phase 7, row creation at Solid's level:** creating, replacing, and clearing
-  rows is the remaining gap (about 1.4× Solid at 0.3.0, 2.07× for clear, and
-  1.64–1.74× for the sortable table's mount). The registry table retains 44.2
-  plain objects, 19.0 arrays, and 19.0 closures per row versus Solid's 10.1,
-  2.0, and 7.0. Targets and steps are in [plan.md](./plan.md#phase-7--row-creation-at-solids-level--planned);
-  the protocol and history are in [benchmarks/README.md](../benchmarks/README.md).
+- **Phase 7, row creation at Solid's level:** implemented and in review.
+  Against 0.7.1 in the same interleaved rounds, clear is 28% faster (2.06× →
+  1.48× Solid), replace 9% (1.40× → 1.28×), creating 10,000 rows 6% (1.36× →
+  1.28×), and the sortable table's mount about 6%; creating 1,000 rows moved
+  least (1.37× → 1.35×). A row retains 67.5 objects instead of 95.5. The ≤ 1.05×
+  creation target was not reached; the outcome and what remains are in
+  [plan.md](./plan.md#phase-7--row-creation-at-solids-level--implemented-in-review)
+  and [benchmarks/README.md](../benchmarks/README.md).
 - **Phase 8, Benos devtools:** a browser extension for the reactive graph,
   live values, and why a DOM node updated, with panels for the router, query,
   forms, async, and server-rendered pages. Steps are in
