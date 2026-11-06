@@ -30,6 +30,11 @@ All notable changes to Benos are documented here.
 
 ### Fixed
 
+- A `<For>` row whose first read of its keyed item, or of its index, happens
+  inside a `computed` now renders. It threw "signal cannot run during computed
+  evaluation" and rendered nothing, as it did in 0.7.1, because the row's state
+  is created on that first read. Creating a signal inside a computed is still
+  an error.
 - Give a server-rendered `<For>` row with no string or number key (an object
   item without `by`, a `by` that returns an object, or a duplicate key) the
   same `createUniqueId` values that hydration gives it. The server's numbering
