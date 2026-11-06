@@ -1371,6 +1371,83 @@ describe('@benosjs/dom', () => {
     expect(runs).toEqual({ 1: 3, 2: 3, 3: 2 })
   })
 
+  it('lets a keyed row read its item and index first inside a computed', () => {
+    type Item = { id: number; label: string }
+    const items = signal<Item[]>([
+      { id: 1, label: 'a' },
+      { id: 2, label: 'b' },
+    ])
+    function Row(props: { row: () => Item; index: () => number }) {
+      const label = computed(() => props.row().label)
+      const position = computed(() => props.index())
+      return jsx('li', {
+        get children() {
+          return `${position()}:${label()}`
+        },
+      })
+    }
+    roots.push(
+      render(
+        () =>
+          jsx(For, {
+            get each() {
+              return items()
+            },
+            by: (item: Item) => item.id,
+            children: (item: () => Item, index: () => number) =>
+              jsx(Row, { row: item, index }),
+          }),
+        document.body,
+      ),
+    )
+    const text = () =>
+      [...document.querySelectorAll('li')].map((li) => li.textContent)
+    expect(text()).toEqual(['0:a', '1:b'])
+    const [first, second] = document.querySelectorAll('li')
+
+    items.set([
+      { id: 1, label: 'a' },
+      { id: 2, label: 'B' },
+    ])
+    expect(text()).toEqual(['0:a', '1:B'])
+    expect([...document.querySelectorAll('li')]).toEqual([first, second])
+
+    items.set([
+      { id: 2, label: 'B' },
+      { id: 1, label: 'a' },
+    ])
+    expect(text()).toEqual(['0:B', '1:a'])
+    expect([...document.querySelectorAll('li')]).toEqual([second, first])
+  })
+
+  it('lets an unkeyed row read its index first inside a computed', () => {
+    const items = signal(['a', 'b'])
+    roots.push(
+      render(
+        () =>
+          jsx(For, {
+            get each() {
+              return items()
+            },
+            children: (item: () => string, index: () => number) => {
+              const position = computed(() => index())
+              return jsx('li', {
+                get children() {
+                  return `${position()}:${item()}`
+                },
+              })
+            },
+          }),
+        document.body,
+      ),
+    )
+    const text = () =>
+      [...document.querySelectorAll('li')].map((li) => li.textContent)
+    expect(text()).toEqual(['0:a', '1:b'])
+    items.set(['b', 'a'])
+    expect(text()).toEqual(['0:b', '1:a'])
+  })
+
   it('keeps what an item function creates alive until its row leaves', () => {
     const items = signal(['a', 'b'])
     const source = signal(1)

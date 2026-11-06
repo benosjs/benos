@@ -812,7 +812,6 @@ function notifySinks(source: Producer): void {
 }
 
 function createState<T>(initial: T, options?: SignalOptions<T>): StateNode<T> {
-  rejectComputedSideEffect('signal')
   const node: StateNode<T> = {
     kind: 'state',
     id: nextNodeId++,
@@ -857,6 +856,7 @@ function writeState<T>(node: StateNode<T>, value: T): void {
 }
 
 export function signal<T>(initial: T, options?: SignalOptions<T>): Signal<T> {
+  rejectComputedSideEffect('signal')
   const node = createState(initial, options)
   const read = (() => {
     track(node as StateNode<unknown>)
@@ -879,7 +879,8 @@ export function signal<T>(initial: T, options?: SignalOptions<T>): Signal<T> {
 /**
  * State for a renderer that needs no signal API: the returned function reads
  * the value, tracked, and with `write` set writes `value` first, as `set`
- * does.
+ * does. Unlike `signal`, it may be created during a computed, since a renderer
+ * creates it lazily on the first read.
  */
 export function internalState<T>(
   initial: T,
