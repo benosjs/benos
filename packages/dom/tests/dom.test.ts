@@ -19,6 +19,7 @@ import {
   Show,
   Switch,
   children,
+  dynamicChild,
   instantiate,
   jsx,
   mergeProps,
@@ -1059,6 +1060,149 @@ describe('@benosjs/dom', () => {
     items.set([])
     expect(host.textContent).toBe('')
     expect(target.textContent).toBe('')
+  })
+
+  it('runs onMount for an element and a Portal after the detached host is attached, alone or in a For', async () => {
+    const target = document.createElement('div')
+    document.body.append(target)
+    const mounted: string[] = []
+    function Card(props: { id: string }) {
+      onMount(() => {
+        mounted.push(props.id)
+      })
+      return [
+        jsx('p', { children: props.id }),
+        jsx(Portal, { mount: target, children: jsx('i', {}) }),
+      ]
+    }
+    const alone = document.createElement('div')
+    const listed = document.createElement('div')
+    roots.push(render(() => jsx(Card, { id: 'alone' }), alone))
+    roots.push(
+      render(
+        () =>
+          jsx(For, {
+            each: ['row'],
+            children: (id: () => string) => jsx(Card, { id: id() }),
+          }),
+        listed,
+      ),
+    )
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(mounted).toEqual([])
+    document.body.append(alone, listed)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(mounted.sort()).toEqual(['alone', 'row'])
+  })
+
+  it('runs onMount when an array or template holds a control whose nodes change after it mounts', async () => {
+    const target = document.createElement('div')
+    document.body.append(target)
+    const outputs: Record<string, () => unknown> = {
+      'element and Portal': () => [
+        jsx('p', {}),
+        jsx(Portal, { mount: target, children: jsx('i', {}) }),
+      ],
+      'element and Show': () => [
+        jsx('p', {}),
+        jsx(Show, { when: true, children: jsx('span', {}) }),
+      ],
+      'element and one-row For': () => [
+        jsx('p', {}),
+        jsx(For, { each: [1], children: () => jsx('li', {}) }),
+      ],
+      'For of one Portal': () =>
+        jsx(For, {
+          each: [1],
+          children: () =>
+            jsx(Portal, { mount: target, children: jsx('i', {}) }),
+        }),
+      'dynamic child': () => dynamicChild(() => jsx('span', {})),
+      'element and dynamic child': () => [
+        jsx('p', {}),
+        dynamicChild(() => jsx('span', {})),
+      ],
+    }
+    for (const attachLater of [false, true]) {
+      const mounted: string[] = []
+      for (const [name, output] of Object.entries(outputs)) {
+        const host = document.createElement('div')
+        if (!attachLater) document.body.append(host)
+        function Owner() {
+          onMount(() => {
+            mounted.push(name)
+          })
+          return output() as JSX.Element
+        }
+        roots.push(render(() => jsx(Owner, {}), host))
+        if (attachLater) {
+          await new Promise((resolve) => setTimeout(resolve, 0))
+          document.body.append(host)
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(mounted.sort()).toEqual(Object.keys(outputs).sort())
+    }
+  })
+
+  it('delays onMount for a component that returns a Portal into a detached target until the target is attached', async () => {
+    const target = document.createElement('div')
+    let mounted = 0
+    function Dialog() {
+      onMount(() => {
+        mounted++
+      })
+      return jsx(Portal, { mount: target, children: jsx('i', {}) })
+    }
+    roots.push(render(() => jsx(Dialog, {}), document.body))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(mounted).toBe(0)
+    document.body.append(target)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(mounted).toBe(1)
+  })
+
+  it('runs onMount for a component that returns only a Portal once its target is connected, while its host is detached', async () => {
+    const target = document.createElement('div')
+    document.body.append(target)
+    let mounted = 0
+    function Dialog() {
+      onMount(() => {
+        mounted++
+      })
+      return jsx(Portal, { mount: target, children: jsx('i', {}) })
+    }
+    roots.push(render(() => jsx(Dialog, {}), document.createElement('div')))
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(mounted).toBe(1)
+  })
+
+  it('moves every node of a keyed row whose output holds a Show', () => {
+    const items = signal(['a', 'b'])
+    roots.push(
+      render(
+        () =>
+          jsx(For, {
+            get each() {
+              return items()
+            },
+            children: (id: () => string) => [
+              jsx(Show, {
+                when: true,
+                children: jsx('span', { children: id() }),
+              }),
+              jsx('b', { children: id() }),
+            ],
+          }),
+        document.body,
+      ),
+    )
+    items.set(['b', 'a'])
+    expect(
+      [...document.body.children].map(
+        (node) => `${node.tagName}:${node.textContent}`,
+      ),
+    ).toEqual(['SPAN:b', 'B:b', 'SPAN:a', 'B:a'])
   })
 
   it('cleans each row up once when a list inside Show is cleared as the Show closes', () => {
