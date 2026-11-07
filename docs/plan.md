@@ -112,7 +112,7 @@ Write the type-level sketch required by risk 1 in `risks.md`: one typed declarat
 - Include the minimal scripts and JSX configuration needed for a first render, and keep router, forms, query, SSR, UI primitives, and other out-of-scope modules out of the generated starter.
 - Recheck npm name and scope availability immediately before publication; publishing remains explicitly deferred until approval.
 
-## Phase 7 — Row creation at Solid's level — implemented, in review
+## Phase 7 — Row creation at Solid's level — complete
 
 Close the remaining initial-render gap with Solid. The 0.3.0 performance track ([perf-plan.md](./perf-plan.md)) took creation from about 1.6× to about 1.4× Solid with compiled direct output and lazy owners; this phase goes after the rest. The brief is [row-perf-plan.md](./row-perf-plan.md), with checkpoints `docs/checkpoints/rp-<step>.md`.
 
@@ -147,6 +147,8 @@ Targets are goals, not results to force: each step reports the honest number, an
 
 Every operation got faster or held, with no regression beyond the spreads (one table sort cell, 3 columns at 10k, moved 1.10 → 1.29× with overlapping spreads; sort is unchanged overall), but the creation targets were not reached. The design ([performance.md](./architecture/performance.md)) projected 1.15–1.25× for all seven candidates; five were kept, and the last two need core bytes beyond its cap, so the phase stopped there. What remains is per-row records Solid does not create at all (a component descriptor and its props copy, the list entry and its accessors, a template instance's values array). Closing it needs a different design, not more of these increments. The retained-allocation row uses this phase's heap-snapshot method, so it is not comparable with the 0.3.0 figures in the goal table.
 
+**Release (0.7.2, 2026-11-07).** The phase merged in benosjs/benos#32 and ships in 0.7.2 with three fixes it found: a keyed row's first item read inside a `computed` (#33), hydration ids of rows without a string or number key (#34), and `onMount` for outputs whose controls change their nodes (#35). Measured on the release build against `v0.7.1` in the same rounds ([benchmarks/README.md](../benchmarks/README.md#072-release-comparison-2026-11-07)), the nine operations take 0.90× 0.7.1's time overall and 1.21× Solid's, level with Svelte (1.20×); the table mount is 0.95× 0.7.1's. Core is 4,583 / 4,608 bytes and core plus DOM 11,854 / 12,032.
+
 **Rules.**
 
 - No public API change and no change to the guarantees in `docs/architecture/`; every existing test passes unchanged. Anything that would need one is raised before it is built.
@@ -167,7 +169,7 @@ Write the candidate changes into `docs/architecture/performance.md`, ranked by e
 
 One approved change at a time, each followed by the full measurement set, its byte cost, and its allocation change. Keep only changes with a measured, repeatable gain; revert the rest and record why.
 
-### 7d — Verification and release preparation — in review
+### 7d — Verification and release preparation — complete
 
 Full verification on three browsers and three operating systems, `benchmarks/README.md` updated with the final comparison against Solid, Svelte, Vue, and React, CHANGELOG, and a pull request. Stop before merging.
 
@@ -212,8 +214,8 @@ Versions 0.2.0 through 0.7.0 are published. The optional UI system is complete a
 
 0.7.1 pinned the starter's Vitest so `npm create benos` installs under npm 10.
 
-Phase 7, row creation at Solid's level, is implemented and in review; next is Phase 8, the devtools. Blocks and eager server serialization remain upcoming after them.
+Phase 7, row creation at Solid's level, is complete and ships in 0.7.2 together with three fixes found during it; next is Phase 8, the devtools. Blocks and eager server serialization remain upcoming after it.
 
 ## Scope boundary
 
-Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. The router, async resources, Suspense, and transitions shipped in 0.4.0; query, forms, and the flagship integration shipped in 0.5.0; string server rendering and hydration shipped in 0.6.0; streaming shipped in 0.7.0. Phases 7 and 8 are planned: row creation performance and the devtools. Blocks, eager server serialization, and React interop remain upcoming unless a later approved plan changes this document.
+Shipped scope includes the core, DOM renderer, compiler, Vite integration, diagnostics, benchmark and dashboard validation, documentation, and the optional UI system listed above. The router, async resources, Suspense, and transitions shipped in 0.4.0; query, forms, and the flagship integration shipped in 0.5.0; string server rendering and hydration shipped in 0.6.0; streaming shipped in 0.7.0. Phase 7, row creation performance, ships in 0.7.2; Phase 8, the devtools, is planned. Blocks, eager server serialization, and React interop remain upcoming unless a later approved plan changes this document.

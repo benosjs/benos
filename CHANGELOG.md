@@ -24,9 +24,10 @@ All notable changes to Benos are documented here.
   6% (1.36× → 1.28×), and the sortable table's mount about 6%; creating 1,000
   rows is 1.37× → 1.35× Solid. A benchmark row retains 67.5 objects instead of
   95.5 and one owner instead of four, and collection falls about 30% when
-  creating 10,000 rows. No operation regressed. Core grows by 97 bytes and
-  core plus DOM by 236 bytes, minified and gzipped. Tables are in
-  `benchmarks/README.md`.
+  creating 10,000 rows. No operation regressed. A second run on the release
+  build, which includes the fixes below, agreed within two percentage points.
+  With those fixes, core grows by 93 bytes and core plus DOM by 339 bytes over
+  0.7.1, minified and gzipped. Tables are in `benchmarks/README.md`.
 
 ### Fixed
 

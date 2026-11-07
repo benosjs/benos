@@ -1,6 +1,6 @@
 # Benos Phase 7 — Row creation at Solid's level
 
-Phase 7 of [plan.md](./plan.md). **Status (2026-11-05):** implemented and verified ([RP-7d](./checkpoints/rp-7d.md)); in review. The 0.3.0 performance track ([perf-plan.md](./perf-plan.md)) took row creation from about 1.6× to about 1.4× Solid with compiled direct output and lazy owners. This track goes after the remaining gap: creating, replacing, and clearing many rows, and the sortable table's first mount. Updates are already at or near Solid and must not regress.
+Phase 7 of [plan.md](./plan.md). **Status (2026-11-07):** complete. Verified at [RP-7d](./checkpoints/rp-7d.md), merged in benosjs/benos#32, and ships in 0.7.2 with the three fixes it found (benosjs/benos#33, #34, and #35). The 0.3.0 performance track ([perf-plan.md](./perf-plan.md)) took row creation from about 1.6× to about 1.4× Solid with compiled direct output and lazy owners. This track goes after the remaining gap: creating, replacing, and clearing many rows, and the sortable table's first mount. Updates are already at or near Solid and must not regress.
 
 Work in steps with review checkpoints: measure first, design second, implement in small measured increments, keep only changes that demonstrably help.
 

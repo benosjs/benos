@@ -1568,3 +1568,101 @@ for this phase); hydrate 3,962 and server 7,688, unchanged. Application
 bundles grow by the runtime's increase only, since generated code is
 unchanged: the dashboard's JavaScript 43,002 → 43,220 bytes gzipped (+218), the
 UI gallery's 85,163 → 85,443 (+280).
+
+## 0.7.2 release comparison (2026-11-07)
+
+The release build: `main` at `02a3ecc`, which is Phase 7 plus the three fixes
+it found (benosjs/benos#33, #34, and #35). It is measured against the `v0.7.1`
+tag and the other frameworks in the same rounds. Node 26.10.0, Chromium
+153.0.8010.12, macOS arm64, production builds, two warmups and seven measured
+rounds with the framework order rotated by round, Chrome trace click-to-paint.
+Times are milliseconds, median [minimum–maximum].
+
+This run did not meet the usual quiet-machine condition: another application
+kept the one-minute load average between 3.6 and 6.6 throughout. The row
+spreads stay narrow, and every 0.7.2 ÷ 0.7.1 ratio below agrees with the quiet
+[Phase 7 run](#071-against-phase-7-interleaved) within two percentage points,
+so the row medians are usable. The table's sort cells are not; see below.
+
+### All frameworks
+
+| Workload           |          0.7.1 (ms) |          0.7.2 (ms) |          Solid (ms) |         Svelte (ms) |            Vue (ms) |          React (ms) | 0.7.1 / Solid | 0.7.2 / Solid | 0.7.2 / 0.7.1 |
+| ------------------ | ------------------: | ------------------: | ------------------: | ------------------: | ------------------: | ------------------: | ------------: | ------------: | ------------: |
+| Create 1,000 rows  |    34.8 [34.1–35.5] |    33.7 [32.4–34.2] |    25.0 [24.5–27.2] |    27.9 [27.4–28.2] |    29.9 [29.3–31.2] |    29.8 [29.3–32.5] |         1.39× |         1.35× |          0.97 |
+| Replace 1,000 rows |    36.5 [35.6–37.9] |    32.9 [31.7–34.3] |    25.9 [25.2–26.1] |    27.4 [27.0–29.1] |    29.5 [26.6–30.6] |    31.5 [30.5–32.8] |         1.41× |         1.27× |          0.90 |
+| Update every 10th  |    12.9 [12.7–21.5] |    12.7 [12.6–13.7] |    13.7 [13.5–14.4] |    13.6 [13.2–23.2] |    24.6 [21.3–25.1] |    18.3 [17.7–20.4] |         0.94× |         0.93× |          0.99 |
+| Select one row     |       1.3 [1.2–2.1] |       1.0 [1.0–1.2] |       0.9 [0.8–1.0] |      1.2 [1.2–22.2] |    19.0 [18.2–24.6] |       6.5 [5.4–7.8] |         1.48× |         1.20× |          0.81 |
+| Swap rows          |      3.8 [3.7–12.9] |       3.6 [3.5–4.0] |       2.8 [2.7–2.8] |       4.2 [4.2–4.4] |    19.4 [18.3–25.7] |    28.2 [26.4–28.5] |         1.35× |         1.28× |          0.95 |
+| Remove one row     |       4.7 [4.7–5.2] |       4.4 [4.3–4.5] |       4.2 [4.2–4.3] |       5.8 [5.8–6.0] |     20.8 [7.4–24.0] |      9.9 [9.0–10.9] |         1.12× |         1.05× |          0.94 |
+| Create 10,000 rows | 325.1 [323.3–326.6] | 306.8 [303.3–311.5] | 237.8 [236.5–240.5] | 246.8 [245.2–253.2] | 263.8 [263.5–276.0] | 515.1 [497.6–555.8] |         1.37× |         1.29× |          0.94 |
+| Append 1,000 rows  |    43.2 [42.9–45.4] |    41.9 [41.3–46.0] |    35.9 [35.3–37.7] |    37.0 [36.6–38.2] |    47.3 [40.7–49.0] |    43.0 [42.3–47.1] |         1.20× |         1.17× |          0.97 |
+| Clear rows         |       5.2 [5.2–6.1] |       3.7 [1.8–4.1] |       2.5 [2.4–2.6] |       3.3 [3.3–3.4] |       4.6 [3.5–6.5] |       4.7 [4.5–6.9] |         2.09× |         1.47× |          0.70 |
+
+0.7.2 is faster than 0.7.1 on all nine operations: clear by 30%, select by 19%,
+replace by 10%, and creating 10,000 rows by 6% (geometric mean 0.90). Over the
+nine operations, the geometric mean of each framework's time relative to Solid
+is 1.21× for Benos 0.7.2 (1.34× for 0.7.1), 1.20× for Svelte, 2.28× for React,
+and 2.57× for Vue. Benos is the fastest of the five on the partial update,
+within 5% of Solid on remove, second to Solid on select and swap, and last of
+the five on creating and replacing 1,000 rows.
+
+### Sortable table: 0.7.1 against 0.7.2
+
+The registry table at 0.7.1 and at 0.7.2 against the handwritten Solid table,
+two warmups and seven rounds, order reversed every round. Initial render:
+
+| Columns | Rows |          0.7.1 (ms) |           0.7.2 (ms) |          Solid (ms) | 0.7.1 / Solid | 0.7.2 / Solid | 0.7.2 / 0.7.1 |
+| ------: | ---: | ------------------: | -------------------: | ------------------: | ------------: | ------------: | ------------: |
+|       2 |   5k | 126.1 [119.2–147.5] |  118.0 [109.7–131.3] |    67.4 [64.2–86.2] |         1.87× |         1.75× |          0.94 |
+|       2 |  10k | 272.1 [244.7–313.6] |  239.6 [212.8–260.2] | 139.2 [126.5–161.3] |         1.95× |         1.72× |          0.88 |
+|       3 |   5k | 175.9 [166.6–242.7] |  163.8 [139.2–188.4] |   94.2 [91.9–115.1] |         1.87× |         1.74× |          0.93 |
+|       3 |  10k | 346.0 [302.2–473.3] |  318.8 [290.7–336.3] | 173.6 [159.9–191.8] |         1.99× |         1.84× |          0.92 |
+|       5 |   5k | 255.2 [228.7–319.7] |  253.7 [220.2–268.4] | 146.5 [140.8–242.9] |         1.74× |         1.73× |          0.99 |
+|       5 |  10k | 554.6 [493.4–584.2] |  495.5 [432.3–528.1] | 318.7 [267.5–368.6] |         1.74× |         1.55× |          0.89 |
+|       8 |   5k | 432.4 [423.0–520.8] |  420.1 [385.1–499.2] | 249.0 [241.6–270.8] |         1.74× |         1.69× |          0.97 |
+|       8 |  10k | 882.4 [839.2–984.9] | 946.1 [779.6–1063.5] | 567.8 [526.2–653.7] |         1.55× |         1.67× |          1.07 |
+
+The geometric mean of 0.7.2 / 0.7.1 over the eight mounts is 0.95, the same
+gain the Phase 7 run measured. Sort:
+
+| Columns | Rows |           0.7.1 (ms) |          0.7.2 (ms) |          Solid (ms) | 0.7.1 / Solid | 0.7.2 / Solid | 0.7.2 / 0.7.1 |
+| ------: | ---: | -------------------: | ------------------: | ------------------: | ------------: | ------------: | ------------: |
+|       2 |   5k |     77.9 [71.1–94.1] |    75.1 [73.4–81.4] |   67.6 [62.3–404.5] |         1.15× |         1.11× |          0.96 |
+|       2 |  10k |  165.5 [146.0–364.8] | 155.1 [143.0–163.8] | 139.1 [129.0–238.3] |         1.19× |         1.12× |          0.94 |
+|       3 |   5k |   107.3 [92.7–108.6] |  107.4 [86.7–140.9] |   96.3 [92.8–107.0] |         1.11× |         1.12× |          1.00 |
+|       3 |  10k |  202.3 [184.1–256.3] | 284.8 [210.3–775.1] | 183.6 [176.2–202.0] |         1.10× |         1.55× |          1.41 |
+|       5 |   5k |  151.6 [145.3–234.7] | 172.8 [150.1–378.7] | 142.8 [138.5–172.4] |         1.06× |         1.21× |          1.14 |
+|       5 |  10k |  355.9 [325.3–625.8] | 405.1 [337.8–714.9] | 324.7 [291.3–349.4] |         1.10× |         1.25× |          1.14 |
+|       8 |   5k |  289.7 [263.3–750.3] | 262.9 [252.2–471.5] | 264.5 [228.0–555.7] |         1.10× |         0.99× |          0.91 |
+|       8 |  10k | 714.0 [558.3–1072.3] | 628.9 [546.8–821.4] | 535.6 [499.0–646.1] |         1.33× |         1.17× |          0.88 |
+
+Sort spreads under this load reach 3–4× their medians, and the cells move in
+both directions (geometric mean 1.04). The 3-column, 10,000-row cell is slower
+again (1.10× → 1.55× Solid, spread 210–775 ms); it is the same cell that moved
+1.10× → 1.29× in the quiet Phase 7 run with overlapping spreads.
+
+### What the fixes cost
+
+Measured on 2026-11-06 in the same rounds as the builds before them:
+
+- **#33 and #34:** `main` with both ÷ the Phase 7 build is 1.00 (0.95–1.05) on
+  the table mount. With all three fixes (#35's first version), the nine row
+  operations are 0.97 ÷ Phase 7 overall.
+- **#35, first version:** ÷ `main` was 1.03–1.07 on the table mount in three
+  runs, because every array output became a live range with its own getter.
+  The merged version keeps live ranges only where a slot can change its nodes
+  and measures 0.98–1.01 ÷ `main` in four runs; rows are unchanged (0.98 ÷
+  Phase 7). See [the design checkpoint](../docs/checkpoints/portal-mount-design.md).
+
+### Sizes
+
+Minified and gzipped, 0.7.1 → 0.7.2 / cap: core 4,490 → 4,583 / 4,608; core
+plus DOM 11,515 → 11,854 / 12,032; hydrate 3,962 → 3,962 / 4,096; server
+7,688 → 7,696 / 8,448.
+
+Raw data:
+[`release-0.7.2-frameworks-2026-11-07.json`](./js-framework-benchmark/results/release-0.7.2-frameworks-2026-11-07.json),
+[`release-0.7.2-table-2026-11-07.json`](./js-framework-benchmark/results/release-0.7.2-table-2026-11-07.json),
+[`release-0.7.2-fixes-table-before-2026-11-06.json`](./js-framework-benchmark/results/release-0.7.2-fixes-table-before-2026-11-06.json),
+and
+[`release-0.7.2-fixes-table-after-2026-11-06.json`](./js-framework-benchmark/results/release-0.7.2-fixes-table-after-2026-11-06.json).

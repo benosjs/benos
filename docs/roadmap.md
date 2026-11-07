@@ -4,16 +4,8 @@ Versions 0.2.0 through 0.7.1 are published. The phase plan and completed work li
 [plan.md](./plan.md); this roadmap tracks shipped optional modules and upcoming
 framework work.
 
-## Next: Phase 7 and Phase 8
+## Next: Phase 8
 
-- **Phase 7, row creation at Solid's level:** implemented and in review.
-  Against 0.7.1 in the same interleaved rounds, clear is 28% faster (2.06× →
-  1.48× Solid), replace 9% (1.40× → 1.28×), creating 10,000 rows 6% (1.36× →
-  1.28×), and the sortable table's mount about 6%; creating 1,000 rows moved
-  least (1.37× → 1.35×). A row retains 67.5 objects instead of 95.5. The ≤ 1.05×
-  creation target was not reached; the outcome and what remains are in
-  [plan.md](./plan.md#phase-7--row-creation-at-solids-level--implemented-in-review)
-  and [benchmarks/README.md](../benchmarks/README.md).
 - **Phase 8, Benos devtools:** a browser extension for the reactive graph,
   live values, and why a DOM node updated, with panels for the router, query,
   forms, async, and server-rendered pages. Steps are in
@@ -77,6 +69,24 @@ bin symlinks and Windows command shims. Users should install a current release.
   dashboard streams its slow activity feed. See the
   [streaming section of the guide](./ssr.md#stream) and the
   [findings](./ssr-findings.md#streaming-070).
+
+## Prepared for 0.7.2
+
+- **Faster row creation, replace, and clear (Phase 7):** against 0.7.1 in the
+  same interleaved rounds, clear is 30% faster (2.09× → 1.47× Solid), select
+  19%, replace 10% (1.41× → 1.27×), creating 10,000 rows 6% (1.37× → 1.29×),
+  and the sortable table's mount about 5%; creating 1,000 rows moved least
+  (1.39× → 1.35×). Across the nine operations Benos is 1.21× Solid's time,
+  level with Svelte (1.20×) and ahead of React (2.28×) and Vue (2.57×). A row
+  retains 67.5 objects instead of 95.5. The ≤ 1.05× creation target was not
+  reached; the outcome and what remains are in
+  [plan.md](./plan.md#phase-7--row-creation-at-solids-level--complete) and
+  [benchmarks/README.md](../benchmarks/README.md#072-release-comparison-2026-11-07).
+- **Fixes found during Phase 7:** a keyed `<For>` row that first reads its
+  item inside a `computed` renders again; rows without a string or number key
+  get the same `createUniqueId` values on the server and in hydration; and
+  `onMount` runs for a component whose output holds a `<Portal>`, `<Show>`,
+  `<For>`, or dynamic child that changes its nodes after mount.
 
 ## Upcoming framework modules
 
