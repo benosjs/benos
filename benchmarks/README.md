@@ -1641,6 +1641,28 @@ both directions (geometric mean 1.04). The 3-column, 10,000-row cell is slower
 again (1.10× → 1.55× Solid, spread 210–775 ms); it is the same cell that moved
 1.10× → 1.29× in the quiet Phase 7 run with overlapping spreads.
 
+**Quiet re-check of sort.** The same 0.7.1 and 0.7.2 table builds and Solid,
+run twice more after the machine was quiet (one-minute load 2.35 at the
+start), two warmups and seven rounds each. Sort:
+
+| Columns | Rows |    Run 1: 0.7.1 (ms) |    Run 1: 0.7.2 (ms) | Run 1: 0.7.2 / 0.7.1 |    Run 2: 0.7.1 (ms) |   Run 2: 0.7.2 (ms) | Run 2: 0.7.2 / 0.7.1 |
+| ------: | ---: | -------------------: | -------------------: | -------------------: | -------------------: | ------------------: | -------------------: |
+|       2 |   5k |    80.9 [64.0–183.9] |     71.5 [67.5–94.0] |                 0.88 |    79.3 [63.9–145.3] |   84.3 [72.2–104.0] |                 1.06 |
+|       2 |  10k |  149.6 [122.6–166.3] |  157.4 [130.9–301.0] |                 1.05 |  157.0 [135.6–187.4] | 179.5 [141.0–287.8] |                 1.14 |
+|       3 |   5k |    90.3 [85.3–122.8] |    95.0 [83.1–132.8] |                 1.05 |    97.1 [85.4–128.1] |   97.4 [84.8–116.5] |                 1.00 |
+|       3 |  10k |  180.8 [163.6–235.2] |  193.2 [166.9–662.8] |                 1.07 |  234.9 [204.9–615.1] | 194.6 [187.8–325.2] |                 0.83 |
+|       5 |   5k |  139.5 [135.4–181.7] |  150.2 [135.2–219.5] |                 1.08 |  162.8 [149.4–229.3] | 180.3 [137.0–280.1] |                 1.11 |
+|       5 |  10k |  364.6 [311.1–995.4] |  361.1 [290.4–446.7] |                 0.99 |  430.0 [278.2–717.7] | 360.5 [280.3–779.3] |                 0.84 |
+|       8 |   5k |  244.9 [224.1–383.2] |  260.8 [221.6–355.9] |                 1.06 |  332.0 [268.4–614.2] | 287.0 [247.8–337.7] |                 0.86 |
+|       8 |  10k | 552.2 [511.4–1203.7] | 552.6 [476.0–1104.2] |                 1.00 | 709.2 [556.8–1096.6] | 717.6 [512.7–927.0] |                 1.01 |
+
+Over the eight cells, 0.7.2 / 0.7.1 is 1.02 (0.88–1.08) in the first run and
+0.98 (0.83–1.14) in the second. The 3-column, 10,000-row cell measures 1.07
+and then 0.83, so its 1.41 above was noise. Two cells are slower in both quiet
+runs, with spreads that overlap 0.7.1's: 2 columns at 10k (1.05 and 1.14) and
+5 columns at 5k (1.08 and 1.11; it was also 1.14 in the loaded run). Overall,
+sort is unchanged. The mount ratio in the same runs is 0.91 and 0.96.
+
 ### What the fixes cost
 
 Measured on 2026-11-06 in the same rounds as the builds before them:
@@ -1664,5 +1686,7 @@ Raw data:
 [`release-0.7.2-frameworks-2026-11-07.json`](./js-framework-benchmark/results/release-0.7.2-frameworks-2026-11-07.json),
 [`release-0.7.2-table-2026-11-07.json`](./js-framework-benchmark/results/release-0.7.2-table-2026-11-07.json),
 [`release-0.7.2-fixes-table-before-2026-11-06.json`](./js-framework-benchmark/results/release-0.7.2-fixes-table-before-2026-11-06.json),
+[`release-0.7.2-fixes-table-after-2026-11-06.json`](./js-framework-benchmark/results/release-0.7.2-fixes-table-after-2026-11-06.json),
+[`release-0.7.2-sort-check-r1-2026-11-07.json`](./js-framework-benchmark/results/release-0.7.2-sort-check-r1-2026-11-07.json),
 and
-[`release-0.7.2-fixes-table-after-2026-11-06.json`](./js-framework-benchmark/results/release-0.7.2-fixes-table-after-2026-11-06.json).
+[`release-0.7.2-sort-check-r2-2026-11-07.json`](./js-framework-benchmark/results/release-0.7.2-sort-check-r2-2026-11-07.json).
