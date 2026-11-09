@@ -1,6 +1,6 @@
 # Benos roadmap
 
-Versions 0.2.0 through 0.7.1 are published. The phase plan and completed work live in
+Versions 0.2.0 through 0.7.2 are published. The phase plan and completed work live in
 [plan.md](./plan.md); this roadmap tracks shipped optional modules and upcoming
 framework work.
 
@@ -70,7 +70,7 @@ bin symlinks and Windows command shims. Users should install a current release.
   [streaming section of the guide](./ssr.md#stream) and the
   [findings](./ssr-findings.md#streaming-070).
 
-## Prepared for 0.7.2
+## Shipped in 0.7.2
 
 - **Faster row creation, replace, and clear (Phase 7):** against 0.7.1 in the
   same interleaved rounds, clear is 30% faster (2.09× → 1.47× Solid), select
