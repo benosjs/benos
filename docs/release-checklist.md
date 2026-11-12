@@ -106,7 +106,8 @@ publishing was configured for every package on 2026-10-31, so 0.7.0 is the
 first release expected to run end to end through the workflow: tag, verify,
 approve the `publish` job, done. It did, on 2026-10-31: every verification
 and consumer job passed and the `publish` job released all thirteen packages
-with provenance and no manual step.
+with provenance and no manual step. 0.7.1 (2026-11-03) and 0.7.2 (2026-11-09)
+released the same way.
 
 ## Automated release (default for future versions)
 
